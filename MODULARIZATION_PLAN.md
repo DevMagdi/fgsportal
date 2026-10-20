@@ -6,10 +6,13 @@
 
 | Path | Stack | Role |
 | --- | --- | --- |
-| `frontend/` | Angular 13 (lazy modules, PrimeNG/Material) | Single-page portal |
-| `FrontEndApiTest/system/` | Laravel 8 + JWT (tymon/jwt-auth) | **Main backend** — all API code, 191 controllers, 178 models, 105 migrations |
-| `system/` | Laravel 8 (partial) | Legacy partial backend copy (contains `vendor/`, storage, public attachments) |
-| repository root | static files | A deployed production build of the Angular app |
+| `frontend/` | Angular 13 (lazy modules, PrimeNG/Material) | Single-page portal (source of truth for all UI code/builds) |
+| `backend/` | Laravel 8 + JWT (tymon/jwt-auth) | **Main backend** — all API code, 191 controllers, 178 models, 105 migrations |
+| `docs/` | Markdown | Module catalogue and provisioning guides |
+
+> The legacy `FrontEndApiTest/system/`, the partial root `system/` copy and the
+> production Angular build dumped at the repository root were removed during the
+> repository cleanup; all server code now lives under `backend/`.
 
 ### Existing functional modules (before this work)
 

@@ -15,13 +15,16 @@ UI surface is then inaccessible/hidden for that client.
 
 ```
 fgsportal/
-├── frontend/                     # Angular 13 application
-├── FrontEndApiTest/system/       # Laravel 8 backend (main API)
-├── system/                       # Legacy partial backend copy (vendor/storage)
+├── backend/                      # Laravel 8 API (all server code)
+├── frontend/                     # Angular 13 application (source of truth for the UI)
 ├── docs/MODULES.md               # Module catalogue & provisioning guide
 ├── MODULARIZATION_PLAN.md        # Architecture decisions & analysis
 └── README.md
 ```
+
+Committed production Angular bundles, the legacy `FrontEndApiTest/` hosting
+folder and the partial root `system/` copy have been removed; build output is
+generated locally or by CI and is never committed.
 
 ## How the module system works
 
@@ -39,13 +42,13 @@ See [`docs/MODULES.md`](docs/MODULES.md) for the full module list and client
 provisioning steps, and [`MODULARIZATION_PLAN.md`](MODULARIZATION_PLAN.md) for
 the architecture analysis.
 
-## Backend setup (Laravel 8, `FrontEndApiTest/system`)
+## Backend setup (Laravel 8, `backend`)
 
 Requirements: PHP >= 7.4 (tested up to 8.x), Composer, MySQL 5.7+/8 (SQLite is
 used by the test suite).
 
 ```bash
-cd FrontEndApiTest/system
+cd backend
 composer install
 cp .env.example .env            # fill DB / JWT / mail values
 php artisan key:generate
