@@ -40,13 +40,13 @@ class ContactLeadController extends Controller
         $array_reponse = [
             'id' => $lead->id . '',
             'campagin_id' => $lead->campagin_id,
-            'campagin_name' => $lead->campagin_id_fun->campagin_name,
+            'campagin_name' => !empty($lead->campagin_id) ? optional($lead->campagin_id_fun)->campagin_name : null,
 
             'sales_id' => $lead->sales_id,
             'sales_name' => !empty($lead->sales_id) ? $lead->sales_id_fun->username : null,
 
             'user_creator_id' => $lead->user_creator_id,
-            'user_creator_name' => $lead->user_creator_id_fun->username,
+            'user_creator_name' => optional($lead->user_creator_id_fun)->username,
 
             'status_id' => !empty($lead->lead_sub_status_id) ? $lead->lead_sub_status_id_fun->contact_status_id : null,
             'status_name' => !empty($lead->lead_sub_status_id) ? (!empty($lead->lead_sub_status_id_fun->contact_status_id) ? $lead->lead_sub_status_id_fun->contact_status_id_fun->contact_status_name : null) : null,
