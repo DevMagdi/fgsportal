@@ -29,6 +29,13 @@ Module metadata lives in the `modules` table; per-client entitlements live in
   enabled slugs (memory + `localStorage`) and (a) hides disabled menu sections in
   the navbar and (b) blocks disabled lazy routes with `ModuleGuard`, redirecting to
   the `/module-disabled` page.
+- **Modules dashboard (`/modules`)** — the `ModulesCardsComponent` loads the full
+  catalogue from `GET /api/modules` and renders **all six modules as cards** (name,
+  description, icon, state). Enabled cards are normal and navigate into the module;
+  disabled modules are never hidden — they stay visible but are **dimmed/grayed
+  with a lock badge**, and clicking one routes to
+  `/module-disabled?module=<slug>` instead of entering the module. Deep links to
+  disabled lazy routes are still blocked by `ModuleGuard`.
 
 ## 3. Enable a module for a client
 
@@ -107,4 +114,6 @@ disable endpoints flush the relevant cache entry automatically.
 2. Add the controller namespace → slug mapping in `config/modules.php`.
 3. Add a lazy Angular route guarded with `data: { module: '<slug>' }` and a navbar
    section gated by `isModuleEnabled('<slug>')`.
-4. Provision the module to companies through the enable endpoint.
+4. Add the slug to `MODULE_ORDER` / `MODULE_PRESENTATION` (icon + landing route)
+   in `ModulesCardsComponent` so it appears on the modules dashboard.
+5. Provision the module to companies through the enable endpoint.

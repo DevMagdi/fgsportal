@@ -27,13 +27,48 @@ const STORAGE_KEY = 'enabledModules';
 export class ModuleService {
   private enabledModulesSubject = new BehaviorSubject<string[]>(this.readStorage());
   private loadedSubject = new BehaviorSubject<boolean>(this.hasStoredData());
+  private catalogueSubject = new BehaviorSubject<SystemModule[]>([]);
 
   /** Stream of enabled module slugs. */
   enabledModules$: Observable<string[]> = this.enabledModulesSubject.asObservable();
   /** Emits true once the first entitlement load (or cache restore) is done. */
   loaded$: Observable<boolean> = this.loadedSubject.asObservable();
+  /** Stream of the full module catalogue (enabled and disabled) with per-company state. */
+  catalogue$: Observable<SystemModule[]> = this.catalogueSubject.asObservable();
 
   constructor(private http: HttpClient) {}
+
+  /**
+   * Fetch the full module catalogue (all six sellable modules, each with its
+   * `is_enabled` state for the current company). Used by the modules dashboard
+   * so disabled modules can still be shown as dimmed cards.
+   */
+  loadCatalogue(): Observable<SystemModule[]> {
+    const token = this.getToken();
+    if (!token) {
+      return of(this.getCatalogue());
+    }
+
+    return this.http
+      .get<any>(`${environment.newServerApi}/api/modules?token=${token}`)
+      .pipe(
+        map((res) => (res?.data ?? []) as SystemModule[]),
+        tap((modules) => {
+          this.catalogueSubject.next(modules);
+          // Keep the enabled-slug cache in sync with the catalogue response.
+          const slugs = modules.filter((m) => m.is_enabled).map((m) => m.slug);
+          if (slugs.length > 0) {
+            this.setEnabledModules(slugs);
+          }
+        }),
+        catchError(() => of(this.getCatalogue()))
+      );
+  }
+
+  /** Synchronous snapshot of the full catalogue (empty until first load). */
+  getCatalogue(): SystemModule[] {
+    return [...this.catalogueSubject.value];
+  }
 
   /**
    * Fetch the modules enabled for the current user's company.
@@ -87,6 +122,7 @@ export class ModuleService {
   clear(): void {
     this.enabledModulesSubject.next([]);
     this.loadedSubject.next(false);
+    this.catalogueSubject.next([]);
     localStorage.removeItem(STORAGE_KEY);
   }
 

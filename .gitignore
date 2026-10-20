@@ -1,5 +1,6 @@
 # ==========================================================
 # FGS Connect — root .gitignore
+# Monorepo: backend/ (Laravel 8) + frontend/ (Angular 13)
 # ==========================================================
 
 # ---- Environment / secrets ----
@@ -10,24 +11,27 @@
 *.pem
 *.p12
 *.pfx
+**/firebase-adminsdk-*.json
+**/google-service-account*.json
 /cert/
-/public/cert/
-FrontEndApiTest/system/public/cert/
-system/public/cert/
+**/public/cert/
 
-# ---- PHP / Laravel (backends) ----
+# ---- PHP / Laravel (backend) ----
+backend/vendor/
 vendor/
 node_modules/
-/public/hot
-/public/storage
-/storage/*.key
+backend/public/hot
+backend/public/storage
+backend/storage/*.key
 .phpunit.result.cache
 .phpunit.cache/
 *.log
-storage/logs/*
-!storage/logs/.gitignore
-bootstrap/cache/*.php
-!bootstrap/cache/.gitignore
+backend/storage/logs/*
+!backend/storage/logs/.gitignore
+backend/bootstrap/cache/*.php
+!backend/bootstrap/cache/.gitignore
+backend/storage/framework/views/*.php
+!backend/storage/framework/views/.gitignore
 Homestead.json
 Homestead.yaml
 docker-compose.override.yml
@@ -37,7 +41,7 @@ dist/
 tmp/
 out-tsc/
 .bazel-out/
-node_modules/
+**/node_modules/
 .angular/
 .sass-cache/
 coverage/
@@ -52,8 +56,8 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 
-# ---- Build output committed at repo root (legacy hosting) ----
-# New builds must be produced locally/CI, not committed.
+# ---- Built/deployed bundles (source of truth is frontend/) ----
+# Never commit production builds at the repo root or in hosting folders.
 /main.js
 /main.*.js
 /runtime.js
@@ -67,6 +71,7 @@ ui-debug.log
 /styles.css
 /styles.*.css
 /*.map
+*.chunk.js
 
 # ---- IDE / OS ----
 .idea/

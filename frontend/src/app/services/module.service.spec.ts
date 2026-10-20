@@ -106,4 +106,43 @@ describe('ModuleService', () => {
     expect(result).toEqual(['core', 'admin']);
     expect(service.isModuleEnabled('admin')).toBeTrue();
   });
+
+  it('loads the full catalogue (including disabled modules) and syncs enabled slugs', () => {
+    const userData = { _token: 'jwt-token' };
+    localStorage.setItem('userData', JSON.stringify(userData));
+
+    let catalogue: any[] = [];
+    service.loadCatalogue().subscribe((modules) => (catalogue = modules));
+
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.newServerApi}/api/modules`
+    );
+    expect(req.request.params.get('token')).toBe('jwt-token');
+
+    req.flush({
+      data: [
+        { id: 1, slug: 'core', name: 'Core', is_core: true, is_active: true, is_enabled: true },
+        { id: 2, slug: 'crm', name: 'CRM', is_core: false, is_active: true, is_enabled: true },
+        { id: 5, slug: 'hr', name: 'Human Resources', is_core: false, is_active: true, is_enabled: false },
+      ],
+    });
+
+    // The catalogue keeps disabled modules so cards can render them dimmed.
+    expect(catalogue.length).toBe(3);
+    expect(service.getCatalogue().map((m) => m.slug)).toEqual(['core', 'crm', 'hr']);
+
+    // Enabled slugs are derived from the catalogue state.
+    expect(service.isModuleEnabled('crm')).toBeTrue();
+    expect(service.isModuleEnabled('hr')).toBeFalse();
+  });
+
+  it('does not call the backend for the catalogue when unauthenticated', () => {
+    localStorage.removeItem('userData');
+
+    let catalogue: any[] = ['sentinel'];
+    service.loadCatalogue().subscribe((modules) => (catalogue = modules));
+
+    httpMock.expectNone(`${environment.newServerApi}/api/modules`);
+    expect(catalogue).toEqual([]);
+  });
 });

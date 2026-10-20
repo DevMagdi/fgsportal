@@ -15,7 +15,10 @@ import { ActivatedRoute, Router } from '@angular/router';
           The <strong>{{ moduleSlug }}</strong> module is not enabled for your company.
           Please contact your administrator or the FGS Connect sales team to enable it.
         </p>
-        <button class="btn btn-primary mt-3" type="button" (click)="goBack()">Go back</button>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+          <button class="btn btn-outline-primary" type="button" (click)="browseModules()">Browse all modules</button>
+          <button class="btn btn-primary" type="button" (click)="goBack()">Go back</button>
+        </div>
       </div>
     </div>
   `,
@@ -39,5 +42,9 @@ export class ModuleDisabledComponent implements OnInit {
   goBack(): void {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
     this.router.navigateByUrl(returnUrl && returnUrl !== '/module-disabled' ? '/' : '/');
+  }
+
+  browseModules(): void {
+    this.router.navigateByUrl('/modules');
   }
 }
