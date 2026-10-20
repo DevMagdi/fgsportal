@@ -243,26 +243,34 @@ class AuthController extends Controller
         if(empty( $user->work_degrees_id)){
            $work_degree=null;
        }else{
-           $work_degree = $user->work_degrees_id_fun->work_degree_name;
+           // The referenced row may have been deleted; never 500 on an orphan FK.
+           $work_degree = optional($user->work_degrees_id_fun)->work_degree_name;
        }
        if(empty( $user->sub_departments_id)){
         $sub_department=null;
         $department =null;
         }else{
-            $sub_department =$user->sub_departments_id_fun->sub_department_name;
-            $department =$user->sub_departments_id_fun->departments_id_fun->department_name;
-            $department_id = $user->sub_departments_id_fun->departments_id;
+            $subDepartment = $user->sub_departments_id_fun;
+            $sub_department = optional($subDepartment)->sub_department_name;
+            $department = optional(optional($subDepartment)->departments_id_fun)->department_name;
+            $department_id = optional($subDepartment)->departments_id;
 
        }
-       
-       $allOpenToWork = UserOpenToWork::where('user_id',$user->id)->where('active',1)->first();
-       if(empty($allOpenToWork->id)){
-           $openToWork = 0;
-       }else{
-           $openToWork = 1;
+
+       // The user_open_to_work table is part of the modular migrations; on a
+       // database where it has not been created yet, treat the flag as off
+       // instead of crashing the whole /me response with a 500.
+       $openToWork = 0;
+       try {
+           $allOpenToWork = UserOpenToWork::where('user_id',$user->id)->where('active',1)->first();
+           if(!empty($allOpenToWork->id)){
+               $openToWork = 1;
+           }
+       } catch (\Throwable $e) {
+           $allOpenToWork = null;
        }
-       
-       
+
+
        $castUser=[
         'canAddPreviousReports'=>$user->canAddPreviousReports==1?true:false,
             'canAddPreviousReportsDate'=>$user->canAddPreviousReportsDate,
@@ -278,7 +286,7 @@ class AuthController extends Controller
            'sub_department_name'=>$sub_department,
            'department_name'=>$department,
            'accType'=>"Employee",
-           'open_to_work'=>$allOpenToWork,
+           'open_to_work'=>$openToWork,
            'accRole'=>$user->sub_departments_id,
            'accPosition'=>$user->work_degrees_id,
            'department'=>$department_id,
@@ -507,8 +515,15 @@ class AuthController extends Controller
       }
     public function me()
     {
-     return ResponseApi::acceptedResponseApi($this->castUserData(Auth::guard('user_api')->user()),"Accepted",201);
-
+        try {
+            $user = Auth::guard('user_api')->user();
+            if (empty($user->id)) {
+                return ResponseApi::unauthorizedResponseApi(['message' => 'Unauthenticated'], 'Unauthenticated', 401);
+            }
+            return ResponseApi::acceptedResponseApi($this->castUserData($user),"Accepted",201);
+        } catch (\Throwable $e) {
+            return ResponseApi::badMethodErrorResponse(['message' => 'Server Error'], 'server Error', 500);
+        }
     }
     public function login(Request $request){
         

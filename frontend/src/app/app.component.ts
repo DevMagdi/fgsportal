@@ -65,7 +65,9 @@ export class AppComponent {
 
         this._authAPi.getUserPermissionsByKey(user.key || '').subscribe(perms => {
           if (perms['status'] == ResStatus.CRUD || perms['status'] == ResStatus.Success_But_Empty) {
-            this._authAPi.userPerms = perms['data'];
+            // Snapshot the permissions: a later failed refresh must not hide
+            // all permission-gated navigation (e.g. module overview cards).
+            this._authAPi.cacheUserPerms(perms['data'] ?? []);
             this.loading = false;
             this.loggedIn = true;
             this._authAPi.currentUser = user;
@@ -73,7 +75,7 @@ export class AppComponent {
           } else {
             this.loading = false;
             this.loggedIn = false;
-            this._authAPi.userPerms = [];
+            this._authAPi.cacheUserPerms([]);
 
           }
           this.loadingService.setLoading(false);
@@ -81,7 +83,9 @@ export class AppComponent {
           this.loading = false;
           this.loggedIn = true;
           console.log(err);
-          this._authAPi.userPerms = [];
+          // Server/network error: keep the last good permissions instead of
+          // blanking every gated screen while the user stays logged in.
+          this._authAPi.restoreCachedPerms(user.key);
           this.loadingService.setLoading(false);
         })
 

@@ -123,11 +123,12 @@ export class NavbarComponent implements OnInit {
             }
           },err=>{
             console.log(err);
-            if(err['error']['status'] == ResStatus.Forbidden && err['error']['message'] == 'Token is Expired'){
+            // Optional chaining: network/500 errors may carry no error body.
+            if(err['error']?.['status'] == ResStatus.Forbidden && err['error']?.['message'] == 'Token is Expired'){
               this._notify.openSnackbar("Session Expired , Please Relogin" , SnackBarState.Warning)
               this.logout();
             }
-          }) 
+          })
 
           if(!localStorage.getItem('userData')){
             window.location.reload()
@@ -165,10 +166,13 @@ export class NavbarComponent implements OnInit {
             }
           },err=>{
             console.log(err);
-            this.userPerms = []
-            this.hasPermTOFollowTicket = false;
-            this.hasPermTOShowSalaries = false
-            if(err['error']['status'] == ResStatus.Forbidden && err['error']['message'] == 'Token is Expired'){
+            // Keep the last good permissions (restored by the service) so the
+            // sidebar does not collapse to ungated links on a /me or
+            // GetUserPermission 500.
+            this.userPerms = this._auth.restoreCachedPerms();
+            this.hasPermTOFollowTicket = this.userPerms.some(p => p.permission_id == 2);
+            this.hasPermTOShowSalaries = this.userPerms.some(p => p.permission_id == 1);
+            if(err['error']?.['status'] == ResStatus.Forbidden && err['error']?.['message'] == 'Token is Expired'){
               this._notify.openSnackbar("Session Expired , Please Relogin" , SnackBarState.Warning)
               this.logout();
             }
