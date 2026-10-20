@@ -1,0 +1,66 @@
+.modules-dashboard {
+  max-width: 1200px;
+}
+
+.module-card {
+  border: 1px solid rgba(67, 89, 113, 0.12);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
+    opacity 0.15s ease-in-out;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.15);
+    outline: none;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.6rem;
+    background-color: rgba(105, 108, 255, 0.1);
+    color: #696cff;
+    font-size: 1.5rem;
+
+    &--disabled {
+      background-color: rgba(119, 131, 143, 0.12);
+      color: #77838f;
+    }
+  }
+
+  &__action {
+    pointer-events: none;
+  }
+
+  // Disabled modules remain visible but are clearly grayed out and locked.
+  &--disabled {
+    opacity: 0.6;
+    filter: grayscale(70%);
+    background-color: #f5f6fa;
+    cursor: not-allowed;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+      box-shadow: 0 0.25rem 0.5rem rgba(67, 89, 113, 0.08);
+    }
+
+    .card-title,
+    .card-text {
+      color: #77838f;
+    }
+  }
+
+  &--core {
+    border-color: rgba(105, 108, 255, 0.35);
+  }
+
+  &__locked-badge {
+    font-weight: 500;
+  }
+}
