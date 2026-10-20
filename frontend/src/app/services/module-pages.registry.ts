@@ -93,7 +93,7 @@ const and = (...all: PageCondition[]): PageCondition => ({ kind: 'and', all });
  */
 export const MODULE_PAGES: Record<string, ModulePage[]> = {
   core: [
-    { title: 'My Work', icon: 'bx bx-time', route: '/my_work', condition: perm(12) },
+    { title: 'Time Sheet', icon: 'bx bx-time', route: '/my_work', condition: perm(12) },
     { title: 'Notes', icon: 'bx bx-note', route: '/notes' },
   ],
 
@@ -112,6 +112,19 @@ export const MODULE_PAGES: Record<string, ModulePage[]> = {
     { title: 'Leads', icon: 'bx bx-user-check', route: '/CRM/leads' },
     { title: 'Opportunity', icon: 'bx bx-dollar-circle', route: '/CRM/opportunity' },
     { title: 'Closed Deal', icon: 'bx bx-shield-x', route: '/CRM/closed' },
+    // ---- Business Development workspace (navbar businessDevelopmentModule) ----
+    {
+      title: 'Public requests',
+      icon: 'bx bx-paper-plane',
+      route: '/CRM/requests',
+      condition: dept(Department.Business_Development),
+    },
+    {
+      title: 'Handle Public requests',
+      icon: 'bx bx-check-circle',
+      route: '/publicReqsApply',
+      condition: perm(11),
+    },
   ],
 
   projects: [
@@ -226,6 +239,15 @@ export const MODULE_PAGES: Record<string, ModulePage[]> = {
       title: 'My Projects',
       icon: 'bx bx-briefcase-alt-2',
       route: '/dev/myprojects',
+      condition: and(
+        dept(Department.TECHNICAL_TEAM),
+        { kind: 'not', of: position(AccountPositions.MANAGER) }
+      ),
+    },
+    {
+      title: 'Users',
+      icon: 'bx bx-user',
+      route: '/users',
       condition: and(
         dept(Department.TECHNICAL_TEAM),
         { kind: 'not', of: position(AccountPositions.MANAGER) }
@@ -350,6 +372,9 @@ export const MODULE_PAGES: Record<string, ModulePage[]> = {
   ],
 
   admin: [
+    // Top-of-sidebar dashboard; the navbar link is gated purely on the admin
+    // module being enabled (isModuleEnabled('admin')), so no extra condition.
+    { title: 'Dashboard', icon: 'bx bx-home', route: '/admin-panel/dashboard' },
     { title: 'Users', icon: 'bx bx-user', route: '/manager/addusers' },
     {
       title: 'All User Data',

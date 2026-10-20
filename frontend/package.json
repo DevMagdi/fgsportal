@@ -6,6 +6,7 @@
         "start": "ng serve",
         "build": "ng build",
         "test": "ng test",
+        "test:node": "node scripts/run-node-specs.js",
         "lint": "ng lint",
         "e2e": "ng e2e",
         "deploy-prod": "ng build --configuration production && ng deploy --base-href=/dist/fgsPM/ --no-build --host $FTP_HOST --port $FTP_PORT --tls false --username $FTP_USERNAME --password $FTP_PASSWORD --remote-dir /public_html/community.firstgulfsolutions.com",
