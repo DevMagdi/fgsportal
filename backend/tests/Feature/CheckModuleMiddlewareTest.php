@@ -41,6 +41,10 @@ class CheckModuleMiddlewareTest extends TestCase
                 ->middleware('module:crm');
             Route::get('/test/crm-mapped', [CrmStubController::class, 'index'])
                 ->middleware('module');
+            Route::get('/test/multi-module', fn () => response()->json(['ok' => 'multi']))
+                ->middleware('module:ticketing,crm');
+            Route::get('/test/unknown-module', fn () => response()->json(['ok' => 'unknown']))
+                ->middleware('module:does-not-exist');
         });
     }
 
@@ -129,5 +133,79 @@ class CheckModuleMiddlewareTest extends TestCase
     public function test_request_without_token_is_rejected_by_jwt(): void
     {
         $this->get('/test/crm-explicit')->assertStatus(404);
+    }
+
+    public function test_management_flip_invalidates_the_cache_without_manual_cache_clear(): void
+    {
+        $admin = User::create([
+            'username' => 'module-admin',
+            'email' => 'module-admin@example.com',
+            'password' => Hash::make('secret'),
+            'sub_departments_id' => 1, // Management — allowed to toggle modules
+            'company_id' => $this->company->id,
+        ]);
+        $adminHeaders = ['Authorization' => 'Bearer ' . JWTAuth::fromUser($admin)];
+
+        // Baseline: the default company has CRM enabled and the route works.
+        $this->get('/test/crm-explicit', $this->authHeader())->assertStatus(200);
+
+        // Disable through the real management endpoint, which must forget the
+        // cached entitlement. No manual Cache::forget happens in this test.
+        $this->post('/api/company/modules/disable', ['module_slug' => 'crm'], $adminHeaders)
+            ->assertStatus(200);
+
+        $this->get('/test/crm-explicit', $this->authHeader())
+            ->assertStatus(403)
+            ->assertJsonPath('data.required_modules', ['crm']);
+
+        // Re-enabling must likewise invalidate the previously cached "denied" state.
+        $this->post('/api/company/modules/enable', ['module_slug' => 'crm'], $adminHeaders)
+            ->assertStatus(200);
+
+        $this->get('/test/crm-explicit', $this->authHeader())->assertStatus(200);
+    }
+
+    public function test_globally_inactive_module_is_denied_even_when_the_pivot_is_enabled(): void
+    {
+        Module::where('slug', 'crm')->update(['is_active' => false]);
+        app(ModuleService::class)->forgetCache($this->company->id, 'crm');
+
+        // The default company still has an enabled pivot row for CRM.
+        $this->get('/test/crm-explicit', $this->authHeader())->assertStatus(403);
+    }
+
+    public function test_unknown_module_slug_is_not_blocked(): void
+    {
+        // Unmapped/unknown features must never lock users out (fail-open for
+        // routes whose slug does not exist in the catalogue).
+        $this->get('/test/unknown-module', $this->authHeader())->assertStatus(200);
+    }
+
+    public function test_multi_slug_middleware_passes_when_any_required_module_is_enabled(): void
+    {
+        $ticketing = Module::where('slug', 'ticketing')->firstOrFail();
+        $crm = Module::where('slug', 'crm')->firstOrFail();
+
+        // Both enabled initially -> allowed.
+        $this->get('/test/multi-module', $this->authHeader())->assertStatus(200);
+
+        // Disable CRM but keep Ticketing -> still allowed (any-of semantics).
+        CompanyModule::where('company_id', $this->company->id)
+            ->where('module_id', $crm->id)
+            ->update(['is_enabled' => false]);
+        app(ModuleService::class)->forgetCache($this->company->id, 'crm');
+
+        $this->get('/test/multi-module', $this->authHeader())->assertStatus(200);
+
+        // Disable Ticketing as well -> both required modules missing -> denied,
+        // and the message names both slugs.
+        CompanyModule::where('company_id', $this->company->id)
+            ->where('module_id', $ticketing->id)
+            ->update(['is_enabled' => false]);
+        app(ModuleService::class)->forgetCache($this->company->id, 'ticketing');
+
+        $this->get('/test/multi-module', $this->authHeader())
+            ->assertStatus(403)
+            ->assertJsonPath('data.required_modules', ['ticketing', 'crm']);
     }
 }
