@@ -34,10 +34,11 @@ class User extends Authenticatable implements JWTSubject
            'firebasekey',
         'branches_id',
         'sub_departments_id',
+        'company_id',
         'canAddPreviousReports',
         'canAddPreviousReportsDate',
         'open_to_work'
-        
+
     ];
 
     public function user_creator_id_fun()
@@ -61,6 +62,22 @@ class User extends Authenticatable implements JWTSubject
     public function branches_id_fun()
     {
         return $this->belongsTo(Branch::class,'branches_id');
+    }
+
+    /**
+     * Tenant company whose module entitlements apply to this user.
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    /**
+     * Convenience helper: is the given module enabled for this user's company?
+     */
+    public function hasModule(string $moduleSlug): bool
+    {
+        return app(\App\Services\ModuleService::class)->isEnabled($moduleSlug, $this);
     }
 
     /**

@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Crypt;
 
 trait ResponseApi{
  
-      public function acceptedResponseApi($data=null , $message=null,$status=null){
+      public static function acceptedResponseApi($data=null , $message=null,$status=null){
         $array=[
           'data' =>  $data,
           'message'=> $message,
@@ -14,7 +14,7 @@ trait ResponseApi{
         return response($array,$status);
     }
 
-    public function notFoundResponse($data=null , $message=null,$status=null){
+    public static function notFoundResponse($data=null , $message=null,$status=null){
       $array=[
         'data' =>  $data,
         'message'=> $message,
@@ -22,7 +22,7 @@ trait ResponseApi{
       ];
       return response($array,$status);
   }
-    public function validatorErrorResponseApi($data=null , $message=null,$status=null){
+    public static function validatorErrorResponseApi($data=null , $message=null,$status=null){
       $array=[
         'data' =>  $data,
         'message'=> $message,
@@ -31,7 +31,7 @@ trait ResponseApi{
       return response($array,$status);
     }
 
-    public function unauthorizedResponseApi($data=null , $message=null,$status=null){
+    public static function unauthorizedResponseApi($data=null , $message=null,$status=null){
       $array=[
         'data' =>  $data,
         'message'=> $message,
@@ -41,7 +41,7 @@ trait ResponseApi{
   }
 
 
-  public function badMethodErrorResponse($data=null , $message=null,$status=null){
+  public static function badMethodErrorResponse($data=null , $message=null,$status=null){
     $array=[
       'data' =>  $data,
       'message'=> $message,
@@ -51,7 +51,7 @@ trait ResponseApi{
 
   }
 
-  public function tokenBadResponse($data=null , $message=null,$status=null){
+  public static function tokenBadResponse($data=null , $message=null,$status=null){
     $array=[
       'data' =>  $data,
       'message'=> $message,
@@ -64,7 +64,7 @@ trait ResponseApi{
   
    
 
-    public function logOutapiResponse($data=null , $message=null,$status=null){
+    public static function logOutapiResponse($data=null , $message=null,$status=null){
       $array=[
         'data' =>  $data,
         'message'=> $message,
@@ -75,7 +75,7 @@ trait ResponseApi{
 
 
 
-    public function unAuthorizedapiResponse($data=null , $message=null,$status=null){
+    public static function unAuthorizedapiResponse($data=null , $message=null,$status=null){
         $array=[
           'data' =>  $data,
           'message'=> $message,
@@ -86,7 +86,7 @@ trait ResponseApi{
 
 
 
-    public function apiResponse($data=null , $message=null,$status=null){
+    public static function apiResponse($data=null , $message=null,$status=null){
         $array=[
           'data' =>  $data,
           'message'=> $message,
@@ -99,7 +99,7 @@ trait ResponseApi{
     
 
 
-    public function validatorApiResponseErrorId($olddata=null , $message=null,$status=null){
+    public static function validatorApiResponseErrorId($olddata=null , $message=null,$status=null){
       if(!empty($olddata["id"])){
   
         $data = [
@@ -115,7 +115,7 @@ trait ResponseApi{
       return response($array,$status);
     }
     
-    public function GetJobAgreementApiResonseCreateAccount($data=null , $message=null,$status=null){
+    public static function GetJobAgreementApiResonseCreateAccount($data=null , $message=null,$status=null){
       $array=[
         'data' =>  $data,
         'message'=> $message,
@@ -124,7 +124,7 @@ trait ResponseApi{
       return response($array,$status);
     }
 
-    public function GetJobAgreementApiResonseHR($data=null , $message=null,$status=null){
+    public static function GetJobAgreementApiResonseHR($data=null , $message=null,$status=null){
       $array=[
         'data' =>  $data,
         'message'=> $message,
@@ -132,7 +132,7 @@ trait ResponseApi{
       ];
       return response($array,$status);
     }
-    public function StoreJobAgreementApiResonse($data=null , $message=null,$status=null){
+    public static function StoreJobAgreementApiResonse($data=null , $message=null,$status=null){
      
       $array=[
         'data' =>  $data,
@@ -141,7 +141,7 @@ trait ResponseApi{
       ];
       return response($array,$status);
     }
-    public function newJobAgreementApiResonse($olddata=null , $message=null,$status=null){
+    public static function newJobAgreementApiResonse($olddata=null , $message=null,$status=null){
       $data=[
         'token'=>$olddata,
       ];
@@ -152,7 +152,7 @@ trait ResponseApi{
       ];
       return response($array,$status);
     }
-    public function existApiResonse($olddata=null , $message=null,$status=null){
+    public static function existApiResonse($olddata=null , $message=null,$status=null){
       $encrypted = Crypt::encryptString($olddata->id);
       $data=[
         'id'=>$encrypted,
@@ -173,7 +173,7 @@ trait ResponseApi{
     }
 
     
-    public function validatorApiResponseJobAgreement($olddata=null , $message=null,$status=null){
+    public static function validatorApiResponseJobAgreement($olddata=null , $message=null,$status=null){
         if(!empty($olddata["username"])){
   
           $data = [
@@ -222,7 +222,7 @@ trait ResponseApi{
 
     }
 
-    public function validatorApiResponse($olddata=null , $message=null,$status=null){
+    public static function validatorApiResponse($olddata=null , $message=null,$status=null){
       
       if(!empty($olddata["email"])){
  
