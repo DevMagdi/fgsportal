@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateContractSupportsTable extends Migration
+class CreateContractSupportsTableV2 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,6 +13,10 @@ class CreateContractSupportsTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('contract_supports')) {
+            return;
+        }
+
         Schema::create('contract_supports', function (Blueprint $table) {
             $table->bigIncrements('id');
         

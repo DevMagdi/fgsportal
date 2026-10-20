@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTransportationRequestAcceptedsTable extends Migration
+class CreateTransportationRequestAcceptedsTableV2 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,6 +13,10 @@ class CreateTransportationRequestAcceptedsTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('transportation_request_accepteds')) {
+            return;
+        }
+
         Schema::create('transportation_request_accepteds', function (Blueprint $table) {
             $table->bigIncrements('id');
             

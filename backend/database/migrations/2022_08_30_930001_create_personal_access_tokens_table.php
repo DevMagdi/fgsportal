@@ -12,7 +12,13 @@ return new class  extends Migration
      * @return void
      */
     public function up()
-    {    
+    {
+        // Sanctum ships its own copy of this migration in vendor; do not fail
+        // when that one already created the table.
+        if (Schema::hasTable('personal_access_tokens')) {
+            return;
+        }
+
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
             $table->morphs('tokenable');
