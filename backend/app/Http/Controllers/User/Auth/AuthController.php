@@ -284,9 +284,9 @@ class AuthController extends Controller
            'department'=>$department_id,
            'refreshRequired'=>(int)$user->refreshRequired,
            'token'=>$user->token,
-           'need_paper'=>(int)$user->user_details_id_fun->need_paper,
-           'full_information'=>(int)$user->user_details_id_fun->full_information,
-           'change_password'=>(int)$user->user_details_id_fun->change_password,
+           'need_paper'=>(int) optional($user->user_details_id_fun)->need_paper,
+           'full_information'=>(int) optional($user->user_details_id_fun)->full_information,
+           'change_password'=>(int) optional($user->user_details_id_fun)->change_password,
        ];
        return $castUser;
    }
@@ -619,16 +619,20 @@ class AuthController extends Controller
     protected function createNewToken($token){
 
         try{
-           
+
             $user = User::find(Auth::guard('user_api')->user()->id);
-            
+
             $user->update([
                 'token'=>$token,
             ]);
-         
-            if($user->user_details_id_fun->need_paper==0||$user->user_details_id_fun->full_information==0||
-            $user->user_details_id_fun->change_password==0){
-                
+
+            // A freshly provisioned user may not have a user_details row yet.
+            // Treat a missing row as "no pending info" instead of crashing.
+            $userDetails = $user->user_details_id_fun;
+
+            if($userDetails && ($userDetails->need_paper==0 || $userDetails->full_information==0 ||
+            $userDetails->change_password==0)){
+
                 return ResponseApi::acceptedResponseApi(
                    $this-> castUserData($user)
                 ,"Need Info",202);
@@ -637,13 +641,13 @@ class AuthController extends Controller
                     $this-> castUserData($user)
               ,"Accepted",202);
             }
-           
+
         }catch(\Exception $e){
             return ResponseApi::badMethodErrorResponse($e,"server Error",500);
 
 
         }
-        
+
     }
 
     public function store(Request $request){

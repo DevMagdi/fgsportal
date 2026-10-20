@@ -54,7 +54,7 @@ const MODULE_PRESENTATION: Record<string, ModulePresentation> = {
   },
   projects: {
     icon: 'bx bx-briefcase-alt-2',
-    route: '/manager',
+    route: '/manager/projects',
     fallbackName: 'Projects',
     fallbackDescription:
       'Projects, processes, tasks, timesheets, reports and PM team requests.',
@@ -68,7 +68,7 @@ const MODULE_PRESENTATION: Record<string, ModulePresentation> = {
   },
   admin: {
     icon: 'bx bx-cog',
-    route: '/admin-panel',
+    route: '/admin-panel/dashboard',
     fallbackName: 'Administration',
     fallbackDescription:
       'Organisational settings, departments, products, permissions, logs, announcements and public requests.',

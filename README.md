@@ -64,6 +64,14 @@ php artisan db:seed             # modules + default company + entitlements
 php artisan serve
 ```
 
+> **Fresh-database note:** the historical codebase only ships migrations for
+> part of its schema — many feature tables (CRM, HR, ticketing, recruitment, …)
+> were created directly in deployed databases. A clean `migrate` + `seed` is
+> enough to run authentication and the modules dashboard. For the full feature
+> set, import a `mysqldump` from an existing environment into an empty database
+> instead, then run `php artisan db:seed` if that dump predates the modular
+> system (modules/companies/company_modules tables).
+
 Management endpoints (JWT required; Management/Administration only):
 
 | Method | Endpoint | Description |
