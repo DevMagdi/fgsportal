@@ -1,34 +1,29 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+// The list of file replacements can be found in angular.json.
+//
+// SECURITY: real credentials must never be committed. Copy
+// environment.example.ts to environment.ts and fill in your project values.
 
 export const environment = {
   production: false,
   firebase: {
-    // apiKey: "AIzaSyBOGcS5gCn8b5R4DEMvThTQjwJXNbbrR20",
-    // authDomain: "fgspm-8bbdc.firebaseapp.com",
-    // projectId: "fgspm-8bbdc",
-    // storageBucket: "fgspm-8bbdc.appspot.com",
-    // messagingSenderId: "971434035275",
-    // appId: "1:971434035275:web:471e67ef9549844efa25ce",
-    // measurementId: "G-J8Z6EQHV9F"
-    apiKey: "AIzaSyDJM5DSKhSXYRlHRrw0uPmDwx6fNIqXp9I",
-    authDomain: "fgs-connect-portal-test.firebaseapp.com",
-    projectId: "fgs-connect-portal-test",
-    storageBucket: "fgs-connect-portal-test.appspot.com",
-    messagingSenderId: "311784048211",
-    appId: "1:311784048211:web:26a2da6bb27d809d1528a6",
+    apiKey: "YOUR_FIREBASE_API_KEY",
+    authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+    projectId: "YOUR_FIREBASE_PROJECT_ID",
+    storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+    appId: "YOUR_FIREBASE_APP_ID",
   },
-  cloudMessagingServerkey:"AAAAX7e0pwE:APA91bEvrXXY_tE099Tq0GDJP1WvylplRGfXohCJ9E0VKYzQuvzu62dGTMgATHCzPi5uYGFjHDf2ckO0ryaiL1kqpqeZYMx5m30H7Gl4xvkMSoiR9EEkeuRA2VQRXEfLlUEYiw-4oxpJ",
-  staticFGSProjectKey:"13",
-  staticFGSProjectTitle:"Static FGS Project",
-  staticFGSProcessKey:"Presales",
-  staticFGSProcessTitle:"4",
-  serverAPI:'https://secret-atoll-82393.herokuapp.com',
-  newServerApi:'http://connectportaltestenvironment.firstgulfsolutions.com/ConnectPortalTest/FrontEndApiTest',
-  // newServerApi:'http://127.0.0.1:8000',
-  currecnyConvert:'https://openexchangerates.org/api/latest.json?',
-  currecnyConvertAppID:'dc84c095c2934ecfa7f882a1aab2863f',
+  cloudMessagingServerkey: "YOUR_CLOUD_MESSAGING_SERVER_KEY",
+  staticFGSProjectKey: "13",
+  staticFGSProjectTitle: "Static FGS Project",
+  staticFGSProcessKey: "Presales",
+  staticFGSProcessTitle: "4",
+  serverAPI: 'YOUR_LEGACY_SERVER_API_URL',
+  newServerApi: 'YOUR_BACKEND_API_BASE_URL',
+  currecnyConvert: 'https://openexchangerates.org/api/latest.json?',
+  currecnyConvertAppID: 'YOUR_OPEN_EXCHANGE_RATES_APP_ID',
   //chatGPTApi:'https://api.openai.com/v1/engines/davinci-codex/completions',
   //chatGPTApiKey:'YOUR_OPENAI_KEY_GOES_HERE'
 };
