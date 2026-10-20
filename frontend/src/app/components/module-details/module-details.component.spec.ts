@@ -6,18 +6,18 @@ import { BehaviorSubject } from 'rxjs';
 import { ModuleDetailsComponent } from './module-details.component';
 import { ModulePagesService } from 'src/app/services/module-pages.service';
 import { AuthApiService } from 'src/app/services/auth-api.service';
-import { ModulePage } from 'src/app/services/module-pages.registry';
+import { ModulePage, ModulePageSection } from 'src/app/services/module-pages.registry';
 
 class ModulePagesServiceStub {
   enabled = true;
-  pages: ModulePage[] = [];
+  sections: ModulePageSection[] = [];
 
   isModuleEnabled(): boolean {
     return this.enabled;
   }
 
-  pagesFor(): ModulePage[] {
-    return this.pages;
+  sectionsFor(): ModulePageSection[] {
+    return this.sections;
   }
 }
 
@@ -27,13 +27,19 @@ class AuthApiServiceStub {
   userPerms = [];
 }
 
-const crmPages: ModulePage[] = [
-  { title: 'Insights', icon: 'bx bx-trending-up', route: '/CRM/dashboard' },
-  { title: 'Activities', icon: 'bx bx-calendar-event', route: '/CRM/activities' },
+const crmSections: ModulePageSection[] = [
   {
-    title: 'Installments',
-    icon: 'bx bx-money',
-    route: ['/manager/installments', 't'],
+    title: 'CRM',
+    pages: [
+      { section: 'CRM', title: 'Insights', icon: 'bx bx-trending-up', route: '/CRM/dashboard' },
+      { section: 'CRM', title: 'Activities', icon: 'bx bx-calendar-event', route: '/CRM/activities' },
+      {
+        section: 'CRM',
+        title: 'Installments',
+        icon: 'bx bx-money',
+        route: ['/manager/installments', 't'],
+      },
+    ],
   },
 ];
 
@@ -76,7 +82,7 @@ describe('ModuleDetailsComponent', () => {
       component = fixture.componentInstance;
       pagesService = TestBed.inject(ModulePagesService) as unknown as ModulePagesServiceStub;
       router = TestBed.inject(Router);
-      pagesService.pages = crmPages;
+      pagesService.sections = crmSections;
       spyOn(router, 'navigateByUrl');
       spyOn(router, 'navigate');
     });
@@ -85,6 +91,13 @@ describe('ModuleDetailsComponent', () => {
       fixture.detectChanges();
       expect(component).toBeTruthy();
       expect(component.slug).toBe('crm');
+    });
+
+    it('renders one heading per sidebar section', () => {
+      fixture.detectChanges();
+      const headings = fixture.nativeElement.querySelectorAll('.module-section__title');
+      expect(headings.length).toBe(1);
+      expect(headings[0].textContent).toContain('CRM');
     });
 
     it('renders one card per visible module page with the right titles', () => {
@@ -108,8 +121,18 @@ describe('ModuleDetailsComponent', () => {
       );
     });
 
+    it('flattens sections through the pages getter', () => {
+      fixture.detectChanges();
+      expect(component.pages.map((page: ModulePage) => page.title)).toEqual([
+        'Insights',
+        'Activities',
+        'Installments',
+      ]);
+      expect(component.totalCards).toBe(3);
+    });
+
     it('shows the empty state when the user has no feature permission', () => {
-      pagesService.pages = [];
+      pagesService.sections = [];
       fixture.detectChanges();
 
       expect(fixture.nativeElement.querySelectorAll('.module-page-card').length).toBe(0);
@@ -145,7 +168,7 @@ describe('ModuleDetailsComponent', () => {
       TestBed.overrideProvider(ModulePagesService, {
         useValue: {
           isModuleEnabled: () => false,
-          pagesFor: () => [],
+          sectionsFor: () => [],
         },
       });
       const r = TestBed.inject(Router);

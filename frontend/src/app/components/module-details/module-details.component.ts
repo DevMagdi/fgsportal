@@ -7,14 +7,16 @@ import {
   MODULE_PAGES,
   MODULE_SLUGS,
   ModulePage,
+  ModulePageSection,
 } from 'src/app/services/module-pages.registry';
 import { ModulePagesService } from 'src/app/services/module-pages.service';
 
 /**
  * Module landing page: renders every feature the selected module contains
- * as a card, mirroring the sidebar links (same routes and the same
- * permission/department visibility rules). Clicking a card opens the real
- * feature page; the feature guards still enforce access on navigation.
+ * as a card, grouped into the same collapsible sections as the sidebar
+ * (same titles, routes and permission/department visibility rules).
+ * Clicking a card opens the real feature page; the feature guards still
+ * enforce access on navigation.
  */
 @Component({
   selector: 'app-module-details',
@@ -23,7 +25,7 @@ import { ModulePagesService } from 'src/app/services/module-pages.service';
 })
 export class ModuleDetailsComponent implements OnInit, OnDestroy {
   slug = '';
-  pages: ModulePage[] = [];
+  sections: ModulePageSection[] = [];
   private userSub?: Subscription;
 
   constructor(
@@ -51,11 +53,11 @@ export class ModuleDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadPages();
+    this.loadSections();
 
     // Permissions arrive shortly after bootstrap; re-evaluate when the user
     // stream emits so the cards match the sidebar exactly.
-    this.userSub = this.authApi.user.subscribe(() => this.loadPages());
+    this.userSub = this.authApi.user.subscribe(() => this.loadSections());
   }
 
   ngOnDestroy(): void {
@@ -66,11 +68,23 @@ export class ModuleDetailsComponent implements OnInit, OnDestroy {
     return MODULE_META[this.slug];
   }
 
+  /** Flattened visible cards, mainly for tests/empty-state checks. */
+  get pages(): ModulePage[] {
+    return this.sections.reduce<ModulePage[]>(
+      (all, section) => all.concat(section.pages),
+      []
+    );
+  }
+
+  get totalCards(): number {
+    return this.pages.length;
+  }
+
   backToModules(): void {
     this.router.navigateByUrl('/modules');
   }
 
-  private loadPages(): void {
-    this.pages = this.modulePagesService.pagesFor(this.slug);
+  private loadSections(): void {
+    this.sections = this.modulePagesService.sectionsFor(this.slug);
   }
 }

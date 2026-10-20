@@ -6,6 +6,7 @@ import {
   MODULE_SLUGS,
   PageVisibilityContext,
   visiblePages,
+  visibleSections,
 } from './module-pages.registry';
 
 const ctx = (overrides: Partial<PageVisibilityContext> = {}): PageVisibilityContext => ({
@@ -309,9 +310,10 @@ describe('module-pages registry', () => {
   });
 
   // Snapshot of the exact sidebar catalogue the product owner signed off:
-  // a management user (no extra permissions) must see precisely these cards
-  // per module, in sidebar order.
-  it('matches the signed-off module-by-module sidebar structure for a manager', () => {
+  // a management user (no extra permissions) must see precisely these
+  // sections and cards, in sidebar order — including the standalone
+  // Dashboard / Notes / Requests / Configurations sections.
+  it('matches the signed-off sidebar sections and cards for a manager', () => {
     const manager = ctx({
       user: {
         department: Department.MANAGEMENT,
@@ -322,59 +324,116 @@ describe('module-pages registry', () => {
       permissionIds: [],
     });
 
-    expect(visiblePages('core', manager).map((p) => p.title)).toEqual(['Notes']);
+    const titlesOf = (slug: string) =>
+      visibleSections(slug, manager).map((section) => [
+        section.title,
+        section.pages.map((page) => page.title),
+      ]);
 
-    expect(visiblePages('crm', manager).map((p) => p.title)).toEqual([
-      'Insights',
-      'Reports',
-      'Organizations',
-      'Contacts',
-      'Activities',
-      'Requests',
-      'Leads',
-      'Opportunity',
-      'Closed Deal',
+    // Notes is a standalone always-on sidebar link.
+    expect(titlesOf('core')).toEqual([['General', ['Notes']]]);
+
+    // CRM block — the nine signed-off entries.
+    expect(titlesOf('crm')).toEqual([
+      [
+        'CRM',
+        [
+          'Insights',
+          'Reports',
+          'Organizations',
+          'Contacts',
+          'Activities',
+          'Requests',
+          'Leads',
+          'Opportunity',
+          'Closed Deal',
+        ],
+      ],
     ]);
 
-    expect(visiblePages('projects', manager).map((p) => p.title)).toEqual([
-      'Pending Reports',
-      'Projects',
-      'Reports',
-      'Developer Progress',
-      'Available To Work',
-      'Public Reports',
-      'Admin Tasks',
-      'Project Manager Reports',
-      'Rating',
+    // Project Management block — the nine signed-off entries.
+    expect(titlesOf('projects')).toEqual([
+      [
+        'Project Management',
+        [
+          'Pending Reports',
+          'Projects',
+          'Reports',
+          'Devloper Progress',
+          'Available To Work',
+          'Public Reports',
+          'Admin Tasks',
+          'Project Manager Reports',
+          'Rating',
+        ],
+      ],
     ]);
 
-    expect(visiblePages('ticketing', manager).map((p) => p.title)).toEqual([
-      'Support Contract',
-      'Tickets',
-      'License',
-      'Clients',
+    // Support block — role-gated Support Reports/Finance sections are dropped.
+    expect(titlesOf('ticketing')).toEqual([
+      ['Support', ['Support Contract', 'Tickets', 'License', 'Clients']],
     ]);
 
-    expect(visiblePages('hr', manager).map((p) => p.title)).toEqual([
-      'Salaries',
-      'Vacations',
-      'Announces',
-      'Public Requests',
-      'Transportations Requests',
-      'Transportation Sheet',
-      'Incentive Requests',
+    // HR block followed by the standalone Requests block.
+    expect(titlesOf('hr')).toEqual([
+      ['HR', ['Salaries', 'Vacations', 'Announces']],
+      [
+        'Requests',
+        [
+          'Public requests',
+          'Transportations Requests',
+          'Transportation Sheet',
+          'Incentive Requests',
+        ],
+      ],
     ]);
 
-    expect(visiblePages('admin', manager).map((p) => p.title)).toEqual([
-      'Dashboard',
-      'Users',
-      'All User Data',
-      'Configurations',
-      'Public Requests',
-      'Transportations Requests',
-      'Transportation Sheet',
-      'Incentive Requests',
+    // Administration area keeps Dashboard and Configurations as their own
+    // sections, with Users/All User Data under Administration.
+    expect(titlesOf('admin')).toEqual([
+      ['Dashboard', ['Dashboard']],
+      ['Administration', ['Users', 'All User Data']],
+      [
+        'Requests',
+        [
+          'Public requests',
+          'Transportations Requests',
+          'Transportation Sheet',
+          'Incentive Requests',
+        ],
+      ],
+      ['Configurations', ['Configurations']],
     ]);
+  });
+
+  it('groups cards into sections and drops sections hidden entirely by permissions', () => {
+    // A manager never sees the role-gated Technical Team / Finance / Hiring
+    // Process / Support Reports sections.
+    const manager = ctx({
+      user: {
+        department: Department.MANAGEMENT,
+        accRole: AccountRoles.CEO,
+        accPosition: AccountPositions.MANAGER,
+      },
+      isManager: true,
+    });
+    const sectionNames = (slug: string) =>
+      visibleSections(slug, manager).map((section) => section.title);
+
+    expect(sectionNames('projects')).not.toContain('Technical Team');
+    expect(sectionNames('ticketing')).toEqual(['Support']);
+    expect(sectionNames('hr')).toEqual(['HR', 'Requests']);
+
+    // A non-manager technical user gets the Technical Team section.
+    const juniorDev = ctx({
+      user: {
+        department: Department.TECHNICAL_TEAM,
+        accRole: AccountRoles.SUPPORT,
+        accPosition: AccountPositions.JUNIOR,
+      },
+    });
+    const projectSections = visibleSections('projects', juniorDev).map((s) => s.title);
+    expect(projectSections).toContain('Technical Team');
   });
 
   it('returns an empty list for unknown slugs and treats no condition as visible', () => {

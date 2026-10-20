@@ -58,7 +58,9 @@ bootstrapping Angular.
 
 - every active `routerLink` in `navbar.component.html` has a matching card, and
   vice versa;
-- the signed-off per-module structure (titles and order) matches for a
-  management user;
+- the signed-off sidebar structure matches for a management user, including
+  the collapsible **sections** (Dashboard, CRM, Project Management, Support,
+  HR, Requests, Administration, Configurations) and the card order inside
+  each; sections whose cards are all permission-hidden are dropped;
 - permission/department/role conditions match the navbar's `*ngIf` rules;
 - titles and routes are unique inside each module.
