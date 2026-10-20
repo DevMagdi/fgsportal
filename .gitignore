@@ -1,0 +1,76 @@
+# ==========================================================
+# FGS Connect — root .gitignore
+# ==========================================================
+
+# ---- Environment / secrets ----
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+/cert/
+/public/cert/
+FrontEndApiTest/system/public/cert/
+system/public/cert/
+
+# ---- PHP / Laravel (backends) ----
+vendor/
+node_modules/
+/public/hot
+/public/storage
+/storage/*.key
+.phpunit.result.cache
+.phpunit.cache/
+*.log
+storage/logs/*
+!storage/logs/.gitignore
+bootstrap/cache/*.php
+!bootstrap/cache/.gitignore
+Homestead.json
+Homestead.yaml
+docker-compose.override.yml
+
+# ---- Node / Angular (frontend) ----
+dist/
+tmp/
+out-tsc/
+.bazel-out/
+node_modules/
+.angular/
+.sass-cache/
+coverage/
+connect.lock
+libpeerconnection.log
+npm-debug.log*
+yarn-error.log*
+testem.log
+/typings
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# ---- Build output committed at repo root (legacy hosting) ----
+# New builds must be produced locally/CI, not committed.
+/main.js
+/main.*.js
+/runtime.js
+/runtime.*.js
+/polyfills.js
+/polyfills.*.js
+/scripts.js
+/scripts.*.js
+/vendor.js
+/vendor.*.js
+/styles.css
+/styles.*.css
+/*.map
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

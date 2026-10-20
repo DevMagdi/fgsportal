@@ -231,7 +231,10 @@ Route::group(['middleware' => [ 'cors','api'],'prefix' => 'users'], function ($r
   
 
 });
-Route::group(['middleware' => [ 'cors','jwt.verify'],'prefix' => 'clients'], function ($router) {
+// Modular system: the bare "module" middleware resolves the required module from
+// the controller handling each route via config('modules.controller_map').
+// Core (Users/Auth/Permissions) controllers are unmapped and always allowed.
+Route::group(['middleware' => [ 'cors','jwt.verify','module'],'prefix' => 'clients'], function ($router) {
   Route::get('/me', [AuthClientController::class, 'me']);
  Route::post('/GetMyOpenTicket', [TicketController::class, 'GetMyOpenTicket']);  
   Route::post('/GetMyClosedTicket', [TicketController::class, 'GetMyClosedTicket']);  
@@ -268,7 +271,7 @@ Route::group(['middleware' => [ 'cors','jwt.verify'],'prefix' => 'clients'], fun
             
 });
 
-Route::group(['middleware' => [ 'cors','jwt.verify'],'prefix' => 'users'], function ($router) {
+Route::group(['middleware' => [ 'cors','jwt.verify','module'],'prefix' => 'users'], function ($router) {
     #################################### User Settings #########################################
     Route::post('/UserResetPassword', [AuthController::class, 'UserResetPassword']);
     #################################### Create user #########################################
@@ -1392,3 +1395,27 @@ Route::group(['middleware' => [ 'cors','jwt.verify'],'prefix' => 'users'], funct
     
     
 
+
+/*
+|--------------------------------------------------------------------------
+| Modular system — module catalogue & per-company entitlements
+|--------------------------------------------------------------------------
+| Management endpoints (enable/disable) are restricted to Management /
+| Administration sub-departments inside ModuleController.
+*/
+Route::group(['middleware' => ['cors', 'jwt.verify'], 'prefix' => 'modules'], function () {
+    Route::get('/', [\App\Http\Controllers\Settings\Module\ModuleController::class, 'index']);
+});
+
+Route::group(['middleware' => ['cors', 'jwt.verify'], 'prefix' => 'company/modules'], function () {
+    Route::get('/', [\App\Http\Controllers\Settings\Module\ModuleController::class, 'companyModules']);
+    Route::post('/enable', [\App\Http\Controllers\Settings\Module\ModuleController::class, 'enable']);
+    Route::post('/disable', [\App\Http\Controllers\Settings\Module\ModuleController::class, 'disable']);
+});
+
+/*
+| Example of explicit per-route module protection (also enforced globally
+| through the controller map above):
+|
+| Route::group(['middleware' => ['jwt.verify', 'module:crm']], function () { ... });
+*/

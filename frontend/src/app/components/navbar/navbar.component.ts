@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 import { Announcement } from 'src/app/interfaces/announcement';
 import { UserPermissions } from 'src/app/interfaces/user-permissions';
 import { AuthApiService } from 'src/app/services/auth-api.service';
+import { ModuleService } from 'src/app/services/module.service';
 import { environment } from 'src/environments/environment';
 import { ResStatus } from 'src/app/interfaces/res-status';
 import { DatabaseService } from 'src/app/services/database.service';
@@ -89,7 +90,13 @@ export class NavbarComponent implements OnInit {
               private message:MessagingService,
               private changeDetectorRef: ChangeDetectorRef,
               private breakpointObserver: BreakpointObserver,
+              private moduleService: ModuleService,
               ) {}
+
+  /** Whether a sellable module is enabled for the current user's company. */
+  isModuleEnabled(slug: string): boolean {
+    return this.moduleService.isModuleEnabled(slug);
+  }
 
   ngOnInit(): void {
   //  this.date =  this.db.gettime()

@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { ResStatus } from '../interfaces/res-status';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from '@angular/fire/database';
 import { UserPermissions } from '../interfaces/user-permissions';
+import { ModuleService } from './module.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +31,8 @@ export class AuthApiService {
 
   constructor(private http:HttpClient,
               private router: Router,
-              private db:AngularFireDatabase) {
+              private db:AngularFireDatabase,
+              private moduleService: ModuleService) {
     this.UserNavParamsRef = db.list(this.UserNavParamsPath);
     this.ClientNavParamsRef = db.list(this.ClientNavParamsPath);
   }
@@ -260,6 +262,8 @@ export class AuthApiService {
     }
     this.user.next(null);
     localStorage.removeItem('userData');
+    // Clear cached module entitlements on logout.
+    this.moduleService.clear();
     return this.http.post(`${environment.newServerApi}/api/users/logout`,reqOptions)
     // if (this.tokenExpirationTimer) {
     //   clearTimeout(this.tokenExpirationTimer);
@@ -283,7 +287,9 @@ export class AuthApiService {
     localStorage.setItem('userData', JSON.stringify(user));
     console.log('handleAuthentication',JSON.stringify(user));
     this.user.next(user);
-    
+
+    // Load the modules this user's company has purchased.
+    this.moduleService.loadEnabledModules().subscribe();
   }
   
   getCurrentLoggedInUser(){

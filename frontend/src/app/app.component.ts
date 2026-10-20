@@ -4,6 +4,7 @@ import { MessagingService } from './services/messaging.service';
 import { DatabaseService } from './services/database.service';
 import { ResStatus } from './interfaces/res-status';
 import { LoadingService } from './services/loading.service';
+import { ModuleService } from './services/module.service';
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,8 @@ export class AppComponent {
     private _db: DatabaseService,
     private _authAPi: AuthApiService,
     public loadingService: LoadingService,
-    private cd:ChangeDetectorRef
+    private cd:ChangeDetectorRef,
+    private moduleService: ModuleService
 
   ) {
 
@@ -50,6 +52,10 @@ export class AppComponent {
     this.messagingService.receiveMessage()
     this.message = this.messagingService.currentMessage
     this._authAPi.autoLogin()
+    // Refresh module entitlements on every app bootstrap (covers page refresh).
+    if (localStorage.getItem('userData')) {
+      this.moduleService.loadEnabledModules().subscribe();
+    }
     this._authAPi.user.subscribe(user => {
       
       this.loadingService.setLoading(true);
