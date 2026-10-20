@@ -25,6 +25,7 @@ import { ManagerGuard } from './services/manager.guard';
 import { ModuleGuard } from './services/module.guard';
 import { ModuleDisabledComponent } from './components/module-disabled/module-disabled.component';
 import { ModulesCardsComponent } from './components/modules-cards/modules-cards.component';
+import { ModuleDetailsComponent } from './components/module-details/module-details.component';
 import { TimeSheetComponent } from './components/dev/components/time-sheet/time-sheet.component';
 import { GlobalTimeSheetComponent } from './components/global-time-sheet/global-time-sheet.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
@@ -48,6 +49,7 @@ const routes: Routes = [
   {path: 'publicReqsApply',component:PublicRequestsApprovalComponent , canActivate:[AuthGuardService]},
   {path: 'module-disabled', component: ModuleDisabledComponent, canActivate:[AuthGuardService]},
   {path: 'modules', component: ModulesCardsComponent, canActivate:[AuthGuardService]},
+  {path: 'modules/:slug', component: ModuleDetailsComponent, canActivate:[AuthGuardService]},
   {path: 'tickets',component:FollowClientTicketsComponent , canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
   {path: 'tickets/:id',component:FollowClientTicketDetailsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
   {path: 'support-reports',component:SupportReportsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},

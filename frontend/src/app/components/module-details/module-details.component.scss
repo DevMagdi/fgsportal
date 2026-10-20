@@ -1,0 +1,46 @@
+.module-details {
+  max-width: 1200px;
+}
+
+.module-details__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.6rem;
+  background-color: rgba(105, 108, 255, 0.1);
+  color: #696cff;
+  font-size: 1.6rem;
+}
+
+.module-page-card {
+  border: 1px solid rgba(67, 89, 113, 0.12);
+  border-radius: 0.75rem;
+  color: inherit;
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.15);
+    outline: none;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.6rem;
+    background-color: rgba(105, 108, 255, 0.1);
+    color: #696cff;
+    font-size: 1.4rem;
+  }
+
+  &__action {
+    pointer-events: none;
+    align-self: flex-start;
+  }
+}

@@ -36,6 +36,15 @@ Module metadata lives in the `modules` table; per-client entitlements live in
   with a lock badge**, and clicking one routes to
   `/module-disabled?module=<slug>` instead of entering the module. Deep links to
   disabled lazy routes are still blocked by `ModuleGuard`.
+- **Module feature pages (`/modules/:slug`)** — clicking an enabled module opens
+  `ModuleDetailsComponent`, which renders **one card per sidebar section** of that
+  module (e.g. CRM: Insights, Reports, Organizations, Contacts, Activities,
+  Requests, Leads, Opportunity, Closed Deal). The titles, router targets and
+  visibility rules mirror the navbar exactly and live in one declarative registry,
+  `frontend/src/app/services/module-pages.registry.ts` (permission, department,
+  role, position, manager/admin and `or`/`and`/`not` conditions). Each feature
+  card navigates to the real route, whose existing guards still apply; users
+  without any visible feature get an explicit empty state instead of a blank page.
 
 ## 3. Enable a module for a client
 
@@ -114,6 +123,8 @@ disable endpoints flush the relevant cache entry automatically.
 2. Add the controller namespace → slug mapping in `config/modules.php`.
 3. Add a lazy Angular route guarded with `data: { module: '<slug>' }` and a navbar
    section gated by `isModuleEnabled('<slug>')`.
-4. Add the slug to `MODULE_ORDER` / `MODULE_PRESENTATION` (icon + landing route)
-   in `ModulesCardsComponent` so it appears on the modules dashboard.
+4. Add the slug to `MODULE_SLUGS` / `MODULE_META` and its feature list to
+   `MODULE_PAGES` in `services/module-pages.registry.ts` (titles, icons, routes
+   and the same visibility conditions as the navbar) so it appears on the modules
+   dashboard and gets a feature-cards landing page.
 5. Provision the module to companies through the enable endpoint.
