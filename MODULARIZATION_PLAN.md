@@ -132,17 +132,26 @@ default company). Wired through `DatabaseSeeder`.
 - `services/module.service.ts` — `BehaviorSubject<string[]>` of enabled slugs,
   mirrored in `localStorage('enabledModules')`, fetched from
   `GET /api/company/modules` after login and on app bootstrap; helpers
-  `isModuleEnabled(slug)` / `getEnabledModules()`.
+  `isModuleEnabled(slug)` / `getEnabledModules()`. It also holds the full
+  catalogue (`loadCatalogue()` / `catalogue$` from `GET /api/modules`) so the UI
+  can show disabled modules too.
 - `services/module.guard.ts` — generic `CanActivate` guard reading
   `route.data.module`; waits for the first entitlement load and redirects to the
   new **Module not enabled** page (`components/module-disabled`).
 - `app-routing.module.ts` — guards on every lazy module:
   CRM → `crm`, HR → `hr`, Admin panel → `admin`, Manager/Dev → `projects`,
-  Tickets/Support reports → `ticketing`.
+  Tickets/Support reports → `ticketing`; the `/modules` dashboard route sits
+  behind the standard auth guard.
+- `components/modules-cards` — **modules dashboard as cards**. All six slugs
+  (`core`, `crm`, `ticketing`, `projects`, `hr`, `admin`) always render with
+  name, description, icon and state. Enabled cards navigate into the module;
+  disabled cards stay visible but are dimmed/grayed with a lock badge and route
+  to `/module-disabled?module=<slug>`. Icon/landing-route metadata lives in the
+  component's `MODULE_PRESENTATION` map; the cards never rely on hiding modules.
 - `navbar.component` — every menu section (CRM, Project Management, Support,
   HR, Finance, Requests, Administration, Dev) is rendered only when its module
-  is enabled.
-- Logout clears cached entitlements.
+  is enabled, plus a permanent **Modules** entry opening the cards dashboard.
+- Logout clears cached entitlements and the catalogue.
 
 ## 5. Backward compatibility
 
@@ -158,13 +167,34 @@ default company). Wired through `DatabaseSeeder`.
 - FTP host/user/password removed from `frontend/package.json` → environment vars.
 - Firebase/FCM/exchange-rate keys replaced with placeholders;
   `environment.example.ts` added.
-- Comprehensive root `.gitignore` (`.env`, `vendor`, `node_modules`, certs, builds).
+- Hardcoded Firebase/FCM keys in `MessageController`, `DatabaseConvertController`
+  and `DatabaseConvertSecondController` now resolve through `config/firebase.php`
+  and `FIREBASE_*` environment variables.
+- A tracked Firebase Admin service-account JSON (real private key) was deleted;
+  `*firebase-adminsdk*.json` is git-ignored.
+- Committed production Angular bundles/source maps (repo root and
+  `FrontEndApiTest/`) were removed; builds are generated, never committed.
+- Comprehensive root `.gitignore` (`.env`, `vendor`, `node_modules`, certs,
+  service accounts, build output, source maps, IDE/OS junk).
+
+### Repository restructure
+
+- Laravel API moved from `FrontEndApiTest/system/` to `backend/`; the legacy
+  partial root `system/` copy and the `FrontEndApiTest/` hosting dump were
+  deleted. `public/index.php` now uses the standard `../vendor` and
+  `../bootstrap/app.php` paths.
+- Final layout: `backend/`, `frontend/`, `docs/` plus root meta files.
 
 ## 7. Testing
 
-- Backend: 19 PHPUnit feature tests (seeder, middleware allow/deny/core/fail-open,
-  management endpoints, auth & validation), running on in-memory SQLite.
-- Frontend: Karma/Jasmine specs for `ModuleService` and `ModuleGuard`.
+- Backend: 28 PHPUnit feature tests / 83 assertions on in-memory SQLite — seeder
+  rows, middleware core/403/200, explicit and config-mapped resolution,
+  multi-slug any-of rules, inactive/unknown slugs, fail-open legacy tenants,
+  management enable/disable (incl. admin sub-departments and `module_id`),
+  core-422 protection, and end-to-end entitlement cache invalidation on flip.
+- Frontend: Karma/Jasmine specs for `ModuleService` (entitlements + catalogue),
+  `ModuleGuard` (allow/redirect) and `ModulesCardsComponent` (all six cards
+  render, disabled dimmed class, core always enabled, click navigation rules).
 
 ## 8. Known pre-existing issue (out of scope)
 

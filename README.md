@@ -8,8 +8,10 @@ enabled or disabled per client company.
 - Optional modules — **CRM**, **Ticketing & Support**, **Projects**, **HR**,
   **Administration**.
 
-A client may buy any combination, e.g. *Core + CRM* only; every other API and
-UI surface is then inaccessible/hidden for that client.
+A client may buy any combination, e.g. *Core + CRM* only; every other API
+surface is then inaccessible for that client, and on the modules dashboard the
+unpurchased modules remain visible as dimmed, locked cards rather than being
+removed.
 
 ## Repository structure
 
@@ -34,7 +36,11 @@ generated locally or by CI and is never committed.
    requests to controllers belonging to disabled modules with **HTTP 403**.
    Controller → module mapping lives in `config/modules.php`.
 3. After login the frontend fetches `GET /api/company/modules`, hides disabled
-   menu entries and guards every lazy route with `ModuleGuard`.
+   menu entries and guards every lazy route with `ModuleGuard`. The **Modules
+   dashboard** at `/modules` additionally renders all six modules as cards:
+   enabled modules open normally, while disabled modules stay visible but are
+   dimmed with a lock badge and route to `/module-disabled?module=<slug>` when
+   clicked — they are never fully hidden.
 4. The default/legacy company is seeded with **all** modules enabled, so existing
    deployments keep working unchanged.
 
@@ -70,8 +76,12 @@ Management endpoints (JWT required; Management/Administration only):
 Run backend tests:
 
 ```bash
-vendor/bin/phpunit            # 19 feature tests, in-memory SQLite
+vendor/bin/phpunit            # 28 feature tests, in-memory SQLite (83 assertions)
 ```
+
+The suite covers the core/403/200 middleware paths, explicit and config-mapped
+module resolution, fail-open legacy tenants, the management enable/disable API,
+end-to-end entitlement cache invalidation and the module seeders.
 
 ## Frontend setup (Angular 13, `frontend`)
 
@@ -93,9 +103,30 @@ export FTP_HOST=... FTP_PORT=21 FTP_USERNAME=... FTP_PASSWORD=...
 npm run deploy-test
 ```
 
+### Firebase / push configuration (backend)
+
+The Firebase keys that used to be hardcoded in the messaging/database controllers
+are now read from `backend/config/firebase.php` via environment variables — copy
+them into `backend/.env` (never commit real values):
+
+| Variable | Purpose |
+| --- | --- |
+| `FIREBASE_SERVER_KEY` | FCM legacy server key for push notifications |
+| `FIREBASE_API_KEY` | Firebase Web API key |
+| `FIREBASE_DATABASE_URL` | Realtime Database base URL (current project) |
+| `FIREBASE_LEGACY_DATABASE_URL` | Legacy project Realtime Database URL |
+| `FIREBASE_LEGACY_DB_AUTH_TOKEN` | Legacy database access token |
+
+Service-account JSON files (`*firebase-adminsdk*.json`) are git-ignored and must
+be provisioned on the server out of band. The frontend keeps `YOUR_*` placeholders
+in `src/environments/environment.example.ts`.
+
 ## Security
 
-- No secrets are committed: `.env` files, TLS keys, FTP credentials and Firebase
-  keys are ignored/sanitised (see root `.gitignore` and the `*.example` templates).
+- No secrets are committed: `.env` files, TLS keys, FTP credentials, Firebase
+  service-account JSON and Firebase keys are ignored/sanitised (see root
+  `.gitignore` and the `*.example` templates).
+- Production Angular bundles and source maps are build output only and are never
+  committed; `frontend/` is the single source of truth for the UI.
 - New deployments must rotate every previously exposed credential (the pre-cleanup
   Git history still contains them).
