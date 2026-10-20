@@ -21,8 +21,9 @@ class CreatePublicRequestsTable extends Migration
             $table->bigInteger('user_creator_id')->unsigned();
             $table->foreign('user_creator_id')->references('id')->on('users');
 
-            $table->bigInteger('public_request_type_id')->unsigned();
-            $table->foreign('public_request_type_id')->references('id')->on('public_request_types');
+            // No public_request_types table ever shipped; kept as a plain
+            // column (the model uses sub_departments_id, added in the v2 migration).
+            $table->bigInteger('public_request_type_id')->unsigned()->nullable();
 
             $table->bigInteger('public_request_status_id')->unsigned();
             $table->foreign('public_request_status_id')->references('id')->on('public_request_statuses');

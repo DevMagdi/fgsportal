@@ -24,12 +24,12 @@ class ContactController extends Controller
 
 
     public function castArrayContact(Contact $dep){
-        $partner = Partner::where('id',$dep->partner_id)->withTrashed()->first();
+        $partner = !empty($dep->partner_id) ? Partner::where('id',$dep->partner_id)->withTrashed()->first() : null;
         $array_response =[
             'user_creator_id'=>$dep->user_creator_id,
             'user_creator_name'=>!empty($dep->user_creator_id_fun)?$dep->user_creator_id_fun->username:null,
-            'partner_id'=>$partner->id.'',
-            'partner_name'=>$partner->partner_name,
+            'partner_id'=>!empty($partner->id)?$partner->id.'':null,
+            'partner_name'=>$partner->partner_name ?? null,
             'name'=>$dep->name,
             'notes'=>$dep->notes,
             'email'=>$dep->email,

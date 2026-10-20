@@ -25,10 +25,11 @@ class CreateUsersTable extends Migration
             $table->foreign('user_creator_id')->references('id')->on('users');
             $table->string('gender',10)->nullable();
             $table->text('mobileNumber')->nullable();
-            $table->integer('active',2)->default(1);
-            $table->integer('canAddPreviousReports',2)->default(0);
-            $table->timestamps('canAddPreviousReportsDate');
-            $table->string('gender',10)->nullable();
+            // NOTE: integer()'s second argument is $autoIncrement, not a length —
+            // the previous form created extra auto-increment primary keys.
+            $table->boolean('active')->default(1);
+            $table->boolean('canAddPreviousReports')->default(0);
+            $table->timestamp('canAddPreviousReportsDate')->nullable();
             $table->bigInteger('user_details_id')->unsigned()->nullable();
             $table->foreign('user_details_id')->references('id')->on('user_details');
             $table->text('token')->nullable();
