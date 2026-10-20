@@ -71,13 +71,13 @@ class UserPermissionGroupController extends Controller
 
     
     public function GetUserPermission(Request $request){
-        //try{
+        try{
             $validator = Validator::make($request->all(), [
                 'token'=>'required|string',
                 'users_id'=>'required|numeric|exists:users,id',
                  ]);
            if ($validator->fails()) {
-   
+
                return ResponseApi::badMethodErrorResponse($validator->errors()->toArray(),"Validator Errors",400);
            }
 
@@ -86,13 +86,23 @@ class UserPermissionGroupController extends Controller
            if(!empty($perm[0]->id) &&!empty($user->id)){
             $arry_response =[];
             foreach ($perm as $key) {
+                // A permission row can outlive its lookup entry; skip orphans
+                // instead of crashing the whole permission load (which hides
+                // every permission-gated card in the UI).
+                $permission = $key->permissions_id_fun;
+                if (empty($permission->id)) {
+                    continue;
+                }
                 $arry_response []=[
                     'userKey'=>$user->id.'',
                     'username'=>$user->username,
-                    'permission_name'=> $key->permissions_id_fun->permission_name,
+                    'permission_name'=> $permission->permission_name,
                     'permission_id'=>$key->permissions_id.'',
                     'status'=>true
                 ];
+            }
+            if (empty($arry_response)) {
+                return ResponseApi::notFoundResponse(null,"Empty",200);
             }
             return ResponseApi::acceptedResponseApi($arry_response,"success",201);
 
@@ -100,12 +110,12 @@ class UserPermissionGroupController extends Controller
             return ResponseApi::notFoundResponse(null,"Empty",200);
 
            }
-            
-        // }catch(\Exception $e){
-        //     return ResponseApi::badMethodErrorResponse($e,"server Error",500);
 
-        // }
-        
+        }catch(\Throwable $e){
+            return ResponseApi::badMethodErrorResponse(['message'=>"Server Error"],"server Error",500);
+
+        }
+
     }
 
  

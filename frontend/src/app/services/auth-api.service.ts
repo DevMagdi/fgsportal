@@ -10,6 +10,7 @@ import { ResStatus } from '../interfaces/res-status';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from '@angular/fire/database';
 import { UserPermissions } from '../interfaces/user-permissions';
 import { ModuleService } from './module.service';
+import { UserPermsCache } from './user-perms.cache';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,22 @@ export class AuthApiService {
               private moduleService: ModuleService) {
     this.UserNavParamsRef = db.list(this.UserNavParamsPath);
     this.ClientNavParamsRef = db.list(this.ClientNavParamsPath);
+  }
+
+  /**
+   * Persist the last successfully loaded permissions so a later 500/network
+   * failure on GetUserPermission (or /me) cannot blank every permission-gated
+   * screen — including the module overview cards — until the next login.
+   */
+  cacheUserPerms(perms: UserPermissions[]): void {
+    const key = this.currentUser?.key ?? this.user.value?.key ?? null;
+    this.userPerms = UserPermsCache.save(key, perms);
+  }
+
+  /** Reload cached permissions for the given/current user; falls back to []. */
+  restoreCachedPerms(userKey?: string): UserPermissions[] {
+    this.userPerms = UserPermsCache.load(userKey ?? this.currentUser?.key ?? this.user.value?.key);
+    return this.userPerms;
   }
 
 
@@ -155,6 +172,9 @@ export class AuthApiService {
   
       if (loadedUser.token) {
         this.user.next(loadedUser);
+        // Restore the last good permissions immediately so permission-gated
+        // cards render even before (or without) a successful API refresh.
+        this.restoreCachedPerms(loadedUser.key);
         this.getCurrentLoggedInUser()?.subscribe(async user=>{
           const dataFromMe = await user['data'] as User
           if(dataFromMe.refreshRequired == true){
@@ -261,7 +281,9 @@ export class AuthApiService {
       'token':token._token,
     }
     this.user.next(null);
+    this.userPerms = [];
     localStorage.removeItem('userData');
+    UserPermsCache.clear(this.currentUser?.key);
     // Clear cached module entitlements on logout.
     this.moduleService.clear();
     return this.http.post(`${environment.newServerApi}/api/users/logout`,reqOptions)
