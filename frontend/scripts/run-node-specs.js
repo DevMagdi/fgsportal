@@ -24,8 +24,20 @@ const FRONTEND_ROOT = path.resolve(__dirname, '..');
 
 // Pure specs: no Angular TestBed / DOM imports, safe to run on Node.
 const PURE_SPECS = [
+  'src/app/pipes/max-length.pipe.spec.ts',
   'src/app/services/module-pages.registry.spec.ts',
 ];
+
+// Lightweight @angular/core shim: pure specs may import a class decorated
+// with @Pipe/@Injectable, which only needs the decorator to be an identity
+// function outside the Angular runtime.
+const ANGULAR_CORE_SHIM = {
+  Pipe: () => (target) => target,
+  Component: () => (target) => target,
+  Injectable: () => (target) => target,
+  NgModule: () => (target) => target,
+  Directive: () => (target) => target,
+};
 
 // ---------------------------------------------------------------------------
 // Tiny Jasmine-compatible framework
@@ -210,6 +222,9 @@ function compileTs(filePath) {
         resolved += '.ts';
       }
       return compileTs(resolved).exports;
+    }
+    if (request === '@angular/core') {
+      return ANGULAR_CORE_SHIM;
     }
     return require(request); // node_modules (rxjs, etc.)
   };
