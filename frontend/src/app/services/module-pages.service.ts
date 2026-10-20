@@ -3,14 +3,16 @@ import { AuthApiService } from './auth-api.service';
 import { ModuleService } from './module.service';
 import {
   ModulePage,
+  ModulePageSection,
   PageVisibilityContext,
   visiblePages,
+  visibleSections,
 } from './module-pages.registry';
 
 /**
  * Bridges the declarative module-pages registry with the logged-in user's
  * department/role/permissions, so the module detail cards show exactly the
- * same features the sidebar would for that user.
+ * same features (and sidebar sections) the sidebar would for that user.
  */
 @Injectable({ providedIn: 'root' })
 export class ModulePagesService {
@@ -26,6 +28,11 @@ export class ModulePagesService {
   /** Feature pages of a module after applying the sidebar visibility rules. */
   pagesFor(slug: string): ModulePage[] {
     return visiblePages(slug, this.buildContext());
+  }
+
+  /** Visible feature pages grouped into the sidebar's collapsible sections. */
+  sectionsFor(slug: string): ModulePageSection[] {
+    return visibleSections(slug, this.buildContext());
   }
 
   private buildContext(): PageVisibilityContext {
