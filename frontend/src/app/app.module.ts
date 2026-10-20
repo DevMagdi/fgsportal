@@ -61,6 +61,7 @@ import { GlobalTimeSheetComponent } from './components/global-time-sheet/global-
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { ModuleDisabledComponent } from './components/module-disabled/module-disabled.component';
 import { ModulesCardsComponent } from './components/modules-cards/modules-cards.component';
+import { ModuleDetailsComponent } from './components/module-details/module-details.component';
 import { SharedComponentsModule } from './shared/shared-components.module';
 import { ProjectCostComponent } from './components/manager/components/project-cost/project-cost.component';
 import { MenuModule } from 'primeng/menu';
@@ -104,6 +105,7 @@ import { ChartModule } from 'primeng/chart';
     PageNotFoundComponent,
     ModuleDisabledComponent,
     ModulesCardsComponent,
+    ModuleDetailsComponent,
     ProjectCostComponent,
     SupportReportsComponent
   ],

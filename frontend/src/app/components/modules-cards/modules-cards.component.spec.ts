@@ -105,7 +105,7 @@ describe('ModulesCardsComponent', () => {
     expect(coreElement.classList.contains('module-card--disabled')).toBeFalse();
   });
 
-  it('navigates into an enabled module when its card is clicked', () => {
+  it('opens the module feature-cards page when an enabled card is clicked', () => {
     moduleService.setEnabled(['core', 'crm']);
     moduleService.catalogue$.next(catalogue(['crm']));
     fixture.detectChanges();
@@ -113,28 +113,31 @@ describe('ModulesCardsComponent', () => {
     const crmCard = component.cards.find((c) => c.slug === 'crm')!;
     component.onCardClick(crmCard);
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith(crmCard.route);
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledOnceWith(['/modules', 'crm']);
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
 
-  it('points every card at a concrete module page that renders content', () => {
+  it('builds one card per slug using the shared module metadata', () => {
     moduleService.setEnabled(['core', 'crm']);
     moduleService.catalogue$.next(catalogue(['crm']));
     fixture.detectChanges();
 
-    const routeFor = (slug: string): string =>
-      component.cards.find((c) => c.slug === slug)!.route;
-
-    // These parent paths have no empty-child redirect and would render a blank
-    // page, so cards must target a concrete child page instead.
-    expect(routeFor('projects')).toBe('/manager/projects');
-    expect(routeFor('admin')).toBe('/admin-panel/dashboard');
-    expect(routeFor('hr')).toBe('/hr');
-    expect(routeFor('crm')).toBe('/CRM/activities');
-    expect(routeFor('ticketing')).toBe('/tickets');
-    expect(routeFor('core')).toBe('/my_work');
-
-    component.cards.forEach((card) => expect(card.route.startsWith('/')).toBeTrue());
+    expect(component.cards.map((c) => c.slug)).toEqual([
+      'core',
+      'crm',
+      'ticketing',
+      'projects',
+      'hr',
+      'admin',
+    ]);
+    component.cards.forEach((card) => {
+      expect(card.icon).toContain('bx ');
+      expect(card.name.length).toBeGreaterThan(0);
+      expect(card.description.length).toBeGreaterThan(0);
+      // ModuleCard no longer carries a route: navigation is centralised
+      // through onCardClick -> /modules/:slug.
+      expect((card as unknown as Record<string, unknown>).route).toBeUndefined();
+    });
   });
 
   it('sends disabled-card clicks to the module-disabled page instead of entering the module', () => {
