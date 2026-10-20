@@ -41,7 +41,13 @@ generated locally or by CI and is never committed.
    enabled modules open normally, while disabled modules stay visible but are
    dimmed with a lock badge and route to `/module-disabled?module=<slug>` when
    clicked — they are never fully hidden.
-4. The default/legacy company is seeded with **all** modules enabled, so existing
+4. Clicking an enabled module card opens its **feature landing page**
+   (`/modules/:slug`): one card per sidebar section of that module (Insights,
+   Reports, Projects, Tickets, …) with the same routes and the same
+   permission/department visibility rules, declared in
+   `frontend/src/app/services/module-pages.registry.ts`. Each feature card
+   navigates to its real page; the route guards still enforce access.
+5. The default/legacy company is seeded with **all** modules enabled, so existing
    deployments keep working unchanged.
 
 See [`docs/MODULES.md`](docs/MODULES.md) for the full module list and client
