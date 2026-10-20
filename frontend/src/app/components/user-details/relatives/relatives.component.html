@@ -1,0 +1,150 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-end my-2">
+                <button (click)="modalOpen=true" class="btn btnStyle" style="cursor: pointer;">
+                    Add Ticket
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover newTableCustom">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Name</th>
+                            <th>relation</th>
+                            <th>Gender</th>
+                            <th>birthDate</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let person of myRelative ; let i = index">
+                            <td>{{i + 1}}</td>
+                            <td>{{person.name}}</td>
+                            <td>{{person.relation}}</td>
+                            <td>{{person.gender}}</td>
+                            <td>{{person.birthDate}}</td>
+                            <td *ngIf="DepartmentEnum.MANAGEMENT || loggedInUser.key == currentUser.key">
+                                <span class="material-icons edit" matTooltip="Edit" (click)="editRelative(person);modalOpen=true">
+                                        edit
+                                    </span>
+                                <span class="material-icons delete" matTooltip="Delete" (click)="deleteRelative(person)">
+                                        delete
+                                   </span>
+                            </td>
+                        </tr>
+
+                        <!-- <tr *ngIf="this.editMode[i]">
+                                <td>{{i + 1}}</td>
+                                <td>
+                                    <mat-form-field>
+                                        <mat-label>Name</mat-label>
+                                        <input matInput value="Sushi" [(ngModel)]="person.name">
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field>
+                                        <mat-label>Relation</mat-label>
+                                        <mat-select [(ngModel)]="person.relation">
+                                            <mat-option value="child">Child</mat-option>
+                                            <mat-option value="wife">Wife</mat-option>
+                                            <mat-option value="husband">Husband</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <mat-form-field>
+                                        <mat-label>Gender</mat-label>
+                                        <mat-select [(ngModel)]="person.gender">
+                                            <mat-option value="male">Male</mat-option>
+                                            <mat-option value="female">Female</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                                <td>
+                                    <input type="date" class="form-control" [(ngModel)]="person.birthDate">
+                                </td>
+                                <td>
+                                    <span class="material-icons save" matTooltip="Save Changes" (click)="saveRelative(i)">
+                                        save
+                                    </span>
+                                    <span class="material-icons cancel" matTooltip="Cancel" (click)="cancelEdit(i)">
+                                        cancel
+                                    </span>
+                                </td>
+                            </tr> -->
+                 
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<p-sidebar styleClass="p-sidebar-sm" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="modalOpen" position="right" 
+[transitionOptions]="'350ms'">
+
+    <h4 class="modal-title" id="modal-basic-title">New Ticket</h4>
+
+    <form [formGroup]="newRelativeForm" (ngSubmit)="validateRelative()" class="example-form">
+        <div class="">
+            <div class="">
+                <div class="row">
+                    <div class="col-lg-12 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Name</mat-label>
+                            <input matInput type="text" id="name" formControlName="name">
+                            <mat-error class="alert help-block" *ngIf="!newRelativeForm.get('name')?.valid && newRelativeForm.get('name')?.touched">
+                                Name Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-12 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Birth Date</mat-label>
+                            <input matInput type="date" id="birthDate" formControlName="birthDate">
+                            <mat-error class="alert help-block" *ngIf="!newRelativeForm.get('birthDate')?.valid && newRelativeForm.get('birthDate')?.touched">
+                                Birth Date Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Relation</mat-label>
+                            <mat-select formControlName="relation">
+                                <mat-option value="child">Child</mat-option>
+                                <mat-option value="wife">Wife</mat-option>
+                                <mat-option value="husband">Husband</mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!newRelativeForm.get('relation')?.valid && newRelativeForm.get('relation')?.touched">
+                                Relation Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Gender</mat-label>
+                            <mat-select formControlName="gender">
+                                <mat-option value='male'>Male</mat-option>
+                                <mat-option value='female'>Female</mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!newRelativeForm.get('gender')?.valid && newRelativeForm.get('gender')?.touched">
+                                Gender Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="">
+            <button type="submit" class="btn btnStyle w-100" [disabled]="newRelativeForm.invalid">Submit</button>
+        </div>
+    </form>
+
+</p-sidebar>

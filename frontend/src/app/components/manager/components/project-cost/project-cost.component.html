@@ -1,0 +1,600 @@
+<div class="container-fluid my-4" *ngIf="!this.projectKey">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="pageTitle">Project Cost</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <form class="example-form mt-1">
+               
+                <mat-label>Choose A project</mat-label>
+                <input type="text" *ngIf="getProjectsLoading == false" class="form-control w-100" [formControl]="myControl" [matAutocomplete]="auto">
+                <app-loading-dots *ngIf="getProjectsLoading == true"></app-loading-dots>
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" 
+                (optionSelected)="getFromHTML($event)">
+                    <mat-optgroup label="Project">
+                        <ng-container *ngFor="let project of filteredOptions | async">
+                            <mat-option *ngIf="project.type == '2'" [value]="project">
+                                <span style="border-left: solid 3px #f4831f;" *ngIf="project.status == '5'">
+                                        {{project.title}} <span style="font-size: smaller;color: red;">"closed"</span>
+                                </span>
+                                <span *ngIf="project.status != '5'">
+                                        {{project.title}}
+                                    </span>
+                            </mat-option>
+                        </ng-container>
+
+                    </mat-optgroup>
+
+
+                    <mat-optgroup label="POC">
+                        <ng-container *ngFor="let project of filteredOptions | async">
+                            <mat-option *ngIf="project.type == '1'" [value]="project">
+                                <span style="border-left: solid 3px #f4831f;" *ngIf="project.status == '5'">
+                                        {{project.title}} <span style="font-size: smaller;color: red;">"closed"</span>
+                                </span>
+                                <span *ngIf="project.status != '5'">
+                                        {{project.title}}
+                                    </span>
+                            </mat-option>
+                        </ng-container>
+
+                    </mat-optgroup>
+
+                </mat-autocomplete>
+                
+            </form>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="getDataLoader" class="spinner">
+    <mat-spinner></mat-spinner>
+</div>
+
+<div class="container mr-0" *ngIf="!getDataLoader">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-right d-flex justify-content-center justify-content-lg-end" *ngIf="!!projectTotalCost">
+                <!-- <button class="btn downloadBtn mx-1" (click)="openPDF()">Download PDF</button> -->
+                <button type="button" class="btn btn-outline-orange mx-1" (click)="openPDF()">
+                    PDF  <span class="tf-icons bx bx-download"></span>&nbsp; 
+                </button>
+
+                <button type="button" class="btn btn-outline-orange mx-1" (click)="recalculate()">
+                    Recalculate  <span class="tf-icons bx bx-repeat"></span>&nbsp; 
+                </button>
+                <button class="btn newProjectBtn mx-1" (click)="sidebarVisible1=true">
+                    Add Cost <span class="ms-2 tf-icons bx bx-plus"></span>&nbsp; 
+                    <!-- <mat-icon>add</mat-icon> -->
+                </button>
+
+
+                <!-- <button class="btn downloadBtn mx-1" (click)="recalculate()">Recalculate</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="ProjectCostData" id="htmlData" *ngIf="!!projectTotalCost && !getDataLoader">
+
+    <!-- <h1 class="text-center textHeader projectTitle"
+     style="cursor: pointer;" [routerLink]="['/projects/',selectedProject.key]">{{selectedProject.title}}</h1> -->
+    <div class="container-fluid">
+        <!-- <div class="row mx-5">
+            <div class="col-12 text-right">
+                <button class="btn btn-outline-info mx-1" (click)="open(mymodal)">Add</button>
+            </div>
+        </div> -->
+        <!-- <div class="row overView">
+            <div class="col-lg-7">
+                <div class="container m-0 p-0">
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="overViewCard card1">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Number Of Processes
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p>
+                                        {{numberOfProcess}}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="overViewCard card2">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Progress
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p>
+                                        {{progress | number:'1.2-2'}} %
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="overViewCard card3">
+                                <div class="cardTitle d-flex justify-content-between">
+                                    <div class="titleContainer w-100 text-center">
+                                        <h3 class="ml-3">
+                                            Budget
+                                        </h3>
+                                    </div>
+                                    <span style="cursor: pointer;color:#f4831f;" *ngIf=" !editMode" class="material-icons edit" matTooltip="Edit" (click)="editCost()">
+                                        edit
+                                    </span>
+                                    <span style="cursor: pointer;color:#f4831f;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="Save" (click)="saveTotalCost()">
+                                        save
+                                    </span>
+                                    <span style="cursor: pointer;color:#9e9e9e;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="cancel" (click)="cancelEditTotalCost()">
+                                        cancel
+                                    </span>
+                                </div>
+                                <div class="cardBody">
+
+                                    <p *ngIf="!editMode">
+                                        {{budgetryCost}} EGP
+                                    </p>
+
+                                    <input *ngIf="!!editMode" type="number" class="form-control" [(ngModel)]="projectTotalCost.budgetryCost">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="container m-0 p-0">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="overViewCard card4">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Actual Cost
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p>
+                                        {{actualCost | number:'1.2-2'}} EGP
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="overViewCard card5">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Variances
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p [ngStyle]="{'color': getColor()}">
+                                        {{budgetryCost - actualCost | number:'1.2-2'}} EGP
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div> -->
+
+        <div class="row overView">
+            <div class="col-lg-4 mb-2">
+                <div class="container m-0 p-0">
+                    <div class="row">
+
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+
+                                <div class="">
+                                    <h2>
+                                        {{numberOfProcess}}
+                                    </h2>
+                                    <p class="titles fw-bold">
+                                        Number Of Processes
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+                                <div class="">
+                                    <div class=" d-flex justify-content-between">
+                                        <div class=" ">
+                                            <h2 *ngIf="!editMode">
+                                                {{budgetryCost}} EGP
+                                            </h2>
+
+                                        </div>
+                                        <span style="cursor: pointer;color:#f4831f;" *ngIf=" !editMode" class="material-icons edit" matTooltip="Edit" (click)="editCost()">
+                                            edit
+                                        </span>
+                                        <span style="cursor: pointer;color:#f4831f;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="Save" (click)="saveTotalCost()">
+                                            save
+                                        </span>
+                                        <span style="cursor: pointer;color:#9e9e9e;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="cancel" (click)="cancelEditTotalCost()">
+                                            cancel
+                                        </span>
+                                    </div>
+
+
+                                    <p>
+                                        Budget
+                                    </p>
+
+                                    <input *ngIf="!!editMode" type="number" class="form-control" [(ngModel)]="projectTotalCost.budgetryCost">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+                                <div class="">
+
+                                    <h2>
+                                        {{actualCost | number:'1.2-2'}} EGP
+                                    </h2>
+                                    <p>
+                                        Actual Cost
+                                    </p>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+
+                                <div class="">
+                                    <h2>
+                                        {{budgetryCost - actualCost | number:'1.2-2'}} EGP
+                                    </h2>
+                                    <p> Variances</p>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-4 mb-2">
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5>Employee Cost Timeline</h5>
+                        <p-chart type="bar" [data]="projectCostWithEmpOverTime" [options]="basicOptions"></p-chart>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-4 mb-2">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5>Process Cost Timeline</h5>
+                        <p-chart type="bar" [data]="projectCostWithProcessOverTime" [options]="basicOptions"></p-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="row charts mx-5">
+            <div class="col-lg-6">
+                <div class="card">
+                    <h5>Employee Cost Timeline</h5>
+                    <p-chart type="bar" [data]="projectCostWithEmpOverTime" [options]="basicOptions"></p-chart>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <h5>Process Cost Timeline</h5>
+                    <p-chart type="bar" [data]="projectCostWithProcessOverTime" [options]="basicOptions"></p-chart>
+                </div>
+            </div>
+        </div> -->
+
+        <div class="row my-5">
+            <div class="col-12">
+                <div class="projectCost">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-11">
+                                <h1 class="text-start textHeader">Project Cost</h1>
+                            </div>
+                            <div class="col-1">
+                                <button class="btn" (click)="exportDevelopmentCost()">
+                                    <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover newTableCustom" id="developmentCost">
+                            <thead>
+                                <tr>
+                                    <td>Months</td>
+                                    <td>Salaries</td>
+                                    <td>Incentive</td>
+                                    <td>Idle Hours</td>
+                                    <td>Transportation</td>
+                                    <td>Mobile</td>
+                                    <td>Internet</td>
+                                    <td>PublicRequest</td>
+                                    <td>Other</td>
+                                    <td>Total</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let cost of projectCostOverTime">
+                                    <td class="dateStyle">{{cost.date}}</td>
+                                    <td>{{cost.salaries | number : '1.2-2'}}</td>
+                                    <td>{{cost.Incentive | number : '1.2-2' }}</td>
+                                    <td>{{cost.Idle_Hours | number : '1.2-2'}}</td>
+                                    <td>{{cost.Transportation | number : '1.2-2'}}</td>
+                                    <td>{{cost.Mobile | number : '1.2-2'}}</td>
+                                    <td>{{cost.Internet | number : '1.2-2'}}</td>
+                                    <td>{{cost.PublicRequest | number : '1.2-2'}}</td>
+                                    <td>{{cost.Other | number : '1.2-2'}}</td>
+                                    <td>{{cost.Total | number : '1.2-2'}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="dateStyle">Total</td>
+                                    <td>{{calcualteTotalCost('salaries') | number : '1.2-2'}}</td>
+                                    <td>{{calcualteTotalCost('Incentive') | number : '1.2-2'}}</td>
+                                    <td>{{calcualteTotalCost('Idle_Hours') | number : '1.2-2'}}</td>
+                                    <td>{{calcualteTotalCost('Transportation') | number : '1.2-2'}}</td>
+                                    <td>{{calcualteTotalCost('Mobile') | number : '1.2-2'}}</td>
+                                    <td>{{calcualteTotalCost('Internet') | number : '1.2-2'}}</td>
+                                    <td>{{calcualteTotalCost('PublicRequest') | number : '1.2-2'}}</td>
+                                    <td>{{calcualteTotalCost('Other') | number : '1.2-2'}}</td>
+                                    <td class="finalTotal">{{calcualteTotalCost('total') | number : '1.2-2'}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row my-5">
+            <div class="col-12">
+                <div class="projectCost">
+                    <div class="row">
+                        <div class="col-11">
+                            <h1 class="text-start textHeader">Process Cost</h1>
+                        </div>
+                        <div class="col-1">
+                            <button class="btn" (click)="exportProcessCost()">
+                                <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+
+                        <table class="table table-hover newTableCustom" id="processCost">
+                            <thead>
+                                <tr>
+                                    <td>Process</td>
+                                    <ng-container *ngFor="let date of projectCostWithProcessOverTime.labels">
+                                        <td>{{date}}</td>
+                                    </ng-container>
+                                    <td>Total</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let process of projectCostWithProcessOverTime.datasets">
+                                    <td class="dateStyle">{{process.label}}</td>
+                                    <ng-container *ngFor="let data of process.data">
+                                        <td>{{data | number:'1.2-2'}}</td>
+                                    </ng-container>
+                                    <td>
+                                        {{getSumOfArrOfNums(process.data) | number:'1.2-2'}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row my-5">
+            <div class="col-12">
+                <div class="projectCost">
+                    <div class="">
+                        <div class="row">
+                            <div class="col-11">
+                                <h1 class="text-start textHeader">Cost Details</h1>
+                            </div>
+                            <div class="col-1">
+                                <button class="btn" (click)="exportCostLogs()">
+                                    <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+
+                        <table class="table table-hover newTableCustom" id="costLogs">
+                            <thead>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Type</td>
+                                    <td>Date</td>
+                                    <td>Amount</td>
+                                    <td>Project</td>
+                                    <td>Process</td>
+                                    <td>Created By</td>
+                                    <td>Notes</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let cost of projectSingleCosts">
+                                    <td class="dateStyle">{{cost.empName}}</td>
+                                    <td>{{cost.costType_name}}</td>
+                                    <td>{{cost.costDate}}</td>
+                                    <td>{{cost.costAmount}}</td>
+                                    <td>{{cost.projectTitle}}</td>
+                                    <td>{{cost.processTitle}}</td>
+                                    <td>{{cost.createdByName}}</td>
+                                    <td>{{cost.notes}}</td>
+                                    <td>
+                                        <i class="pi pi-trash m-1 deleteIcon" matTooltip="Delete" *ngIf="(cost.isManual == true && cost.createdByKey == currentUser.key && currentUser.department == DepartmentEnum.MANAGEMENT) || (currentUser.accRole == AccountRolesEnum.SUPER_USER && cost.isManual == true)"
+                                            (click)="deleteCost(cost)"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<p-sidebar [(visible)]="sidebarVisible1" position="right" styleClass="p-sidebar-md" [autoZIndex]="false" [baseZIndex]="9999">
+    <!-- <ng-template #mymodal let-modal> -->
+    <!-- <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Add Project Cost</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss( 'Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div> -->
+    <div class="modal-body">
+        <h4 class="modal-title fs-4 mb-1 fw-bold" id="modal-basic-title">Add Project Cost</h4>
+
+        <form [formGroup]="newSingleProjectCostForm">
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label>Process</mat-label>
+                            <mat-select formControlName="processKey">
+                                <mat-option value=''></mat-option>
+                                <mat-option *ngFor="let process of projectSubTasks" [value]='process.key'>
+                                    {{process.title}}</mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!newSingleProjectCostForm.get( 'processKey')?.valid && newSingleProjectCostForm.get( 'processKey')?.touched">
+                                *Process Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <span class="p-float-label w-100">
+                            <label>Process</label>
+                            <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="projectSubTasks"
+                            formControlName="processKey" optionLabel="title" optionValue="key"
+                             class="w-100" placeholder="select project process"
+                            [ngClass]="{'is-invalid':!newSingleProjectCostForm.get('processKey')?.valid && newSingleProjectCostForm.get('processKey')?.touched}"></p-dropdown>
+                            <div *ngIf="!newSingleProjectCostForm.get('processKey')?.valid && newSingleProjectCostForm.get('processKey')?.touched" class="invalid-feedback">
+
+                                <small>*Process Required</small>
+                              </div>
+                        </span>
+                    </div>
+                    <div class="col-md-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label>Employee</mat-label>
+                            <mat-select formControlName="empKey">
+                                <mat-option value=''></mat-option>
+                                <mat-option *ngFor="let emp of projectTeam" [value]='emp.user_team_id'>{{emp.user_team_name}}</mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!newSingleProjectCostForm.get( 'empKey')?.valid && newSingleProjectCostForm.get( 'empKey')?.touched">
+                                *Employee Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <span class="p-float-label w-100">
+                            <label>Employee</label>
+                            <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="projectTeam"
+                            formControlName="empKey" optionLabel="user_team_name" optionValue="user_team_id"
+                             class="w-100" placeholder="select Employee"
+                            [ngClass]="{'is-invalid':!newSingleProjectCostForm.get('empKey')?.valid && newSingleProjectCostForm.get('empKey')?.touched}"></p-dropdown>
+                            <div *ngIf="!newSingleProjectCostForm.get('empKey')?.valid && newSingleProjectCostForm.get('empKey')?.touched" class="invalid-feedback">
+
+                                <small>*Employee Required</small>
+                              </div>
+                        </span>
+                    </div>
+
+                    <div class="col-md-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label>Cost Type</mat-label>
+                            <mat-select formControlName="costType">
+                                <mat-option *ngFor="let cost of costTypes" [value]="cost.id">{{cost.cost_type}}</mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!newSingleProjectCostForm.get( 'costType')?.valid && newSingleProjectCostForm.get( 'costType')?.touched">
+                                *Cost Type Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <span class="p-float-label w-100">
+                            <label>Cost Type</label>
+                            <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="costTypes"
+                            formControlName="costType" optionLabel="cost_type" optionValue="id"
+                             class="w-100" placeholder="select Employee"
+                            [ngClass]="{'is-invalid':!newSingleProjectCostForm.get('costType')?.valid && newSingleProjectCostForm.get('costType')?.touched}"></p-dropdown>
+                            <div *ngIf="!newSingleProjectCostForm.get('costType')?.valid && newSingleProjectCostForm.get('costType')?.touched" class="invalid-feedback">
+
+                                <small>*Cost Type Required</small>
+                              </div>
+                        </span>
+                    </div>
+
+                    <div class="col-md-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label>Comment</mat-label>
+                            <input matInput type="text" id="costComment" formControlName="costComment">
+                        </mat-form-field> -->
+                        <app-form-input label="Comment" [control]="newSingleProjectCostForm.get('costComment')" placeholder="Write Comment"></app-form-input>
+                    </div>
+
+
+                    <div class="col-md-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label>Date</mat-label>
+                            <input matInput type="date" id="costDate" formControlName="costDate">
+                            <mat-error class="alert help-block" *ngIf="!newSingleProjectCostForm.get( 'costDate')?.valid && newSingleProjectCostForm.get( 'costDate')?.touched">
+                                *Date Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Date" type="date" [control]="newSingleProjectCostForm.get('costDate')" placeholder="pick Date"></app-form-input>
+                    </div>
+
+                    <div class="col-md-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label>Amount</mat-label>
+                            <input matInput type="number" id="costAmount" formControlName="costAmount">
+                            <mat-error class="alert help-block" *ngIf="!newSingleProjectCostForm.get( 'costAmount')?.valid && newSingleProjectCostForm.get( 'costAmount')?.touched">
+                                *Amount Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Amount" type="number" [control]="newSingleProjectCostForm.get('costAmount')" placeholder="Write Amount"></app-form-input>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="row mx-2 mt-1">
+
+            <button class="btn newProjectBtn w-100 text-center" (click)="addNewProjectCost()" [disabled]="newSingleProjectCostForm.invalid" type="submit">Submit</button>
+        </div>
+    </div>
+    <!-- <div class="modal-footer text-center"> -->
+    <!-- <button class="btn newProjectBtn w-100 text-center" (click)="addNewProjectCost()"
+        [disabled]="newSingleProjectCostForm.invalid" type="submit">Submit</button> -->
+    <!-- </div> -->
+    <!-- </ng-template> -->
+</p-sidebar>

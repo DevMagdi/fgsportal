@@ -1,0 +1,245 @@
+<div class="table-responsive">
+
+<table class="my-3 table table-hover newTableCustom">
+    <thead>
+        <tr>
+            <td>#</td>
+            <td>Date</td>
+            <td>Duration</td>
+            <td>Time Activity</td>
+            <td>Project</td>
+            <td>Process Name</td>
+            <td>Task Name</td>
+            <!-- <td>Progress</td> -->
+            <!-- <td>Details</td> -->
+            <td>Rejected By</td>
+            <!-- <td>Rejection Reason</td> -->
+            <td></td>
+        </tr>
+    </thead>
+    <tbody *ngIf="!!myRejectedReports && myRejectedReports.length > 0">
+        <ng-container *ngFor="let report of myRejectedReports ; let i = index">
+            <tr>
+                <td>{{i + 1}}</td>
+                <td>{{report.reportDate}}</td>
+                <td>{{report.durationByHours}}</td>
+                <td>{{report.time_activity_name}}</td>
+
+                <td *ngIf="report.projectName">{{report.projectName}}</td>
+                <td *ngIf="!report.projectName">-</td>
+
+                <td *ngIf="report.processName">{{report.processName}}</td>
+                <td *ngIf="!report.processName">-</td>
+
+                <td *ngIf="report.taskTitle">{{report.taskTitle}}</td>
+                <td *ngIf="!report.taskTitle">-</td>
+
+
+
+                <!-- <td *ngIf="report.progress">{{report.progress}}</td> -->
+                <!-- <td *ngIf="!report.progress">-</td> -->
+
+                <!-- <td>{{report.details}}</td> -->
+
+                <td>{{report.approvedByName}}</td>
+                
+                <!-- <td *ngIf="report.rejectionReason">{{report.rejectionReason}}</td> -->
+                <!-- <td *ngIf="!report.rejectionReason">-</td> -->
+
+                <td>
+                    <!-- <button (click)="approveReport(i)" class="btn approvalBtn mx-1">Approve</button>
+                    <button (click)="rejectReport(i)" class="btn rejectBtn mx-1">Reject</button> -->
+                    <span class="material-icons edit" matTooltip="Edit Report" data-toggle="modal" data-target="#addNewTask" (click)="open('mymodal' , report)">
+                        edit
+                    </span>
+
+                    <!-- <button (click)="reOpenReport(i)" class="btn approvalBtn mx-1">Open Again</button> -->
+
+                </td>
+            </tr>
+        </ng-container>
+
+    </tbody>
+</table>
+</div>
+
+<!-- Modal -->
+<p-sidebar header="" [(visible)]="displayModal" position="right" [autoZIndex]="false" 
+[baseZIndex]="999999"
+styleClass="p-sidebar-md" [modal]="true" style="z-index: 2;">
+<!-- <ng-template #mymodal let-c="close" let-d="dismiss"> -->
+    <!-- <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">{{rejectedReportInEditMode? 'Edit Report' : 'Add New report' }}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div> -->
+    <div class="modal-body">
+        <div class="container">
+
+            <div class="row">
+                <div class="col-md-6 my-2">
+                    <label for="date">Date</label>
+                    <!-- <select name="date" id="date" [(ngModel)]="reportToEdit.reportDate" class="form-control">
+                        <option *ngFor="let day of currentWeekDays" value="{{day | date : 'M/d/yyyy'}}" >{{day | date : 'fullDate'}}</option>
+                    </select> -->
+                    <input type="text" [value]="reportToEdit.reportDate" class="form-control" disabled>
+                </div>
+                <div class="col-md-6 my-2">
+                    <label for="activity">Today Progress:</label>
+                    <select name="activity" id="activity" class="form-control" [(ngModel)]="reportToEdit.time_activity" (change)="changeDuration()">
+                        <option *ngFor="let type of reportTypes" value="{{type.key}}">{{type.report_type}}</option>
+
+                        <!-- <option value="daily_task">Daily TASK</option>
+                        <option value="g_reading">GENERAL_READING</option>
+                        <option value="training">TRAINING</option>
+                        <option value="c_meeting">CLIENT_MEETING</option>
+                        <option value="meeting">MEETING</option>
+                        <option value="support">SUPPORT</option>
+                        <option value="ideal_hours">idle hours</option>
+                        <option value="official_vacation">official vacation</option>
+                        <option value="unpaid_vacation">unpaid vacation</option> -->
+                    </select>
+                </div>
+            
+            <!-- <div class="row"> -->
+                <div class="col-md-6 my-2" *ngIf="reportToEdit.time_activity == ActivityEnum.IDEAL_HOURS || reportToEdit.time_activity == ActivityEnum.CLIENT_MEETING || reportToEdit.time_activity == ActivityEnum.DAILY_TASK || reportToEdit.time_activity == ActivityEnum.SUPPORT">
+                    <label for="dailytask">Project Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.projectID" (ngModelChange)="getProjectProcess()">
+                        <option value=""></option>
+                        <option *ngFor="let project of myProjectsList" [value]="project.key">{{project.title}}</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 my-2" *ngIf="(reportToEdit.time_activity == ActivityEnum.IDEAL_HOURS || reportToEdit.time_activity == ActivityEnum.CLIENT_MEETING || reportToEdit.time_activity == ActivityEnum.DAILY_TASK || reportToEdit.time_activity == ActivityEnum.SUPPORT) && !!reportToEdit.projectID">
+                    <label for="dailytask">Activity Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.processID" (ngModelChange)="getProcessTasks()">
+                        <option value=""></option>
+                        <option *ngFor="let process of myProcess" [value]="process.key">{{process.title}}</option>
+                    </select>
+                </div>
+                <div class="col-md-6 my-2" *ngIf="(reportToEdit.time_activity == ActivityEnum.DAILY_TASK || reportToEdit.time_activity == ActivityEnum.SUPPORT) && !!reportToEdit.processID">
+                    <label for="dailytask">Task Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.taskID" (change)="getTaskProgress();getSelectedTask()">
+                        <option value=""></option>
+                        <option *ngFor="let task of myTasksList" [value]="task.key">{{task.title}}</option>
+                    </select>
+
+                    <!-- <div class="col-md-12" *ngIf="reportToEdit.time_activity == ActivityEnum.DAILY_TASK">
+                    <label for="dailytask">Task Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.taskID" (change)="getTaskProgress();getSelectedTask()">
+                    <option *ngFor="let task of myTasks" [value]="task.key">{{task.project_title}}=>{{task.process_title}}: {{task.title}}</option>
+                </select>
+                </div>
+                <div class="col-md-12" *ngIf="reportToEdit.time_activity == ActivityEnum.SUPPORT">
+                    <label for="dailytask">Task Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.taskID" (change)="getTaskProgress();getSelectedTask()">
+                    <option *ngFor="let task of mySupportTasks" [value]="task.key">{{task.project_title}}=>{{task.process_title}}: {{task.title}}</option>
+                </select> -->
+
+                </div>
+            <!-- </div> -->
+            <!-- <div class="row"> -->
+                <!-- <div class="col-md-6 my-2" *ngIf="reportToEdit.time_activity == ActivityEnum.DAILY_TASK">
+                    <label for="dailytask">Task Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.taskID" (change)="getTaskProgress()">
+                        <option value=""></option>
+                        <option *ngFor="let task of myTasks" [value]="task.key">{{task.project_title}}: {{task.title}}</option>
+                    </select>
+                </div>
+                <div class="col-md-6 my-2" *ngIf="reportToEdit.time_activity == ActivityEnum.SUPPORT">
+                    <label for="dailytask">Task Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.taskID">
+                        <option value=""></option>
+                        <option *ngFor="let task of mySupportTasks" [value]="task.key">{{task.project_title}}: {{task.title}}</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 my-2" *ngIf="reportToEdit.time_activity == ActivityEnum.IDEAL_HOURS || reportToEdit.time_activity == ActivityEnum.CLIENT_MEETING">
+                    <label for="dailytask">Project Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.projectID" (ngModelChange)="getProjectProcess()">
+                        <option *ngFor="let project of myProjectsList" [value]="project.key">{{project.title}}</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 my-2" *ngIf="(reportToEdit.time_activity == ActivityEnum.IDEAL_HOURS || reportToEdit.time_activity == ActivityEnum.CLIENT_MEETING) && !!reportToEdit.projectID">
+                    <label for="dailytask">Process Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.processID">
+                        <option value=""></option>
+                        <option *ngFor="let process of myProcess" [value]="process.key">{{process.title}}</option>
+                    </select>
+                </div> -->
+
+                <div class="col-md-6 my-2" *ngIf="reportToEdit.time_activity != ActivityEnum.OFFICIAL_VACATION && reportToEdit.time_activity != ActivityEnum.UNPAID_VACATION">
+                    <label for="duration">Duration By Hours:</label>
+                    <input type="number" name="duration" id="duration" class="form-control" [(ngModel)]="reportToEdit.durationByHours">
+                </div>
+            <!-- </div> -->
+
+            
+            
+            <div class="col-md-12 my-2" *ngIf="reportToEdit.time_activity == ActivityEnum.DAILY_TASK">
+                <div class="row">
+                    <div class="col-6">
+
+                        <label for="progress">Your Progress (%):</label>
+                        <input type="number" name="progress" min="1" max="100" maxlength="3" id="progress" class="form-control" [(ngModel)]="reportToEdit.progress">
+                    </div>
+
+                    <div class="col-6 mt-auto">
+
+                        <label for="progress">Your Previous Progress is: {{taskTotalProgress}} % </label>
+                        <mat-progress-bar id="progress" class="example-margin" min="1" max="100" mode="determinate" [value]="taskTotalProgress">
+                        </mat-progress-bar>
+                    </div>
+                    </div>
+                </div>
+
+            <!-- <div class="row" > -->
+           
+
+            <!-- <div class="row"> -->
+
+                <div class="col-md-6 my-2" *ngIf="currentUser.accPosition != AccountPositionEnum.SENIOR">
+                    <label for="approval_Manager">Senior To Approve (Optional)</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.seniorToApproveKey">
+                        <option value=""></option>
+                        <option *ngFor="let senior of seniors" [value]="senior.key">{{senior.username}}</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 my-2" *ngIf="!reportToEdit.seniorToApproveKey || reportToEdit.seniorToApproveKey.length == 0">
+                    <label for="approval_Manager">approval Manager</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="reportToEdit.managerApprovalKey">
+                        <option value=""></option>
+                        <option *ngFor="let manager of managers" [value]="manager.key">{{manager.username}}</option>
+                    </select>
+                </div>
+                <div class="col-md-6 my-2" *ngIf="!!reportToEdit.rejectionReason">
+                    <label for="dailytask">Rejection Reason:</label>
+                    <div>
+                        <p class="rejectionReason">
+                            {{reportToEdit.rejectionReason}}
+                        </p>
+                    </div>
+                    <!-- <div class="txt">
+                        <textarea name="dailytask" class="form-control" id="dailytask" cols="30" rows="5" [value]="reportToEdit.rejectionReason" placeholder="details" disabled></textarea>
+                    </div> -->
+                <!-- </div> -->
+            </div>
+
+                <div class="col-md-12">
+                    <label for="dailytask">Daily Progress Summary:</label>
+                    <div class="txt">
+                        <textarea name="dailytask" class="form-control" id="dailytask" cols="30" rows="5" [(ngModel)]="reportToEdit.details" placeholder="details"></textarea>
+                    </div>
+                </div>
+            <!-- </div> -->
+        </div>
+    </div>
+    </div>
+    <div class="modal-footer text-start">
+        <button class="btn" (click)="validateReportData()">{{rejectedReportInEditMode? 'Edit' : 'Add'}}</button>
+    </div>
+<!-- </ng-template> -->
+</p-sidebar>

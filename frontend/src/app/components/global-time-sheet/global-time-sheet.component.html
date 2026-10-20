@@ -1,0 +1,184 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="globaltimesheetLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="timeSheetPage">
+    <div class="container-fluid mt-5">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="tasksTable m-3">
+                    <div class="days m-2" *ngFor="let day of currentWeekDays ; let i = index ">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-2 day">
+                                    <h3 style="font-family:'Cairo';font-weight: bold;">{{day | date : 'fullDate'}}</h3>
+                                </div>
+                                <div class="col-md-9 tasks">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-md-3 " class="report" *ngFor="let report of myReportsList">
+                                                <!-- {{report.reportDate}} {{getDate(day)}} -->
+                                                <ng-container *ngIf="getDate(day) == report.report_date">
+                                                    <div class="task m-2 p-2">
+                                                        <div class="container-fluid">
+                                                            <div class="row">
+                                                                <div class="col-12">
+                                                                    <h5 class="text-center" *ngIf="report.report_status_id == '2'" style="color:green;">Approved</h5>
+                                                                    <h5 class="text-center" *ngIf="report.report_status_id != '2' && report.report_status_id != '3'" style="color:#f4831f;">Pending On {{report.manager_approve_name}}</h5>
+                                                                    <h5 class="text-center" *ngIf="report.report_status_id == '3'" style="color:brown;">Rejected</h5>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-10">
+                                                                    <div class="working" *ngIf="report.report_type_name">Working On : {{report.report_type_name}}</div>
+                                                                    <div class="working" *ngIf="!!report.task_name">Task Title: {{report.task_name}}</div>
+                                                                    <div class="working" *ngIf="!!report.report_details">Details: {{report.report_details}}</div>
+                                                                    <div class="working">Duration : {{report.duration}}</div>
+                                                                    <div class="working" *ngIf="!!report.report_progress">Progress : {{report.report_progress}}</div>
+
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="icon" *ngIf="report.devID == currentUser.key && report.approved != true && report.rejected != true">
+                                                                        <span class="material-icons delete" matTooltip="Delete Report" (click)="deleteReport(report)">
+                                                                            delete
+                                                                        </span>
+                                                                        <br>
+                                                                        <span class="material-icons edit" matTooltip="Edit Report" data-bs-toggle="modal" data-bs-target="#largeModal" (click)="editReport(report)">
+                                                                            edit
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="totalHours" *ngFor="let oneDayTotalHours of totalHours ; let e = index">
+                                        <ng-container *ngIf="i == e">
+                                            {{oneDayTotalHours}} Hours
+                                        </ng-container>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="addBtn">
+                    <button class="btn" data-bs-toggle="modal" data-bs-target="#largeModal" (click)="openNewReportForm()">
+                        Add Report
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+
+    <div class="modal modal-top fade" id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-top modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel3">New Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeForm()"></button>
+                </div>
+
+                <div class="mb-3">
+                    <form [formGroup]="newGlobalReportForm" (ngSubmit)="validateReportData()" class="example-form">
+                        <div class="modal-body">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="Title">Date</label>
+                                            <div class="input-group input-group-merge">
+                                                <input class="form-control" type="date" formControlName="report_date" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Today Activity</mat-label>
+                                                <mat-select formControlName="report_type_id" class="form-control">
+                                                    <ng-container *ngFor="let type of reportTypes">
+                                                        <mat-option *ngIf="type.key == '1' || type.key == '5'||type.key == '6' " [value]="type.key">{{type.report_type}}</mat-option>
+                                                    </ng-container>
+                                                </mat-select>
+                                            </mat-form-field>
+                                            <mat-error class="alert help-block" *ngIf="!newGlobalReportForm.get('report_type_id')?.valid && newGlobalReportForm.get('report_type_id')?.touched">
+                                                Today Activity Is Required
+                                            </mat-error>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="email">Duration</label>
+                                            <div class="input-group input-group-merge">
+                                                <input class="form-control" type="number" formControlName="duration" />
+                                            </div>
+                                            <mat-error class="alert help-block" *ngIf="!newGlobalReportForm.get('duration')?.valid && newGlobalReportForm.get('duration')?.touched">
+                                                Duration Is Required
+                                            </mat-error>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Task</mat-label>
+                                                <mat-select formControlName="task_id" class="form-control">
+                                                    <mat-option *ngFor="let task of myTasks" [value]="task.id">{{task.task_title}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="email">Details</label>
+                                            <div class="input-group input-group-merge">
+                                                <textarea class="form-control" formControlName="report_details"></textarea>
+                                            </div>
+                                            <mat-error class="alert help-block" *ngIf="!newGlobalReportForm.get('report_details')?.valid && newGlobalReportForm.get('report_details')?.touched">
+                                                Details Is Required
+                                            </mat-error>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Approval Manager</mat-label>
+                                                <mat-select formControlName="manager_approve_id" class="form-control">
+                                                    <mat-option *ngFor="let man of managers" [value]="man.key">{{man.username}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                            <mat-error class="alert help-block" *ngIf="!newGlobalReportForm.get('manager_approve_id')?.valid && newGlobalReportForm.get('manager_approve_id')?.touched">
+                                                Manager To Approve Is Required
+                                            </mat-error>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close" (click)="closeForm()">
+                            Close
+                        </button>
+                            <button type="submit" class="btn btn-success" [disabled]="newGlobalReportForm.invalid" data-bs-dismiss="modal" aria-label="Close">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

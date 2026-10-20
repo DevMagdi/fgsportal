@@ -1,0 +1,25 @@
+@import '../../../../../colors';
+table {
+    width: 100%;
+}
+
+.mainTitle {
+    color: $buttonMainBackgroundColor;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.cancel {
+    color: $secondFontColor;
+    cursor: pointer;
+}
+
+.save {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.edit {
+    color: $mainThemeColor;
+    cursor: pointer;
+}

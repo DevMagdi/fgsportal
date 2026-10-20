@@ -1,0 +1,1105 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="convertLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<button class="btn requestPocBTN mx-1" id="openPocReqBTN" style="display: none;" data-bs-toggle="modal"
+    data-bs-target="#requestForPOC" (click)="openRequestForPOCModal()">Requert POC</button>
+<button class="btn requestPocBTN mx-1" id="openRFPReqBTN" style="display: none;" data-bs-toggle="modal"
+    data-bs-target="#RFPModal" (click)="getMyRFPConfigList()">Requert RFP</button>
+
+<div class="container-fluid  fullPageStyle">
+    <div class="row">
+        <div class="col-12">
+            <div class="views">
+                <i class="pi pi-list viewIcon viewActive mx-1" id="pipeView" (click)="changeView('pipe')"></i>
+                <i class="pi pi-table viewIcon mx-1" id="listView" (click)="changeView('list')"></i>
+
+                <button class="btn btnStyle mx-2" (click)="openAddLeadForm();addLead=true">+ Opportunity</button>
+            </div>
+        </div>
+    </div>
+    <div class="row my-1" *ngIf="pipeView">
+        <div class="col-12">
+            <div class="example-container" cdkDropListGroup>
+                <div [ngStyle]="{'width':getElemWidth()}" *ngFor="let status of leadsSubStatus; let i = index"
+                    class="example-list" cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListData]="myLeads">
+                    <h2 class="text-center listTitle">
+                        {{status.contact_sub_status_name}}
+                        <span class="count"
+                            [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                            <br>
+                            {{getTotalCost(status.id) | number : '1.2-2'}} USD . {{getNumOfLeads(status.id)}}
+                            Opportunities
+                        </span>
+                    </h2>
+                    <ng-container *ngFor="let lead of myLeads ; let l = index">
+                        <div class="example-box p-1" [id]="'mylead'+l" *ngIf="lead.lead_sub_status_id == status.id"
+                            cdkDrag>
+                            <div class="container-fluid m-0 p-0" [routerLink]="['/CRM/leads',lead.id]">
+                                <div class="row m-0 p-0">
+                                    <div class="col-9 fa-stack-1x">
+                                        <p class="leadName">{{lead.title}}</p>
+                                        <p class="partnerName">{{lead.partner_name}}</p>
+                                        <p class="cost" *ngIf="!!lead.cost">
+                                            <!-- <i class="menu-icon tf-icons bx bx-user"></i>  -->
+                                            {{lead.cost | currency:lead.currency?lead.currency:''}}
+                                        </p>
+                                    </div>
+                                    <div class="col-3  d-flex justify-content-center align-items-center">
+                                        <i *ngIf="!lead.next_action" class="menu-icon tf-icons bx bx-check noAction"
+                                            matTooltip="No Pending Activity"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Call"
+                                            class="pi pi-phone selectBTN coloredIcon" matTooltip="Pending Call"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.SendEmail"
+                                            class="pi pi-envelope selectBTN coloredIcon" matTooltip="Pending Email"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Meeting"
+                                            class="pi pi-users selectBTN coloredIcon" matTooltip="Pending Meeting"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Task"
+                                            class="pi pi-clock selectBTN coloredIcon" matTooltip="Pending Task"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Deadline"
+                                            class="pi pi-flag selectBTN coloredIcon" matTooltip="Pending Deadline"></i>
+                                        <span *ngIf="lead.next_action_type_id == ActivityTypesEnum.Lunch"
+                                            class="material-symbols-outlined selectBTN coloredIcon"
+                                            matTooltip="Pending Lunch">
+                                            restaurant
+                                        </span>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Other"
+                                            class="pi pi-check selectBTN coloredIcon" matTooltip="Pending Other"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Notes"
+                                            class="pi pi-book selectBTN coloredIcon" matTooltip="Pending Notes"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                    <div class="addLead d-flex justify-content-center bg-white p-2 text-center">
+                        <a class="" (click)="openAddLeadFormFromIcon(i);addLead=true">
+                            Add New
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-1" *ngIf="listView">
+        <div class="col-12">
+            <div class="">
+                <p-table responsiveLayout="scroll" id="dt1" styleClass="p-datatable-sm" #dt1 [value]="myLeads"
+                    dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]"
+                    [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [globalFilterFields]="['title','cost','partner_name','product_name']">
+                    <ng-template pTemplate="caption">
+                        <div class="d-flex justify-content-end">
+                            <div>
+                                <span class="p-input-icon-left">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text"
+                                        (input)="dt1.filterGlobal($any($event.target).value, 'contains')"
+                                        placeholder="Search keyword" />
+                                </span>
+                                <button pButton label="Clear" class="p-button-outlined p-button-sm mx-1"
+                                    icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                            </div>
+
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Title
+                                    <p-columnFilter type="text" field="title" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Value
+                                    <p-columnFilter type="numeric" field="cost" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Organization
+                                    <p-columnFilter type="text" field="partner_name" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Product
+                                    <p-columnFilter field="product_id" matchMode="in" display="menu"
+                                        [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                        <ng-template pTemplate="header">
+                                            <div class="px-3 pt-3 pb-0">
+                                                <span class="font-bold">Industry Picker</span>
+                                            </div>
+                                        </ng-template>
+                                        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                            <p-multiSelect [ngModel]="value" [options]="products" optionValue="id"
+                                                placeholder="Any" (onChange)="filter($event.value)"
+                                                optionLabel="product_name">
+                                                <ng-template let-option pTemplate="item">
+                                                    <div class="p-multiselect-representative-option">
+                                                        <span class="ml-1">{{option.product_name}}</span>
+                                                    </div>
+                                                </ng-template>
+                                            </p-multiSelect>
+                                        </ng-template>
+                                    </p-columnFilter>
+                                </div>
+                            </th>
+
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Next Activity
+                                    <p-columnFilter type="date" field="next_action_date"
+                                        display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Owner
+                                    <p-columnFilter type="text" field="sales_name" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <!-- <th></th> -->
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-lead>
+                        <tr>
+                            <td [routerLink]="['/CRM/leads',lead.id]" style="cursor: pointer;"><i
+                                    class="fab fa-angular fa-lg text-danger "></i> <strong>{{lead.title}}</strong></td>
+                            <td style="cursor: pointer;">
+                                {{lead.cost| currency:lead.currency?lead.currency:''}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{lead.partner_name}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                {{lead.product_name}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                <div *ngIf="!!lead.next_action_date">
+                                    <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Call"
+                                        class="pi pi-phone coloredIcon"></i>
+                                    <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.SendEmail"
+                                        class="pi pi-envelope coloredIcon"></i>
+                                    <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Meeting"
+                                        class="pi pi-users coloredIcon"></i>
+                                    <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Task"
+                                        class="pi pi-clock coloredIcon"></i>
+                                    <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Deadline"
+                                        class="pi pi-flag coloredIcon"></i>
+                                    <span *ngIf="lead.next_action_type_id == ActivityTypesEnum.Lunch"
+                                        class="material-symbols-outlined coloredIcon">
+                                        restaurant
+                                    </span>
+                                    <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Other"
+                                        class="pi pi-check coloredIcon"></i>
+                                    <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Notes"
+                                        class="pi pi-book coloredIcon"></i>
+                                    <span [ngStyle]="{color: getTimeColor(lead.next_action_date)}">
+                                        {{lead.next_action_date|date:'medium'}}
+                                    </span>
+                                </div>
+                                <div class="noActivity" *ngIf="!lead.next_action_date">
+                                    <i class="pi pi-exclamation-triangle"></i> No Activity
+                                </div>
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{lead.sales_name}}
+                            </td>
+                            <!-- <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-edit-alt me-1"></i> Archive</a>
+                                        <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td> -->
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="7">No customers found.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+            <!-- <div class="card">
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                                <th>Organization</th>
+                                <th>Product</th>
+                                <th>Next Activity</th>
+                                <th>Owner</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            <tr *ngFor="let lead of myLeads">
+                                <td [routerLink]="['/CRM/leads',lead.id]" style="cursor: pointer;"><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{lead.title}}</strong></td>
+                                <td style="cursor: pointer;">
+                                    {{lead.cost}}
+                                </td>
+                                <td style="cursor: pointer;">
+                                    {{lead.partner_name}}
+                                </td>
+
+                                <td style="cursor: pointer;">
+                                    {{lead.product_name}}
+                                </td>
+
+                                <td style="cursor: pointer;">
+                                    <div *ngIf="!!lead.next_action_date">
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Call" class="pi pi-phone coloredIcon"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Meeting" class="pi pi-users coloredIcon"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Task" class="pi pi-clock coloredIcon"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Deadline" class="pi pi-flag coloredIcon"></i>
+                                        <span *ngIf="lead.next_action_type_id == ActivityTypesEnum.Lunch" class="material-symbols-outlined coloredIcon">
+                                            restaurant
+                                        </span>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Other" class="pi pi-check coloredIcon"></i>
+                                        <i *ngIf="lead.next_action_type_id == ActivityTypesEnum.Notes" class="pi pi-book coloredIcon"></i>
+                                        <span [ngStyle]="{color: getTimeColor(lead.next_action_date)}">
+                                            {{lead.next_action_date}}
+                                        </span>
+                                    </div>
+                                    <div class="noActivity" *ngIf="!lead.next_action_date">
+                                        <i class="pi pi-exclamation-triangle"></i> No Activity
+                                    </div>
+                                </td>
+                                <td style="cursor: pointer;">
+                                    {{lead.sales_name}}
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-edit-alt me-1"></i> Archive</a>
+                                            <a class="dropdown-item" href="javascript:void(0);"><i class="bx bx-trash me-1"></i> Delete</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="organizationModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+
+        <div class="modal-content" *ngIf="!!newPartnerFormopened">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">New Organization</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" 
+                (click)="newPartnerFormopened = false"></button>
+            </div>
+
+            <div class="mb-3">
+                <form [formGroup]="newPartnerForm" (ngSubmit)="addPartner()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="Title">Name</label>
+                                        <div class="">
+                                            <input class="form-control" type="text" placeholder="Bank Misr"
+                                                formControlName="partner_name" [ngClass]="{'is-invalid':!newPartnerForm.get('partner_name')?.valid &&
+                                    newPartnerForm.get('partner_name')?.touched}" />
+                                            <small class="invalid-feedback"
+                                                *ngIf="!newPartnerForm.get('partner_name')?.valid && newPartnerForm.get('partner_name')?.touched">
+                                                Partner Name Is Required
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Industry</label>
+                                        <mat-select formControlName="industry" class="form-control" [ngClass]="{'is-invalid':!newPartnerForm.get('industry')?.valid &&
+                                    newPartnerForm.get('industry')?.touched}">
+                                            <mat-option *ngFor="let ind of partnerIndustry"
+                                                [value]="ind.id">{{ind.partner_industry_name}}</mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                        <small class="invalid-feedback"
+                                            *ngIf="!newPartnerForm.get('industry')?.valid && newPartnerForm.get('industry')?.touched">
+                                            Industry Is Required
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Type</label>
+                                        <mat-select formControlName="organize_type_id" class="form-control">
+                                            <mat-option *ngFor="let type of organizationTypes"
+                                                [value]="type.id">{{type.organize_type}}</mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6"
+                                    *ngIf="currentUser.department == departmentEnum.MANAGEMENT || (currentUser.department == departmentEnum.Business_Development && currentUser.accPosition== AccountPositionsEnum.MANAGER)">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Assign To Sales</label>
+                                        <mat-select formControlName="sales_id" class="form-control">
+                                            <mat-option value=""></mat-option>
+                                            <mat-option *ngFor="let sales of allSales"
+                                                [value]="sales.key">{{sales.username}}</mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Country</label>
+                                        <mat-select formControlName="country" class="form-control">
+                                            <mat-option *ngFor="let country of CurrencyList"
+                                                [value]="country.countryCode">
+                                                <div
+                                                    class="country-item d-flex align-items-center justify-content-start">
+                                                    <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                        width="17px" height="20px"
+                                                        [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                    <div>{{country.countryName}}</div>
+                                                </div>
+                                            </mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="email">Email</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex@Examble.com"
+                                                formControlName="email" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="phone">Phone</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="0123456789"
+                                                formControlName="phone" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="address">Address</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. 6 October"
+                                                formControlName="partner_address" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="Website">Website</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="url" placeholder="Website"
+                                                formControlName="website" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="description">Description</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Description"
+                                                formControlName="partner_description" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" (click)="newPartnerFormopened = false">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btnStyle" [disabled]="newPartnerForm.invalid">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="contactModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+
+        <div class="modal-content" *ngIf="!!newContactFormopened">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" 
+                (click)="newContactFormopened = false;"></button>
+            </div>
+
+            <div class="mb-3">
+                <form [formGroup]="newPersonContactForm" (ngSubmit)="createNewContact()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <app-form-input label="Name" [control]="newPersonContactForm.get('name')"
+                                            placeholder="Write Name"></app-form-input>
+                                        <!-- <label class="" for="Title">Name</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. Ahmed" formControlName="name" />
+                                        </div>
+                                        <mat-error class="alert help-block" *ngIf="!newPersonContactForm.get('name')?.valid && newPersonContactForm.get('name')?.touched">
+                                            Name Is Required
+                                        </mat-error> -->
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="email">Email</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex@Examble.com"
+                                                formControlName="email" />
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="address">Address</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. 6 October"
+                                                formControlName="address" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="title">Title</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="CEO"
+                                                formControlName="title" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-10">
+                                    <div class="mb-3">
+                                        <label class="" for="phone">Phone</label>
+                                        <ng-container formArrayName="phones">
+                                            <div *ngFor="let h of phones.controls; index as i">
+                                                <ng-container [formGroupName]="i">
+                                                    <div class="d-flex my-1">
+                                                        <input class="form-control mx-1" type="text" placeholder="Phone"
+                                                            formControlName="phone" />
+                                                        <select class="form-select" id="exampleFormControlSelect1"
+                                                            aria-label="Default select example"
+                                                            formControlName="phone_type">
+                                                            <option value="Work">Work</option>
+                                                            <option value="Home">Home</option>
+                                                            <option value="Mobile">Mobile</option>
+                                                            <option value="Whatsapp">Whatsapp</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+
+                                                        <div *ngIf="h['controls'].phone_type?.value == 'Work'">
+                                                            <input class="form-control" type="text"
+                                                                formControlName="extend" placeholder="extend">
+                                                        </div>
+
+                                                        <span (click)="delPhone(i)" *ngIf="i>0"
+                                                            class="material-icons delete mx-2 my-auto">
+                                                            delete
+                                                        </span>
+
+                                                        <button class="btn btn-outline-success mx-2" type="button"
+                                                            (click)="addPhone()"
+                                                            *ngIf="newPersonContactForm.get('phones')?.value.length < 5 && i==0">+</button>
+
+                                                    </div>
+                                                    <div *ngIf="h.touched && h.invalid" class="alert alert-danger">
+                                                        <div *ngIf="h['controls'].phone.errors?.required">Please enter
+                                                            Phone number</div>
+                                                        <div *ngIf="h['controls'].phone.invalid">Phone Not Valid</div>
+                                                        <div *ngIf="h['controls'].phone_type.errors?.required">Please
+                                                            enter Phone type</div>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </ng-container>
+                                        <!-- <button class="btn btn-outline-info"
+                                            *ngIf="newPersonContactForm.get('phones')?.value.length < 5" type="button"
+                                            (click)="addPhone()">add</button> -->
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger"
+                            (click)="newContactFormopened = false;newPersonContactForm.reset()">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btnStyle"
+                            [disabled]="newPersonContactForm.invalid">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= Request POC Modal ========================================= -->
+<div class="modal fade" id="requestForPOC" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">Request POC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="requestPOCForm" (ngSubmit)="requestForPOC()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="" for="Title">Title</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Title" class="input-group-text"><i
+                                                class="bx bx-line-chart"></i></span>
+                                        <input class="form-control" type="text" placeholder="POC Title"
+                                            formControlName="title" />
+                                    </div>
+                                    <mat-error class="alert help-block"
+                                        *ngIf="!requestPOCForm.get('title')?.valid && requestPOCForm.get('title')?.touched">
+                                        Title Is Required
+                                    </mat-error>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="" for="Title">process</label>
+                                    <ng-container formArrayName="process">
+                                        <div class="d-flex my-1" *ngFor="let h of process.controls; index as i">
+                                            <ng-container [formGroupName]="i">
+                                                <input class="form-control mx-1" type="text" placeholder="title"
+                                                    formControlName="process_title" />
+                                                <input class="form-control mx-1" type="text" placeholder="desc"
+                                                    formControlName="process_description" />
+                                                <input class="form-control mx-1" type="text" placeholder="dept"
+                                                    formControlName="process_department" />
+                                                <span (click)="delProcess(i)" class="material-icons delete">
+                                                    delete
+                                                </span>
+                                            </ng-container>
+                                        </div>
+                                    </ng-container>
+                                    <button class="btn btn-outline-info"
+                                        *ngIf="requestPOCForm.get('process')?.value.length < 5" type="button"
+                                        (click)="addProcess()">add</button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="" for="Description">Description</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Description" class="input-group-text"><i
+                                                class="bx bx-captions"></i></span>
+                                        <input class="form-control" type="text" placeholder="Description"
+                                            formControlName="description" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="" for="prodcut">Product</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="prodcut" class="input-group-text"><i
+                                                class="bx bx-network-chart"></i></span>
+                                        <mat-select class="form-control" formControlName="product_id">
+                                            <mat-option *ngFor="let prod of products"
+                                                [value]='prod.id'>{{prod.product_name}}</mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="" for="Priority">Priority</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Priority" class="input-group-text"><i
+                                                class="bx bx-trending-up"></i></span>
+                                        <mat-select class="form-control" formControlName="request_poc_priority_id">
+                                            <mat-option *ngFor="let priority of requestForPocPriority"
+                                                [value]='priority.id'>{{priority.reqeust_poc_priority_name}}</mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <button type="button" class="btn submitFormBtn" mat-raised-button
+                                        (click)="fileInput.click()">Attach File</button>
+                                    <input hidden (change)="imagesupload($event)" multiple #fileInput type="file"
+                                        id="file">
+                                    <table class="table table-hover"
+                                        *ngIf="!!requestForPOCAttaches && requestForPOCAttaches.length > 0">
+                                        <thead>
+                                            <th>#</th>
+                                            <th>File Name</th>
+                                            <th>Size</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let file of requestForPOCAttaches;let i = index">
+                                                <td>{{i +1 }}</td>
+                                                <td>{{file.name}}</td>
+                                                <td>{{file.size / 1000 | number:'1.2-2'}} KB</td>
+                                                <td>
+                                                    <span (click)="deleteIMG(i)" class="material-icons delete">
+                                                        delete
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close"
+                        [disabled]="requestPOCForm.invalid">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================= Request RFP Modal ========================================= -->
+<div class="modal fade" id="RFPModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">Request RFP</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="requestRFPForm" (ngSubmit)="requestForRFP()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="" for="title">Title</label>
+                                    <input class="form-control" type="text" placeholder="Title"
+                                        formControlName="title" />
+                                    <mat-error class="alert help-block"
+                                        *ngIf="!requestRFPForm.get('title')?.valid && requestRFPForm.get('title')?.touched">
+                                        Title Is Required
+                                    </mat-error>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="" for="comment">Comment</label>
+                                    <input class="form-control" type="text" placeholder="Comment"
+                                        formControlName="comment" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="" for="comment">Send To</label>
+                                    <mat-select class="form-control" formControlName="approval_ids" multiple>
+                                        <mat-option *ngFor="let user of myRFPConfigList"
+                                            [value]='user.key'>{{user.username}}</mat-option>
+                                    </mat-select>
+                                    <mat-error class="alert help-block"
+                                        *ngIf="!requestRFPForm.get('approval_ids')?.valid && requestRFPForm.get('approval_ids')?.touched">
+                                        Send To Is Required
+                                    </mat-error>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <button type="button" class="btn submitFormBtn" mat-raised-button
+                                        (click)="rfpfile.click()">Attach File</button>
+                                    <input hidden (change)="RFPimagesupload($event)" multiple #rfpfile type="file"
+                                        id="rfpfile">
+                                    <table class="table table-hover"
+                                        *ngIf="!!requestForRFPAttaches && requestForRFPAttaches.length > 0">
+                                        <thead>
+                                            <th>#</th>
+                                            <th>File Name</th>
+                                            <th>Size</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let file of requestForRFPAttaches;let i = index">
+                                                <td>{{i +1 }}</td>
+                                                <td>{{file.name}}</td>
+                                                <td>{{file.size / 1000 | number:'1.2-2'}} KB</td>
+                                                <td>
+                                                    <span (click)="RFPdeleteIMG(i)" class="material-icons delete">
+                                                        delete
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close"
+                        [disabled]="requestRFPForm.invalid || requestForRFPAttaches.length == 0">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="addLead"
+    position="right" [transitionOptions]="'350ms'">
+
+    <div class="">
+        <!-- <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">New Opportunity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+        <form [formGroup]="newLeadForm" (ngSubmit)="createNewLead()" class="example-form">
+            <div class="modal-body leadForm">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="">
+                                <!-- <label class="" for="ContactPerson">Title</label>
+                                <div class="input-group input-group-merge">
+                                    <span id="ContactPerson" class="input-group-text"><i
+                                            class="bx bx-heading"></i></span>
+                                    <input class="form-control" type="text" id="ContactPerson"
+                                        placeholder="RPA Bank Misr" formControlName="title" />
+                                </div>
+                                <mat-error class="alert help-block"
+                                    *ngIf="!newLeadForm.get('title')?.valid && newLeadForm.get('title')?.touched">
+                                    Title Is Required
+                                </mat-error> -->
+                                <app-form-input label="Title"
+                                [control]="newLeadForm.get('title')"
+                                placeholder="Write title"></app-form-input>
+                            </div>
+                            <!-- <div class="mb-3">
+                                    <label class="" for="Organization">Organization</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Organization" class="input-group-text">
+                                            <i class="bx bx-buildings"></i>
+                                        </span>
+                                        <mat-select class="form-control" formControlName="partner_id">
+                                            <mat-option *ngFor="let partner of allPartners" [value]='partner.id'>
+                                                {{partner.partner_name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div> -->
+                            <!-- <app-dynamic-select-and-add-partner-component></app-dynamic-select-and-add-partner-component> -->
+                            <!-- <div class="mb-3">
+                                    <label class="" for="address">Adress</label>
+                                    <input class="form-control" type="text" id="address" placeholder="6th October City" formControlName="address" />
+                                </div> -->
+
+                                <div class="mb-3">
+                                    <label class="" for="cost">Deal Size</label>
+                                    <div class="input-group input-group-merge">
+                                        <div class="container-fluid">
+                                            <div class="row gap-4">
+                                                <div class="col-6 p-0 m-0">
+                                                    <p-inputNumber styleClass="w-100"
+                                                        formControlName="cost"></p-inputNumber>
+                                                </div>
+                                                <div class="col-4 p-0 m-0">
+                                                    <p-dropdown tyleClass="w-100" [options]="CurrencyList"
+                                                        formControlName="selectedCurrency" optionLabel="currencyCode">
+                                                        <ng-template let-country pTemplate="item">
+                                                            <div class="country-item d-flex">
+                                                                <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                                    width="17px" height="20px"
+                                                                    [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                                <div>{{country.currencyName}}</div>
+                                                            </div>
+                                                        </ng-template>
+                                                    </p-dropdown>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <div class="mb-3">
+                                <label class="" for="Organization">Organization</label>
+                                <div class="input-group input-group-merge">
+                                    <span id="Organization" class="input-group-text">
+                                        <i class="bx bx-buildings"></i>
+                                    </span>
+                                    <input type="text" id="Organization" class="form-control" placeholder="ACME Inc."
+                                        formControlName="partner_id" [matAutocomplete]="auto">
+                                    <span class="input-group-text isnew" *ngIf="!!newOrgAdded">
+                                        <i class="bx bx-star"></i>
+                                        New
+                                    </span>
+                                </div>
+                                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                                    (optionSelected)="getFromHTML($event)">
+                                    <mat-option *ngFor="let partner of filteredOptions | async" [value]="partner">
+                                        {{partner.partner_name}}
+                                    </mat-option>
+                                    <!-- <mat-option *ngIf="!!addNewOrgnization" data-aos="fade-in">
+                                            <button (click)="openAddPartnerForm(newLeadForm.get(['partner_id'])?.value);newPartnerFormopened = true" pButton pRipple type="button" icon="pi pi-plus" class="p-button-rounded p-button-outlined p-button-sm"></button> -->
+                                    <!-- data-bs-toggle="modal" data-bs-target="#newPartner" -->
+
+                                    <!-- <button (click)="addPartner(newContactForm.get(['partner_id'])?.value)" type="button" class="rounded-pill btn-icon btn-outline-info">
+                                                <span class="tf-icons bx bx-plus"></span>
+                                            </button> -->
+                                    <!-- </mat-option> -->
+                                    <mat-option *ngIf="!!addNewOrgnization" data-aos=""
+                                        class="text-center align-items-baseline">
+                                        <p (click)="openAddPartnerForm(newLeadForm.get(['partner_id'])?.value);newPartnerFormopened = true"
+                                            class="" data-bs-toggle="modal" data-bs-target="#organizationModal">
+                                            <i class="menu-icon tf-icons bx bx-plus"></i>Add New
+                                        </p>
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="" for="Contact">Contact</label>
+                                <app-loading-dots *ngIf="contactLoading"></app-loading-dots>
+                                <p-autoComplete *ngIf="!contactLoading" placeholder="Ex. Ahmed" [size]="50"
+                                    inputStyleClass="form-control" [completeOnFocus]="true" formControlName="contact_id"
+                                    [showEmptyMessage]="true" [suggestions]="filteredContacts"
+                                    (completeMethod)="filterContacts($event)" field="name"
+                                    [minLength]="1"></p-autoComplete>
+                                <a *ngIf="!!newLeadForm.get(['partner_id'])?.value && !addNewOrgnization"
+                                    data-bs-toggle="modal" data-bs-target="#contactModal" class=""
+                                    (click)="newContactFormopened=true;openNewContactForm()">+ Add New Contact</a>
+                            </div>
+                            <!-- <div class="mb-3">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label *ngIf="!contactLoading">Contact</mat-label>
+                                        <mat-label class="formLables">
+                                            <div class="loading-dots" *ngIf="contactLoading">
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                            </div>
+                                        </mat-label>
+                                        <mat-select formControlName="contact_id">
+                                            <mat-option *ngFor="let contact of myPersonContacts" [value]='contact.id'>
+                                                {{contact.name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div> -->
+
+                          
+                            <div class="mb-3 ">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Labels</label>
+                                    <mat-select [compareWith]="comparer" formControlName="labels" multiple="true" class="form-control">
+                                        <mat-option *ngFor="let label of lables" [value]='label'>
+                                            <span class="labelOption"
+                                                [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                                {{label.label_name}}
+                                            </span>
+                                        </mat-option>
+                                    </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                            <div class="mb-3 " *ngIf="currentUser.department != departmentEnum.Business_Development">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Assign To Sales</label>
+                                    <mat-select formControlName="sales_id" class="form-control">
+                                        <mat-option *ngFor="let sales of salesTeam" [value]='sales.key'>
+                                            {{sales.username}}
+                                        </mat-option>
+                                    </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                        </div>
+                        <div class="col-lg-6">
+                            
+                            <div class="my-2">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Type</label>
+                                    <mat-select formControlName="type_id" class="form-control">
+                                        <mat-option *ngFor="let type of contactTypes" [value]='type.id'>
+                                            {{type.lead_type_name}}
+                                        </mat-option>
+                                    </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                            <div class="mb-3 ">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Lead Source</label>
+                                    <mat-select formControlName="campaign_id" class="form-control">
+                                        <mat-option *ngFor="let campaign of allCampaign" [value]='campaign.id'>
+                                            {{campaign.campagin_name}}
+                                        </mat-option>
+                                    </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="" for="address">Expected Close Date</label>
+                                <input class="form-control" type="date" id="address" placeholder="6th October City"
+                                    formControlName="expected_close_date" />
+                            </div>
+
+
+                            <div class="mb-3 ">
+                                <label class="" for="stepsContainer">Lead Status</label>
+                                <div class="steps" id="stepsContainer">
+                                    <ng-container *ngFor="let status of contactSubStatus;let i=index">
+                                        <div class="first active" (click)="selectSteps(i)" routerLinkActive="active"
+                                            *ngIf="i==0" [matTooltip]="status.contact_sub_status_name">
+                                        </div>
+                                        <div class="middle" (click)="selectSteps(i)"
+                                            *ngIf="i > 0 && i != contactSubStatus.length - 1"
+                                            [matTooltip]="status.contact_sub_status_name">
+                                        </div>
+
+                                        <div class="last" (click)="selectSteps(i)"
+                                            *ngIf="i == contactSubStatus.length - 1"
+                                            [matTooltip]="status.contact_sub_status_name">
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+
+
+
+                            <div class="mb-3 ">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Product</label>
+                                    <mat-select formControlName="product_id" class="form-control">
+                                        <mat-option *ngFor="let product of products" [value]='product.id'>
+                                            {{product.product_name}}
+                                        </mat-option>
+                                    </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                            
+                            <!-- <div class="mb-3">
+                                    <label class="" for="cost">Deal Size</label>
+                                    <div class="input-group input-group-merge">
+                                        <input class="form-control" type="number" id="cost" placeholder="0" formControlName="cost" />
+                                        <span class="input-group-text">EGP</span>
+                                    </div>
+                                </div> -->
+
+                            <!-- <div class="mb-3">
+                                    <label class="" for="Email">Email</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="email" id="Email" class="form-control" placeholder="john.doe@gmail.com" aria-label="john.doe" aria-describedby="basic-default-email2" formControlName="Email" />
+                                    </div>
+                                </div> -->
+                            <!-- <div class="mb-3">
+                                    <label class="" for="basic-default-phone">Phone No</label>
+                                    <div class="container p-0 m-0" *ngFor="let phone of contactPhones;let i=index">
+                                        <div class="row p-0 m-0">
+                                            <div class="col-7 p-0 m-0">
+                                                <input type="number" id="basic-default-phone" class="form-control phone-mask" [(ngModel)]="phone.phone" placeholder="658 799 8941" [ngModelOptions]="{standalone: true}" />
+                                            </div>
+                                            <div class="col-4 p-0 m-0">
+                                                <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" [(ngModel)]="phone.phone_type" [ngModelOptions]="{standalone: true}">
+                                                    <option value="Work">Work</option>
+                                                    <option value="Home">Home</option>
+                                                    <option value="Mobile">Mobile</option>
+                                                    <option value="Whatsapp">Whatsapp</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-1 p-0 m-0">
+                                                <i class="menu-icon tf-icons bx bx-trash trashIcon" (click)="deletePhone(i)"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text addPhone" *ngIf="contactPhones.length < 5">
+                                        <a href="javascript: void(0)" (click)="addPhone()">+ Add</a>
+
+                                    </div>
+
+
+                                </div> -->
+
+                        </div>
+                        <div class="mb-3">
+                            <label class="" for="notes">Notes</label>
+                            <textarea id="notes" class="form-control" rows="5"
+                                placeholder="Hi, Do you have a moment to talk Joe?"
+                                formControlName="notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer row gap-4">
+                <button type="button" class="btn btn-outline-danger col-5" (click)="addLead=true">
+                    Close
+                </button>
+                <button type="submit" class="btn btnStyle col-5" data-bs-dismiss="modal" aria-label="Close"
+                    [disabled]="newLeadForm.invalid">Save</button>
+            </div>
+        </form>
+
+    </div>
+
+
+</p-sidebar>

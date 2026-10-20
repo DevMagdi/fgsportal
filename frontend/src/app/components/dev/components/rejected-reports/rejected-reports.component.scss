@@ -1,0 +1,49 @@
+@import '../../../../colors';
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: #100f0f;
+        line-height: 50px;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+        }
+    }
+}
+
+.rejectionReason {
+    padding-left: 5px;
+    color: $buttonMainBackgroundColor;
+}
+
+.approvalBtn {
+    // background-color: $buttonMainBackgroundColor;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+
+    color: #fff;
+    // width: 40%;
+    // margin: auto;
+}
+
+.edit {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.rejectBtn {
+    background-color: brown;
+    color: #fff;
+    // width: 40%;
+    // margin: auto;
+}
+
+.modal-footer {
+    button {
+        background-color: $buttonMainBackgroundColor;
+        color: #fff;
+        width: 40%;
+        margin-left: auto;
+    }
+}

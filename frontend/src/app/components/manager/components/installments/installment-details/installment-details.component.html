@@ -1,0 +1,405 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="debitDetailsLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+
+<div class="container-fluid" *ngIf="!!debitDetails">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mt-3 ml-3">
+                <span>
+                    <i class="pi pi-arrow-left backIcon mr-1" (click)="goBack()"></i>
+                </span>
+                <span *ngIf="!debitOnEditMode" class="fieldTitle">
+                    {{debitDetails.title}}
+                </span>
+                <span *ngIf="!!debitOnEditMode">
+                    <input class="form-control" [(ngModel)]="debitDetails.title">
+                </span>
+
+                <!-- <div class="header d-flex justify-content-between my-2">
+                    <h3 class="titles" *ngIf="!titleOnEditMode">
+                        {{debitDetails.title}}
+                    </h3>
+                    <input *ngIf="!!titleOnEditMode" class="form-control" [(ngModel)]="debitDetails.title">
+                    <span (click)="titleOnEditMode = !titleOnEditMode" class="material-icons edit" *ngIf="!titleOnEditMode">
+                        edit
+                    </span>
+                    <span (click)="updateDebit()" class="material-icons save" *ngIf="!!titleOnEditMode">
+                        save
+                    </span>
+                    <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!titleOnEditMode">
+                        cancel
+                    </span>
+                </div> -->
+            </h1>
+        </div>
+    </div>
+    <div class="card p-1">
+        <div class="row">
+            <div class="col-10">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <span class="fieldTitle">
+                                Type:
+                            </span>
+                            <span class="fieldData" *ngIf="!debitOnEditMode">
+                                {{debitDetails.installment_type_name}}
+                            </span>
+                            <span *ngIf="!!debitOnEditMode">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-select [(ngModel)]="debitDetails.installment_type_id" class="form-control">
+                                        <mat-option *ngFor="let type of InstallmentTypeEnum | keyvalue" [value]="type.value">{{type.key}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </span>
+                        </div>
+                        <div class="col-lg-6">
+                            <span class="fieldTitle">
+                                Amount:
+                            </span>
+                            <span class="fieldData" *ngIf="!debitOnEditMode">
+                                {{debitDetails.total_amount | number}}
+                            </span>
+                            <span *ngIf="!!debitOnEditMode">
+                                <input class="form-control" type="number" placeholder="0" [(ngModel)]="debitDetails.total_amount" />
+                            </span>
+                        </div>
+                        <div class="col-lg-6">
+                            <span class="fieldTitle">
+                                Bank:
+                            </span>
+                            <span class="fieldData" *ngIf="!debitOnEditMode">
+                                {{debitDetails.payment_bank}}
+                            </span>
+                            <span *ngIf="!!debitOnEditMode">
+                                <input class="form-control" type="text" placeholder="EX. CIB" [(ngModel)]="debitDetails.payment_bank" />
+                            </span>
+                        </div>
+                        <div class="col-lg-6">
+                            <span class="fieldTitle">
+                                 
+                                {{debitDetails.installment_type_id == InstallmentTypeEnum.Investment? 'Extra' : 'Maintenance'}} Amount:
+                            </span>
+                            <span class="fieldData" *ngIf="!debitOnEditMode">
+                                {{debitDetails.interest_amount | number}}
+                            </span>
+                            <span *ngIf="!!debitOnEditMode">
+                                <input class="form-control" type="number" placeholder="0" [(ngModel)]="debitDetails.interest_amount" />
+                            </span>
+                        </div>
+                        <div class="col-lg-6" *ngIf="!debitOnEditMode">
+                            <span class="fieldTitle">
+                                Next Payment Date : 
+                            </span>
+                            <span class="fieldData">
+                                {{nextPayment ? nextPayment.incoming_date : '-'}}
+                            </span>
+                        </div>
+                        <div class="col-lg-6" *ngIf="pageType == 't'">
+                            <span class="fieldTitle">
+                                Down Payment Amount:
+                            </span>
+                            <span class="fieldData" *ngIf="!debitOnEditMode">
+                                {{debitDetails.down_payment_amount | number}}
+                            </span>
+                            <span *ngIf="!!debitOnEditMode">
+                                <input class="form-control" type="number" placeholder="0" [(ngModel)]="debitDetails.down_payment_amount" />
+                            </span>
+                        </div>
+                        <div class="col-lg-6" *ngIf="pageType == 'v'">
+                        </div>
+
+                        <div class="col-lg-6" *ngIf="!debitOnEditMode">
+                            <span class="fieldTitle">
+                                Next Payment Amount :
+                            </span>
+                            <span class="fieldData">
+
+                                {{nextPayment ? (nextPayment.installment_amount| number) : '-'}}
+                            </span>
+                        </div>
+                        <div class="col-lg-6" *ngIf="!debitOnEditMode">
+                            <span class="fieldTitle">
+                                Paid:
+                            </span>
+                            <span class="fieldData">
+                                {{paid | number}}
+                            </span>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <span class="fieldTitle">
+                                Description:
+                            </span>
+                            <span class="fieldData" *ngIf="!debitOnEditMode">
+                                {{debitDetails.main_description}}
+                            </span>
+                            <span *ngIf="!!debitOnEditMode">
+                                <input class="form-control" type="text" placeholder="Desc" [(ngModel)]="debitDetails.main_description" />
+                            </span>
+                        </div>
+                        <div class="col-lg-6" *ngIf="!debitOnEditMode">
+                            <span class="fieldTitle">
+                                Remaining: 
+                            </span>
+                            <span class="fieldData">
+
+                                {{debitDetails.remaining | number}}
+                            </span>
+                        </div>
+                        <div class="col-lg-6">
+                            <span class="fieldTitle">
+                                Currency:
+                            </span>
+                            <span class="fieldData" *ngIf="!debitOnEditMode">
+                                {{debitDetails.currency ? debitDetails.currency : '-'}}
+                            </span>
+                            <span *ngIf="!!debitOnEditMode">
+                                <!-- <input class="form-control" type="text" placeholder="Desc" [(ngModel)]="debitDetails.currency" /> -->
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label class="formLables">Currency</mat-label>
+                                    <mat-select [(ngModel)]="debitDetails.currency" class="form-control">
+                                        <mat-option *ngFor="let cur of CurrencyList" [value]="cur.currencyCode">
+                                            <div class="country-item d-flex justify-content-start align-items-center">
+                                                <img src="../../../../../assets/img/flags/{{cur.countryCode}}.png" width="17px" height="20px" [class]="'flag flag-' + cur.currencyName.toLowerCase()" />
+                                                <div>{{cur.currencyName}}</div>
+                                            </div>
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <!-- <button class="btn btn-outline-info" *ngIf="!debitOnEditMode" (click)="debitOnEditMode=true">Edit</button> -->
+                <!-- <button class="btn btn-outline-info mx-1" *ngIf="!!debitOnEditMode" (click)="updateDebit()">Save</button> -->
+                <!-- <button class="btn btn-outline-danger" *ngIf="!!debitOnEditMode" (click)="debitOnEditMode=false;getDebitDetails()">canel</button> -->
+                <span class="material-icons edit" matTooltip="Save" *ngIf="!!debitOnEditMode" (click)="updateDebit()">
+                    save
+                </span>
+                <span class="material-icons cancel" matTooltip="Cancel" *ngIf="!!debitOnEditMode" (click)="debitOnEditMode=false;getDebitDetails()">
+                    cancel
+                </span>
+                <span class="material-icons edit" *ngIf="!debitOnEditMode" matTooltip="Edit" (click)="debitOnEditMode=true">
+                    edit
+                </span>
+                <span class="material-icons delete" *ngIf="!debitOnEditMode" matTooltip="Delete" (click)="deletDebit()">
+                    delete
+               </span>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="row">
+            <div class="col-12">
+                <!-- <table class="table table-hover table-striped">
+                    <thead>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Desc</th>
+                        <th>Status</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let inst of debitDetails.installment_period_array; index as i">
+                            <ng-container *ngIf="i == instIndexToEdit">
+                                <td>
+                                    {{i+1}}
+                                </td>
+                                <td>
+                                    <input class="form-control" type="date" placeholder="1/1/2024" [(ngModel)]="inst.incoming_date">
+                                </td>
+                                <td>
+                                    <input class="form-control" type="number" placeholder="100,000" [(ngModel)]="inst.installment_amount">
+                                </td>
+                                <td>
+                                    <input class="form-control" type="string" placeholder="Desc" [(ngModel)]="inst.installment_description">
+                                </td>
+                                <td>
+                                    <p-checkbox id="status" [binary]="true" inputId="binary" class="mx-1 mb-1" (click)="updateInstallments(inst)" [(ngModel)]="inst.is_paid"></p-checkbox>
+                                    <label for="status" class="mx-1 mt-1">{{inst.is_paid ? 'Paid' : 'UnPaid'}}</label>
+                                </td>
+                                <td>
+                                    <span (click)="saveEdit(inst)" class="material-icons delete">
+                                        save
+                                    </span>
+                                    <span (click)="cancelEdit()" class="material-icons delete">
+                                        cancel
+                                    </span>
+                                </td>
+                            </ng-container>
+                            <ng-container *ngIf="i != instIndexToEdit">
+
+                                <td>
+                                    {{i+1}}
+                                </td>
+                                <td>
+                                    {{inst.incoming_date}}
+                                </td>
+                                <td>
+                                    {{inst.installment_amount | number}}
+                                </td>
+                                <td>
+                                    {{inst.installment_description}}
+                                </td>
+                                <td>
+                                    {{inst.is_paid ? 'Paid' : 'Pending'}}
+                                </td>
+                                <td>
+                                    <ng-container *ngIf="!!inst.id">
+                                        <img src="../../../../../assets/img/menu.svg" [matMenuTriggerFor]="menu" style=" cursor: pointer;" class="Component-22-1">
+
+                                        <mat-menu #menu="matMenu">
+                                            <button mat-menu-item (click)="editInst(inst,i)">
+                                                    Edit
+                                            </button>
+
+                                            <button mat-menu-item (click)="changePaidStatus(inst)">
+                                                   Mark As {{inst.is_paid ? 'Pending' : 'Paid'}}
+                                            </button>
+
+                                            <button mat-menu-item (click)="deleteInstallment(inst.id || '')">Delete</button>
+
+                                        </mat-menu>
+                                    </ng-container>
+                                    <ng-container *ngIf="!inst.id">
+                                        <button mat-menu-item (click)="editInst(inst,i)">
+                                            Edit
+                                        </button>
+                                    </ng-container>
+
+                                </td>
+                            </ng-container>
+                        </tr>
+
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <th></th>
+                            <td>
+                                <button class="btn btn-outline-info" type="button" (click)="addInstallment()">add</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table> -->
+
+                <!-- dataKey="id" [rows]="10" [showCurrentPageReport]="false" [paginator]="false" -->
+                <!-- {{debitDetails | json}} -->
+                <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="debitDetails.installment_period_array" [reorderableColumns]="true">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th></th>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Desc</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-inst ; let-i="rowIndex">
+                        <tr [pReorderableRow]="i" (drop)="saveEditResorting()">
+                            <ng-container *ngIf="i == instIndexToEdit">
+                                <td></td>
+                                <td>
+                                    {{i+1}}
+                                </td>
+                                <td>
+                                    <input class="form-control" type="date" placeholder="1/1/2024" [(ngModel)]="inst.incoming_date">
+                                </td>
+                                <td>
+                                    <input class="form-control" type="number" placeholder="100,000" [(ngModel)]="inst.installment_amount">
+                                </td>
+                                <td>
+                                    <input class="form-control" type="string" placeholder="Desc" [(ngModel)]="inst.installment_description">
+                                </td>
+                                <td>
+                                    <p-checkbox id="status" [binary]="true" inputId="binary" class="mx-1 mb-1" (click)="updateInstallments(inst)" [(ngModel)]="inst.is_paid"></p-checkbox>
+                                    <label for="status" class="mx-1 mt-1">{{inst.is_paid ? 'Paid' : 'UnPaid'}}</label>
+                                </td>
+                                <td>
+                                    <span (click)="saveEdit(inst)" class="material-icons delete">
+                                        save
+                                    </span>
+                                    <span (click)="cancelEdit()" class="material-icons delete">
+                                        cancel
+                                    </span>
+                                </td>
+                            </ng-container>
+                            <ng-container *ngIf="i != instIndexToEdit">
+                                <td>
+                                    <span class="pi pi-bars" ></span>
+                                </td>
+                                <td>
+                                    {{i+1}}
+                                </td>
+                                <td>
+                                    {{inst.incoming_date}}
+                                </td>
+                                <td>
+                                    {{inst.installment_amount | number}}
+                                </td>
+                                <td>
+                                    {{inst.installment_description}}
+                                </td>
+                                <td>
+                                    {{inst.is_paid ? 'Paid' : 'Pending'}}
+                                </td>
+                                <td>
+                                    <ng-container *ngIf="!!inst.id">
+                                        <img src="../../../../../assets/img/menu.svg" [matMenuTriggerFor]="menu" style=" cursor: pointer;" class="Component-22-1">
+
+                                        <mat-menu #menu="matMenu">
+                                            <button mat-menu-item (click)="editInst(inst,i)">
+                                                    Edit
+                                            </button>
+
+                                            <button mat-menu-item (click)="changePaidStatus(inst)">
+                                                   Mark As {{inst.is_paid ? 'Pending' : 'Paid'}}
+                                            </button>
+
+                                            <button mat-menu-item (click)="deleteInstallment(inst.id || '')">Delete</button>
+
+                                        </mat-menu>
+                                    </ng-container>
+                                    <ng-container *ngIf="!inst.id">
+                                        <button mat-menu-item (click)="editInst(inst,i)">
+                                            Edit
+                                        </button>
+                                    </ng-container>
+
+                                </td>
+                            </ng-container>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <th></th>
+                            <td>
+                                <button class="btn btn-outline-info" type="button" (click)="addInstallment()">add</button>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="7">No data found.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+
+            </div>
+        </div>
+    </div>
+</div>

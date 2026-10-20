@@ -1,0 +1,28 @@
+@import '../../../colors';
+
+.search {
+    height: 42px;
+
+    input {
+        // border: $mainThemeColor solid 1px;
+        // border-radius: 0;
+        // background-color: $softThemeColor;
+        color: $subSubThemeColor;
+        font-size: 12px;
+        height: 42px;
+        &::placeholder {
+            color: $subSubThemeColor;
+            }
+
+    }
+    .p-inputtext{
+        border-right: 1px solid !important;
+        border-color: $subSubThemeColor;
+    }
+    i , span {
+        color: $subSubThemeColor;
+        // background-color: $softThemeColor;
+        // margin-right: 0;
+    }
+    
+}

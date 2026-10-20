@@ -1,0 +1,888 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="processLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="all">
+    <div class="mx-2">
+        <!-- <div class="row" *ngIf="!!processDetails">
+            <div class="col-12">
+                <div class="pageHeader d-flex justify-content-between">
+                    <div class="title d-flex justify-content-start">
+                        <h1 class="mt-3 ml-3">
+                            <span>
+                                <i class="pi pi-arrow-left backIcon mr-1" [routerLink]="['/projects' , projectDetails.key]"></i>
+                            </span> Activity Details
+                        </h1>
+                    </div>
+                    <button class="btn newTaskBtn" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="open(mymodal);getTaskTypes();getProcessTeam()">
+                        New Task
+                    </button>
+                </div>
+            </div>
+        </div> -->
+        <div class="row" *ngIf="!!processDetails">
+            <div class="container-fluid">
+
+                <div class="row projectDetails p-4 text-dark m-auto">
+
+                    <div class="col-md-3 mb-2">
+                        <div>
+                            <div class="d-flex justify-content-between">
+
+                                <h2 class="project_title">
+                                    <i *ngIf="isManager || isProjectManager" class="pi pi-arrow-left backIcon mr-1" [routerLink]="['/manager/projects' , projectDetails.key]"></i>
+                                    <i *ngIf="!isManager && !isProjectManager" class="pi pi-arrow-left backIcon mr-1" [routerLink]="['/dev/myprojects' , projectDetails.key]"></i>
+                                    {{processDetails.title}}
+                                </h2>
+
+                                <div class="col-1" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)">
+                                    <div class="ctrBtns text-center" *ngIf="!processEditMode && !DevOnEditMode">
+                                        <td>
+                                            <div class="dropdown">
+                                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="javascript:void(0);" (click)="editProcess()" data-bs-toggle="modal" data-bs-target="#largeModal">Edit Process Details</a>
+                                                    <a class="dropdown-item" href="javascript:void(0);" (click)="editDevs()">
+                                                        Edit Process Team</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <!-- <span class="material-icons edit" matTooltip="Edit Project" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="editProcess()">
+                                            edit
+                                        </span> -->
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p>{{processDetails.desc}}</p>
+
+
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <table class="w-100">
+                            <tr>
+                                <td class="p-1">Start Date</td>
+                                <td class="fw-bold p-1">{{processDetails.start_date |date:'d MMMM,YYYY'}}</td>
+                            </tr>
+                            <tr>
+                                <td class="p-1">End Date</td>
+                                <td class="fw-bold p-1">{{processDetails.end_date |date:'d MMMM,YYYY'}}</td>
+                            </tr>
+                            <tr>
+                                <td class="p-1">Status</td>
+                                <td class="fw-bold p-1">{{processDetails.status_name}}</td>
+                            </tr>
+                            <tr>
+                                <td class="p-1">Activity Duration</td>
+                                <td class="fw-bold p-1">{{processDetails.ex_duration}} Days</td>
+                            </tr>
+
+
+
+                        </table>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="row">
+
+                            <div class="col-md-4 col-6">
+                                <div>
+                                    <p class="text-start subSubTitel">Business Analysis</p>
+                                    <div [ngbTooltip]="BAsTeam" placement="bottom" class="avatar-group">
+
+                                        <p-avatarGroup styleClass="mb-3 ">
+                                            <ng-container *ngFor="let item of projectDetails.BAsTeam!.slice(0,2)">
+                                                <p-avatar *ngIf="item.photoURL" [image]="newServerApi+item.photoURL" size="small" shape="circle"></p-avatar>
+                                                <p-avatar *ngIf="!item.photoURL" [image]="'../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                            </ng-container>
+                                            <p-avatar *ngIf="projectDetails.BAsTeam!.length>2" label="+{{projectDetails.BAsTeam!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                                        </p-avatarGroup>
+                                    </div>
+                                    <ng-template #BAsTeam>
+
+                                        <div class="" *ngFor="let ba of projectDetails.BAsTeam">
+                                            <p *ngIf="ba.trash == 1" class="mb-0" style="text-decoration:line-through">
+                                                {{ ba.username }}
+                                            </p>
+                                            <p *ngIf="ba.trash != 1" class="mb-0">
+                                                {{ ba.username }}
+                                            </p>
+                                        </div>
+
+                                    </ng-template>
+                                </div>
+                                <div>
+                                    <p class="text-start subSubTitel">Developers</p>
+                                    <div [ngbTooltip]="Devs_mempers" placement="bottom" class="avatar-group">
+                                        <p-avatarGroup styleClass="mb-3">
+                                            <ng-container *ngFor="let item of projectDetails.Devs_mempers?.slice(0,2)">
+                                                <p-avatar *ngIf="item.photoURL" [image]="newServerApi+item.photoURL" size="small" shape="circle"></p-avatar>
+                                                <p-avatar *ngIf="!item.photoURL" [image]="'../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                            </ng-container>
+
+
+                                            <p-avatar *ngIf="projectDetails.Devs_mempers!.length>2" label="+{{projectDetails.Devs_mempers!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                                        </p-avatarGroup>
+                                    </div>
+                                    <ng-template #Devs_mempers>
+
+                                        <div class="" *ngFor="let dev of projectDetails.Devs_mempers">
+                                            <p *ngIf="dev.trash == 1" class="mb-0" style="text-decoration:line-through">
+                                                {{ dev.username }}
+                                            </p>
+                                            <p *ngIf="dev.trash != 1" class="mb-0">
+                                                {{ dev.username }}
+                                            </p>
+                                        </div>
+
+                                    </ng-template>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 col-6">
+                                <div>
+                                    <p class="text-start subSubTitel">Support Team</p>
+                                    <div [ngbTooltip]="OtherTeam" placement="bottom" class="avatar-group">
+
+                                        <p-avatarGroup styleClass="mb-3">
+                                            <ng-container *ngFor="let item of projectDetails.OtherTeam?.slice(0,2)">
+                                                <p-avatar *ngIf="item.photoURL" [image]="newServerApi+item.photoURL" size="small" shape="circle"></p-avatar>
+                                                <p-avatar *ngIf="!item.photoURL" [image]="'../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                            </ng-container>
+
+
+                                            <p-avatar *ngIf="projectDetails.OtherTeam!.length>2" label="+{{projectDetails.OtherTeam!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                                        </p-avatarGroup>
+                                    </div>
+                                    <ng-template #OtherTeam>
+
+                                        <div class="" *ngFor="let dev of projectDetails.OtherTeam">
+                                            <p *ngIf="dev.trash == 1" class="mb-0" style="text-decoration:line-through">
+                                                {{ dev.username }}
+                                            </p>
+                                            <p *ngIf="dev.trash != 1" class="mb-0">
+                                                {{ dev.username }}
+                                            </p>
+                                        </div>
+
+                                    </ng-template>
+                                </div>
+                                <div>
+                                    <p class="text-start subSubTitel">Tech Lead</p>
+                                    <div [ngbTooltip]="techLead" placement="bottom" class="avatar-group">
+                                        <p-avatarGroup styleClass="mb-3">
+                                            <p-avatar *ngIf="projectDetails.tech_leadPhotoURL" [image]="newServerApi+projectDetails.tech_leadPhotoURL" size="small" shape="circle"></p-avatar>
+                                            <p-avatar *ngIf="!projectDetails.tech_leadPhotoURL" [image]="'../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                        </p-avatarGroup>
+                                    </div>
+                                    <ng-template #techLead>
+
+                                        <div>{{projectDetails.Tech_leadName}}</div>
+
+                                    </ng-template>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 col-6">
+                                <div>
+                                    <p class="text-start subSubTitel">Project Manager</p>
+                                    <div [ngbTooltip]="PM" placement="bottom" class="avatar-group">
+                                        <p-avatarGroup styleClass="mb-3">
+                                            <p-avatar *ngIf="projectDetails.PMPhotoURL" [image]="newServerApi+projectDetails.PMPhotoURL" size="small" shape="circle"></p-avatar>
+                                            <p-avatar *ngIf="!projectDetails.PMPhotoURL" [image]="'../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                        </p-avatarGroup>
+                                    </div>
+                                    <ng-template #PM>
+
+                                        <div>{{projectDetails.PMName}}</div>
+
+                                    </ng-template>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <!-- 
+        <div class="row category_header my-3 mt-5">
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75"></div>
+                <div class="hrLine"></div>
+            </div>
+            <div class="col-4">
+                <h1 class="text-center mb-1">Activity TASKS</h1>
+            </div>
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75 float-right"></div>
+                <div class="clr"></div>
+                <div class="hrLine w-100"></div>
+            </div>
+        </div> -->
+
+        <div class="row my-2">
+            <div class="col-12">
+                <section class="tasks">
+                    <!-- <div class="search my-5 d-flex justify-content-center">
+                        <input class="form-control w-50" type="text" [(ngModel)]="searchKey" 
+                        (keyup)="searchTasks()" placeholder="Search By Task Title">
+                        <span class="material-icons p-2">
+                            search
+                        </span>
+                    </div>
+                    <div class="supportMode d-flex justify-content-center mb-5">
+                        <div class="btn allTasks" (click)="showAllTasks()">All Tasks</div>
+                        <div class="btn supportedTasks" (click)="showTasksWithSupport()">Supported Tasks</div>
+                    </div> -->
+                    <div class="d-flex justify-content-between my-2">
+                        <div>
+                            <div class="search">
+
+                                <span class="p-input-icon-left">
+                                    <i class="pi pi-search"></i>
+                                    <input type="text" class="search-input"
+                                    [(ngModel)]="searchKey" 
+                                    (keyup)="searchTasks()" placeholder="Search"
+                                     pInputText />
+                                </span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <button class="btn newTaskBtn" *ngIf="isManager == true || (isProjectManager == true && 
+                            currentUser.key == projectDetails.PMID)" (click)="viewTaskForm=true;taskEditMode=false;getTaskTypes();getProcessTeam()">
+                                Add Task
+                                <span class="ms-2 tf-icons bx bx-plus"></span>&nbsp;
+                            </button>
+                        </div>
+                    </div>
+                    <table class="table table-hover newTableCustom">
+                        <thead class="theader">
+                            <tr>
+                                <td>No.</td>
+                                <td>Task Type</td>
+                                <td>title</td>
+                                <!-- <td>Details</td> -->
+                                <td>Start Date</td>
+                                <td>Duration</td>
+                                <!-- <td>Real Duration</td> -->
+                                <td>End Date</td>
+                                <!-- <td>Remaining</td>
+                                <td>Progress</td> -->
+                                <td>Assigned To</td>
+                                <td *ngIf="tableWithSupportMode">Supported With</td>
+                                <td>Task Status</td>
+                                <!-- <td>File</td> -->
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- | paginate: { id: 'task_pagination',
+                            itemsPerPage: 10,
+                            currentPage: taskspage,
+                            totalItems: totalTasksRecords} ; -->
+                            <tr *ngFor="let task of projectTasks  let i = index" class="trow">
+                                <td>{{i + 1}}</td>
+                                <td>{{ task.type_name}}</td>
+                                <td>{{ task.title }}</td>
+                                <!-- <td>{{ task.desc }}</td> -->
+                                <td>{{ task.start_date |date:'MMM dd , YYY' }}</td>
+                                <td>{{ task.ex_duration }} Hours</td>
+                                <!-- <td>{{ task.real_duration }} Hours</td> -->
+                                <td>{{ task.end_date | date:'MMM dd , YYY'}}</td>
+                                <!-- <td>{{ramainingTaskCalc(task) }}</td> -->
+                                <!-- <td>{{task.progress ? task.progress : 0 }}</td> -->
+                                <td>{{ task.empName}}</td>
+                                <td *ngIf="tableWithSupportMode">{{ task.supportName}}</td>
+
+                                <td style="min-width:150px; word-wrap: break-word;" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)">
+                                    <div class="loading-dots" *ngIf="taskStatusLoading">
+                                        <div class="loading-dots--dot"></div>
+                                        <div class="loading-dots--dot"></div>
+                                        <div class="loading-dots--dot"></div>
+                                    </div>
+
+                                    <mat-select class="form-control" *ngIf="!taskStatusLoading" name="" id="" [(ngModel)]="task.status" (selectionChange)="changeTaskStatus(task)">
+                                        <mat-option *ngFor="let status of taskStatus" value="{{status.id}}">{{status.task_status_name}}</mat-option>
+                                    </mat-select>
+                                </td>
+                                <td *ngIf="!isManager && !isProjectManager">
+                                    {{task.status_name}}
+                                </td>
+                                <!-- <td>
+                                    <div class="row" *ngIf="loggedInID == task.empID">
+                                        
+                                        <div class="loading-dots" *ngIf="!!uploading">
+                                            <div class="loading-dots--dot"></div>
+                                            <div class="loading-dots--dot"></div>
+                                            <div class="loading-dots--dot"></div>
+                                        </div>
+                                        <button *ngIf="!uploading" type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
+                                        <input hidden (change)="uploadFile($event , task)" #fileInput type="file" id="file" accept="application/pdf,image/*">
+
+                                        <span *ngIf="(!!pddUrl && pddUrl.length > 0)&&!uploading">
+                                            {{pddUrl}}
+                                            <button class="btn submitBTN" (click)="submitUploadTaskFile(task)">submit</button>
+                                        </span>
+                                    </div>
+                                    <span *ngIf="task.pddURL">
+                                        <a href="{{newServerApi}}{{task.pddURL}}" target="_blank">{{task.pddName}}</a>
+                                    </span>
+                                </td> -->
+                                <td class="ctrBtns" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)">
+                                    <span class="material-icons edit" matTooltip="Edit Task" (click)="viewTaskForm=true;taskEditMode = true;editTask(task);">
+                                        edit
+                                    </span>
+                                    <span class="material-icons delete" matTooltip="Delete Task" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="deleteTask(task)">
+                                        delete
+                                    </span>
+                                </td>
+                            </tr>
+                            <!-- </ng-container> -->
+                        </tbody>
+
+
+                    </table>
+                    <!-- <div>
+                        <pagination-controls style="float: right;" id="task_pagination" (pageChange)="taskspage = $event"></pagination-controls>
+                    </div> -->
+
+
+                </section>
+            </div>
+
+        </div>
+
+
+        <!-- <div class="row category_header my-3">
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75"></div>
+                <div class="hrLine"></div>
+            </div>
+            <div class="col-4">
+                <h1 class="text-center mb-1">
+                    <span class="material-icons">
+                    comment
+                    </span> Comments
+                </h1>
+            </div>
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75 float-right"></div>
+                <div class="clr"></div>
+                <div class="hrLine w-100"></div>
+            </div>
+        </div>
+
+
+        <div class="row my-2">
+            <div class="col-12 commentsSection">
+                <div class="container mt-5 mb-5">
+                    <div class="d-flex justify-content-center row">
+                        <div class="d-flex flex-column col-md-12">
+                            <div class="coment-bottom bg-white p-2 px-4">
+                                <div class="d-flex flex-row add-comment-section mt-4 mb-4">
+                                    <input type="text" class="form-control mr-3" placeholder="Add comment" [(ngModel)]="newProcessComment.comment">
+                                    <button class="btn newCommentBtn" type="button" (click)="createProcessComment()">Comment</button>
+                                </div>
+                                <div class="commented-section" *ngFor="let comment of processComments.slice().reverse()">
+                                    <div class="container-fluid p-2">
+                                        <div class="row">
+                                            <div class="col-10">
+                                                <div class="d-flex flex-row align-items-center commented-user">
+                                                    <h5 class="mr-2">{{comment.commenterName}}</h5><span class="dot mb-1"></span><span class="mb-1 ml-2">{{comment.createdAt}}</span>
+                                                </div>
+                                                <div class="comment-text-sm"><span>{{comment.comment}}</span></div>
+                                            </div>
+                                            <div class="col-2 d-flex justify-content-center align-items-center">
+                                                <span class="material-icons delIcon" *ngIf="comment.commenterKey == currentUser.key" matTooltip="Delete" (click)="deleteComment(comment)">
+                                                    delete
+                                               </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <mat-divider></mat-divider>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+
+    </div>
+</div>
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="6" [autoZIndex]="false" [(visible)]="processEditMode" position="right" [transitionOptions]="'350ms'" *ngIf="isManager == true || (isProjectManager == true && 
+currentUser.key == projectDetails.PMID)" (onHide)="cancelEdit()">
+    <div class="row mb-4" *ngIf="processEditMode">
+        <div class="col-12">
+            <div class=" p-3">
+                <div class="projectDetailsData d-flex align-items-center">
+                    <div class="container-fluid p-3">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- <div class="normalMode" *ngIf="!processEditMode">
+                          <div class="pData">
+                              <h2>Activity Name: <span>{{processDetails.title}}</span></h2>
+                          </div>
+
+                          <div class="pData">
+                              <h2>Start Date: <span>{{processDetails.start_date}}</span></h2>
+                          </div>
+
+
+                          <div class="pData" *ngIf="!!processDetails.progress">
+                              <h2>Progress: <span>{{processDetails.progress | number : '1.2-2' }}%</span></h2>
+                          </div>
+                      </div> -->
+
+
+                                <div class="projectEditMode">
+                                    <div class="pData">
+                                        <h2>Activity Name: <span><input class="form-control" type="text" value="{{processDetails.title}}" [(ngModel)]="processDetails.title"></span></h2>
+                                    </div>
+
+                                    <div class="pData">
+                                        <h2>Start Date:
+
+                                            <!-- <span> -->
+
+                                            <p-calendar [(ngModel)]="processDetails.start_date" (onClose)="onEditModeProcessDateCalculation()" [showIcon]="false" inputId="icon" class="w-100"></p-calendar>
+                                        </h2>
+                                        <!-- </span> -->
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-12">
+                                <!-- <div class="normalMode" *ngIf="!processEditMode">
+                          <div class="pData">
+                              <h2>Description: <span>{{processDetails.desc}}</span></h2>
+                          </div>
+
+
+                          <div class="pData">
+                              <h2>Activity Duration: <span>{{processDetails.ex_duration}} Days</span></h2>
+                          </div>
+
+
+
+
+                      </div> -->
+                                <div class="projectEditMode" *ngIf="processEditMode">
+
+                                    <div class="pData mt-2">
+                                        <h2>Description: <span>
+                              <input class="form-control" type="text" value="{{processDetails.desc}}" [(ngModel)]="processDetails.desc">
+                              
+                          </span></h2>
+                                    </div>
+
+
+                                    <div class="pData">
+                                        <h2>Project Duration: <span>
+                               <input class="form-control" type="number" (change)="onEditModeProcessDateCalculation()" value="{{processDetails.ex_duration}}" [(ngModel)]="processDetails.ex_duration">
+                           </span></h2>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-12">
+                                <!-- <div class="normalMode" *ngIf="!processEditMode">
+
+                          <div class="pData">
+                              <h2>Status: <span>{{processDetails.status_name}}</span></h2>
+                          </div>
+
+                          <div class="pData">
+                              <h2>End Date: <span>{{processDetails.end_date | date}}</span></h2>
+                          </div>
+                      </div> -->
+                                <div class="projectEditMode" *ngIf="processEditMode">
+                                    <div class="pData">
+                                        <h2>Status:
+
+                                            <mat-select class="form-control" name="" id="" [(ngModel)]="processDetails.status">
+                                                <mat-option *ngFor="let status of processStatus" value="{{status.id}}">{{status.process_status_name}}</mat-option>
+                                            </mat-select>
+                                        </h2>
+                                    </div>
+
+                                    <div class="pData mt-2">
+                                        <h2>End Date: <span>
+                              <input class="form-control" disabled type="text" value="{{processDetails.end_date | date}}" >
+                          </span></h2>
+                                    </div>
+
+
+                                    <div class="ctrBtns d-flex  text-right justify-content-end" *ngIf="processEditMode">
+                                        <button class="btn btn-outline-danger px-5 me-2" matTooltip="Cancel" *ngIf="isManager == true || (isProjectManager == true && 
+                                 currentUser.key == projectDetails.PMID)" (click)="cancelEdit()">
+                                 cancel
+                             </button>
+
+                                        <button class="btnStyle btn  px-5" *ngIf="isManager == true ||
+                               (isProjectManager && currentUser.key == projectDetails.PMID)" (click)="saveEditedProcess()">save</button>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-- <div class="col-md-1">
+                      <div *ngIf="processEditMode" class="text-right">
+                          <img src="../../../assets/img/cancel.svg" class="Group-131 w-10 h-10" matTooltip="Cancel"
+                           *ngIf="isManager == true || (isProjectManager == true && 
+                           currentUser.key == projectDetails.PMID)" (click)="cancelEdit()">
+                      </div> -->
+                            <!-- <div class="ctrBtns text-center" *ngIf="!processEditMode">
+                          <span class="material-icons edit" matTooltip="Edit Project" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="editProcess()">
+                              edit
+                          </span>
+
+                      </div> -->
+                            <!-- </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</p-sidebar>
+
+
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="6" [autoZIndex]="false" [(visible)]="DevOnEditMode" position="right" [transitionOptions]="'350ms'" *ngIf="isManager == true || (isProjectManager == true && 
+currentUser.key == projectDetails.PMID)" (onHide)="cancelEdit()">
+    <div class="row mb-4" *ngIf="DevOnEditMode">
+        <div class="col-12">
+            <div class="p-3">
+                <div class=" d-flex align-items-center">
+                    <div class="container-fluid p-3">
+                        <div class="row">
+                            <div class="col-md-12 dData">
+
+                                <!-- <div class="DevOnNormalMode" *ngIf="!DevOnEditMode">
+                              <h2>Business Analysis :</h2>
+                              <ul *ngIf="processDetails">
+                                  <li class="ml-5" *ngFor="let ba of processDetails.BAsTeam">
+                                      <p *ngIf="ba.trash == 1" style="text-decoration:line-through">
+                                          {{ ba.username }}
+                                      </p>
+                                      <p *ngIf="ba.trash != 1">
+                                          {{ ba.username }}
+                                      </p>
+                                  </li>
+                              </ul>
+                              <h2>Support Team :</h2>
+                              <ul *ngIf="processDetails">
+                                  <li class="ml-5" *ngFor="let sup of processDetails.OtherTeam">
+                                      <ng-container>
+                                          <p *ngIf="sup.trash == 1" style="text-decoration:line-through">
+                                              {{ sup.username }}
+                                          </p>
+                                          <p *ngIf="sup.trash != 1">
+                                              {{ sup.username }}
+                                          </p>
+                                      </ng-container>
+                                  </li>
+                              </ul>
+
+                              <h2 *ngIf="processDetails">Tech Lead : <span>{{processDetails.Tech_leadName}}</span></h2>
+                          </div> -->
+                                <div class="DevOnEditMode" *ngIf="DevOnEditMode">
+                                    <h2 *ngIf="processDetails">Business Analysis :
+                                        <span>
+                                      <div class="loading-dots" *ngIf="projectTeamLoading">
+                                          <div class="loading-dots--dot"></div>
+                                          <div class="loading-dots--dot"></div>
+                                          <div class="loading-dots--dot"></div>
+                                      </div>
+                                      <mat-select *ngIf="!projectTeamLoading" class="form-control" multiple name="" id="" [(ngModel)]="process_business_analysis">
+                                             
+                                              <ng-container *ngFor="let team of projectTeam">
+                                                  <mat-option *ngIf="team.project_structure_id == ProjectStructureEnum.Analysis" value="{{team.id}}">{{team.user_team_name}}</mat-option>
+                                              </ng-container>
+                                      </mat-select>
+                                  </span>
+                                    </h2>
+                                    <hr>
+                                    <h2 *ngIf="processDetails">Support Team:
+                                        <span>
+                                      <div class="loading-dots" *ngIf="projectTeamLoading">
+                                          <div class="loading-dots--dot"></div>
+                                          <div class="loading-dots--dot"></div>
+                                          <div class="loading-dots--dot"></div>
+                                      </div>
+                                      <mat-select *ngIf="!projectTeamLoading" class="form-control" multiple name="" id="" [(ngModel)]="process_support_team">
+                                              <ng-container *ngFor="let team of projectTeam">
+                                                  <mat-option *ngIf="team.project_structure_id == ProjectStructureEnum.SUPPORT" value="{{team.id}}">{{team.user_team_name}}</mat-option>
+                                              </ng-container>
+                                      </mat-select>
+                                  </span>
+                                    </h2>
+                                    <hr>
+                                    <h2 *ngIf="processDetails">Tech Lead : <span>
+                                  <div class="loading-dots" *ngIf="projectTeamLoading">
+                                      <div class="loading-dots--dot"></div>
+                                      <div class="loading-dots--dot"></div>
+                                      <div class="loading-dots--dot"></div>
+                                  </div>
+                                  <mat-select class="form-control" name="" id="" [(ngModel)]="tech_lead" *ngIf="!projectTeamLoading">
+                                      <ng-container *ngFor="let team of projectTeam">
+                                          <mat-option *ngIf="team.project_structure_id == ProjectStructureEnum.Tech_Lead" value="{{team.id}}">{{team.user_team_name}}</mat-option>
+                                      </ng-container>
+                                  </mat-select>
+                              </span></h2>
+                                </div>
+                            </div>
+                            <div class="col-md-12 dData">
+                                <!-- <div class="DevOnNormalMode " *ngIf="!DevOnEditMode">
+                              <div class="container-fluid">
+                                  <div class="row">
+                                      <div class="col-md-9">
+                                          <h2>Developers : </h2>
+                                          <ul *ngIf="processDetails">
+                                              <li class="ml-5" *ngFor="let dev of processDetails.Devs_mempers">
+                                                  <p *ngIf="dev.trash == 1" style="text-decoration:line-through">
+                                                      {{ dev.username }}
+                                                  </p>
+                                                  <p *ngIf="dev.trash != 1">
+                                                      {{ dev.username }}
+                                                  </p>
+                                                  
+                                              </li>
+                                          </ul>
+                                      </div>
+                                  </div>
+                              </div>
+
+                          </div> -->
+                                <div class="DevOnEditMode" *ngIf="DevOnEditMode">
+                                    <h2>Developers : </h2>
+                                    <div class="loading-dots" *ngIf="projectTeamLoading">
+                                        <div class="loading-dots--dot"></div>
+                                        <div class="loading-dots--dot"></div>
+                                        <div class="loading-dots--dot"></div>
+                                    </div>
+                                    <mat-select class="form-control" multiple [(ngModel)]="process_team_mempers" *ngIf="!projectTeamLoading">
+                                        <ng-container *ngFor="let team of projectTeam">
+                                            <mat-option *ngIf="team.project_structure_id == ProjectStructureEnum.Developer" value="{{team.id}}">{{team.user_team_name}}</mat-option>
+                                        </ng-container>
+                                    </mat-select>
+
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <!-- <div class="ctrBtns" *ngIf="!DevOnEditMode">
+                              <img src="../../../assets/img/edit-alt.svg" class="edit-alt" matTooltip="Edit Developers" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="editDevs()">
+                          </div> -->
+                                <div class="ctrBtns d-flex justify-content-end mt-2" *ngIf="DevOnEditMode">
+                                    <button class="btn btn-outline-danger px-5 me-2" matTooltip="Cancel" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="cancelEdit()">
+                                 cancel
+                             </button>
+                                    <button class="btn btnStyle px-5 me-2" matTooltip="Save Changes" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="saveEditDevs()">
+                                  save
+                              </button>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</p-sidebar>
+
+<p-sidebar [(visible)]="displayRateForm" position="right" [autoZIndex]="false" [baseZIndex]="9999" styleClass="p-sidebar-md">
+    <ng-template pTemplate="content">
+        <app-standard-rate-form [question]='questions' (questionOutput)="submitRate($event)"></app-standard-rate-form>
+    </ng-template>
+</p-sidebar>
+<p-sidebar [(visible)]="viewTaskForm" position="right" [autoZIndex]="false" [baseZIndex]="9999" styleClass="p-sidebar-md" (onHide)="cancelEditTask()">
+    <ng-template pTemplate="content">
+
+        <!-- <ng-template #mymodal let-c="close" let-d="dismiss"> -->
+        <!-- <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">{{!!taskEditMode?'Edit':'Add New'}} Task</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div> -->
+        <h3 class="modal-title fw-bold" id="modal-basic-title">{{!!taskEditMode?'Edit':'Add New'}} Task</h3>
+
+        <div class="modal-body">
+            <form (ngSubmit)="onSubmit(f)" #f="ngForm">
+                <div id="task-data">
+                    <div class="form-group">
+                        <div class=" row">
+                            <div class="col-12 my-2">
+                                Task Type
+                                <div class="loading-dots" *ngIf="taskTypesLoading">
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                </div>
+                                <mat-select *ngIf="!taskTypesLoading" class="form-control" id="" [(ngModel)]="newTask.type" ngModel name="type" required #type="ngModel">
+                                    <mat-option *ngFor="let type of taskTypes" value="{{type.id}}">{{type.task_type}}</mat-option>
+                                </mat-select>
+                            </div>
+                            <div class="col-12 my-2">
+                                Task Title
+                                <input class="form-control" type="text" [(ngModel)]="newTask.title" ngModel name="title" required #title="ngModel">
+                                <span class="help-block" *ngIf="!title.valid && title.touched" style="color: red;">
+                                Please enter a task title
+                            </span>
+                            </div>
+
+                            <div class="col-12 my-2">
+                                Task Description
+                                <textarea class="form-control" placeholder="task description" [(ngModel)]="newTask.desc" [ngModelOptions]="{standalone: true}"></textarea>
+                            </div>
+
+                            <div class="col-12 my-2">
+                                Start Date
+                                <input class="form-control" type="date" placeholder="start Date" (change)="taskEndDateCalculation()" [(ngModel)]="newTask.start_date" ngModel name="start_date" required #start_date="ngModel">
+                                <span class="help-block" *ngIf="!start_date.valid && start_date.touched" style="color: red;">
+                                Please enter a valid date
+                            </span>
+                            </div>
+
+                            <div class="col-12 my-2 ">
+                                Expected Duration By Hours
+                                <input class="form-control " type="number" placeholder="Expected Duration By Hours " min="1 " (change)="taskEndDateCalculation() " [(ngModel)]="newTask.ex_duration" ngModel name="ex_duration" required #ex_duration="ngModel">
+                                <span class="help-block " *ngIf="!ex_duration.valid && ex_duration.touched" style="color: red;">
+                                    Please enter a valid duration
+                                </span>
+                            </div>
+
+                            <div class="col-12 my-2">
+                                End Date
+                                <input class="form-control" type="date" placeholder="end Date" [(ngModel)]="newTask.end_date" [ngModelOptions]="{standalone: true}">
+                            </div>
+
+                            <div class="col-12 my-2" *ngIf="newTask.type != '2'">
+                                Developer
+                                <div class="loading-dots" *ngIf="processTeamLoading">
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                </div>
+                                <mat-select [ngModelOptions]="{standalone: true}" *ngIf="!processTeamLoading" class="form-control" name="" id="" [(ngModel)]="newTask.empID">
+                                    <ng-container *ngFor="let team of processTeam">
+                                        <mat-option *ngIf="team.project_structure_id == ProjectStructureEnum.Developer"
+                                         value="{{team.id}}">{{team.user_team_name}}</mat-option>
+                                    </ng-container>
+                                </mat-select>
+                            </div>
+
+                            <div class="col-12 my-2" *ngIf="newTask.type != '2'">
+                                Support Developer
+                                <div class="loading-dots" *ngIf="processTeamLoading">
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                </div>
+                                <mat-select [ngModelOptions]="{standalone: true}" *ngIf="!processTeamLoading" class="form-control" name="" id="" [(ngModel)]="newTask.supportID">
+                                    <ng-container *ngFor="let team of processTeam">
+                                        <mat-option *ngIf="team.project_structure_id == ProjectStructureEnum.Developer" value="{{team.id}}">{{team.user_team_name}}</mat-option>
+                                    </ng-container>
+                                </mat-select>
+                            </div>
+
+                            <div class="col-12 my-2" *ngIf="newTask.type =='2'">
+                                BA
+                                <div class="loading-dots" *ngIf="processTeamLoading">
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                </div>
+                                <mat-select [ngModelOptions]="{standalone: true}" *ngIf="!processTeamLoading" class="form-control" name="" id="" [(ngModel)]="newTask.empID">
+                                    <ng-container *ngFor="let team of processTeam">
+                                        <mat-option *ngIf="team.project_structure_id == ProjectStructureEnum.Analysis" value="{{team.id}}">{{team.user_team_name}}</mat-option>
+                                    </ng-container>
+                                </mat-select>
+                            </div>
+
+                            <div class="col-12 my-2">
+                                Senior
+                                <select class="form-control" [(ngModel)]="newTask.seniorToApproveID" ngModel name="senior" #developer="ngModel">
+                                <option value=""></option>
+                                <option *ngFor=" let senior of seniors" value="{{senior.key}}">{{senior.username}}</option>
+                            </select>
+                            </div>
+
+                            <div class="col-12" *ngIf="!!newTask.seniorToApproveID">
+                                <span>
+                                <br>
+                            </span>
+                                <mat-checkbox class="example-margin" [(ngModel)]="newTask.seniorIsMandatory" [ngModelOptions]="{standalone: true}">Is Mandatory ?</mat-checkbox>
+                            </div>
+
+                            <div class="col-12 my-2">
+                                <button type="button" class="btn checkDevAvBTN" (click)="checkDevavailability()">Check If Developer is Available</button>
+                            </div>
+                        </div>
+
+                        <div class="devAvailability" *ngIf="devTasksList.length > 0">
+                            <hr>
+                            <div class="col-12 my-2">
+                                <h3 class="category_header px-2">During This Time {{newTask.empName}} Is Assigned To:</h3>
+                                <table class="table tabel-hover">
+                                    <thead>
+                                        <tr>
+                                            <td>Task Title</td>
+                                            <td>Start Date</td>
+                                            <td>End Date</td>
+                                            <td>Duration</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let task of devTasksList">
+                                            <td>{{task.title}}</td>
+                                            <td>{{task.start_date}}</td>
+                                            <td>{{task.end_date | date:'M/d/yyyy'}}</td>
+                                            <td>{{task.ex_duration}} hours</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                        <div class="devAvailability" *ngIf="!!isChecked && (!devTasksList || devTasksList.length == 0)">
+                            <hr>
+                            <div class="col-12 my-2">
+                                <h3 class="category_header px-2">
+                                    <i class="pi pi-check checkIcon mr-1"></i> During This Time {{newTask.empName}} Is Available
+                                </h3>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btnStyle px-4 me-2" data-dismiss="newTask " (click)="addTask() " type="submit" *ngIf="!taskEditMode" data-dismiss="newTask" [disabled]="!f.valid">Add Task</button>
+            <button class="btn btnStyle px-4 me-2" data-dismiss="newTask " (click)="save() " type="submit" *ngIf="taskEditMode" data-dismiss="newTask">Save changes</button>
+            <button class="btn btn-outline-danger" matTooltip="cancel Edit" style="color: brown; cursor: pointer;" *ngIf="taskEditMode" (click)="cancelEditTask()" data-dismiss="newTask"> 
+                cancel
+        </button>
+        </div>
+        <!-- </ng-template> -->
+    </ng-template>
+</p-sidebar>

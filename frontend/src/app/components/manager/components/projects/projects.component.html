@@ -1,0 +1,508 @@
+<div class=" mainPage manager-projects mx-3">
+    <!-- <div class="row">
+        <div class="col-12">
+            <div class="container-fluid">
+               
+            </div>
+        </div>
+    </div> -->
+    <div class="mt-5 mx-2 mb-5">
+        <h1 class="category_header p-2 mb-2">
+            <!-- <i class="pi pi-arrow-left backIcon mr-1" [routerLink]="['/projects']"></i> -->
+            Projects</h1>
+        <div class="row mb-2">
+            <div class="col-md-6 d-flex gap-4 mb-2">
+                <div class="search">
+                    <!-- <mat-label class="inputLabel">Search</mat-label> -->
+                    <div class="p-inputgroup">
+
+                        <input type="text" pInputText [(ngModel)]="searchKey" (keyup)="searchProject()" placeholder="Search By Project Title">
+                        <span class="p-inputgroup-addon"><mat-icon>search</mat-icon></span>
+                    </div>
+
+                    <!-- <input class="form-control customInput w-100" type="text" [(ngModel)]="searchKey" (keyup)="searchProject()" placeholder="Search By Project Title"> -->
+                </div>
+                <div>
+                    <!-- <mat-label class="inputLabel">Status</mat-label> -->
+                    <mat-select class="form-control customInput status-input" (selectionChange)="filterProjects()" multiple [(ngModel)]="filtersList" [ngModelOptions]="{standalone: true}" placeholder="slect status" floatLabel="true">
+                        <ng-container *ngFor="let status of StatusEnum | keyvalue">
+                            <mat-option *ngIf="status.value!='5'" value="{{status.value}}">{{status.key}}</mat-option>
+                        </ng-container>
+                    </mat-select>
+                </div>
+            </div>
+            <div class="col-md-6 mb-2 mt-auto">
+
+                <button class="btn newProjectBtn" style="width: 125px;" (click)="sidebarVisible1=true;
+                getAllUsers();getPartners();getTypes()" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT">
+                    <!-- <mat-icon>add</mat-icon> -->
+                    Add Project
+                </button>
+            </div>
+        </div>
+        <div class="hrLine"></div>
+        <div class="row">
+            <ng-container *ngFor="let project of myProjects">
+                <div class="col-md-3" *ngIf="project.type == '2'">
+                    <div class="card mb-5 p-2">
+                        <div class="pCard_header globalFont text-start">{{ project.title }}
+                            <span *ngIf="checkIfHasPerm(22)" class="text-decoration-underline text-primary ms-2" style="cursor: pointer;" routerLink="/manager/cloneProject/{{project.key}}">clone</span>
+                        </div>
+                        <a class="badge {{project.status_name |lowercase}} p-2" style="width: fit-content;">{{project.status_name |uppercase}}</a>
+                        <!-- <div>
+                            <p class="text-start subTitel">Team</p>
+                            <p-avatarGroup styleClass="mb-3">
+                                <p-avatar image="https://raw.githubusercontent.com/solodev/layering-profile-images/master/images/baby-yoda.jpg" 
+                                size="small" shape="circle"></p-avatar>
+                                <p-avatar image="https://raw.githubusercontent.com/solodev/layering-profile-images/master/images/r2d2.jpg" 
+                                size="small" shape="circle"></p-avatar>
+            
+                                <p-avatar label="+2" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                            </p-avatarGroup>
+                        </div> -->
+                        <div>
+                            <p class="text-start subTitel">Progress</p>
+
+                            <p-progressBar [value]="project.progress" [style]="{'height': '10px'}"></p-progressBar>
+                            <p class="text-end subTitel">{{project.progress| number : '1.2-2'}}%</p>
+
+                        </div>
+                        <a class="btn btn-sm detailBtn m-2">
+                            <div class="globalFont" [routerLink]="['/manager/projects',project.key]">Details</div>
+                        </a>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+
+        <h1 class="category_header p-1 mt-2">POC</h1>
+        <div class="hrLine"></div>
+
+        <div class="row">
+            <ng-container *ngFor="let project of myProjects">
+                <div class="col-md-3" *ngIf="project.type == '1'">
+                    <div class="card mb-5 p-2">
+                        <div class="pCard_header globalFont text-start">{{ project.title }}
+                            <span *ngIf="checkIfHasPerm(22)" class="text-decoration-underline text-primary ms-2" style="cursor: pointer;" routerLink="/manager/cloneProject/{{project.key}}">clone</span>
+                        </div>
+                        <a class="badge {{project.status_name |lowercase}} p-2" style="width: fit-content;">{{project.status_name}}</a>
+
+                        <!-- <div>
+                            <p class="text-start subTitel">Team</p>
+                            <p-avatarGroup styleClass="mb-3">
+                                <p-avatar image="https://raw.githubusercontent.com/solodev/layering-profile-images/master/images/baby-yoda.jpg" 
+                                size="small" shape="circle"></p-avatar>
+                                <p-avatar image="https://raw.githubusercontent.com/solodev/layering-profile-images/master/images/r2d2.jpg" 
+                                size="small" shape="circle"></p-avatar>
+            
+                                <p-avatar label="+2" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                            </p-avatarGroup>
+                        </div> -->
+                        <div>
+                            <p class="text-start subTitel">Progress</p>
+
+                            <p-progressBar [value]="project.progress" [style]="{'height': '10px'}"></p-progressBar>
+                            <p class="text-end subTitel">{{project.progress| number : '1.2-2'}}%</p>
+
+                        </div>
+                        <a class="btn btn-sm detailBtn m-2">
+                            <div class="globalFont" [routerLink]="['/manager/projects',project.key]">Details</div>
+                        </a>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+        <div class="w-100"></div>
+    </div>
+
+
+    <!-- <div class="addBtn container">
+        <div class="row">
+            <div class="col-11"></div>
+            <div class="col-1">
+                <button class="btn newProjectBtn" mat-fab (click)="open(mymodal);getAllUsers();getPartners();getTypes()" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div> -->
+</div>
+
+
+
+<!-- Modal -->
+<p-sidebar [(visible)]="sidebarVisible1" position="right" styleClass="p-sidebar-lg" [autoZIndex]="false" [baseZIndex]="9999">
+    <!-- <ng-template class="myModal bg-light" #mymodal let-c="close" let-d="dismiss"> -->
+    <!-- <div class="modal-header border-bottom-0 pb-0">
+            <h4 class="modal-title text-center text-dark formLabelHeader" id="modal-basic-title">Add new Project</h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div> -->
+    <div class="modal-body mt-0 pt-0 pb-0">
+        <h4 class="modal-title fw-bold text-dark formLabelHeader mb-1 fs-4" id="modal-basic-title">Add new Project</h4>
+
+        <form [formGroup]="newProjectForm" class="example-form">
+
+            <div class="container mt-0 pt-0">
+                <!-- <label class="formLabelHeader">Project Info : </label> -->
+
+                <div class="row">
+                    <div class="col-lg-6 my-3">
+                        <div class="example-full-width w-100">
+                            <!-- <mat-label class="formLables">Title</mat-label>
+                                <input class="form-control" type="text" id="title" formControlName="title"
+                                [ngClass]="{'is-invalid':!newProjectForm.get('title')?.valid &&
+                                 newProjectForm.get('title')?.touched}">
+                                <mat-error class="alert help-block" *ngIf="!newProjectForm.get('title')?.valid && newProjectForm.get('title')?.touched">
+                                    Title Is Required
+                                </mat-error> -->
+                            <app-form-input label="Title" [control]="newProjectForm.get('title')" placeholder="Write Project Title"></app-form-input>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <div class="example-full-width w-100">
+                                <mat-label class="formLables">Description</mat-label>
+                                <input class="form-control" type="text" id="desc" formControlName="desc">
+                            </div> -->
+                        <app-form-input label="Description" [control]="newProjectForm.get('desc')" placeholder="Write Project Description"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Type</mat-label>
+                                <mat-select formControlName="type">
+                                    <mat-option *ngFor="let type of projectTypes" [value]='type.id'>{{type.project_type}}</mat-option>
+                                </mat-select>
+                                <mat-error class="alert help-block" *ngIf="!newProjectForm.get('department')?.valid && newProjectForm.touched">
+                                    Type Is Required
+                                </mat-error>
+                            </mat-form-field> -->
+                        <label for="dropdown">Type</label>
+                        <span class="p-float-label w-100">
+                                <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="projectTypes"
+                                formControlName="type" optionLabel="project_type" optionValue="id"
+                                 class="w-100" placeholder="select project type"
+                                [ngClass]="{'is-invalid':!newProjectForm.get('department')?.valid &&
+                                 newProjectForm.get('department')?.touched}"></p-dropdown>
+                                <div *ngIf="!newProjectForm.get('department')?.valid && newProjectForm.get('department')?.touched" class="invalid-feedback">
+    
+                                    <small>Type is Required</small>
+                                  </div>
+                            </span>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <div class="example-full-width w-100">
+
+                            <label class="formLables">Start Date</label>
+                            <p-calendar (ngModelChange)="endDateCalculation()" formControlName="start_date" [showIcon]="true" inputId="icon" class="w-100" placeholder="pick a Date" [ngClass]="{'is-invalid':!newProjectForm.get('start_date')?.valid &&
+                                 newProjectForm.get('start_date')?.touched}"></p-calendar>
+
+                            <div class="invalid-feedback" *ngIf="!newProjectForm.get('start_date')?.valid && newProjectForm.get('start_date')?.touched">
+                                Start Date is Required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <div class="example-full-width w-100">
+                                <label class="formLables">Duration</label>
+                                <input class="form-control" (change)="endDateCalculation()" 
+                                type="number" id="duration" formControlName="duration"
+                                [ngClass]="{'is-invalid':!newProjectForm.get('duration')?.valid &&
+                                 newProjectForm.get('duration')?.touched}">
+                                <div class="invalid-feedback" *ngIf="!newProjectForm.get('duration')?.valid && newProjectForm.get('duration')?.touched">
+                                    Duration Is Required
+                                </div>
+                            </div> -->
+                        <app-form-input label="Duration" (inputChanged)="endDateCalculation()" [control]="newProjectForm.get('duration')" type="number" placeholder="Write Project Duration"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">End Date</mat-label>
+                        <p-calendar formControlName="end_date" [showIcon]="true" inputId="icon" placeholder="pick a Date"></p-calendar>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Budget</mat-label>
+                                <input matInput type="number" id="budget" formControlName="budget">
+                            </mat-form-field> -->
+                        <app-form-input label="budget" [control]="newProjectForm.get('budget')" type="number" placeholder="Write Project Budget"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Project Manager</mat-label>
+                                <mat-select formControlName="pm" [required]="newProjectForm.get('type')?.value == '2'">
+                                    <mat-option *ngFor="let pm of PMs" [value]='pm.key'>{{pm.username}}</mat-option>
+                                </mat-select>
+                            </mat-form-field> -->
+                        <label for="dropdown">Project Manager</label>
+                        <span class="p-float-label w-100">
+                                <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="PMs"
+                                formControlName="pm" optionLabel="username" optionValue="key"
+                                 class="w-100" placeholder="select project manager" [required]="newProjectForm.get('type')?.value == '2'"
+                                [ngClass]="{'is-invalid':!newProjectForm.get('pm')?.valid && newProjectForm.get('pm')?.touched}"></p-dropdown>
+                                <div *ngIf="!newProjectForm.get('pm')?.valid && newProjectForm.get('pm')?.touched" class="invalid-feedback">
+    
+                                    <small>Project Manager is Required</small>
+                                  </div>
+                            </span>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="newProjectForm.get('type')?.value == '1'">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Tech Lead</mat-label>
+                                <mat-select formControlName="tl">
+                                    <mat-option *ngFor="let tl of TLeads" [value]='tl.key'>{{tl.username}}</mat-option>
+                                </mat-select>
+                            </mat-form-field> -->
+                        <label for="">Tech Lead</label>
+                        <span class="p-float-label w-100">
+                                <p-dropdown inputId="" [autoDisplayFirst]="false" [options]="TLeads"
+                                formControlName="tl" optionLabel="username" optionValue="key"
+                                 class="w-100" placeholder="select Tech Lead" ></p-dropdown>
+                            </span>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="newProjectForm.get('type')?.value == '1'">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Business Analyst</mat-label>
+                                <mat-select multiple formControlName="ba">
+                                    <mat-option *ngFor="let ba of BAs" [value]='ba.key'>{{ba.username}}</mat-option>
+                                </mat-select>
+                            </mat-form-field> -->
+                        <label for="">Business Analyst</label>
+                        <span class="p-float-label w-100">
+                                <p-multiSelect inputId=""  [options]="BAs"
+                                formControlName="ba" optionLabel="username" optionValue="key"
+                                 class="w-100" placeholder="select Business Analyst" ></p-multiSelect>
+                            </span>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="newProjectForm.get('type')?.value == '1'">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Team Memebers</mat-label>
+                                <mat-select multiple formControlName="devs">
+                                    <mat-option *ngFor="let dev of devs" [value]='dev.key'>{{dev.username}}</mat-option>
+                                </mat-select>
+                            </mat-form-field> -->
+                        <label for="">Team Memebers</label>
+                        <span class="p-float-label w-100">
+                                <p-multiSelect inputId=""  [options]="devs"
+                                formControlName="devs" optionLabel="username" optionValue="key"
+                                 class="w-100" placeholder="select Team Memebers" ></p-multiSelect>
+                            </span>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="newProjectForm.get('type')?.value == '1'">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Support Team</mat-label>
+                                <mat-select multiple formControlName="support">
+                                    <mat-option *ngFor="let sup of support_team" [value]='sup.key'>{{sup.username}}</mat-option>
+                                </mat-select>
+                            </mat-form-field> -->
+                        <label for="">Support Team</label>
+                        <span class="p-float-label w-100">
+                                <p-multiSelect inputId=""  [options]="support_team"
+                                formControlName="support" optionLabel="username" optionValue="key"
+                                 class="w-100" placeholder="select Support Team" ></p-multiSelect>
+                            </span>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Customer Info</mat-label>
+                                <mat-select formControlName="partner">
+                                    <mat-option *ngFor="let partner of allPartners" [value]='partner.id'>{{partner.partner_name}}</mat-option>
+                                </mat-select>
+                                <mat-error class="alert help-block" *ngIf="!newProjectForm.get('partner')?.valid && newProjectForm.touched">
+                                    Partner Is Required
+                                </mat-error>
+                            </mat-form-field> -->
+                        <label for="dropdown">Customer Info</label>
+                        <span class="p-float-label w-100">
+                                <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="allPartners"
+                                formControlName="partner" optionLabel="partner_name" optionValue="id"
+                                 class="w-100" placeholder="select Customer Info" [required]="newProjectForm.get('type')?.value == '2'"
+                                [ngClass]="{'is-invalid':!newProjectForm.get('partner')?.valid && newProjectForm.get('partner')?.touched}"></p-dropdown>
+                                <div *ngIf="!newProjectForm.get('partner')?.valid && newProjectForm.get('partner')?.touched" class="invalid-feedback">
+    
+                                    <small>Customer Info is Required</small>
+                                  </div>
+                            </span>
+                    </div>
+
+                </div>
+                <div class="row" *ngIf="!!errors">
+                    <p style="color: #f00;" *ngFor="let err of errors | keyvalue">
+                        <span *ngFor="let e of err | keyvalue">
+                                * {{e.value}}
+                                </span>
+                    </p>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 my-3">
+
+                        <button type="submit" class="btn submitFormBtn newProjectBtn w-100" [disabled]="newProjectForm.invalid" (click)="addProject()">Add New Project</button>
+                    </div>
+                </div>
+                <!-- <mat-divider class="my-3"></mat-divider>
+                    <label class="formLabelHeader">Customer Info : </label>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="col-lg-6 my-3">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label class="formLables">PCustomer Info artner</mat-label>
+                                    <mat-select formControlName="partner">
+                                        <mat-option *ngFor="let partner of allPartners" [value]='partner.id'>{{partner.partner_name}}</mat-option>
+                                    </mat-select>
+                                    <mat-error class="alert help-block" *ngIf="!newProjectForm.get('partner')?.valid && newProjectForm.touched">
+                                        Partner Is Required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div> -->
+            </div>
+        </form>
+
+    </div>
+    <!-- <div class="modal-footer justify-content-md-start">
+            <button class="btn submitFormBtn newProjectBtn w-px-200" data-dismiss="modal" (click)="addProject()" 
+            type="submit" [disabled]="!newProjectForm.invalid">Add New Project</button>
+        </div> -->
+
+
+    <!-- </ng-template> -->
+</p-sidebar>
+<!-- <ng-template #mymodal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Add New Project</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form (ngSubmit)="onSubmit(f)" #f="ngForm">
+            <div id="project-data">
+                <div class="container-fluid">
+                    <label class="formLabelHeader">Project Info : </label>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="titleProject">Title</label>
+                            <input class="form-control" type="text" placeholder="Title" [(ngModel)]="newProject.title" ngModel name="titleProject" required #titleProject="ngModel">
+                            <span class="help-block" *ngIf="!titleProject.valid && titleProject.touched" style="color: red;">
+                                Please enter a valid title
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="descProject">Description</label>
+                            <input class="form-control" name="descProject" type="text" placeholder="Description" [(ngModel)]="newProject.desc" [ngModelOptions]="{standalone: true}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="projectType">Type</label>
+                            <select class="form-control" name="projectType" id="projectType" [(ngModel)]="newProject.type" ngModel name="projectType" required #projectType="ngModel">
+                                <option value="poc">POC</option>
+                                <option value="project">Normal Project</option>
+                            </select>
+                            <span class="help-block" *ngIf="!projectType.valid && projectType.touched" style="color: red;">
+                                Please choose a valid project type
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="startDate">Start Date</label>
+                            <input class="form-control" name="startDate" id="startDate" type="date" placeholder="start_date" (change)="endDateCalculation()" [(ngModel)]="newProject.start_date" ngModel name="startDate" required #startDate="ngModel">
+                            <span class="help-block" *ngIf="!startDate.valid && startDate.touched" style="color: red;">
+                                Please enter a valid date
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="duration">Duration</label>
+                            <input class="form-control" name="duration" id="duration" type="number" min="1" placeholder="duration" (change)="endDateCalculation()" [(ngModel)]="newProject.duration" [ngModelOptions]="{standalone: true}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="endDate">End Date</label>
+                            <input class="form-control" name="endDate" id="endDate" type="text" placeholder="end_date" disabled [value]="newProject.end_date | date">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="budget">Budget (Optional)</label>
+                            <input class="form-control" name="budget" id="budget" type="number" placeholder="budget" [(ngModel)]="newProject.budget" [ngModelOptions]="{standalone: true}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="projectmanager">Project Manager</label>
+                            <mat-select class="form-control" name="projectmanager" id="projectmanager" [(ngModel)]="project_manager" ngModel name="projectManager" [required]="newProject.type == 'project'" #projectManager="ngModel">
+                                <mat-option *ngFor="let pm of PMs" value="{{pm.key}}">{{pm.username}}</mat-option>
+                            </mat-select>
+                            <span class="help-block" *ngIf="!projectManager.valid && projectManager.touched" style="color: red;">
+                                Please enter a valid project manager
+                            </span>
+                        </div>
+                        <div class="col-md-4" *ngIf="currentUser.accPosition == accPositionEnum.MANAGER || currentUser.department == DepartmentEnum.MANAGEMENT && newProject.type == 'poc'">
+                            <label for="BA">Business Analyst</label>
+                            <mat-select class="form-control" name="BA" id="BA" multiple [(ngModel)]="project_business_analysis" [ngModelOptions]="{standalone: true}">
+                                <mat-option *ngFor="let ba of BAs" value="{{ba.key}}">{{ba.username}}</mat-option>
+                                <mat-option *ngFor="let dev of devs" value="{{dev.key}}">{{dev.username}}</mat-option>
+
+                            </mat-select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" *ngIf="currentUser.accPosition == accPositionEnum.MANAGER || currentUser.department == DepartmentEnum.MANAGEMENT && newProject.type == 'poc'">
+                            <label for="teamMembers">Team Memebers</label>
+                            <mat-select class="form-control" name="teamMembers" id="teamMembers" multiple [(ngModel)]="project_team_mempers" [ngModelOptions]="{standalone: true}">
+                                <mat-option *ngFor="let dev of devs" value="{{dev.key}}">{{dev.username}}</mat-option>
+                                <mat-option *ngFor="let ba of BAs" value="{{ba.key}}">{{ba.username}}</mat-option>
+                            </mat-select>
+
+                        </div>
+                        <div class="col-md-4" *ngIf="currentUser.accPosition == accPositionEnum.MANAGER || currentUser.department == DepartmentEnum.MANAGEMENT && newProject.type == 'poc'">
+                            <label for="techLead">Tech Lead</label>
+                            <mat-select class="form-control" name="techLead" id="techLead" [(ngModel)]="tech_leads" [ngModelOptions]="{standalone: true}">
+                                <mat-option *ngFor="let tech of TLeads" value="{{tech.key}}">{{tech.username}}</mat-option>
+                            </mat-select>
+                        </div>
+                    </div>
+
+                    <mat-divider class="my-3"></mat-divider>
+
+                    <label class="formLabelHeader">Customer Info : </label>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="customerName">Name</label>
+                            <input class="form-control" name="customerName" type="text" placeholder="Customer Name" [(ngModel)]="newProject.customerName" [ngModelOptions]="{standalone: true}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="phone">Phone Number</label>
+                            <input class="form-control" name="phone" type="text" placeholder="Customer Phone Number" [(ngModel)]="newProject.customerPhone" [ngModelOptions]="{standalone: true}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="customerEmail">Email</label>
+                            <input class="form-control" name="customerEmail" type="text" placeholder="Customer Email" [(ngModel)]="newProject.customerEmail" [ngModelOptions]="{standalone: true}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="customerAdress">Address</label>
+                            <input class="form-control" name="customerAdress" type="text" placeholder="Customer Address" [(ngModel)]="newProject.customerAddress" [ngModelOptions]="{standalone: true}">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-outline-secondary btn-sm" data-dismiss="modal" (click)="addProject()" type="submit" [disabled]="!f.valid">Create</button>
+    </div>
+</ng-template> -->

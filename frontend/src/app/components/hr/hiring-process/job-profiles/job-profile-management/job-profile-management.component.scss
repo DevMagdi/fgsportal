@@ -1,0 +1,27 @@
+@import '../../../../../colors';
+
+.jop-profile-status{
+    .p-dropdown{
+
+        width: 100%;
+        .p-dropdown-label {
+            padding: 0.575rem 0.75rem;
+        }
+    }
+}
+.jop-profile-select{
+    .p-multiselect{
+
+        width: 100%;
+        .p-multiselect-label {
+            padding: 0.575rem 0.75rem;
+        }
+    }
+}
+.add-skill-icon{
+    background: $softThemeColor;
+    padding: 6px;
+    border-radius: 50%;
+    color: $mainThemeColor;
+}
+

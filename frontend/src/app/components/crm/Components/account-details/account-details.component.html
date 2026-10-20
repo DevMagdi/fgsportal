@@ -1,0 +1,2262 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="leadDetailsLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+<div class="leadDetails mt-2 mx-2" *ngIf="!!currentLeadDetails">
+    <div class="lead_header">
+
+        <div class="d-flex justify-content-between">
+            <div>
+
+                <h4 class=" pt-3 header_title"><span class="">
+                        <i class="pi pi-arrow-left backIcon mr-1" [routerLink]="['/CRM/opportunity/']"></i>CRM /Leads
+                    </span> </h4>
+            </div>
+
+            <div class="dropdown">
+                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <i class="bx bx-dots-vertical-rounded"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="javascript:void(0);" (click)="convertToLead()"
+                        *ngIf="currentLeadDetails.lead_sub_status_id != '4'"><i class="bx bx-arrow-from-right me-1"></i>
+                        Convert To Lead</a>
+                    <a class="dropdown-item" href="javascript:void(0);" (click)="reopen()"
+                        *ngIf="currentLeadDetails.lead_sub_status_id == '4'"><i class="bx bx-arrow-from-right me-1"></i>
+                        RE-Open</a>
+                    <a class="dropdown-item" href="javascript:void(0);" (click)="closeContact('11')"><i
+                            class="bx bx-archive-in me-1"></i> Archive</a>
+                    <a class="dropdown-item" href="javascript:void(0);" (click)="closeContact('12')"><i
+                            class="bx bx-edit-alt me-1"></i> Not Interested</a>
+                    <a class="dropdown-item" href="javascript:void(0);" (click)="closeContact('14')"><i
+                            class="bx bx-dislike me-1"></i> Disqualified</a>
+                    <a class="dropdown-item" href="javascript:void(0);" (click)="deleteContact()"><i
+                            class="bx bx-trash me-1"></i> Delete</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="lead_header_content row px-2 mainInfo">
+
+            <div class="col-md-3">
+                <div class="lead_name">
+                    <h4 class="main_title editMode mb-1" (click)="openEditCurrentLeadDetails('title')">
+                        {{currentLeadDetails.title}}
+                    </h4>
+                    <div class="myDialog card" *ngIf="!!editLeadName" data-aos="fade-in">
+                        <div class="dHeader my-2">
+                            Rename this deal:
+                        </div>
+                        <div class="dContent my-2">
+                            <input type="text" class="form-control" [(ngModel)]="newValue">
+                        </div>
+                        <div class="card-footer dFooter">
+                            <button class="btn cancelBTN mx-1"
+                                (click)="editLeadName = !editLeadName;cancelEdit()">cancel</button>
+                            <button class="btn btnStyle mx-1" (click)="saveEditLead('title')">Save</button>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="cost ">
+                    <h4 class="editMode mb-0" (click)="openEditCurrentLeadDetails('cost')"
+                        *ngIf="!currentLeadDetails.cost">EGP 0</h4>
+                    <h4 class="editMode mb-0" (click)="openEditCurrentLeadDetails('cost')"
+                        *ngIf="!!currentLeadDetails.cost">{{currentLeadDetails.cost |
+                        currency:currentLeadDetails.currency?currentLeadDetails.currency:''}}</h4>
+                    <div class="myDialog card" *ngIf="!!editCost && !costDetailsFormOpened" data-aos="fade-in">
+                        <div class="dHeader my-2">
+                            Change the value:
+                        </div>
+                        <div class="dContent my-2">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-8 p-0 m-0">
+                                        <input type="number" class="form-control" [(ngModel)]="newValue">
+                                    </div>
+                                    <div class="col-4 p-0 m-0">
+                                        <mat-select class="form-control" [(ngModel)]="currentLeadDetails.currency">
+                                            <mat-option *ngFor="let country of CurrencyList"
+                                                [value]="country.currencyCode">
+                                                <div
+                                                    class="country-item d-flex align-items-center justify-content-start">
+                                                    <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                        width="17px" height="20px"
+                                                        [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                    <div>{{country.currencyName}}</div>
+                                                </div>
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                                <!-- <div class="row">
+                                        <div class="col-12">
+                                            <a href="javascript:void(0)" (click)="costDetailsFormOpened = true">Details</a>
+                                        </div>
+                                    </div> -->
+                            </div>
+                        </div>
+                        <div class="card-footer dFooter">
+                            <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                            <button class="btn btnStyle mx-1" (click)="saveEditLead('cost')">Save</button>
+                        </div>
+                    </div>
+                    <div class="myDialog card" *ngIf="!!editCost && !!costDetailsFormOpened" data-aos="fade-in">
+                        <div class="dHeader my-2">
+                            Change the value:
+                        </div>
+                        <div class="dContent my-2">
+                            <app-lead-cost-details-form (dataEvent)="costDetailsFormOpened = false;receiveData($event)"
+                                [leadData]="currentLeadDetails"></app-lead-cost-details-form>
+                        </div>
+                        <div class="card-footer dFooter">
+                            <button class="btn cancelBTN mx-1" (click)="costDetailsFormOpened = false">cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product">
+                    <a href="javascript:void(0);" *ngIf="!!currentLeadDetails.product_name" class="addProduct ml-2"
+                        (click)="openEditCurrentLeadDetails('product_id')">
+                        {{currentLeadDetails.product_name}}
+                    </a>
+                    <a href="javascript:void(0);" *ngIf="!currentLeadDetails.product_name" class="addProduct ml-2"
+                        (click)="openEditCurrentLeadDetails('product_id')">
+                        + Add Product
+                    </a>
+                    <div class="myDialog card" *ngIf="!!editProduct" data-aos="fade-in">
+                        <div class="dHeader my-2">
+                            Add products:
+                        </div>
+                        <div class="dContent my-2">
+                            <mat-select class="form-control" [(ngModel)]="newValue">
+                                <mat-option *ngFor="let product of products"
+                                    [value]='product.id'>{{product.product_name}}</mat-option>
+                            </mat-select>
+                        </div>
+                        <div class="card-footer dFooter">
+                            <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                            <button class="btn btnStyle mx-1" (click)="saveEditLead('product_id')">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="" *ngIf="currentLeadDetails.lead_sub_status_id != '4'">
+                    <div class="">
+                        <div class="SubstatusChange">
+                            <div class="steps" id="stepsContainer">
+                                <ng-container *ngFor="let status of contactSubStatus;let i=index">
+                                    <div class="first active" (click)="selectSteps(i);this.editLeadSubstatus(status.id)"
+                                        routerLinkActive="active" *ngIf="i==0"
+                                        [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+                                    <div class="middle" (click)="selectSteps(i);this.editLeadSubstatus(status.id)"
+                                        *ngIf="i > 0 && i != contactSubStatus.length - 1"
+                                        [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+
+                                    <div class="last" (click)="selectSteps(i);this.editLeadSubstatus(status.id)"
+                                        *ngIf="i == contactSubStatus.length - 1"
+                                        [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+
+                                </ng-container>
+                            </div>
+                        </div>
+                        <p class="main_title">{{currentLeadDetails.lead_sub_status_name}}</p>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-3 text-left">
+                        <p>Type</p>
+                    </div>
+                    <div class="col-7">
+
+                        <div class="subSubTitle mx-2">
+                            <div (click)="openEditCurrentLeadDetails('labels')">
+                                <a *ngFor="let label of currentLeadDetails.label;let isLast = last">
+                                    <span class=" editMode">
+                                        {{label.label_name}}
+                                        <span *ngIf="!isLast">,</span>
+                                    </span>
+                                </a>
+                            </div>
+
+                            <div class="myDialog card" *ngIf="!!editLabels" data-aos="fade-in">
+                                <div class="dHeader my-2">
+                                    Change Labels:
+                                </div>
+                                <div class="dContent my-2">
+                                    <mat-select [compareWith]="comparer" class="form-control " multiple="true"
+                                        [(ngModel)]="currentLeadDetails.label">
+                                        <mat-option *ngFor="let label of lables" [value]="label">
+                                            <span class="labelOption"
+                                                [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                                {{label.label_name}}
+                                            </span>
+                                        </mat-option>
+                                    </mat-select>
+                                </div>
+                                <div class="card-footer dFooter">
+                                    <button class="btn cancelBTN mx-1"
+                                        (click)="editLabels = !editLabels;cancelEdit()">cancel</button>
+                                    <button class="btn btnStyle mx-1" (click)="saveEditLead('label')">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 text-left">
+                        <p class="dLabel">
+                            Source
+                        </p>
+                    </div>
+                    <div class="col-7 text-left">
+                        <p *ngIf="!editCampaign" (click)="openEditCurrentLeadDetails('campaign_id')" class="dData">
+                            <span *ngIf="!!currentLeadDetails.campagin_id" class="subSubTitle editMode">
+                                {{currentLeadDetails.campagin_name}}
+                            </span>
+                            <span *ngIf="!currentLeadDetails.campagin_id">
+                                + Add Source
+                            </span>
+                        </p>
+                        <div class="myDialog card" *ngIf="!!editCampaign" data-aos="fade-in">
+                            <div class="dHeader my-2">
+                                Change Source:
+                            </div>
+                            <div class="dContent my-2">
+
+                                <mat-select class="form-control" [(ngModel)]="newValue">
+                                    <mat-option *ngFor="let camp of allCampaign"
+                                        [value]='camp.id'>{{camp.campagin_name}}</mat-option>
+                                </mat-select>
+                            </div>
+                            <div class="card-footer dFooter my-2">
+                                <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                <button class="btn btnStyle mx-1" (click)="saveEditLead('campaign_id')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 text-left"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3 text-left">
+                        <p class="dLabel">
+                            Organization
+                        </p>
+                    </div>
+                    <div class="col-7 text-left">
+                        <p *ngIf="!editPartner" (click)="openEditCurrentLeadDetails('partner')" class="dData">
+                            <span *ngIf="!!currentLeadDetails.partner_name" class="subSubTitle editMode">
+                                {{currentLeadDetails.partner_name}}
+                            </span>
+                            <span *ngIf="!currentLeadDetails.partner_name">
+                                + Add Organization
+                            </span>
+                        </p>
+
+                        <div class="myDialog card" *ngIf="!!editPartner" data-aos="fade-in">
+                            <div class="dHeader my-2">
+                                Change Organization:
+                            </div>
+                            <div class="dContent my-2">
+                                <div class="input-group input-group-merge">
+                                    <form [formGroup]="changePartnerForm">
+                                        <input type="text" id="Organization" class="form-control"
+                                            placeholder="ACME Inc." formControlName="partner_id"
+                                            [matAutocomplete]="auto">
+                                        <span class="input-group-text isnew" *ngIf="!!newOrgAdded">
+                                            <i class="bx bx-star"></i>
+                                            New
+                                        </span>
+                                    </form>
+                                </div>
+                                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                                    (optionSelected)="getFromHTML($event)">
+                                    <mat-option *ngFor="let partner of filteredOptions | async" [value]="partner">
+                                        {{partner.partner_name}}
+                                    </mat-option>
+                                    <mat-option *ngIf="!!addNewOrgnization" data-aos="fade-in">
+                                        No Organization Found
+                                        <!-- <button (click)="addPartner(changePartnerForm.get(['partner_id'])?.value)" type="button" class="rounded-pill btn-icon btn-outline-info">
+                                                    <span class="tf-icons bx bx-plus"></span>
+                                                </button> -->
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </div>
+
+                            <div class="card-footer dFooter my-2">
+                                <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                <button class="btn btnStyle mx-1" (click)="saveEditLead('partner_id')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 text-left"></div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-3 text-left">
+                        <p class="dLabel">
+                            Contact
+                        </p>
+                    </div>
+                    <div class="col-7 text-left">
+                        <p *ngIf="!editContact" (click)="openEditCurrentLeadDetails('contact_id')" class="dData">
+                            <span *ngIf="!!currentLeadDetails.contact_name" class="subSubTitle editMode">
+                                {{currentLeadDetails.contact_name}}
+                            </span>
+                            <span *ngIf="!currentLeadDetails.contact_name">
+                                + Add Contact
+                            </span>
+                        </p>
+
+                        <div class="myDialog card" *ngIf="!!editContact" data-aos="fade-in">
+                            <div class="dHeader my-2">
+                                Change Organization:
+                            </div>
+                            <div class="dContent my-2">
+
+                                <div class="input-group input-group-merge">
+                                    <p-autoComplete placeholder="Ex. Ahmed" inputStyleClass="form-control"
+                                        [completeOnFocus]="true" [(ngModel)]="newValue" [showEmptyMessage]="true"
+                                        [suggestions]="filteredContacts" (completeMethod)="filterContacts($event)"
+                                        field="name" [minLength]="1"></p-autoComplete>
+                                </div>
+                            </div>
+
+                            <div class="dFooter card-footer my-2">
+                                <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                <button class="btn btnStyle mx-1" (click)="saveEditLead('contact_id')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 text-left"></div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="row">
+                    <div class="col-3 text-left">
+                        <p class="dLabel">
+                            Address
+                        </p>
+                    </div>
+                    <div class="col-7 text-left">
+                        <p *ngIf="!editAddress" class="dData">
+                            <span *ngIf="!!currentLeadDetails.address" class="subSubTitle editMode">
+                                {{currentLeadDetails.address}}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-2 text-left"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3 text-left">
+                        <p class="dLabel">
+                            Email
+                        </p>
+                    </div>
+                    <div class="col-7 text-left">
+                        <p *ngIf="!editEmail" class="dData">
+                            <span *ngIf="!!currentLeadDetails.email">
+                                <!-- {{currentLeadDetails.email}} -->
+                                <a href="mailto:{{currentLeadDetails.email}}?subject=welcome from FGS &body=Hello,{{currentLeadDetails.contact_name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}"
+                                    target="_blank" rel="noopener noreferrer">
+                                    {{currentLeadDetails.email}}
+                                </a>
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-2 text-left"></div>
+                </div>
+
+                <div class="row phoneRow" *ngFor="let phone of currentLeadDetails.phone;let i=index">
+                    <div class="col-3 text-left">
+                        <p class="dLabel" *ngIf="!phoneOnEditMode[i]" class="dData">
+                            {{phone.phone_type}}
+                        </p>
+                    </div>
+                    <div class="col-7 text-left">
+                        <p *ngIf="!phoneOnEditMode[i]" class="dData">
+                            <a href="tel:{{phone.country_code}}{{phone.phone}}" *ngIf="phone.phone_type != 'Whatsapp'"
+                                [matTooltip]="'Call Phone ('+phone.phone+' )'">
+                                {{phone.country_code?phone.country_code :'+2'}}-{{phone.phone}}
+                            </a>
+                            <a href="https://api.whatsapp.com/send?phone={{phone.phone}}" target="_blank"
+                                *ngIf="phone.phone_type == 'Whatsapp'"
+                                [matTooltip]="'Message ( '+phone.phone+' ) On Whatsapp'">
+                                {{phone.phone}}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 text-left">
+
+                        <p>Owner</p>
+
+                    </div>
+                    <div class="col-7 text-left owner">
+
+                        <div class="OwnerData">
+                            <p class="salesName subSubTitle editMode " (click)="openEditCurrentLeadDetails('sales_id')"
+                                *ngIf="currentUser.accRole != AccountRoleEnum.SALES ||
+                                (currentUser.department == departmentEnum.Business_Development && 
+                                currentUser.accPosition == AccountPositionsEnum.MANAGER);else showOwner">
+                                {{currentLeadDetails.sales_name ? currentLeadDetails.sales_name :
+                                currentLeadDetails.user_creator_name}}
+                                <!-- <i class="pi pi-angle-down" 
+                                    *ngIf="currentUser.accRole != AccountRoleEnum.SALES ||
+                                     (currentUser.department == departmentEnum.Business_Development && 
+                                     currentUser.accPosition == AccountPositionsEnum.MANAGER)"
+                                    ></i> -->
+                            </p>
+                            <ng-template #showOwner>
+
+                                <p class="subSubTitle">
+
+                                    {{currentLeadDetails.sales_name ? currentLeadDetails.sales_name :
+                                    currentLeadDetails.user_creator_name}}
+                                </p>
+
+                            </ng-template>
+
+
+                            <div class="myDialog card" *ngIf="!!editOwner" data-aos="fade-in">
+                                <div class="dHeader my-2">
+                                    Transfer ownership:
+                                </div>
+                                <div class="dContent my-2">
+                                    <mat-select class="form-control" [(ngModel)]="newValue">
+                                        <mat-option *ngFor="let sales of salesTeam"
+                                            [value]='sales.key'>{{sales.username}}</mat-option>
+                                    </mat-select>
+                                </div>
+                                <div class="dFooter my-2">
+                                    <button class="btn cancelBTN m-1"
+                                        (click)="editOwner = !editOwner;cancelEdit()">cancel</button>
+                                    <button class="btn btnStyle m-1" (click)="saveEditLead('sales_id')">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+
+                <div class="row">
+                    <div class="col-3">
+                        date
+                    </div>
+                    <div class="col-7 d-flex justify-content-start">
+                        <div class="closeDate">
+                            <p (click)="openEditCurrentLeadDetails('expected_close_date')">
+                                <!-- <i class="pi pi-flag coloredIcon"></i> -->
+                                <span *ngIf="!!currentLeadDetails.expected_close_date">
+                                    {{currentLeadDetails.expected_close_date | date:'longDate'}}
+                                </span>
+                                <span *ngIf="!currentLeadDetails.expected_close_date">
+                                    + Expected Close Date
+                                </span>
+                            </p>
+                            <div class="myDialog card" *ngIf="!!editDate" data-aos="fade-in">
+                                <div class="dHeader my-2">
+                                    Expected End Date:
+                                </div>
+                                <div class="dContent my-2">
+                                    <input type="date" class="form-control" [(ngModel)]="newValue">
+                                </div>
+                                <div class="card-footer dFooter">
+                                    <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                                    <button class="btn btnStyle mx-1"
+                                        (click)="saveEditLead('expected_close_date')">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-3" matTooltip="Actual Closing Date">
+                        ACD
+                    </div>
+                    <div class="col-7 d-flex justify-content-start">
+                        <div class="ACD">
+                            <p (click)="openEditCurrentLeadDetails('actual_closing_date')">
+                                <!-- <i class="pi pi-flag coloredIcon"></i> -->
+                                <span *ngIf="!!currentLeadDetails.actual_closing_date">
+                                    {{currentLeadDetails.actual_closing_date | date:'longDate'}}
+                                </span>
+                                <span *ngIf="!currentLeadDetails.actual_closing_date">
+                                    + Actual Close Date
+                                </span>
+                            </p>
+                            <div class="myDialog card" *ngIf="!!editACD" data-aos="fade-in">
+                                <div class="dHeader my-2">
+                                    Actual End Date:
+                                </div>
+                                <div class="dContent my-2">
+                                    <input type="date" class="form-control" [(ngModel)]="newValue">
+                                </div>
+                                <div class="card-footer dFooter">
+                                    <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                                    <button class="btn btnStyle mx-1"
+                                        (click)="saveEditLead('actual_closing_date')">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 text-left">
+                        <p class="dLabel">
+                            Notes
+                        </p>
+                    </div>
+                    <div class="col-7 text-left">
+                        <p *ngIf="!editNotes" class="dData" (click)="openEditCurrentLeadDetails('notes')">
+                            <span *ngIf="!!currentLeadDetails.notes">
+                                {{currentLeadDetails.notes}}
+                            </span>
+                        </p>
+                        <div *ngIf="!!editNotes" data-aos="fade-in">
+                            <textarea [(ngModel)]="newValue" class="form-control"></textarea>
+                            <div class="formFooter my-2">
+                                <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                <button class="btn btnStyle mx-1" (click)="saveEditLead('notes')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2 text-left"></div>
+                </div>
+                <div class="closeLead">
+
+                    <div class="winAndLose mx-1">
+                        <button class="btn requestPocBTN mx-1" id="openPocReqBTN" style="display: none;"
+                            data-bs-toggle="modal" data-bs-target="#modalCenter"
+                            (click)="openRequestForPOCModal()">Requert POC</button>
+                        <button class="btn requestPocBTN mx-1" id="openRFPReqBTN" style="display: none;"
+                            data-bs-toggle="modal" data-bs-target="#RFPModal" (click)="getMyRFPConfigList()">Requert
+                            RFP</button>
+                        <div *ngIf="currentLeadDetails.status_id == '3'">
+                            <button class="btn wonBTN mx-1" (click)="won()">Won</button>
+                            <button class="btn lostBTN mx-1" (click)="lost()">Lost</button>
+                        </div>
+                        <div *ngIf="currentLeadDetails.status_id == '4'">
+                            <button class="btn wonBTN mx-1" disabled
+                                *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.WON">Won</button>
+                            <button class="btn lostBTN mx-1" disabled
+                                *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.LOST">Lost</button>
+                            <button class="btn btn-outline-secondary mx-1" disabled
+                                *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.Archive">Archived</button>
+                            <button class="btn btn-outline-secondary mx-1" disabled
+                                *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.Not_Interested">Not
+                                Interested</button>
+                            <button class="btn btn-outline-secondary mx-1" disabled
+                                *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.Disqualified">Disqualified</button>
+                            <button *ngIf="currentLeadDetails.status_id == '4'" class="btn btn-outline-dark mx-1"
+                                (click)="reopen()">RE-Open</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <p-tabView [(activeIndex)]="activeIndex">
+        <p-tabPanel header="Info">
+            <div class="container-fluid">
+                <!-- removed code -->
+
+                <div class="row mt-4">
+                    <div class="col-4">
+
+                        <div class="requestForPOC my-1" *ngIf="rfpRequests.length > 0">
+                            <div class="card border-0">
+                                <h3 class="fw-bold pt-2 px-4 pb-0 text-dark">
+                                    Recent RFP Request
+                                </h3>
+                                <div class="card-body p-0">
+                                    <div class="container-fluid">
+                                        <div class="example-box" *ngFor="let req of rfpRequests;let i=index">
+                                            <div class="d-flex justify-content-between align-items-center">
+
+                                                <div>
+
+                                                    <h3>
+                                                        {{req.request_rfp_title}}
+                                                    </h3>
+                                                    <p>
+                                                        <a target="_blank" href="#p-panel-{{i}}">See More</a>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <svg (click)="activeIndex=2" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M8.90961 20.67C8.71961 20.67 8.52961 20.6 8.37961 20.45C8.08961 20.16 8.08961 19.68 8.37961 19.39L14.8996 12.87C15.3796 12.39 15.3796 11.61 14.8996 11.13L8.37961 4.61002C8.08961 4.32002 8.08961 3.84002 8.37961 3.55002C8.66961 3.26002 9.14961 3.26002 9.43961 3.55002L15.9596 10.07C16.4696 10.58 16.7596 11.27 16.7596 12C16.7596 12.73 16.4796 13.42 15.9596 13.93L9.43961 20.45C9.28961 20.59 9.09961 20.67 8.90961 20.67Z"
+                                                            fill="#74619B" />
+                                                    </svg>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="requestForPOC my-4" *ngIf="pocRequests.length > 0">
+                            <div class="card border-0">
+                                <h3 class="fw-bold pt-2 px-4 pb-0 text-dark">
+                                    Recent POC Request
+                                </h3>
+                                <div class="card-body p-0">
+                                    <div class="container-fluid">
+                                        <div class="example-box" *ngFor="let req of pocRequests;let i=index">
+
+                                            <div class="d-flex justify-content-between align-items-center">
+
+                                                <div>
+
+                                                    <h3>
+                                                        {{req.request_poc_title}}
+                                                    </h3>
+                                                    <p>
+                                                        <a target="_blank" href="#p-panel-{{i}}">See More</a>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <svg (click)="activeIndex=1" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M8.90961 20.67C8.71961 20.67 8.52961 20.6 8.37961 20.45C8.08961 20.16 8.08961 19.68 8.37961 19.39L14.8996 12.87C15.3796 12.39 15.3796 11.61 14.8996 11.13L8.37961 4.61002C8.08961 4.32002 8.08961 3.84002 8.37961 3.55002C8.66961 3.26002 9.14961 3.26002 9.43961 3.55002L15.9596 10.07C16.4696 10.58 16.7596 11.27 16.7596 12C16.7596 12.73 16.4796 13.42 15.9596 13.93L9.43961 20.45C9.28961 20.59 9.09961 20.67 8.90961 20.67Z"
+                                                            fill="#74619B" />
+                                                    </svg>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <div class="leadPersonDetails my-1">
+                            <div class="card">
+                                <div class="my-card-title py-3">
+                                    Info
+                                </div>
+                                
+                                <div class="card-body">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel">
+                                                    Type
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!editType" (click)="openEditCurrentLeadDetails('type')" class="dData">
+                                                    <span *ngIf="!!currentLeadDetails.lead_type_name">
+                                                        {{currentLeadDetails.lead_type_name}}
+                                                    </span>
+                                                    <span *ngIf="!currentLeadDetails.lead_type_name">
+                                                        + Add Type
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editType" data-aos="fade-in">
+                                                    <mat-select class="form-control" [(ngModel)]="newValue">
+                                                        <mat-option *ngFor="let type of contactTypes" [value]='type.id'>{{type.lead_type_name}}</mat-option>
+                                                    </mat-select>
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn btnStyle mx-1" (click)="saveEditLead('lead_type_id')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-2 text-left"></div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel">
+                                                    Source
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!editCampaign" (click)="openEditCurrentLeadDetails('campaign_id')" class="dData">
+                                                    <span *ngIf="!!currentLeadDetails.campagin_id">
+                                                        {{currentLeadDetails.campagin_name}}
+                                                    </span>
+                                                    <span *ngIf="!currentLeadDetails.campagin_id">
+                                                        + Add Source
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editCampaign" data-aos="fade-in">
+                                                    <mat-select class="form-control" [(ngModel)]="newValue">
+                                                        <mat-option *ngFor="let camp of allCampaign" [value]='camp.id'>{{camp.campagin_name}}</mat-option>
+                                                    </mat-select>
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn btnStyle mx-1" (click)="saveEditLead('campaign_id')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-2 text-left"></div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel">
+                                                    Organization
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!editPartner" (click)="openEditCurrentLeadDetails('partner')" class="dData">
+                                                    <span *ngIf="!!currentLeadDetails.partner_name">
+                                                        {{currentLeadDetails.partner_name}}
+                                                    </span>
+                                                    <span *ngIf="!currentLeadDetails.partner_name">
+                                                        + Add Organization
+                                                    </span>
+                                                </p>
+
+                                                <div *ngIf="!!editPartner" data-aos="fade-in">
+                                                    <div class="input-group input-group-merge">
+                                                        <form [formGroup]="changePartnerForm">
+                                                            <input type="text" id="Organization" class="form-control" placeholder="ACME Inc." formControlName="partner_id" [matAutocomplete]="auto">
+                                                            <span class="input-group-text isnew" *ngIf="!!newOrgAdded">
+                                                                <i class="bx bx-star"></i>
+                                                                New
+                                                            </span>
+                                                        </form>
+                                                    </div>
+                                                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getFromHTML($event)">
+                                                        <mat-option *ngFor="let partner of filteredOptions | async" [value]="partner">
+                                                            {{partner.partner_name}}
+                                                        </mat-option>
+                                                        <mat-option *ngIf="!!addNewOrgnization" data-aos="fade-in">
+                                                            No Organization Found
+                                                            <button (click)="addPartner(changePartnerForm.get(['partner_id'])?.value)" type="button" class="rounded-pill btn-icon btn-outline-info">
+                                                                <span class="tf-icons bx bx-plus"></span>
+                                                            </button>
+                                                        </mat-option>
+                                                    </mat-autocomplete>
+
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn btnStyle mx-1" (click)="saveEditLead('partner_id')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-2 text-left"></div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel">
+                                                    Contact
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!editContact" (click)="openEditCurrentLeadDetails('contact_id')" class="dData">
+                                                    <span *ngIf="!!currentLeadDetails.contact_name">
+                                                        {{currentLeadDetails.contact_name}}
+                                                    </span>
+                                                    <span *ngIf="!currentLeadDetails.contact_name">
+                                                        + Add Contact
+                                                    </span>
+                                                </p>
+
+                                                <div *ngIf="!!editContact" data-aos="fade-in">
+                                                    <div class="input-group input-group-merge">
+                                                        <p-autoComplete placeholder="Ex. Ahmed" inputStyleClass="form-control" [completeOnFocus]="true" [(ngModel)]="newValue" [showEmptyMessage]="true" [suggestions]="filteredContacts" (completeMethod)="filterContacts($event)" field="name" [minLength]="1"></p-autoComplete>
+                                                    </div>
+
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn btnStyle mx-1" (click)="saveEditLead('contact_id')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-2 text-left"></div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel">
+                                                    Address
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!editAddress" class="dData">
+                                                    <span *ngIf="!!currentLeadDetails.address">
+                                                        {{currentLeadDetails.address}}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="col-2 text-left"></div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel">
+                                                    Email
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!editEmail" class="dData">
+                                                    <span *ngIf="!!currentLeadDetails.email">
+                                                        
+                                                        <a href="mailto:{{currentLeadDetails.email}}?subject=welcome from FGS &body=Hello,{{currentLeadDetails.contact_name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}" target="_blank" rel="noopener noreferrer">
+                                                            {{currentLeadDetails.email}}
+                                                        </a>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="col-2 text-left"></div>
+                                        </div>
+
+                                        <div class="row phoneRow" *ngFor="let phone of currentLeadDetails.phone;let i=index">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel" *ngIf="!phoneOnEditMode[i]" class="dData">
+                                                    {{phone.phone_type}}
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!phoneOnEditMode[i]" class="dData">
+                                                    <a href="tel:{{phone.country_code}}{{phone.phone}}" *ngIf="phone.phone_type != 'Whatsapp'" [matTooltip]="'Call Phone ('+phone.phone+' )'">
+                                                        {{phone.country_code?phone.country_code :'+2'}}-{{phone.phone}}  
+                                                    </a>
+                                                    <a href="https://api.whatsapp.com/send?phone={{phone.phone}}" target="_blank" *ngIf="phone.phone_type == 'Whatsapp'" [matTooltip]="'Message ( '+phone.phone+' ) On Whatsapp'">
+                                                        {{phone.phone}}  
+                                                    </a>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-3 text-left">
+                                                <p class="dLabel">
+                                                    Notes
+                                                </p>
+                                            </div>
+                                            <div class="col-7 text-left">
+                                                <p *ngIf="!editNotes" class="dData" (click)="openEditCurrentLeadDetails('notes')">
+                                                    <span *ngIf="!!currentLeadDetails.notes">
+                                                        {{currentLeadDetails.notes}}
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editNotes" data-aos="fade-in">
+                                                    <textarea [(ngModel)]="newValue" class="form-control"></textarea>
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1" (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn btnStyle mx-1" (click)="saveEditLead('notes')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-2 text-left"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div> -->
+
+
+                    </div>
+                    <div class="col-8">
+                        <div class="leadActivity">
+                            <div class="card">
+                                <div class="sidebarActivity">
+                                    <div class="new my-2">
+                                        <p-tabMenu [model]="items" #tab [activeItem]="activeItem"
+                                            (click)="selectActiveTab(tab)"></p-tabMenu>
+                                        <div class="card" *ngIf="activeItem.label == 'Notes' && !!openNotesForm">
+                                            <form [formGroup]="newActivityForm" (ngSubmit)="addQuickNote()">
+                                                <p-editor [modules]="quillOPT" formControlName="comment"
+                                                    [style]="{'height':'100px'}">
+                                                    <ng-template pTemplate="header">
+                                                        <span class="ql-format-group">
+                                                        </span>
+                                                    </ng-template>
+                                                </p-editor>
+                                                <div class="ActivityFormFooter">
+                                                    <button type="button"
+                                                        (click)="openNotesForm = !openNotesForm;newActivityForm.reset()"
+                                                        class="btn cancelBTN btn-sm mx-1">Discard</button>
+                                                    <button type="submit" class="btn btnStyle btn-sm mx-1">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="card openNotesForm pl-3 d-flex justify-content-center"
+                                            (click)="openNotesForm = !openNotesForm"
+                                            *ngIf="activeItem.label == 'Notes' && !openNotesForm">
+                                            Click Here To Add Note...
+                                        </div>
+
+                                        <div class="card openActivityForm pl-3 d-flex justify-content-center"
+                                            (click)="openActivityForm = !openActivityForm;newActivityForm.reset();activityOnEditMOde=false;"
+                                            *ngIf="activeItem.label == 'Activity' && !openActivityForm">
+                                            Click Here To create an activity...
+                                        </div>
+                                        <div class="card" *ngIf="activeItem.label == 'Activity'&& !!openActivityForm">
+                                            <form [formGroup]="newActivityForm" (ngSubmit)="submitSaveActivityForm()">
+
+                                                <div class="container-fluid">
+                                                    <div class="row my-2">
+                                                        <div class="col-12 my-2">
+                                                            <input type="text" class="form-control"
+                                                                formControlName="comment"
+                                                                [placeholder]="getSelectedActivity(newActivityForm.get(['type_id'])?.value)">
+                                                        </div>
+                                                        <div class="col-12 my-2">
+
+
+                                                            <p-selectButton [options]="ActivityTypesEnum | keyvalue"
+                                                                optionLabel="key" optionValue="value"
+                                                                formControlName="type_id"
+                                                                (onChange)="activityTypeChanged($event)">
+                                                                <ng-template let-type>
+                                                                    <div [matTooltip]="type.key">
+                                                                        <i *ngIf="type.value == ActivityTypesEnum.Call"
+                                                                            class="pi pi-phone selectBTN coloredIcon"></i>
+                                                                        <i *ngIf="type.value == ActivityTypesEnum.SendEmail"
+                                                                            class="pi pi-envelope selectBTN coloredIcon"></i>
+                                                                        <i *ngIf="type.value == ActivityTypesEnum.Meeting"
+                                                                            class="pi pi-users selectBTN coloredIcon"></i>
+                                                                        <i *ngIf="type.value == ActivityTypesEnum.Task"
+                                                                            class="pi pi-clock selectBTN coloredIcon"></i>
+                                                                        <i *ngIf="type.value == ActivityTypesEnum.Deadline"
+                                                                            class="pi pi-flag selectBTN coloredIcon"></i>
+                                                                        <span
+                                                                            *ngIf="type.value == ActivityTypesEnum.Lunch"
+                                                                            class="material-symbols-outlined selectBTN coloredIcon">
+                                                                            restaurant
+                                                                        </span>
+                                                                        <i *ngIf="type.value == ActivityTypesEnum.Other"
+                                                                            class="pi pi-check selectBTN coloredIcon"></i>
+                                                                        <i *ngIf="type.value == ActivityTypesEnum.Notes"
+                                                                            class="pi pi-book selectBTN coloredIcon"></i>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </p-selectButton>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row my-2">
+                                                        <div class="col-1 my-2">
+                                                            <i class="pi pi-clock clock coloredIcon"></i>
+                                                        </div>
+                                                        <div class="col-4 my-2">
+                                                            <input class="form-control" matInput type="datetime-local"
+                                                                id="fromDate" formControlName="start_date">
+                                                        </div>
+                                                        <div class="col-4 my-2">
+                                                            <input class="form-control" matInput type="datetime-local"
+                                                                id="toDate" formControlName="end_date">
+                                                        </div>
+                                                    </div>
+                                                    <hr>
+                                                    <div class="row my-2 " *ngIf="activityOnEditMOde">
+
+                                                        <div class="row"
+                                                            *ngIf="
+                                                        newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting || newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Call">
+                                                            <div class="col-12 my-2">
+                                                                <i class="pi pi-clock clock coloredIcon"></i>
+                                                                <span class="fw-bold">
+                                                                    Acutal Activity Time
+                                                                </span>
+                                                            </div>
+
+                                                            <div class="col-4 my-2">
+                                                                <input class="form-control" matInput placeholder="date"
+                                                                    type="date" id="activity_day_date"
+                                                                    formControlName="activity_day_date">
+                                                            </div>
+                                                            <div class="col-4 my-2">
+                                                                <input class="form-control" matInput placeholder="time"
+                                                                    type="time" id="toDate" format="HH:mm"
+                                                                    formControlName="activity_start_date">
+                                                            </div>
+
+                                                            <div class="col-4 my-2"
+                                                                *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting">
+                                                                <input class="form-control" matInput
+                                                                    placeholder="Duration" type="number" id="duration"
+                                                                    formControlName="duration">
+                                                            </div>
+
+                                                        </div>
+
+                                                        <div class="col-md-12">
+                                                            <label class="" for="notes">Description</label>
+                                                            <textarea formControlName="description" class="form-control"
+                                                                rows="5" placeholder="Activity Description"></textarea>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="ActivityFormFooter">
+                                                    <ng-container
+                                                        *ngIf="newActivityForm.get(['type_id'])?.value != ActivityTypesEnum.Meeting && newActivityForm.get(['type_id'])?.value != ActivityTypesEnum.Call">
+                                                        <!-- <p-checkbox #activityStatus id="status" value="1"
+                                                            class="mx-1 mb-1" formControlName="status"></p-checkbox>
+                                                        <label for="status" class="mx-1 mt-1">Mark As Done</label> -->
+
+                                                        <mat-radio-group formControlName="status" class="mt-2">
+                                                            <mat-radio-button class="mx-2" [value]="'1'">
+                                                                Mark As Done</mat-radio-button>
+                                                        </mat-radio-group>
+
+
+                                                    </ng-container>
+
+                                                    <ng-container
+                                                        *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting">
+
+
+                                                        <mat-radio-group formControlName="status" class="mt-2">
+                                                            <mat-radio-button class="mx-2"
+                                                                [value]="'8'">Scheduled</mat-radio-button>
+                                                            <mat-radio-button class="mx-2"
+                                                                [value]="'6'">Rescheduled</mat-radio-button>
+                                                            <mat-radio-button class="mx-2"
+                                                                [value]="'5'">Completed</mat-radio-button>
+                                                            <mat-radio-button class="mx-2"
+                                                                [value]="'7'">Cancelled</mat-radio-button>
+                                                        </mat-radio-group>
+
+                                                    </ng-container>
+                                                    <ng-container
+                                                        *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Call">
+
+
+                                                        <mat-radio-group formControlName="status" class="mt-2">
+                                                            <mat-radio-button class="mx-2" [value]="'8'">
+                                                                Scheduled </mat-radio-button>
+                                                            <mat-radio-button class="mx-2" [value]="'3'">
+                                                                Answered </mat-radio-button>
+                                                            <mat-radio-button class="mx-2" [value]="'4'">
+                                                                Not Answered </mat-radio-button>
+                                                        </mat-radio-group>
+
+                                                    </ng-container>
+
+
+                                                    <button type="button"
+                                                        (click)="openActivityForm = !openActivityForm;newActivityForm.reset();activityOnEditMOde=false;"
+                                                        class="btn cancelBTN btn-sm mx-1">Cancel</button>
+                                                    <button type="submit" class="btn btnStyle btn-sm mx-1">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="card" *ngIf="activeItem.label == 'Attach'">
+                                            <p-fileUpload [className]="'btnStyle'" [customUpload]="true"
+                                                (uploadHandler)="myUploader($event)" [multiple]="true">
+
+                                                <ng-template pTemplate="content">
+                                                    <ol *ngIf="leadAttaches.length">
+                                                        <li class="my-2" *ngFor="let file of leadAttaches.reverse()">
+                                                            <div class="card p-3 my-1">
+                                                                <span
+                                                                    class="activityComment d-flex justify-content-between">
+                                                                    <a href="{{newServerApi}}{{file.contact_lead_attach}}"
+                                                                        target="_blank">
+                                                                        {{file.file_name}}
+                                                                    </a>
+                                                                    <span (click)="deleteAttach(file)"
+                                                                        class="material-icons delete mx-2">
+                                                                        delete
+                                                                    </span>
+                                                                </span>
+                                                                <br>
+                                                                <span class="activityDate">
+                                                                    {{file.createdAt | date:'medium'}} .
+                                                                    {{file.user_creator_name}}
+                                                                </span>
+
+                                                            </div>
+                                                        </li>
+                                                    </ol>
+                                                </ng-template>
+                                            </p-fileUpload>
+
+                                        </div>
+                                    </div>
+                                    <!-- <div class="planned my-2">
+                                        <div class="secTitle">
+                                            <p>Planned</p>
+                                        </div>
+                                        <p-timeline [value]="plannedActivity" align="alternate"
+                                            styleClass="customized-timeline">
+                                            <ng-template pTemplate="marker" let-activity>
+                                               
+
+                                                <span class="custom-marker shadow-2">
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Call"
+                                                        class="pi pi-phone coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.SendEmail"
+                                                        class="pi pi-phone coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Meeting"
+                                                        class="pi pi-users coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Task"
+                                                        class="pi pi-clock coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Deadline"
+                                                        class="pi pi-flag coloredIcon"></i>
+                                                    <span *ngIf="activity.activity_type_id == ActivityTypesEnum.Lunch"
+                                                        class="material-symbols-outlined coloredIcon">
+                                                        restaurant
+                                                    </span>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Other"
+                                                        class="pi pi-check coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Notes"
+                                                        class="pi pi-book coloredIcon"></i>
+                                                </span>
+                                            </ng-template>
+                                            <ng-template pTemplate="content" let-activity>
+                                                <div class="card p-3 my-1">
+                                                    <div class="container">
+                                                        <div class="row">
+                                                            <div class="col-11">
+                                                                <span class="activityComment">
+                                                                    <i (click)="markAsDone(activity)"
+                                                                        matTooltip="Mark As Done"
+                                                                        class="menu-icon tf-icons bx bx-radio-circle markAsDoneIcon"></i>
+                                                                    {{activity.comment}}
+                                                                </span>
+                                                                <br>
+                                                                <span class="activityDate"
+                                                                    [ngStyle]="{color: getTimeColor(activity.from_date)}">
+                                                                    {{activity.from_date | date:'medium'}} .
+                                                                    {{activity.createdBy_name}}
+                                                                </span>
+                                                            </div>
+                                                            <div class="col-1">
+                                                                <div class="dropdown">
+                                                                    <button type="button"
+                                                                        class="btn p-0 dropdown-toggle hide-arrow"
+                                                                        data-bs-toggle="dropdown">
+                                                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu">
+                                                                        <a class="dropdown-item"
+                                                                            href="javascript:void(0);"
+                                                                            (click)="editActivity(activity)"><i
+                                                                                class="bx bx-edit-alt me-1"></i>
+                                                                            Edit</a>
+                                                                        <a class="dropdown-item"
+                                                                            href="javascript:void(0);"
+                                                                            (click)="deleteActivity(activity)"><i
+                                                                                class="bx bx-trash me-1"></i> Delete</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ng-template>
+                                        </p-timeline>
+                                    </div> -->
+                                    <!-- <div class="quickPlan my-2">
+                                        <div class="quickPlanForm">
+                                            <form [formGroup]="newActivityForm" class="example-form">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-lg-2 col-md-2 col-sm-6">
+                                                            <div class="mt-2 ml-1">
+                                                                <mat-select formControlName="type_id">
+                                                                    <mat-select-trigger>
+                                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Call"
+                                                                            class="pi pi-phone coloredIcon"></i>
+                                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.SendEmail"
+                                                                            class="pi pi-envelope coloredIcon"></i>
+                                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting"
+                                                                            class="pi pi-users coloredIcon"></i>
+                                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Task"
+                                                                            class="pi pi-clock coloredIcon"></i>
+                                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Deadline"
+                                                                            class="pi pi-flag coloredIcon"></i>
+                                                                        <span
+                                                                            *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Lunch"
+                                                                            class="material-symbols-outlined coloredIcon">
+                                                                            restaurant
+                                                                        </span>
+                                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Other"
+                                                                            class="pi pi-check coloredIcon"></i>
+                                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Notes"
+                                                                            class="pi pi-book coloredIcon"></i>
+                                                                    </mat-select-trigger>
+                                                                    <ng-container
+                                                                        *ngFor="let type of ActivityTypesEnum | keyvalue">
+
+                                                                        <mat-option
+                                                                            *ngIf="type.value != ActivityTypesEnum.Notes"
+                                                                            [value]="type.value">
+                                                                            <i *ngIf="type.value == ActivityTypesEnum.Call"
+                                                                                class="pi pi-phone coloredIcon"></i>
+                                                                            <i *ngIf="type.value == ActivityTypesEnum.SendEmail"
+                                                                                class="pi pi-envelope coloredIcon"></i>
+                                                                            <i *ngIf="type.value == ActivityTypesEnum.Meeting"
+                                                                                class="pi pi-users coloredIcon"></i>
+                                                                            <i *ngIf="type.value == ActivityTypesEnum.Task"
+                                                                                class="pi pi-clock coloredIcon"></i>
+                                                                            <i *ngIf="type.value == ActivityTypesEnum.Deadline"
+                                                                                class="pi pi-flag coloredIcon"></i>
+                                                                            <span
+                                                                                *ngIf="type.value == ActivityTypesEnum.Lunch"
+                                                                                class="material-symbols-outlined coloredIcon">
+                                                                                restaurant
+                                                                            </span>
+                                                                            <i *ngIf="type.value == ActivityTypesEnum.Other"
+                                                                                class="pi pi-check coloredIcon"></i>
+                                                                           
+                                                                            <span> {{ type.key }} </span>
+                                                                        </mat-option>
+                                                                    </ng-container>
+                                                                </mat-select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-10 col-md-10 col-sm-6">
+                                                            <div class="m-1">
+                                                                <input class="form-control" type="text"
+                                                                    id="ContactPerson"
+                                                                    [placeholder]="getSelectedActivity(newActivityForm.get(['type_id'])?.value)"
+                                                                    formControlName="comment" />
+                                                            </div>
+                                                            <div class="m-1 d-flex justify-content-center">
+                                                                <p-tag (click)="addQuickActivity('hour')"
+                                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                                    styleClass="m-1" class="myTag"
+                                                                    value="in 1h"></p-tag>
+                                                                <p-tag (click)="addQuickActivity('hours')"
+                                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                                    styleClass="m-1" class="myTag"
+                                                                    value="in 3h"></p-tag>
+                                                                <p-tag (click)="addQuickActivity('tomorrow')"
+                                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                                    styleClass="m-1" class="myTag"
+                                                                    value="Tomorrow"></p-tag>
+                                                                <p-tag (click)="addQuickActivity('week')"
+                                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                                    styleClass="m-1" class="myTag"
+                                                                    value="Next week"></p-tag>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div> -->
+                                    <div class="done my-2">
+                                        <div class="secTitle">
+                                            <p>All Activities</p>
+                                        </div>
+                                        <p-timeline [value]="myLeadActivites" align="alternate"
+                                            styleClass="customized-timeline">
+                                            <ng-template pTemplate="marker" let-activity>
+                                                <!-- [style.backgroundColor]="event.color" -->
+                                                <span class="custom-marker shadow-2">
+                                                    <!-- <i [ngClass]="event.icon"></i> -->
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Call"
+                                                        class="pi pi-phone coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.SendEmail"
+                                                        class="pi pi-envelope coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Meeting"
+                                                        class="pi pi-users coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Task"
+                                                        class="pi pi-clock coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Deadline"
+                                                        class="pi pi-flag coloredIcon"></i>
+                                                    <span *ngIf="activity.activity_type_id == ActivityTypesEnum.Lunch"
+                                                        class="material-symbols-outlined coloredIcon">
+                                                        restaurant
+                                                    </span>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Other"
+                                                        class="pi pi-check coloredIcon"></i>
+                                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Notes"
+                                                        class="pi pi-book coloredIcon"></i>
+                                                </span>
+                                            </ng-template>
+                                            <ng-template pTemplate="content" let-activity>
+                                                <div class="card p-3 my-1"
+                                                    *ngIf="activity.activity_type_id != ActivityTypesEnum.Notes">
+                                                    <div class="row">
+                                                        <div class="col-md-11">
+                                                            <span class="activityComment">
+                                                                <!-- <i (click)="markAsUnDone(activity)"
+                                                                    matTooltip="Mark As Not Done"
+                                                                    class="menu-icon tf-icons bx bx-check doneIcon"></i> -->
+                                                                <span class="fw-bold">{{activity.comment}}</span>
+                                                            </span>
+                                                            <br>
+                                                            <span class="activityDate"
+                                                                [class.text-success]="
+                                                                activity.activity_status_id == ActivityStatusEnum.Completed ||
+                                                                 activity.activity_status_id == ActivityStatusEnum.Answered ||
+                                                                  activity.activity_status_id == ActivityStatusEnum.Done"
+                                                                [class.text-danger]="activity.activity_status_id == ActivityStatusEnum.Cancelled ||
+                                                                activity.activity_status_id == ActivityStatusEnum.NotAnswered"
+                                                                [class.text-warning]="activity.activity_status_id == ActivityStatusEnum.Pending ||
+                                                                activity.activity_status_id == ActivityStatusEnum.Rescheduled">
+                                                                {{activity.from_date | date:'medium'}} .
+                                                                {{activity.createdBy_name}}
+                                                            </span>
+                                                            <br>
+                                                            <span class="activityDate mt-2"
+                                                                *ngIf="activity.activity_start_date || activity.activity_end_date">
+
+
+                                                                <span class="">Activity Time:</span>
+
+                                                                {{activity.activity_start_date
+                                                                }}
+                                                                <!-- {{ activity.activity_end_date
+                                                                | date:'dd-MM-yyyy HH:mm a'}} . -->
+                                                                <ng-container *ngIf="activity.duration > 0">
+                                                                    .( {{activity.duration}} Hours )
+                                                                </ng-container>
+                                                            </span>
+
+                                                        </div>
+                                                        <div class="col-1">
+                                                            <div class="dropdown">
+                                                                <button type="button"
+                                                                    class="btn p-0 dropdown-toggle hide-arrow"
+                                                                    data-bs-toggle="dropdown">
+                                                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                                                </button>
+                                                                <div class="dropdown-menu">
+                                                                    <a class="dropdown-item" href="javascript:void(0);"
+                                                                        (click)="editActivity(activity)"><i
+                                                                            class="bx bx-edit-alt me-1"></i>
+                                                                        Edit</a>
+                                                                    <a *ngIf="
+                                                            (activity.activity_status_id != ActivityStatusEnum.Completed &&
+                                                                 activity.activity_status_id != ActivityStatusEnum.Answered &&
+                                                                  activity.activity_status_id != ActivityStatusEnum.Done) || currentUser.accRole == AccountRoles.SUPER_USER"
+                                                                        class="dropdown-item" href="javascript:void(0);"
+                                                                        (click)="deleteActivity(activity)"><i
+                                                                            class="bx bx-trash me-1"></i> Delete</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card p-3 my-1"
+                                                    *ngIf="activity.activity_type_id == ActivityTypesEnum.Notes"
+                                                    style="background-color:#FFFCDC ;">
+                                                    <span class="activityDate">
+                                                        <!-- <i (click)="markAsUnDone(activity)" matTooltip="Mark As Not Done" class="menu-icon tf-icons bx bx-check doneIcon"></i> -->
+                                                        {{activity.from_date | date:'medium'}} .
+                                                        {{activity.createdBy_name}}
+                                                    </span>
+                                                    <span class="activityComment">
+                                                        <span [innerHTML]="activity.comment"
+                                                            class="px-5 ql-editor"></span>
+                                                    </span>
+                                                    <br>
+                                                </div>
+                                            </ng-template>
+                                            <!-- <ng-template pTemplate="content">
+                                                    <span>
+                                                        <i class="menu-icon tf-icons bx bx-check coloredIcon"></i>
+                                                        {{this.contactToShow.user_creator_name}} → Lead created
+                                                    </span>
+                                                    <br>
+                                                    <span>
+                                                        {{this.contactToShow.created_at | date:'medium'}}
+                                                    </span>
+                                                </ng-template> -->
+                                        </p-timeline>
+                                        <div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="POC Requests">
+            <div class="container-fluid">
+                <div class="row my-2">
+                    <div class="col-12">
+                        <p-panel *ngFor="let req of pocRequests" [header]="req.request_poc_title" [toggleable]="true">
+                            <ng-template pTemplate="icons">
+                                <button
+                                    *ngIf="currentUser.department != departmentEnum.MANAGEMENT && (req.request_poc_status_id == pocRequestStatusEnum.Re_Edit || req.request_poc_status_id == pocRequestStatusEnum.Pending_On_CEO)"
+                                    type="button" class="p-panel-header-icon p-link" data-bs-toggle="dropdown">
+                                    <span class="pi pi-cog"></span>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="updatePocRequest(req)"
+                                        data-bs-toggle="modal" data-bs-target="#modalCenter"><i
+                                            class="bx bx-edit-alt me-1"></i>Edit</a>
+                                    <!-- <a class="dropdown-item" href="javascript:void(0);" (click)="deletePocRequest(req)"><i class="bx bx-trash me-1"></i> Delete</a> -->
+                                </div>
+                            </ng-template>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="d-flex text-muted pt-3">
+                                            <svg *ngIf="!req.user_creator_photo_url"
+                                                class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32"
+                                                height="32" xmlns="http://www.w3.org/2000/svg" role="img"
+                                                aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice"
+                                                focusable="false">
+                                                <title>{{req.user_creator_name}}</title>
+                                                <rect width="100%" height="100%" fill="#007bff" /><text x="50%" y="50%"
+                                                    fill="#007bff" dy=".3em">32x32</text>
+                                            </svg>
+                                            <img class="rounded-circle" *ngIf="!!req.user_creator_photo_url"
+                                                src="{{newServerApi}}{{req.user_creator_photo_url}}" alt="" width="35"
+                                                height="35">
+                                            <p class="pb-3 mb-0 small lh-sm">
+                                                <strong
+                                                    class="d-block text-gray-dark">&#64;{{req.user_creator_name}}</strong>
+                                                {{req.created_at | date:'medium'}}
+                                            </p>
+                                            <!-- Created New Request For POC . -->
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="d-flex text-muted pt-3">
+                                            <p class="pb-3 mb-0 small lh-sm">
+                                                <strong>{{req.product_name}}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="d-flex text-muted pt-3">
+                                            <p class="pb-3 mb-0 small lh-sm">
+                                                <strong>{{req.request_poc_priority_name}}</strong>
+                                            </p>
+                                            &nbsp; / &nbsp;
+                                            <p class="pb-3 mb-0 small lh-sm"
+                                                [ngStyle]="{'color':getColor(req.request_poc_status_id)}">
+                                                <strong>{{req.request_poc_status_id ==
+                                                    PocRequestStatusEnum.Pending_On_CEO ? 'Pending On Level 1' :
+                                                    req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CTO
+                                                    ?'Pending On Level 2' : req.request_poc_status_name }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="pb-2 mb-0"><strong>Description:</strong></p>
+                                        <div class="d-flex text-muted pt-3">
+                                            <p class="pb-3 mb-0 small lh-sm">
+                                                {{req.description}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="pb-2 mb-0" *ngIf="req.request_poc_attach.length > 0">Attaches:</h6>
+                                        <ul class="list-unstyled" *ngIf="req.request_poc_attach.length > 0">
+                                            <li class="my-2" *ngFor="let file of req.request_poc_attach.reverse()">
+                                                <div class="card p-3 my-1">
+                                                    <span class="activityComment d-flex justify-content-between">
+                                                        <a href="{{newServerApi}}{{file.request_poc_attach_link}}"
+                                                            target="_blank">
+                                                            {{file.request_poc_attach_name}}
+                                                        </a>
+                                                        <!-- <span (click)="deleteAttach(file)" class="material-icons delete mx-2">
+                                                                delete
+                                                            </span> -->
+                                                    </span>
+                                                    <br>
+                                                    <span class="activityDate">
+                                                        {{file.created_at | date:'medium'}} . {{file.user_creator_name}}
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-12"
+                                        *ngIf="!!req.request_poc_process && req.request_poc_process.length > 0">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>Department</th>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let p of req.request_poc_process">
+                                                    <td>{{p.process_title}}</td>
+                                                    <td>{{p.process_description}}</td>
+                                                    <td>{{p.process_department}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card" *ngIf="!!req.history && req.history.length > 0">
+                                <div class="container">
+                                    <div class="row" *ngFor="let his of req.history.reverse();let i=index">
+                                        <div class="col-12">
+                                            <div class="d-flex text-muted pt-3">
+                                                <svg *ngIf="!his.user_creator_photo_url"
+                                                    class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32"
+                                                    height="32" xmlns="http://www.w3.org/2000/svg" role="img"
+                                                    aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice"
+                                                    focusable="false">
+                                                    <title>{{his.user_creator_name}}</title>
+                                                    <rect width="100%" height="100%" fill="#007bff" /><text x="50%"
+                                                        y="50%" fill="#007bff" dy=".3em">32x32</text>
+                                                </svg>
+                                                <img class="rounded-circle" *ngIf="!!his.user_creator_photo_url"
+                                                    src="{{newServerApi}}{{his.user_creator_photo_url}}" alt=""
+                                                    width="35" height="35">
+                                                <p class="pb-3 mb-0 small lh-sm">
+                                                    <strong
+                                                        class="d-block text-gray-dark">&#64;{{his.user_creator_name}}</strong>
+                                                    {{his.created_at | date:'medium'}}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <p>
+                                                {{his.comment}}
+                                            </p>
+                                        </div>
+                                        <div class="col-12" *ngIf="his.poc_action_attach.length > 0">
+                                            <ul class="list-unstyled">
+                                                <li class="my-2" *ngFor="let file of his.poc_action_attach.reverse()">
+                                                    <div class="card p-3 my-1">
+                                                        <span class="activityComment d-flex justify-content-between">
+                                                            <a href="{{newServerApi}}{{file.request_poc_attach_link}}"
+                                                                target="_blank">
+                                                                {{file.request_poc_attach_name}}
+                                                            </a>
+                                                        </span>
+                                                        <br>
+                                                        <span class="activityDate">
+                                                            {{file.created_at | date:'medium'}} .
+                                                            {{file.user_creator_name}}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ng-template pTemplate="footer">
+                                <button class="btn btn-outline-success mx-1" data-bs-toggle="modal"
+                                    data-bs-target="#takeActionOnReq" (click)="openActionForm(req,'approve')"
+                                    *ngIf="(currentUser.accRole == AccountRoleEnum.CEO && req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CEO)|| (currentUser.accRole == AccountRoleEnum.CTO&& req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CTO) || currentUser.accRole == AccountRoleEnum.SUPER_USER">Approve</button>
+                                <button class="btn btn-outline-info mx-1" data-bs-toggle="modal"
+                                    data-bs-target="#takeActionOnReq" (click)="openActionForm(req,'sendToCTO')"
+                                    *ngIf="req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CEO && (currentUser.accRole == AccountRoleEnum.CEO || currentUser.accRole == AccountRoleEnum.SUPER_USER)">Send
+                                    To Level 2</button>
+
+                                <button class="btn btn-outline-info mx-1" data-bs-toggle="modal"
+                                    data-bs-target="#takeActionOnReq" (click)="openActionForm(req,'sendToCEO')"
+                                    *ngIf="(req.request_poc_status_id == PocRequestStatusEnum.Re_Edit && currentUser.accRole == AccountRoleEnum.SALES) ||  (req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CTO && currentUser.accRole == AccountRoleEnum.CTO) || (currentUser.accRole == AccountRoleEnum.SUPER_USER)">Send
+                                    To Level 1</button>
+                                <button class="btn btn-outline-secondary mx-1" data-bs-toggle="modal"
+                                    data-bs-target="#takeActionOnReq" (click)="openActionForm(req,'Re-Edit')"
+                                    *ngIf="req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CEO && (currentUser.accRole == AccountRoleEnum.CEO || currentUser.accRole == AccountRoleEnum.SUPER_USER)">Return
+                                    To Sales</button>
+                                <button class="btn btn-outline-danger mx-1" data-bs-toggle="modal"
+                                    data-bs-target="#takeActionOnReq" (click)="openActionForm(req,'reject')"
+                                    *ngIf="(currentUser.accRole == AccountRoleEnum.CEO && req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CEO)|| (currentUser.accRole == AccountRoleEnum.CTO && req.request_poc_status_id == PocRequestStatusEnum.Pending_On_CTO)|| currentUser.accRole == AccountRoleEnum.SUPER_USER">Reject</button>
+                            </ng-template>
+                        </p-panel>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="RFP Requests">
+            <div class="container-fluid">
+                <div class="row my-2">
+                    <div class="col-12">
+                        <p-panel *ngFor="let req of rfpRequests" [header]="req.request_rfp_title" [toggleable]="true">
+                            <ng-template pTemplate="icons">
+                                <button
+                                    *ngIf="currentUser.department != departmentEnum.MANAGEMENT && (req.request_rfp_status_id == pocRequestStatusEnum.Re_Edit || req.request_rfp_status_id == pocRequestStatusEnum.Pending_On_CEO)"
+                                    type="button" class="p-panel-header-icon p-link" data-bs-toggle="dropdown">
+                                    <span class="pi pi-cog"></span>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <!-- (click)="updatePocRequest(req)" -->
+                                    <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
+                                        data-bs-target="#modalCenter"><i class="bx bx-edit-alt me-1"></i>Edit</a>
+                                    <!-- <a class="dropdown-item" href="javascript:void(0);" (click)="deletePocRequest(req)"><i class="bx bx-trash me-1"></i> Delete</a> -->
+                                </div>
+                            </ng-template>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="d-flex text-muted pt-3">
+                                            <svg *ngIf="!req.user_creator_photo_url"
+                                                class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32"
+                                                height="32" xmlns="http://www.w3.org/2000/svg" role="img"
+                                                aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice"
+                                                focusable="false">
+                                                <title>{{req.user_creator_name}}</title>
+                                                <rect width="100%" height="100%" fill="#007bff" /><text x="50%" y="50%"
+                                                    fill="#007bff" dy=".3em">32x32</text>
+                                            </svg>
+                                            <img class="rounded-circle" *ngIf="!!req.user_creator_photo_url"
+                                                src="{{newServerApi}}{{req.user_creator_photo_url}}" alt="" width="35"
+                                                height="35">
+                                            <p class="pb-3 mb-0 small lh-sm">
+                                                <strong class="d-block text-gray-dark">
+                                                    <a href="javascript:void(0);"
+                                                        [routerLink]="['/user',req.user_creator_id]">
+                                                        &#64;{{req.user_creator_name}}
+                                                    </a>
+                                                </strong> {{req.created_at | date:'medium'}}
+                                            </p>
+                                            <!-- Created New Request For POC . -->
+                                        </div>
+                                    </div>
+                                    <!-- <div class="col-3">
+                                        <div class="d-flex text-muted pt-3">
+                                            <p class="pb-3 mb-0 small lh-sm">
+                                                <strong>{{req.product_name}}</strong>
+                                            </p>
+                                        </div>
+                                    </div> -->
+                                    <div class="col-3">
+                                        <div class="d-flex text-muted pt-3">
+                                            <!-- <p class="pb-3 mb-0 small lh-sm">
+                                                <strong>{{req.request_poc_priority_name}}</strong>
+                                            </p>
+                                            &nbsp; / &nbsp; -->
+                                            <p class="pb-3 mb-0 small lh-sm"
+                                                [ngStyle]="{'color':getColorForRFP(req.request_rfp_status_id)}">
+                                                <strong
+                                                    *ngIf="req.request_rfp_status_id == RFPRequestStatusEnum.Pending">Pending
+                                                    On {{req.pending_name}}</strong>
+                                                <strong
+                                                    *ngIf="req.request_rfp_status_id == RFPRequestStatusEnum.Approved">Approved</strong>
+                                                <strong
+                                                    *ngIf="req.request_rfp_status_id == RFPRequestStatusEnum.Rejected">Rejected</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="pb-2 mb-0"><strong>Description:</strong></p>
+                                        <div class="d-flex text-muted pt-3">
+                                            <p class="pb-3 mb-0 small lh-sm">
+                                                {{req.comment}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="pb-2 mb-0" *ngIf="req.request_rfp_attach.length > 0">Attaches:</h6>
+                                        <ul class="list-unstyled" *ngIf="req.request_rfp_attach.length > 0">
+                                            <li class="my-2" *ngFor="let file of req.request_rfp_attach.reverse()">
+                                                <div class="card p-3 my-1">
+                                                    <span class="activityComment d-flex justify-content-between">
+                                                        <a href="{{newServerApi}}{{file.request_rfp_attach_link}}"
+                                                            target="_blank">
+                                                            {{file.request_rfp_attach}}
+                                                        </a>
+                                                        <!-- <span (click)="deleteAttach(file)" class="material-icons delete mx-2">
+                                                                delete
+                                                            </span> -->
+                                                    </span>
+                                                    <br>
+                                                    <span class="activityDate">
+                                                        {{file.created_at | date:'medium'}} . {{file.user_creator_name}}
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card" *ngIf="!!req.history && req.history.length > 0">
+                                <div class="container">
+                                    <div class="row" *ngFor="let his of req.history.reverse();let i=index">
+                                        <div class="col-12">
+                                            <div class="d-flex text-muted pt-3">
+                                                <svg *ngIf="!his.manager_approve_photo_url"
+                                                    class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32"
+                                                    height="32" xmlns="http://www.w3.org/2000/svg" role="img"
+                                                    aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice"
+                                                    focusable="false">
+                                                    <title>{{his.manager_approve_name}}</title>
+                                                    <rect width="100%" height="100%" fill="#007bff" /><text x="50%"
+                                                        y="50%" fill="#007bff" dy=".3em">32x32</text>
+                                                </svg>
+                                                <img class="rounded-circle" *ngIf="!!his.manager_approve_photo_url"
+                                                    src="{{newServerApi}}{{his.manager_approve_photo_url}}" alt=""
+                                                    width="35" height="35">
+                                                <p class="pb-3 mb-0 small lh-sm">
+                                                    <strong class="d-block text-gray-dark">
+                                                        <a href="javascript:void(0);"
+                                                            [routerLink]="['/user',his.manager_approve_id]">
+                                                            &#64;{{his.manager_approve_name}}
+                                                        </a>
+                                                    </strong> {{his.created_at | date:'medium'}}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <p>
+                                                {{his.comment}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ng-template pTemplate="footer" *ngIf="ifForMe(req)">
+                                <button class="btn btn-outline-success mx-1" data-bs-toggle="modal"
+                                    data-bs-target="#takeRFPAction"
+                                    (click)="openRFPActionForm(req,true)">Approve</button>
+                                <button class="btn btn-outline-danger mx-1" data-bs-toggle="modal"
+                                    data-bs-target="#takeRFPAction"
+                                    (click)="openRFPActionForm(req,false)">Reject</button>
+                            </ng-template>
+                        </p-panel>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+    </p-tabView>
+
+</div>
+
+
+
+
+<!-- ============================================= Request POC Modal ========================================= -->
+<div class="modal fade" id="modalCenter" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">Request POC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="requestPOCForm" (ngSubmit)="requestForPOC()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="Title">Title</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Title" class="input-group-text"><i
+                                                class="bx bx-line-chart"></i></span>
+                                        <input class="form-control" type="text" placeholder="POC Title"
+                                            formControlName="title" />
+                                    </div>
+                                    <mat-error class="alert help-block"
+                                        *ngIf="!requestPOCForm.get('title')?.valid && requestPOCForm.get('title')?.touched">
+                                        Title Is Required
+                                    </mat-error>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="Title">process</label>
+                                    <ng-container formArrayName="process">
+                                        <div class="d-flex my-1" *ngFor="let h of process.controls; index as i">
+                                            <ng-container [formGroupName]="i">
+                                                <input class="form-control mx-1" type="text" placeholder="title"
+                                                    formControlName="process_title" />
+                                                <input class="form-control mx-1" type="text" placeholder="desc"
+                                                    formControlName="process_description" />
+                                                <input class="form-control mx-1" type="text" placeholder="dept"
+                                                    formControlName="process_department" />
+                                                <span (click)="delProcess(i)" class="material-icons delete">
+                                                    delete
+                                                </span>
+                                            </ng-container>
+                                        </div>
+                                    </ng-container>
+                                    <button class="btn btn-outline-info"
+                                        *ngIf="requestPOCForm.get('process')?.value.length < 5" type="button"
+                                        (click)="addProcess()">add</button>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="Description">Description</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Description" class="input-group-text"><i
+                                                class="bx bx-captions"></i></span>
+                                        <input class="form-control" type="text" placeholder="Description"
+                                            formControlName="description" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="prodcut">Product</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="prodcut" class="input-group-text"><i
+                                                class="bx bx-network-chart"></i></span>
+                                        <mat-select class="form-control" formControlName="product_id">
+                                            <mat-option *ngFor="let prod of products"
+                                                [value]='prod.id'>{{prod.product_name}}</mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="Priority">Priority</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Priority" class="input-group-text"><i
+                                                class="bx bx-trending-up"></i></span>
+                                        <mat-select class="form-control" formControlName="request_poc_priority_id">
+                                            <mat-option *ngFor="let priority of requestForPocPriority"
+                                                [value]='priority.id'>{{priority.reqeust_poc_priority_name}}</mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <button type="button" class="btn submitFormBtn" mat-raised-button
+                                        (click)="fileInput.click()">Attach File</button>
+                                    <input hidden (change)="imagesupload($event)" multiple #fileInput type="file"
+                                        id="file">
+                                    <table class="table table-hover"
+                                        *ngIf="!!requestForPOCAttaches && requestForPOCAttaches.length > 0">
+                                        <thead>
+                                            <th>#</th>
+                                            <th>File Name</th>
+                                            <th>Size</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let file of requestForPOCAttaches;let i = index">
+                                                <td>{{i +1 }}</td>
+                                                <td>{{file.name}}</td>
+                                                <td>{{file.size / 1000 | number:'1.2-2'}} KB</td>
+                                                <td>
+                                                    <span (click)="deleteIMG(i)" class="material-icons delete">
+                                                        delete
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close"
+                        [disabled]="requestPOCForm.invalid">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================= Request RFP Modal ========================================= -->
+<div class="modal fade" id="RFPModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">Request RFP</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="requestRFPForm" (ngSubmit)="requestForRFP()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="title">Title</label>
+                                    <input class="form-control" type="text" placeholder="Title"
+                                        formControlName="title" />
+                                    <mat-error class="alert help-block"
+                                        *ngIf="!requestRFPForm.get('title')?.valid && requestRFPForm.get('title')?.touched">
+                                        Title Is Required
+                                    </mat-error>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="comment">Comment</label>
+                                    <input class="form-control" type="text" placeholder="Comment"
+                                        formControlName="comment" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="comment">Send To</label>
+                                    <mat-select class="form-control" formControlName="approval_ids" multiple>
+                                        <mat-option *ngFor="let user of myRFPConfigList"
+                                            [value]='user.key'>{{user.username}}</mat-option>
+                                    </mat-select>
+                                    <mat-error class="alert help-block"
+                                        *ngIf="!requestRFPForm.get('approval_ids')?.valid && requestRFPForm.get('approval_ids')?.touched">
+                                        Send To Is Required
+                                    </mat-error>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <button type="button" class="btn submitFormBtn" mat-raised-button
+                                        (click)="rfpfile.click()">Attach File</button>
+                                    <input hidden (change)="RFPimagesupload($event)" multiple #rfpfile type="file"
+                                        id="rfpfile">
+                                    <table class="table table-hover"
+                                        *ngIf="!!requestForRFPAttaches && requestForRFPAttaches.length > 0">
+                                        <thead>
+                                            <th>#</th>
+                                            <th>File Name</th>
+                                            <th>Size</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let file of requestForRFPAttaches;let i = index">
+                                                <td>{{i +1 }}</td>
+                                                <td>{{file.name}}</td>
+                                                <td>{{file.size / 1000 | number:'1.2-2'}} KB</td>
+                                                <td>
+                                                    <span (click)="RFPdeleteIMG(i)" class="material-icons delete">
+                                                        delete
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close"
+                        [disabled]="requestRFPForm.invalid || requestForRFPAttaches.length == 0">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= Request POC Action Modal ========================================= -->
+
+
+
+
+<div class="modal fade" id="takeActionOnReq" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">Request POC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="requestPOCActionForm" (ngSubmit)="requestPOCAction()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="Title">Comment</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Title" class="input-group-text"><i
+                                                class="bx bx-line-chart"></i></span>
+                                        <input class="form-control" type="text" placeholder="Comment"
+                                            formControlName="comment" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <button type="button" class="btn submitFormBtn" mat-raised-button
+                                        (click)="fileInput.click()">Attach File</button>
+                                    <input hidden (change)="imagesupload($event)" multiple #fileInput type="file"
+                                        id="file">
+                                    <table class="table table-hover"
+                                        *ngIf="!!requestForPOCAttaches && requestForPOCAttaches.length > 0">
+                                        <thead>
+                                            <th>#</th>
+                                            <th>File Name</th>
+                                            <th>Size</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let file of requestForPOCAttaches;let i = index">
+                                                <td>{{i +1 }}</td>
+                                                <td>{{file.name}}</td>
+                                                <td>{{file.size / 1000 | number:'1.2-2'}} KB</td>
+                                                <td>
+                                                    <span (click)="deleteIMG(i)" class="material-icons delete">
+                                                        delete
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-12" *ngIf="action == 'approve'">
+                                <div formGroupName="poc" class="container">
+                                    <label class="formLabelHeader">Project Info : </label>
+
+                                    <div class="row">
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Title</mat-label>
+                                                <input matInput type="text" id="title" formControlName="title"
+                                                    [required]="action == 'approve'">
+                                                <mat-error class="alert help-block"
+                                                    *ngIf="!requestPOCActionForm.controls['poc'].get(['title'])?.valid && requestPOCActionForm.controls['poc'].get('title')?.touched">
+                                                    Title Is Required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Description</mat-label>
+                                                <input matInput type="text" id="desc" formControlName="desc">
+                                            </mat-form-field>
+                                        </div>
+
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-label class="formLables">Start Date</mat-label>
+                                            <p-calendar (ngModelChange)="endDateCalculation()"
+                                                formControlName="start_date" [showIcon]="true" inputId="icon"
+                                                [required]="action == 'approve'"></p-calendar>
+                                            <mat-error class="alert help-block"
+                                                *ngIf="!requestPOCActionForm.controls['poc'].get('start_date')?.valid && requestPOCActionForm.controls['poc'].get('start_date')?.touched">
+                                                Start Date is Required
+                                            </mat-error>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Duration</mat-label>
+                                                <input matInput (change)="endDateCalculation()" type="number"
+                                                    id="duration" formControlName="duration"
+                                                    [required]="action == 'approve'">
+                                                <mat-error class="alert help-block"
+                                                    *ngIf="!requestPOCActionForm.controls['poc'].get('duration')?.valid && requestPOCActionForm.controls['poc'].get('duration')?.touched">
+                                                    Duration Is Required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-label class="formLables">End Date</mat-label>
+                                            <p-calendar formControlName="end_date" [showIcon]="true"
+                                                inputId="icon"></p-calendar>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Budget</mat-label>
+                                                <input matInput type="number" id="budget" formControlName="budget">
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Project Manager</mat-label>
+                                                <mat-select formControlName="pm">
+                                                    <mat-option *ngFor="let pm of PMs"
+                                                        [value]='pm.key'>{{pm.username}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Tech Lead</mat-label>
+                                                <mat-select formControlName="tl">
+                                                    <mat-option *ngFor="let tl of TLeads"
+                                                        [value]='tl.key'>{{tl.username}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Business Analyst</mat-label>
+                                                <mat-select multiple formControlName="ba">
+                                                    <mat-option *ngFor="let ba of BAs"
+                                                        [value]='ba.key'>{{ba.username}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-lg-4 my-3">
+                                            <mat-form-field class="example-full-width w-100">
+                                                <mat-label class="formLables">Team Memebers</mat-label>
+                                                <mat-select multiple formControlName="devs">
+                                                    <mat-option *ngFor="let dev of devs"
+                                                        [value]='dev.key'>{{dev.username}}</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                    </div>
+                                    <mat-divider class="my-3"></mat-divider>
+                                    <label class="formLabelHeader">Customer Info : </label>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="col-lg-4 my-3">
+                                                <mat-form-field class="example-full-width w-100">
+                                                    <mat-label class="formLables">Partner</mat-label>
+                                                    <mat-select formControlName="partner"
+                                                        [required]="action == 'approve'">
+                                                        <mat-option *ngFor="let partner of allPartners"
+                                                            [value]='partner.id'>{{partner.partner_name}}</mat-option>
+                                                    </mat-select>
+                                                    <mat-error class="alert help-block"
+                                                        *ngIf="!requestPOCActionForm.controls['poc'].get('partner')?.valid && requestPOCActionForm.touched">
+                                                        Partner Is Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close"
+                        [disabled]="requestPOCActionForm.invalid">Submit</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= Request RFP Action Modal ========================================= -->
+
+
+
+
+<div class="modal fade" id="takeRFPAction" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">RFP Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="requestRFPActionForm" (ngSubmit)="requestRFPAction()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="Title">Comment</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Title" class="input-group-text"><i
+                                                class="bx bx-line-chart"></i></span>
+                                        <input class="form-control" type="text" placeholder="Comment"
+                                            formControlName="comment" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12"
+                                *ngIf="currentUser.department == departmentEnum.Business_Development">
+                                <div class="mb-3">
+                                    <label class="form-label" for="comment">Send To</label>
+                                    <mat-select class="form-control" formControlName="assignTo" multiple>
+                                        <mat-option *ngFor="let user of myRFPConfigList"
+                                            [value]='user.key'>{{user.username}}</mat-option>
+                                    </mat-select>
+                                    <!-- <mat-error class="alert help-block" *ngIf="!requestRFPForm.get('approval_ids')?.valid && requestRFPForm.get('approval_ids')?.touched">
+                                        Send To Is Required
+                                    </mat-error> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close"
+                        [disabled]="requestRFPActionForm.invalid">Submit</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- ============================================= Mark As Lost Modal ========================================= -->
+
+<!-- <div class="modal fade" id="takeActionOnReq" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">Mark As Lost</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form (ngSubmit)="lost()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="Title">Comment</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Title" class="input-group-text"><i class="bx bx-line-chart"></i
+                                        ></span>
+                                        <input class="form-control" type="text" placeholder="Comment" formControlName="comment" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close" [disabled]="">Submit</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div> -->

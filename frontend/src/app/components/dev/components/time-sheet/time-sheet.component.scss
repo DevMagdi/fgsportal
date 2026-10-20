@@ -1,0 +1,111 @@
+// input,
+// select {
+//     width: 50%;
+//     margin: auto;
+// }
+// .timeSheetPage {
+//     zoom: 0.8;
+// }
+@import '../../../../colors';
+.list {
+    margin-left: 20px;
+    .listIcon {
+        color: $mainThemeColor;
+        cursor: pointer;
+    }
+}
+
+.menuBtn {
+    background-color: $mainThemeColor;
+    color: #fff;
+}
+
+.menuBtn:hover {
+    background-color: $mainThemeColor;
+    color: #fff;
+}
+
+.tasksTable {
+    margin-top: 5px;
+    .days {
+        // border: solid 1px $mainThemeColor;
+        // border-radius: 10px;
+        // box-shadow: 0 0 5px rgba($mainThemeColor, 0.5);
+        color: $mainThemeColor;
+        border-bottom: 1px solid $subSubThemeColor;
+    }
+
+        .days-header{
+            color: $mainThemeColor;
+            border-bottom: 1px solid $mainThemeColor;
+            background-color: $softThemeColor;
+        }
+    
+}
+
+.task {
+    // border: solid 1px $mainThemeColor;
+    border-radius: 6px;
+    // box-shadow: 0 0 5px $mainThemeColor;
+    // background-color: white; //rgba($color: $mainThemeColor, $alpha: 0.5); // rgba(165, 55, 155, 0.5) ;
+    color: $mainThemeColor;
+    box-shadow: 0 0 5px rgba($mainThemeColor, 0.5);
+    .working {
+        font-family: $mainFontFamily;
+    }
+    // font-family: 'Lato', sans-serif !important;
+    .icon {
+        text-align: right;
+        .delete {
+            color: #dcdcdc !important;
+            cursor: pointer;
+        }
+        .edit {
+            color: $buttonMainBackgroundColor !important;
+            cursor: pointer;
+        }
+    }
+}
+
+.addBtn {
+    // text-align: right;
+    // margin-top: 65px !important;
+    position: absolute;
+    top: -25px;
+    right: 0;
+    width: fit-content;
+    button {
+        background-color: $buttonMainBackgroundColor;
+        color: #fff;
+    }
+}
+
+.modal-footer {
+    button {
+        background-color: $buttonMainBackgroundColor;
+        color: #fff;
+        width: 40%;
+        margin: auto;
+    }
+}
+.btnSave{
+
+    // background-color: $buttonMainBackgroundColor;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    color: #fff;
+    width: 100%;
+    // margin: auto;
+}
+
+@media (max-width: 768px) {
+    .listIcon {
+        display: none;
+    }
+    .addBtn {
+        top: 0px;
+    }
+    .tasksTable {
+        width: 100%;
+        margin: 40px 0 0 0 !important;
+    }
+}

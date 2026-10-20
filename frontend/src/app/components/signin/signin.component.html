@@ -1,0 +1,121 @@
+<!-- <p-blockUI style="width: 100vw; height: 100vh;" [blocked]="resetPasswordLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI> -->
+<div class="mainPage">
+    <div class="container-fluid m-0 p-0">
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="formSection">
+                    <div class="container">
+                        <div class="row m-2">
+
+                            <div class="col-lg-10 m-auto">
+                                <div class="text-start">
+
+                                    <h1 class="form_header" *ngIf="!resetPasswordMode">Welcome Back !</h1>
+                                    <p class="sub_header" *ngIf="!resetPasswordMode">Keep your plan on track</p>
+                                    <h1 class="form_header" *ngIf="resetPasswordMode">
+                                        <!-- <span>
+                                            <i class="material-icons arrowIcon" (click)="resetPassowrd()">arrow_back</i>
+                                        </span> -->
+                                        <span>
+                                            Forget your password?
+                                        </span>
+                                    </h1>
+                                        <p  *ngIf="resetPasswordMode">No worries , we’ll send you reset instructions</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3 p-3">
+                            <div class="col-lg-10 m-auto" *ngIf="!resetPasswordMode">
+                                <div class="alert alert-danger p-3 m-2" *ngIf="signInCounter > 5">
+                                    <a class="btn resetPass" data-toggle="modal" data-target="#forgetPassword"
+                                        (click)="resetPassowrd()">
+                                        Forgot Password ?!
+                                    </a>
+                                </div>
+                                <div class="alert alert-danger p-3 m-2" *ngIf="!!errMessage">
+                                    {{errMessage}}
+                                </div>
+                                <form class="login-form validate-form text-start" (ngSubmit)="login()">
+                                    <div class="wrap-input validate-input my-3"
+                                        data-validate="Valid email is required: ex@abc.xyz">
+                                        <label for="inputEmail"> Email</label>
+                                        <input type="email" id="inputEmail" class="form-control p-1 my-1"
+                                            placeholder="Email Address" [(ngModel)]="email"
+                                            [ngModelOptions]="{standalone: true}" required>
+                                        <span class="focus-input"></span>
+                                        <span class="symbol-input">
+                                            <i class="fa fa-envelope" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="wrap-input validate-input mt-3" data-validate="Password is required">
+                                        <label for="inputPassword"> Password</label>
+
+                                        <input type="password" id="inputPassword" class="form-control p-1 my-1"
+                                            placeholder="Password" [(ngModel)]="password"
+                                            [ngModelOptions]="{standalone: true}" required>
+                                        <span class="focus-input"></span>
+                                        <span class="symbol-input">
+                                            <i class="fa fa-lock" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+
+                                    <a class="btn resetPass mb-3 mt-2" data-toggle="modal" data-target="#forgetPassword"
+                                        (click)="resetPassowrd()">
+                                        Forgot Your Password?
+                                    </a>
+
+                                    <div class="container-login-form-btn mt-2">
+                                        <button type="submit" class="btn signIn" >
+                                            Login
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="col-lg-10 m-auto" *ngIf="resetPasswordMode">
+                                <form class="login-form validate-form text-start">
+                                    <div class="wrap-input validate-input my-3"
+                                        data-validate="Valid email is required: ex@abc.xyz">
+                                        <label for="inputEmail">Email</label>
+                                        <input type="inputEmail" class="form-control p-1 my-1"
+                                            placeholder="enter your mail" [(ngModel)]="emailForgetPassword"
+                                            [ngModelOptions]="{standalone: true}">
+
+                                        <span class="focus-input"></span>
+                                        <span class="symbol-input">
+                                            <i class="fa fa-envelope" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="container-login-form-btn">
+                                        <button class="btn signIn mt-2" (click)="forgetPassword()">
+                                            Reset Password
+                                        </button>
+                                        <div class="mt-4 text-center" (click)="resetPassowrd()">
+                                            <span>
+                                                <i class="material-icons arrowIcon m-auto"
+                                                    (click)="resetPassowrd()">arrow_back</i>
+                                            </span>
+                                            <span class="backToLogin ps-2">Back to Login</span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="imgSec text-center mt-5">
+                    <img src="../../../assets/img/robot.png" class="mt-5" width="200" height="200" alt="">
+                    <br>
+                    <img src="../../../assets/img/Frame 4379.png" class="mt-4" width="405" height="70" alt="">
+                    <h1 class="text-white p-4">Empowering businesses with AI-powered technology transformations.</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,507 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="timesheetLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="timeSheetPage">
+    <div class="container-fluid mt-1">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="list">
+                    <span class="material-icons listIcon" [matMenuTriggerFor]="projects">
+                        list
+                    </span>
+                    <mat-menu #projects="matMenu">
+                        <ng-container *ngFor="let project of myProjectsList">
+                            <button mat-menu-item [matMenuTriggerFor]="process"
+                                [routerLink]="['/dev/myprojects',project.key]">{{project.title}}</button>
+                            <mat-menu #process="matMenu">
+                                <ng-container *ngFor="let process of myProcessesList">
+                                    <button mat-menu-item [matMenuTriggerFor]="tasks"
+                                        *ngIf="process.project_key == project.key"
+                                        [routerLink]="['/dev/myprojects',project.key ,process.key ]">{{process.title}}</button>
+                                    <mat-menu #tasks="matMenu">
+                                        <ng-container *ngFor="let task of myTasks">
+                                            <button mat-menu-item *ngIf="task.process_key == process.key "
+                                                [routerLink]="['/dev/myprojects',project.key ,process.key]">{{task.title}}</button>
+                                            <!-- && task.supportID != myID && task.empID == myID -->
+                                        </ng-container>
+                                        <mat-divider></mat-divider>
+                                        <ng-container *ngFor="let task of mySupportTasks">
+                                            <button mat-menu-item *ngIf="task.process_key == process.key "
+                                                [routerLink]="['/dev/myprojects',project.key , process.key]">{{task.title}}</button>
+                                        </ng-container>
+                                    </mat-menu>
+
+                                </ng-container>
+
+
+                            </mat-menu>
+                        </ng-container>
+                    </mat-menu>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="tasksTable m-3">
+                    <div class="days-header m-2">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-4 col-8">
+                                    <h3 class="">Date </h3>
+                                </div>
+                                <!-- <div class="col-md-7">Report</div> -->
+                                <div class="col-md-4 col-4">
+                                    <h3>Hours</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="days m-2" *ngFor="let day of currentWeekDays ; let i = index ">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-4 day d-flex my-1 py-1">
+                                    <span style="cursor: pointer;"
+                                        class="border rounded-3 my-auto me-2 align-items-center"
+                                        (click)="showDayReports(i)">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" *ngIf="!this.openedDay[i]">
+                                            <path
+                                                d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z"
+                                                fill="#513982" />
+                                            <path
+                                                d="M12 18.75C11.59 18.75 11.25 18.41 11.25 18V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V18C12.75 18.41 12.41 18.75 12 18.75Z"
+                                                fill="#513982" />
+                                        </svg>
+
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" *ngIf="!!this.openedDay[i]">
+                                            <path
+                                                d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z"
+                                                fill="#513982" />
+                                        </svg>
+
+
+                                    </span>
+                                    <h3 class="my-auto" style="font-family:'Cairo';font-weight: bold;">{{day | date :
+                                        'fullDate'}}</h3>
+                                </div>
+                                <!-- {{report.reportDate}} {{getDate(day)}} -->
+                                <!-- <div class="col-md-9 tasks">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-md-3 " class="report" 
+                                            *ngFor="let report of myReportsList">
+                                                <ng-container *ngIf="getDate(day) == report.reportDate">
+                                                    <div class="task m-2 p-2">
+                                                        <div class="container-fluid">
+                                                            <div class="row">
+                                                                <div class="col-12">
+                                                                    <h5 class="text-center" *ngIf="report.report_status_id == '2'" style="color:green;">Approved</h5>
+                                                                    <h5 class="text-center" *ngIf="report.report_status_id != '2' && report.report_status_id != '3'" style="color:#f4831f;">{{report.report_status_name}}</h5>
+                                                                    <h5 class="text-center" *ngIf="report.report_status_id == '3'" style="color:brown;">Rejected</h5>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-10">
+                                                                    <div class="working">Working On : {{report.time_activity_name}}</div>
+                                                                    <div class="working" *ngIf="!!report.projectName">Project Name: {{report.projectName}}</div>
+                                                                    <div class="working" *ngIf="!!report.processName">Activity Name: {{report.processName}}</div>
+                                                                    <div class="working" *ngIf="!!report.taskTitle">Task Title: {{report.taskTitle}}</div>
+                                                                    <div class="working" *ngIf="!!report.details">Details: {{report.details}}</div>
+                                                                    <div class="working">Duration : {{report.preApprovedDuration}}</div>
+                                                                    <div class="working" *ngIf="report.approved == true && (report.preApprovedDuration != report.durationByHours)">Approved Duration : {{report.durationByHours}}</div>
+                                                                    <div class="working" *ngIf="report.approved == true && (report.preApprovedDuration != report.durationByHours)">Manager Comment : {{report.managerChangeDurationComment}}</div>
+                                                                    <div class="working" *ngIf="!!report.progress">Progress : {{report.progress}}</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="icon" *ngIf="(!report.seniorToApproveKey || (!!report.seniorToApproveKey && !report.seniorDecision)) && (report.devID == myID && report.approved != true && report.rejected != true)">
+                                                                        <span class="material-icons delete" matTooltip="Delete Report" (click)="deleteReport(report)">
+                                                                            delete
+                                                                        </span>
+                                                                        <br>
+                                                                        <span class="material-icons edit" matTooltip="Edit Report" data-toggle="modal" data-target="#addNewTask" (click)="editReport(report) ; open(mymodal)">
+                                                                            edit
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <div class="col-md-4 my-auto">
+                                    <div class="totalHours" *ngFor="let oneDayTotalHours of totalHours ; let e = index">
+                                        <ng-container *ngIf="i == e" #hour>
+                                            {{oneDayTotalHours}} Hours
+                                        </ng-container>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m-2 d-none" [id]="'day'+i">
+                            <div class="container">
+                                <div class="row">
+                                    <table class="table newTableCustomDah">
+                                        <thead>
+                                            <tr>
+                                                <th>Processes</th>
+                                                <th>Project</th>
+                                                <th>Working on</th>
+                                                <th>Duration</th>
+                                                <th>progress</th>
+                                                <th>Task Title</th>
+                                                <th>Details</th>
+                                                <th>Status</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr *ngFor="let report of myReportsList">
+                                                <ng-container *ngIf="getDate(day) == report.reportDate">
+
+                                                    <td>{{(report.processName || '') |maxLength:10}}</td>
+                                                    <td>{{(report.projectName ||'') |maxLength:10}}</td>
+                                                    <td>{{report.time_activity_name}}</td>
+                                                    <td>{{report.durationByHours}} hours</td>
+                                                    <td>{{report.progress}} %</td>
+                                                    <td>{{(report.taskTitle || '')|maxLength:10}}</td>
+                                                    <td>{{(report.details ||'') |maxLength:10}}</td>
+                                                    <td>
+                                                        <p *ngIf="report.report_status_id == '2'" style="color:green;">
+                                                            Approved by : {{report.approvedByName}}</p>
+                                                        <p *ngIf="report.report_status_id != '2' && report.report_status_id != '3'"
+                                                            style="color:#f4831f;">{{report.report_status_name}}</p>
+                                                        <p *ngIf="report.report_status_id == '3'" style="color:brown;">
+                                                            Rejected</p>
+
+                                                    </td>
+                                                    <td>
+                                                        <div style="cursor: pointer;" class="icon d-flex"
+                                                            *ngIf="(!report.seniorToApproveKey || (!!report.seniorToApproveKey &&
+                                                         !report.seniorDecision)) && (report.devID == myID && report.approved != true && report.rejected != true)">
+                                                            <span class="material-icons delete text-danger"
+                                                                matTooltip="Delete Report"
+                                                                (click)="deleteReport(report)">
+                                                                delete
+                                                            </span>
+                                                            <br>
+                                                            <span class="material-icons edit text-warning"
+                                                                matTooltip="Edit Report"
+                                                                (click)="editReport(report) ; displayModal=true">
+                                                                edit
+                                                            </span>
+                                                        </div>
+                                                    </td>
+
+                                                </ng-container>
+                                            </tr>
+
+
+                                        </tbody>
+                                    </table>
+                                    <!-- <div class="col-md-3 col-8">
+                                        <h3 class="">Processes (4) </h3>
+                                    </div>
+                                    <div class="col-md-7">Report</div>
+                                    <div class="col-md-2 col-4">
+                                        <h3>Hours</h3>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- <p-table #dt1 id="dt1" [value]="currentWeekDays" dataKey="day">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th style="width: 3rem"></th>
+                                <th>day</th>
+                                <th> Hours</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-day let-expanded="expanded">
+                            <tr>
+                                <td>
+                                    <button type="button" pButton pRipple [pRowToggler]="day" class="p-button-text p-button-rounded-1 p-button-plain border p-1 " [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-plus'"></button>
+                                </td>
+                                <td>
+                                    <a >
+                                        {{day | date : 'fullDate'}}
+                                    </a>
+                                </td>
+                                <td>{{ day.total_working_hours }}</td>
+                            </tr>
+    
+                        </ng-template>
+                         
+                        <ng-template pTemplate="rowexpansion" let-day >
+                            
+                            
+                                
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="p-3">
+                                                <p-table [value]="myReportsList" dataKey="report" >
+                                                   
+                                                    <ng-template pTemplate="header">
+                                                        <tr>
+                                                            <th style="width: 5rem"></th>
+                                                            <th>Process Name</th>
+                                                            <th>Working Hours</th>
+                                                        </tr>
+                                                    </ng-template>
+                                                    <ng-template pTemplate="body" let-process let-processExpanded="expanded">
+                                                        <ng-container  *ngIf="getDate(day) == process.reportDate" >
+
+                                                            <tr>
+                                                                <td>
+                                                                    <button type="button" pButton pRipple [pRowToggler]="process" class="p-button-text p-button-rounded-1 p-button-plain border p-1" [icon]="processExpanded ? 'pi pi-chevron-down' : 'pi pi-plus'"></button>
+                                                                </td>
+                                                                <td>
+                                                                    <a>
+                                                                       asddd
+                                                                    </a>
+                                                                </td>
+                                                                <td>{{ process.process_working_hours }}</td>
+                                                            </tr>
+                                                        </ng-container>
+                                                        
+                                                    </ng-template>
+                                                   
+                                                    <ng-template pTemplate="emptymessage">
+                                                        <tr>
+                                                            <td colspan="6">There are no Process for this product yet.</td>
+                                                        </tr>
+                                                    </ng-template>
+                                                </p-table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                
+                                
+                           
+                            
+                        </ng-template>
+                        <ng-template pTemplate="footer">
+    
+                            <tr>
+                               
+                                <td colspan="2">Total Working Hours</td>
+                                <td>{{day.total_working_hours}}</td>
+                            </tr>
+                        </ng-template>
+                    </p-table> -->
+                    <div>
+                    </div>
+
+                </div>
+                <div class="addBtn" *ngIf="!hideAddBtn">
+                    <button class="btn" (click)="displayModal=true;getManagersAndSeniors();getReportTypes()">
+                        Add Report
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <p-sidebar header="" [(visible)]="displayModal" position="right" [autoZIndex]="false" [baseZIndex]="9999"
+        styleClass="p-sidebar-lg" [modal]="true" (onHide)="cancelEdit()">
+        <!-- <ng-template #mymodal let-c="close" let-d="dismiss"> -->
+        <!-- <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">{{reportInEditMode? 'Edit Report' : 'Add New report' }}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+    </div> -->
+        <ng-template pTemplate="content">
+            <div class="">
+                <div class="container">
+
+                    <div class="row">
+                        <div class="col-md-6 my-2">
+                            <label for="date" class="d-block">Date</label>
+
+                            <p-calendar *ngIf="!!currentUser && !currentUser.canAddPreviousReports && isOutSourcedTask"
+                                [(ngModel)]="newReport.outSourceTasksDate" selectionMode="range" appendTo="body"
+                                [showIcon]="true" [minDate]="firstWeekDay" [maxDate]="lastWeekDay" name="date" id="date"
+                                styleClass="w-100" class="w-100 d-block"></p-calendar>
+
+                            <input *ngIf="!!currentUser && !currentUser.canAddPreviousReports && !isOutSourcedTask"
+                                (keydown)="$event.preventDefault()" type="date" [min]="yesterDay" [max]="toDay"
+                                name="date" id="date" class="form-control" [(ngModel)]="newReport.reportDate">
+
+                            <input *ngIf="!!currentUser && currentUser.canAddPreviousReports" type="date"
+                                class="form-control my-1" [(ngModel)]="newReport.reportDate">
+
+
+                            <!-- <input (keydown)="$event.preventDefault()"
+                                type="date" [min]="firstWeekDay" [max]="lastWeekDay" name="date" id="date"
+                                class="form-control" [(ngModel)]="newReport.reportDate" > -->
+
+                        </div>
+                        <div class="col-md-6 my-2">
+                            <label for="activity">Today Progress:</label>
+                            <select name="activity" id="activity" class="form-control"
+                                [(ngModel)]="newReport.time_activity" (change)="changeDuration()">
+                                <ng-container *ngFor="let type of reportTypes">
+                                    <!-- <option *ngIf="type.key == '1' || type.key == '2' || type.key == '8' || type.key == '5'||type.key == '6' " value="{{type.key}}">{{type.report_type}}</option> -->
+                                    <option *ngIf="type.key != '3' && type.key != '4' && type.key != '7'"
+                                        value="{{type.key}}">{{type.report_type}}</option>
+
+                                </ng-container>
+                                <!-- <option value="daily_task">Daily TASK</option>
+                    <option value="training">TRAINING</option>
+                    <option value="c_meeting">CLIENT_MEETING</option>
+                    <option value="support">SUPPORT</option>
+                    <option value="ideal_hours">idle hours</option>
+                    <option value="official_vacation">official vacation</option>
+                    <option value="unpaid_vacation">unpaid vacation</option> -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 my-2"
+                            *ngIf="newReport.time_activity == ActivityEnum.IDEAL_HOURS || newReport.time_activity == ActivityEnum.CLIENT_MEETING || newReport.time_activity == ActivityEnum.DAILY_TASK || newReport.time_activity == ActivityEnum.SUPPORT">
+                            <label for="dailytask">Project Name?!</label>
+                            <select name="dailytask" id="dailytask" class="form-control"
+                                [(ngModel)]="newReport.projectID" (ngModelChange)="getProjectProcess()">
+                                <option value=""></option>
+                                <option *ngFor="let project of myProjectsList" [value]="project.key">{{project.title}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 my-2"
+                            *ngIf="(newReport.time_activity == ActivityEnum.IDEAL_HOURS || newReport.time_activity == ActivityEnum.CLIENT_MEETING || newReport.time_activity == ActivityEnum.DAILY_TASK || newReport.time_activity == ActivityEnum.SUPPORT) && !!newReport.projectID">
+                            <label for="dailytask">Activity Name?!</label>
+                            <select name="dailytask" id="dailytask" class="form-control"
+                                [(ngModel)]="newReport.processID" (ngModelChange)="getProcessTasks()">
+                                <option value=""></option>
+                                <option *ngFor="let process of myProcess" [value]="process.key">{{process.title}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 my-2"
+                            *ngIf="(newReport.time_activity == ActivityEnum.DAILY_TASK || newReport.time_activity == ActivityEnum.SUPPORT) && !!newReport.processID">
+                            <label for="dailytask">Task Name?!</label>
+                            <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="newReport.taskID"
+                                (change)="getTaskProgress();getSelectedTask()">
+                                <option value=""></option>
+                                <option *ngFor="let task of myTasksList" [value]="task.key">{{task.title}}</option>
+                            </select>
+
+                            <!-- <div class="col-md-12" *ngIf="newReport.time_activity == ActivityEnum.DAILY_TASK">
+                    <label for="dailytask">Task Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="newReport.taskID" (change)="getTaskProgress();getSelectedTask()">
+                    <option *ngFor="let task of myTasks" [value]="task.key">{{task.project_title}}=>{{task.process_title}}: {{task.title}}</option>
+                </select>
+                </div>
+                <div class="col-md-12" *ngIf="newReport.time_activity == ActivityEnum.SUPPORT">
+                    <label for="dailytask">Task Name?!</label>
+                    <select name="dailytask" id="dailytask" class="form-control" [(ngModel)]="newReport.taskID" (change)="getTaskProgress();getSelectedTask()">
+                    <option *ngFor="let task of mySupportTasks" [value]="task.key">{{task.project_title}}=>{{task.process_title}}: {{task.title}}</option>
+                </select> -->
+
+                        </div>
+                        <div class="col-md-6 my-2" *ngIf="(newReport.time_activity == ActivityEnum.TICKET_SUPPORT)">
+                            <label for="activity">Tickets: </label>
+                            <select name="activity" id="activity" class="form-control"
+                                [(ngModel)]="newReport.ticket_id">
+                                <ng-container *ngFor="let type of recentClientTickets">
+                                    <option value="{{type.key}}">{{type.title}}</option>
+
+                                </ng-container>
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 my-2"
+                            *ngIf="newReport.time_activity != ActivityEnum.OFFICIAL_VACATION && newReport.time_activity != ActivityEnum.UNPAID_VACATION">
+                            <label for="duration">Duration By Hours:</label>
+                            <input type="number" name="duration" id="duration" class="form-control"
+                                [(ngModel)]="newReport.preApprovedDuration">
+                        </div>
+
+                        <div class="col-md-6 my-2" *ngIf="newReport.time_activity == ActivityEnum.DAILY_TASK">
+                            <label for="progress">Your Progress (%):</label>
+                            <input type="number" name="progress" min="1" max="100" maxlength="3" id="progress"
+                                class="form-control" [(ngModel)]="newReport.progress">
+
+                            <label for="progress">Your Previous Progress is: {{taskTotalProgress}} % </label>
+                            <mat-progress-bar id="progress" class="example-margin" min="1" max="100" mode="determinate"
+                                [value]="taskTotalProgress">
+                            </mat-progress-bar>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 my-2"
+                            *ngIf="!!currentUser?.accPosition && currentUser?.accPosition != AccountPositionEnum.SENIOR">
+                            <label for="approval_Manager">Senior To Approve (Optional)</label>
+                            <select *ngIf="!selectedTask || (!!selectedTask && !selectedTask.seniorIsMandatory)"
+                                name="dailytask" id="dailytask" class="form-control"
+                                [(ngModel)]="newReport.seniorToApproveKey">
+                                <option value=""></option>
+                                <option *ngFor="let senior of seniors" [value]="senior.key">{{senior.username}}</option>
+                            </select>
+
+                            <select disabled *ngIf="!!selectedTask && selectedTask.seniorIsMandatory" name="dailytask"
+                                id="dailytask" class="form-control" [(ngModel)]="newReport.seniorToApproveKey">
+                                <option [value]="newReport.seniorToApproveKey">{{newReport.seniorToApproveName}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- !selectedTask || (!!selectedTask && !selectedTask.seniorIsMandatory) -->
+
+
+                        <div class="col-md-6 my-2"
+                            *ngIf="!newReport.seniorToApproveKey || newReport.seniorToApproveKey.length == 0 ">
+                            <label for="approval_Manager">approval Manager</label>
+                            <select name="dailytask" id="dailytask" class="form-control"
+                                [(ngModel)]="newReport.managerApprovalKey">
+                                <option value=""></option>
+                                <ng-container *ngFor="let manager of managers">
+                                    <option *ngIf="manager.key != '36' && manager.key != '1'" [value]="manager.key">
+                                        {{manager.username}}</option>
+                                </ng-container>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 my-2">
+                            <label for="dailytask">Daily Progress Summary:</label>
+                            <div class="txt">
+                                <textarea name="dailytask" class="form-control" id="dailytask" cols="30" rows="5"
+                                    [(ngModel)]="newReport.details" placeholder="details"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-start text-start my-2">
+                        <div class="col-md-6 my-2">
+                            <button class="btn btnSave " [disabled]="(newReport.time_activity == ActivityEnum.CLIENT_MEETING || newReport.time_activity == ActivityEnum.IDEAL_HOURS) &&
+                         (newReport.projectID == undefined || newReport.processID == undefined)"
+                                (click)="validateReportData()">{{reportInEditMode? 'Edit' : 'Add'}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </ng-template>
+        <!-- </ng-template> -->
+
+    </p-sidebar>
+
+
+</div>

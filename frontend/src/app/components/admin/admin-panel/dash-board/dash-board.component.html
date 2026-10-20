@@ -1,0 +1,237 @@
+<div class="container-fluid dash my-5">
+    <div class="col-10 titles ml-2">
+        <div class="">
+
+            <h1 class="user_name fw-bold mb-0">Hello {{currentUser.username}}</h1>
+            <p class="date">{{date | date:'d MMMM , YYYY'}}</p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-12 mb-2">
+            <div class="row">
+
+                <div class="col-md-6">
+                    <div class="card text-start statistics mb-2 p-1">
+                        <div class="card-body">
+                            <h2 *ngIf="myNavParams">{{dashboardStatistics.pending_reports}}</h2>
+                            <p class="titles fw-bold">Pending Reports</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-start statistics mb-2 p-1">
+                        <div class="card-body">
+                            <h2>{{dashboardStatistics.admin_tasks}}</h2>
+                            <p class="titles fw-bold">Admin Tasks</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-start statistics mb-2 p-1">
+                        <div class="card-body">
+                            <h2>{{dashboardStatistics.public_request}}</h2>
+                            <p class="titles fw-bold">Public Requests</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card text-start statistics mb-2 p-1">
+                        <div class="card-body">
+                            <h2>{{dashboardStatistics.open_tickets }}</h2>
+                            <p class="titles fw-bold">Open tickets</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-lg-4 mb-2">
+            <div class="card statistics">
+                <div class="chartValueCard p-2 m-3">
+                    <div class="card-title">
+                        Projects By Status
+                    </div>
+                    <p-skeleton *ngIf="!loaded" shape="circle" size="150px"></p-skeleton>
+
+                    <canvas mdbChart *ngIf="loaded" [chartType]="projectsStatusChartType" [datasets]="projectsStatusChartDatasets" [labels]="projectsStatusChartLabels" [colors]="projectsStatusChartColors" [options]="projectsStatusChartOptions" [legend]="true" (chartHover)="projectsStatusChartHovered($event)"
+                        (chartClick)="projectsStatusChartClicked($event)" style="height: 250px !important;">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-2">
+            <div class="card statistics">
+                <div class="chartValueCard p-2 m-3">
+                    <div class="card-title">
+                        Projects By Type
+                    </div>
+                    <p-skeleton *ngIf="!loaded" shape="circle" size="150px"></p-skeleton>
+                    <canvas mdbChart *ngIf="loaded" [chartType]="projectsTypeChartType" [datasets]="projectsTypeChartDatasets" [labels]="projectsTypeChartLabels" [colors]="projectsTypeChartColors" [options]="projectsTypeChartOptions" [legend]="true" (chartHover)="projectsTypeChartHovered($event)"
+                        (chartClick)="projectsTypeChartClicked($event)" style="height: 250px !important;">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row mt-2">
+        <div class="col-lg-8 mb-2">
+            <div class="card border-0">
+
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+
+                        <h3 class="card-title fw-bold">
+                            Latest Requests
+                        </h3>
+                        <h3 class="titles text-end" style="cursor: pointer;" routerLink="/manager/publicreqs">All requests</h3>
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="my-3 table table-hover newTableCustomDah">
+                            <thead>
+                                <tr>
+
+                                    <th>employee</th>
+                                    <th>department</th>
+                                    <th>type</th>
+                                    <th>Project</th>
+                                    <th>status</th>
+                                    <!-- <th>assgin to</th> -->
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <ng-container *ngIf="dashboardStatistics.latest_request!.length>0">
+                                    <tr *ngFor="let item of dashboardStatistics.latest_request">
+                                        <td>{{item.Employee}}</td>
+                                        <td>{{item.Department}}</td>
+                                        <td>{{item.RequestType}}</td>
+                                        <td>{{item.Project}}</td>
+                                        <td>{{item.Status}}</td>
+                                        <!-- <td >{{item.AssignedTo}}</td> -->
+                                    </tr>
+
+
+                                </ng-container>
+                                <tr *ngIf="dashboardStatistics.latest_request!.length==0">
+                                    <td colspan="5" class="text-center">no requests founded</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-2" *ngIf="currentUser.department == departmentEnum.MANAGEMENT">
+            <div class="card border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+
+                        <h3 class="card-title fw-bold">
+                            Admin Tasks
+                        </h3>
+                        <a routerLink="/manager/admin_tasks">
+
+                            <h3 class="titles text-end">All requests</h3>
+                        </a>
+                    </div>
+
+                    <div class="mb-5">
+
+                        <div class="card mb-2">
+                            <div class="card-body p-2">
+                                <h3 class="fw-bold">Quarter Sales Report</h3>
+                                <div class="d-flex justify-content-start gap-5">
+
+                                    <div>
+                                        <p class="text-muted mb-0">Start Date</p>
+                                        <p>25th Sep 2023</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted mb-0">End Date</p>
+                                        <p>25th Sep 2023</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="card mb-2">
+                            <div class="card-body p-2">
+                                <h3 class="fw-bold">Quarter Sales Report</h3>
+                                <div class="d-flex justify-content-start gap-5">
+
+                                    <div>
+                                        <p class="text-muted mb-0">Start Date</p>
+                                        <p>25th Sep 2023</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted mb-0">End Date</p>
+                                        <p>25th Sep 2023</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <h3 class="fw-bold">Quarter Sales Report</h3>
+                                <div class="d-flex justify-content-start gap-5">
+
+                                    <div>
+                                        <p class="text-muted mb-0">Start Date</p>
+                                        <p>25th Sep 2023</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted mb-0">End Date</p>
+                                        <p>25th Sep 2023</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn addTaskBtn mt-4 w-100" routerLink="/manager/admin_tasks">
+                        Add New Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<!-- <div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="projectsChart" *ngIf="loaded">
+                <div style="display: block">
+                    <canvas mdbChart [chartType]="projectsStatusChartType" [datasets]="projectsStatusChartDatasets" [labels]="projectsStatusChartLabels" [colors]="projectsStatusChartColors" [options]="projectsStatusChartOptions" [legend]="true" (chartHover)="projectsStatusChartHovered($event)"
+                        (chartClick)="projectsStatusChartClicked($event)">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="projectsChart" *ngIf="loaded">
+                <div style="display: block">
+                    <canvas mdbChart [chartType]="projectsTypeChartType" [datasets]="projectsTypeChartDatasets" [labels]="projectsTypeChartLabels" [colors]="projectsTypeChartColors" [options]="projectsTypeChartOptions" [legend]="true" (chartHover)="projectsTypeChartHovered($event)"
+                        (chartClick)="projectsTypeChartClicked($event)">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="co-12 w-75">
+            <div class="devChart">
+            </div>
+        </div>
+    </div>
+</div> -->
+<!-- <app-dev-monthly-progress></app-dev-monthly-progress> -->

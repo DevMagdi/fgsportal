@@ -1,0 +1,53 @@
+@import '../../../../../colors';
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: $mainThemeColor;
+        line-height: 50px;
+        font-family: $mainFontFamily;
+        font-weight: 600;
+        text-align: center;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+            text-align: center;
+            .dateStyle,
+            .finalTotal {
+                font-family: $mainFontFamily;
+                font-weight: 600;
+                color: $mainThemeColor;
+            }
+        }
+    }
+}
+
+.cardHeader {
+    color: $mainThemeColor;
+    font-size: larger;
+    font-weight: 600;
+    font-family: $mainFontFamily;
+}
+
+.editIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.myCardStyle {
+    color: $mainThemeColor;
+    font-family: $mainFontFamily;
+    .cardImg {
+        border: solid 2px $buttonMainBackgroundColor;
+    }
+    .empName {
+        font-weight: 600;
+    }
+    .myLable {
+        font-weight: 600;
+    }
+    .optionColor {
+        color: $buttonMainBackgroundColor;
+    }
+}

@@ -1,0 +1,96 @@
+@import '../../../../../colors';
+.edit {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.delete {
+    color: #a19ea0;
+    cursor: pointer;
+}
+
+.arrowIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+:host ::ng-deep .p-multiselect {
+    min-width: 15rem;
+    width: 18rem;
+}
+
+:host ::ng-deep .multiselect-custom {
+    .p-multiselect-label {
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+    }
+    .country-item-value {
+        padding: .25rem .5rem;
+        border-radius: 3px;
+        display: inline-flex;
+        margin-right: .5rem;
+        background-color: var(--primary-color);
+        color: var(--primary-color-text);
+        img.flag {
+            width: 17px;
+        }
+    }
+    .country-placeholder {
+        padding: 0.25rem;
+    }
+}
+
+:host ::ng-deep {
+    @media screen and (max-width: 640px) {
+        .p-multiselect {
+            width: 100%;
+        }
+    }
+}
+
+.delete {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.coloredIcon {
+    color: $mainThemeColor;
+}
+
+.coloredIconSec {
+    color: $buttonMainBackgroundColor;
+}
+
+.ci {
+    .form-control {
+        width: 100000px !important;
+    }
+}
+
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-header {
+            background: rgba($color: $mainThemeColor, $alpha: 0.1);
+        }
+    }
+}
+
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-thead {
+            // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+            background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+        }
+        .p-datatable .p-datatable-thead>tr>th {
+            color: $mainThemeColor;
+            background: inherit;
+            text-align: left;
+            font-size: 14px;
+        }
+    }
+}
+
+td {
+    text-align: left !important;
+    font-size: 12px;
+}

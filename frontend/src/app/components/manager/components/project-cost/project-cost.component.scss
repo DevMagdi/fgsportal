@@ -1,0 +1,165 @@
+@import '../../../../colors';
+.pageTitle {
+    color: rgba($color: $mainThemeColor, $alpha: 0.8);
+    font-size: 38px;
+    font-family: $mainFontFamily;
+    font-weight: 600;
+    border-left: solid 7px $buttonMainBackgroundColor;
+    padding-left: 5px;
+}
+
+.spinner {
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.downloadBtn {
+    background-color: $mainThemeColor;
+    color: #efefef;
+}
+
+.overView {
+    // background-color: rgba($color: $mainThemeColor, $alpha: 0.5);
+    padding-top: 10px;
+    margin-top: 10px;
+    .overViewCard {
+        // background-color: #fff;
+        // box-shadow: 0 0 10px rgba($color: $mainThemeColor, $alpha: 0.8);
+        // background-color: rgba($color: $mainThemeColor, $alpha: 0.2);
+        // width: 200px;
+        height: 150px;
+        margin: 5px;
+        padding: 5px;
+        border-radius: 5px;
+        .cardTitle {
+            text-align: center;
+            height: 40%;
+            h3 {
+                color: #fff;
+                font-size: 20px;
+                font-family: $mainFontFamily;
+                font-weight: 600;
+            }
+        }
+        .cardBody {
+            height: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            p {
+                color: #fff; //$buttonMainBackgroundColor;
+                font-size: 20px;
+                font-family: $mainFontFamily;
+            }
+        }
+    }
+    .card1 {
+        background-image: linear-gradient(50deg, #09c, $mainThemeColor)!important;
+    }
+    .card2 {
+        background-image: linear-gradient(50deg, #8EF9FE, #263238)!important;
+    }
+    .card3 {
+        background-image: linear-gradient(50deg, #FF9E80, #D50000)!important;
+    }
+    .card4 {
+        background-image: linear-gradient(50deg, #C5D429, #2E7D32)!important;
+    }
+    .card5 {
+        background-image: linear-gradient(50deg, #ffd86f, #FF7043)!important;
+    }
+}
+
+.textHeader {
+    color: $mainThemeColor;
+    font-family: $mainFontFamily;
+    font-weight: 600;
+    font-size: 24px;
+}
+
+.projectTitle {
+    background-color: #efefef;
+    padding: 10px;
+    margin: 10px 50px;
+    border-radius: 5px;
+}
+
+.projectCost {
+    .tableCustom {
+        thead {
+            background-color: $tabBackGround;
+            color: $mainThemeColor;
+            line-height: 50px;
+            font-family: $mainFontFamily;
+            font-weight: 600;
+            text-align: center;
+        }
+        tbody {
+            tr {
+                border-top: solid 2px $mainThemeColor;
+                line-height: 50px;
+                text-align: center;
+                .dateStyle,
+                .finalTotal {
+                    font-family: $mainFontFamily;
+                    font-weight: 600;
+                    color: $mainThemeColor;
+                }
+            }
+        }
+    }
+    .newTableCustom{
+        tr{
+            td{
+                color: $mainThemeColor;
+            }
+        }
+    }
+}
+
+.deleteIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+.statistics{
+    border-color: $borderColor;
+    border-radius: 16px;
+    padding: .9rem;
+    // min-height: 153px !important;
+
+    h2{
+        font-size: 16px;
+        font-weight: bold;
+    }
+    p{
+        font-size: 14px; 
+        color: $subThemeColor;
+        font-weight: 500;
+    }
+
+}
+.newProjectBtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    color: white;
+}
+.btn-outline-orange{
+    color: $buttonSubBackgroundColor!important;
+    border-color: $buttonSubBackgroundColor!important;
+    box-shadow: none!important;
+
+}
+::ng-deep p-dropdown.ng-dirty.ng-invalid > .p-dropdown {
+    border-color: #ced4da !important;
+    // min-width: 100%;
+}
+::ng-deep .p-dropdown , ::ng-deep .p-calendar ,::ng-deep .p-multiselect {
+    min-width: 100% !important;
+
+}

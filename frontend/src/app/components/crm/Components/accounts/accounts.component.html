@@ -1,0 +1,478 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="accountsLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">CRM /</span> Accounts</h4>
+        <div class=" text-left">
+            <p-table id="dt1" #dt1 [value]="myAccounts" dataKey="id" [rows]="10" responsiveLayout="scroll"
+                [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [loading]="loading" [paginator]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [globalFilterFields]="['partner_name','phone','email','partner_industry_name','country']">
+                <ng-template pTemplate="caption">
+                    <div class="d-flex justify-content-between">
+
+                        <button (click)="sidebarDisplay=true;openAddPartnerForm()" type="button" class="btn btnStyle">
+                            <i class="menu-icon tf-icons bx bx-plus"></i>
+                            Account
+                        </button>
+                        <div>
+
+                            <span class="p-input-icon-left search">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text"
+                                    (input)="dt1.filterGlobal($any($event.target).value, 'contains')"
+                                    placeholder="Search keyword" />
+                            </span>
+                            <button pButton label="Clear" class="btnOutLine p-button-sm mx-1" icon="pi pi-filter-slash"
+                                (click)="clear(dt1)"></button>
+                        </div>
+
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Organization Name
+                                <p-columnFilter field="partner_name" matchMode="in" display="menu"
+                                    [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+
+                                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                        <p-multiSelect [ngModel]="value" [options]="nameFilterOptions"
+                                            (onClear)="filter([])" optionLabel="label" optionValue="value"
+                                            placeholder="Any" [showClear]="true"
+                                            (onChange)="filter($event.value)"></p-multiSelect>
+                                    </ng-template>
+                                </p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                <span>
+                                    Industry
+                                </span>
+                                <p-columnFilter field="partner_industry_id" matchMode="in" display="menu"
+                                    [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                    <ng-template pTemplate="header">
+                                        <div class="px-3 pt-3 pb-0">
+                                            <span class="font-bold">Industry Picker</span>
+                                        </div>
+                                    </ng-template>
+                                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                        <p-multiSelect [ngModel]="value" [options]="partnerIndustry" optionValue="id"
+                                            placeholder="Any" (onChange)="filter($event.value)"
+                                            optionLabel="partner_industry_name">
+                                            <ng-template let-option pTemplate="item">
+                                                <div class="p-multiselect-representative-option">
+                                                    <span class="ml-1">{{option.partner_industry_name}}</span>
+                                                </div>
+                                            </ng-template>
+                                        </p-multiSelect>
+                                    </ng-template>
+                                </p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Country
+                                <p-columnFilter field="country" matchMode="in" display="menu" [showMatchModes]="false"
+                                    [showOperator]="false" [showAddButton]="false">
+
+                                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                        <p-multiSelect [ngModel]="value" [options]="countryFilterOptions"
+                                            (onClear)="filter([])" optionLabel="label" optionValue="value"
+                                            placeholder="Any" [showClear]="true"
+                                            (onChange)="filter($event.value)"></p-multiSelect>
+                                    </ng-template>
+                                </p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Phone
+                                <p-columnFilter type="text" field="phone" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Email
+                                <p-columnFilter type="text" field="email" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th
+                            *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department == DepartmentEnum.Business_Development && currentUser.accPosition== AccountPositionsEnum.MANAGER)">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Sales
+                                <p-columnFilter field="sales_name" matchMode="in" display="menu"
+                                    [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+
+                                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                        <p-multiSelect [ngModel]="value" [options]="salesFilterOptions"
+                                            (onClear)="filter([])" optionLabel="label" optionValue="value"
+                                            placeholder="Any" [showClear]="true"
+                                            (onChange)="filter($event.value)"></p-multiSelect>
+                                    </ng-template>
+                                </p-columnFilter>
+                            </div>
+                        </th>
+
+                        <!-- <th pSortableColumn="person_contact">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Contacts
+                                <p-sortIcon field="person_contact"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th pSortableColumn="contact">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Leads
+                                <p-sortIcon field="contact"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th pSortableColumn="lead">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Opportunity
+                                <p-sortIcon field="lead"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th pSortableColumn="won">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Won
+                                <p-sortIcon field="won"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th pSortableColumn="lost">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Lost
+                                <p-sortIcon field="lost"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th pSortableColumn="archive">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Archive
+                                <p-sortIcon field="archive"></p-sortIcon>
+                            </div>
+                        </th> -->
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-account>
+                    <tr>
+                        <td>
+                            <!-- {{account.partner_name}} -->
+
+                            <a [routerLink]="['/CRM/accounts',account.id]">
+                                {{account.partner_name}}
+                            </a>
+                        </td>
+                        <td>
+                            {{account.partner_industry_name}}
+                        </td>
+                        <td>
+                            {{getCountryName(account.country)}}
+                        </td>
+                        <td>
+                            <a href="tel:{{account.phone}}" target="_blank"
+                                [matTooltip]="'Call Phone ('+account.phone+' )'">
+                                {{account.phone}}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="mailto:{{account.email}}?subject=welcome from FGS &body=Hello,{{account.name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}"
+                                target="_blank" rel="noopener noreferrer">
+                                {{account.email}}
+                            </a>
+                        </td>
+                        <td
+                            *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department == DepartmentEnum.Business_Development && currentUser.accPosition== AccountPositionsEnum.MANAGER)">
+                            {{account.sales_name}}
+                        </td>
+                        <!-- <td>
+                            {{account.person_contact}}
+                        </td>
+                        <td>
+                            {{account.contact}}
+                        </td>
+                        <td style="cursor: pointer;">
+                            {{account.lead}}
+                        </td>
+                        <td style="cursor: pointer;">
+                            {{account.won}}
+                        </td>
+                        <td style="cursor: pointer;">
+                            {{account.lost}}
+                        </td>
+                        <td style="cursor: pointer;">
+                            {{account.archive}}
+                        </td> -->
+
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                    data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:void(0);"
+                                        (click)="sidebarDisplay=true;editPartner(account)">
+                                        <i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="deletePart(account)"><i
+                                            class="bx bx-trash me-1"></i> Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="8">No customers found.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <!-- Basic Bootstrap Table -->
+        <!-- <div class="card">
+            <div class="card-header">
+                <button (click)="openAddPartnerForm()" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#largeModal">
+                    <i class="menu-icon tf-icons bx bx-plus"></i>
+                    Account
+                </button>
+            </div>
+            <div class="table-responsive text-nowrap">
+                <table class="table myTable table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Industry</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Contacts</th>
+                            <th>Leads</th>
+                            <th>Won</th>
+                            <th>Lost</th>
+                            <th>Archive</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        <tr *ngFor="let acc of myAccounts">
+                            <td style="cursor: pointer;"><i class="fab fa-angular fa-lg text-danger me-3"></i> {{acc.partner_name}}</td>
+                            <td style="cursor: pointer;">
+                                {{acc.partner_industry_name}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                {{acc.phone}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                {{acc.email}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{acc.contact}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{acc.lead}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{acc.won}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{acc.lost}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{acc.archive}}
+                            </td>
+
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="editPartner(acc)" data-bs-toggle="modal" data-bs-target="#largeModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="deletePart(acc)"><i class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> -->
+
+    </div>
+
+</div>
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="sidebarDisplay"
+    position="right" [transitionOptions]="'350ms'" (onHide)="newPartnerForm.reset()">
+    <!-- <div class="modal modal-top fade" id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content"> -->
+    <!-- <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+    <h3 class="modal-title fw-bold" id="exampleModalLabel3">New Organization</h3>
+
+    <div class="mb-3">
+        <form [formGroup]="newPartnerForm" (ngSubmit)="submitPartForm()" class="example-form">
+            <div class="modal-body part-form">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Title">Name</label>
+                                <!-- <div class=""> -->
+                                <input class="form-control" type="text" placeholder="Write name"
+                                    formControlName="partner_name" [ngClass]="{'is-invalid':!newPartnerForm.get('partner_name')?.valid &&
+                                        newPartnerForm.get('partner_name')?.touched}" />
+                                <div class="invalid-feedback"
+                                    *ngIf="!newPartnerForm.get('partner_name')?.valid && newPartnerForm.get('partner_name')?.touched">
+                                    Partner Name Is Required
+                                </div>
+                                <!-- </div> -->
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class="formLables">Industry</label>
+                                <mat-select formControlName="industry" class="form-control" [ngClass]="{'is-invalid':!newPartnerForm.get('industry')?.valid &&
+                                        newPartnerForm.get('industry')?.touched}" placeholder="select industry"
+                                    floatlLabel="never">
+                                    <mat-option *ngFor="let ind of partnerIndustry"
+                                        [value]="ind.id">{{ind.partner_industry_name}}</mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                                <div class="invalid-feedback"
+                                    *ngIf="!newPartnerForm.get('industry')?.valid && newPartnerForm.get('industry')?.touched">
+                                    Industry Is Required
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class="formLables">Type</label>
+                                <mat-select formControlName="organize_type_id" class="form-control"
+                                    placeholder="select type" floatlLabel="never">
+                                    <mat-option *ngFor="let type of organizationTypes"
+                                        [value]="type.id">{{type.organize_type}}</mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+                        </div>
+
+                        <div class="col-md-6"
+                            *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department == DepartmentEnum.Business_Development && currentUser.accPosition== AccountPositionsEnum.MANAGER)">
+                            <div class="mb-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class="formLables">Assign To Sales</label>
+                                <mat-select formControlName="sales_id" class="form-control" placeholder="select sales"
+                                    floatlLabel="never">
+                                    <mat-option value=""></mat-option>
+                                    <mat-option *ngFor="let sales of allSales"
+                                        [value]="sales.key">{{sales.username}}</mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class="formLables">Country</label>
+                                <mat-select formControlName="country" class="form-control" placeholder="select country"
+                                    floatlLabel="never">
+                                    <mat-option *ngFor="let country of CurrencyList" [value]="country.countryCode">
+                                        <div class="country-item d-flex align-items-center justify-content-start">
+                                            <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                width="17px" height="20px"
+                                                [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                            <div>{{country.countryName}}</div>
+                                        </div>
+                                    </mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="email">Email</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="email" placeholder="Write Email Address"
+                                        formControlName="email" />
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="phone">Phone</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="text" placeholder="Write phone number"
+                                        formControlName="phone" />
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="address">Address</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="text" placeholder="Write Address"
+                                        formControlName="partner_address" />
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Website">Website</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="url" placeholder="Write Website url"
+                                        formControlName="website" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="description">Description</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="text" placeholder="Write Description"
+                                        formControlName="partner_description" />
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+                            <div class="mb-3 d-flex align-items-center">
+                                <p-checkbox class="my-auto me-2" formControlName="is_client" [binary]="true"
+                                    inputId="binary"></p-checkbox>
+                                <label class="form-label my-auto" for="is_client">Mark As Client</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" (click)="sidebarDisplay=false" class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal" aria-label="Close">
+                    Close
+                </button>
+                <button type="submit" class="btn btnStyle" [disabled]="newPartnerForm.invalid" data-bs-dismiss="modal"
+                    aria-label="Close">Save</button>
+            </div>
+        </form>
+    </div>
+    <!-- </div>
+    </div>
+</div> -->
+</p-sidebar>

@@ -1,0 +1,81 @@
+<div class="table-responsive">
+
+    <table class="my-3 table table-hover newTableCustomDah">
+        <thead>
+            <tr>
+
+                <th>#</th>
+                <th>title</th>
+                <th>project manager</th>
+                <th>projects</th>
+                <th>Date</th>
+                <th>status</th>
+                <th class="text-center">Actions</th>
+
+            </tr>
+
+        </thead>
+        <tbody>
+            <ng-container *ngIf="reports.length>0">
+                <tr *ngFor="let item of reports;let i=index">
+                    <td>{{i+1}}</td>
+
+                    <td>{{item.team_request_title}}</td>
+                    <td>{{item.user_creator_name}}</td>
+
+                    <td class="report_projects" (click)="report=item;showReport=true">{{item.projects.length}} project/s
+                    </td>
+                    <td>{{item.for_date}}</td>
+
+                    <td *ngIf="isManager">
+                        <a *ngIf="item.team_request_status_id==reportStatus.Open" class="btn btnStyle text-white"
+                            (click)="changePMTeamRequestStatus(item.key)">Approve</a>
+                        <span *ngIf="item.team_request_status_id==reportStatus.Closed"
+                            [class]="item.team_request_status.toLowerCase()">{{item.team_request_status}}</span>
+                    </td>
+                    <td class="text-center" *ngIf="isManager">
+                        <i class="pi pi-eye editIcon cursor" (click)="report=item;showReport=true"></i>
+
+                    </td>
+                    <td *ngIf="!isManager">
+                        <span [class]="item.team_request_status.toLowerCase()">{{item.team_request_status}}</span>
+                    </td>
+                    <td *ngIf="!isManager">
+                        <a>
+
+                            <i class="pi pi-eye editIcon mx-1" (click)="report=item;showReport=true"></i>
+                            <i *ngIf="item.team_request_status_id==reportStatus.Open" class="pi pi-pencil editIcon mx-1"
+                                (click)="report=item;sidebarDisplay=true"></i>
+                            <i *ngIf="item.team_request_status_id==reportStatus.Open"
+                                class="pi pi-trash deleteIcon mx-1 text-danger" (click)="deleteReport(item)"></i>
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            </ng-container>
+            <tr *ngIf="reports!.length==0">
+                <td colspan="7" class="text-center">no reports founded</td>
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="showReport"
+    position="right" [transitionOptions]="'350ms'">
+    <ng-template pTemplate="content">
+
+        <app-show-report [report]="report"></app-show-report>
+    </ng-template>
+</p-sidebar>
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="sidebarDisplay"
+    position="right" [transitionOptions]="'350ms'" (onHide)="closeSideBar.emit(true)">
+    <ng-template pTemplate="content">
+
+        <app-manage-report [report]="report"></app-manage-report>
+    </ng-template>
+</p-sidebar>

@@ -1,0 +1,1265 @@
+<p-blockUI [blocked]="navLoading" style="width: 100vw; height: 100vh">
+  <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<nav class="navbar navbar-expand-sm bg-white">
+  <!-- <a class="navbar-brand ml-2" routerLink="/">
+        <div class="logo mr-2">
+            <img src="../../../assets/img/new logo.png" />
+        </div>
+    </a> -->
+  <!-- <span class="clock ml-2">
+        {{date | date:'medium'}}
+    </span> -->
+  <!-- <a class="navbar-brand ml-2" routerLink="/" matTooltip="6 October War Memory">
+        <div class="logo mr-2">
+            <img src="https://acegif.com/wp-content/uploads/gif/egypt-flag-7.gif" />
+        </div>
+    </a> -->
+  <!-- <button *ngIf="isLoggedIn" class="navbar-toggler navbar-light" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon">
+        </span>
+    </button> -->
+
+
+  <div class="navbar-collapse navLinks" id="navbarSupportedContent">
+    <ul *ngIf="isLoggedIn" class="nav nav-pills ml-auto justify-content-end">
+      <!-- <li class="nav-item" *ngIf="currentUser.department === DepartmentEnum.CLIENT">
+                <a class="nav-link" [routerLink]="['/support/profile',currentUserKey]">
+                    <span class="material-icons">
+                        account_circle
+                    </span>
+                </a>
+            </li> -->
+      <!-- <div> -->
+
+
+      <!-- <li class="nav-item mt-2 me-5 search-form d-none d-sm-block">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text searchIcon" id="addon-wrapping">
+                            <img src="../../../assets/img/search-normal.png" width="20" height="20" alt="" srcset="">
+                        </span>
+                    <input type="search" class="form-control searchInput" placeholder="Username" aria-label="Username" aria-describedby="addon-wrapping">
+                </div>
+            </li> -->
+      <!-- </div> -->
+
+
+      <!-- <div class="d-flex"> -->
+
+
+      <!-- <li class="nav-item mt-2">
+                    <span class="clock">
+                        {{date | date:'medium'}}
+                    </span>
+                </li> -->
+      <li *ngIf="getunreadnotification().length > 0" class="nav-item">
+        <button [matMenuTriggerFor]="menu" mat-button>
+          <span [matBadge]="
+              getunreadnotification().length == 0
+                ? ''
+                : getunreadnotification().length
+            " class="material-icons" matBadgeColor="warn">
+            notifications
+          </span>
+        </button>
+        <mat-menu #menu="matMenu">
+          <div *ngFor="
+              let notify of getunreadnotification().slice().reverse()
+                | slice : 0 : 4;
+              let i = index
+            " (click)="readThisNotify(notify)" class="notify cursor-pointer hover">
+            <div class="container">
+              <div class="row">
+                <div class="col-12">
+                  {{ getTime(notify.createdAt) }}
+                </div>
+                <div class="col-12">
+                  <span style="font-weight: bold">
+                    {{ notify.senderName }}
+                  </span>
+                  {{ notify.title }}
+                </div>
+
+
+                <div class="col-12">{{ notify.body }}</div>
+              </div>
+            </div>
+            <hr>
+          </div>
+          <a routerLink="/notification" class="d-flex justify-content-center">
+            See More
+          </a>
+        </mat-menu>
+      </li>
+      <li *ngIf="getunreadnotification().length < 1" class="nav-item">
+        <button [matMenuTriggerFor]="menu" mat-button>
+          <span [matBadge]="
+              getunreadnotification().length == 0
+                ? ''
+                : getunreadnotification().length
+            " class="material-icons" matBadgeColor="warn">
+            notifications
+          </span>
+        </button>
+        <mat-menu #menu="matMenu">
+          <div *ngFor="
+              let notify of myNotifications.slice().reverse() | slice : 0 : 4;
+              let i = index
+            " (click)="readThisNotify(notify)" class="notify cursor-pointer hover">
+            <div class="container">
+              <div class="row">
+                <div class="col-12">
+                  {{ getTime(notify.createdAt) }}
+                </div>
+                <div class="col-12">
+                  <span style="font-weight: bold">
+                    {{ notify.senderName }}
+                  </span>
+                  {{ notify.title }}
+                </div>
+                <div class="col-12">{{ notify.body }}</div>
+              </div>
+            </div>
+            <hr>
+          </div>
+          <a routerLink="/notification" class="d-flex justify-content-center">
+            See More
+          </a>
+        </mat-menu>
+      </li>
+
+
+      <li *ngIf="currentUser.accType != AccountTypeEnum.Client" class="nav-item">
+        <!-- <a class="nav-link" [routerLink]="['/user',currentUserKey]"> -->
+        <!-- <p-avatar *ngIf="!currentUser.photoURL && !currentUser.gender || !currentUser.photoURL && currentUser.gender == 'male'" image="../../../assets/img/avatarman.png" styleClass="mr-2" shape="circle"></p-avatar>
+                        <p-avatar *ngIf="!currentUser.photoURL && currentUser.gender == 'female'" image="{{newServerApi}}{{currentUser.photoURL}}" styleClass="mr-2" shape="circle"></p-avatar> -->
+        <!-- <p-avatar *ngIf="!!currentUser.photoURL" image="{{newServerApi}}{{currentUser.photoURL}}" shape="circle"></p-avatar> -->
+        <!-- <span class="material-icons">
+                            account_circle
+                        </span>
+                    </a> -->
+
+
+        <!-- <a class="nav-link" [routerLink]="['/user',currentUserKey]">
+                            <span class="material-icons">
+                                account_circle
+                            </span>
+                        </a> -->
+        <button [matMenuTriggerFor]="menu" mat-button>
+          <!-- <span class="material-icons" [matBadge]="getunreadnotification().length == 0 ? '' : getunreadnotification().length" 
+                        matBadgeColor="warn">
+                            account_circle
+                        </span> -->
+          <span>
+            <img *ngIf="
+                (!currentUser.photoURL && !currentUser.gender) ||
+                (!currentUser.photoURL && currentUser.gender == 'male')
+              " src="../../../assets/img/avatarman.png" alt="User" class="rounded-circle userAvatar p-2" width="50"
+              height="50">
+            <img *ngIf="!currentUser.photoURL && currentUser.gender == 'female'"
+              src="../../../assets/img/girlmyavatar.png" alt="User" class="rounded-circle userAvatar p-2" width="50"
+              height="50">
+            <img *ngIf="!!currentUser.photoURL" src="{{ newServerApi }}{{ currentUser.photoURL }}" alt="User"
+              class="rounded-circle userAvatar p-2" width="50" height="50">
+          </span>
+          <span class="ps-2">
+            {{ currentUser.username }}
+            <i class="menu-icon tf-icons bx bx-chevron-down m-0"></i>
+          </span>
+        </button>
+        <mat-menu #menu="matMenu">
+          <div class="cursor-pointer user-menu">
+            <a [routerLink]="['/user', currentUserKey]" class="nav-link">
+              <span class="px-2 fw-bold">View Profile</span>
+            </a>
+            <hr class="m-auto">
+            <a (click)="logout()" class="nav-link">
+              <span class="px-2 fw-bold">Sign Out</span>
+            </a>
+          </div>
+        </mat-menu>
+      </li>
+
+
+      <!-- <li>
+                    <a class="nav-link" (click)="logout()">Sign Out</a>
+                </li> -->
+      <!-- </div> -->
+    </ul>
+  </div>
+</nav>
+<mat-sidenav-container *ngIf="isLoggedIn" class="sidenav-container">
+  <!-- currentUser.department == '3' ? false : !(isHandset$ | async) -->
+  <mat-sidenav #drawer [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="!(isHandset$ | async)" class="sidenav mat-elevation-z12"
+    fixedInViewport="true">
+    <mat-toolbar class="toolbar">
+      <div [ngStyle]="{
+          'margin-top':
+            currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
+            currentUser.accPosition != AccountPositionEnum.MANAGER
+              ? '10px'
+              : '0'
+        }" class="w-100 d-flex flex-column align-items-center text-center">
+        <div class="logo-main">
+          <a class="navbar-brand" routerLink="/">
+            <div class="logo">
+              <img src="../../../assets/img/Frame 4379.png">
+            </div>
+          </a>
+        </div>
+        <!-- <mat-icon aria-label="Side nav toggle icon">menu</mat-icon> -->
+        <!-- <button class="btn position-absolute menu-button" type="button" id="menu-button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle();drawerClose =true">
+                    <img src="../../../assets/img/arrow-circle-left.png" class="arrow-left" alt="" srcset="">
+                </button> -->
+
+
+        <!-- <div>
+                    <img *ngIf="!currentUser.photoURL && !currentUser.gender || !currentUser.photoURL && currentUser.gender == 'male'" src="../../../assets/img/avatarman.png" alt="User" class="rounded-circle userAvatar p-2" width="125" height="125">
+                    <img *ngIf="!currentUser.photoURL && currentUser.gender == 'female'" src="../../../assets/img/girlmyavatar.png" alt="User" class="rounded-circle userAvatar p-2" width="125" height="125">
+                    <img *ngIf="!!currentUser.photoURL" src={{newServerApi}}{{currentUser.photoURL}} alt="User" class="rounded-circle userAvatar p-2" width="125" height="125">
+                </div> -->
+
+
+        <!-- <div class="mt-2"> -->
+        <!-- <h4>{{currentUser.username}}</h4> -->
+        <!-- <div class="field-checkbox" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition != AccountPositionEnum.MANAGER"> -->
+        <!-- <p-checkbox inputId="otw" [binary]="true" (click)="openToWork()" [ngModel]="currentUser.open_to_work"></p-checkbox>
+                        <label class="mylabel" for="otw">Open To Work</label>
+                {{currentUser.open_to_work == true ? 'Not Avaliable' : 'Avaliable'}}
+                <mat-checkbox class="openToWork" style="color:#fff" [checked]="currentUser.open_to_work == '1' ? true : false" (change)="checkopenToWork()">
+                            <span *ngIf="currentUser.open_to_work == '1'">
+                                Not Avaliable
+                            </span>
+                            <span *ngIf="currentUser.open_to_work == '0'">
+                                Avaliable
+                            </span>
+                        </mat-checkbox> -->
+        <!-- <button class="btn openToWorkBTN" data-bs-toggle="modal" data-bs-target="#openToWork" (click)="getMyOpenToWork()">Open To Work</button>
+                    </div> -->
+        <!-- <p class="text-secondary mb-1 role">{{currentUser.department == DepartmentEnum.TECHNICAL_TEAM ? 'Developer' : currentUser.department== 'pm' ? 'Project Manager' : currentUser.accType == 'b_analysis' ? 'Business Analysis' : currentUser.accType == 'manager' ? 'Manager' : currentUser.accType}}</p>
+                    <p class="text-muted email">{{currentUser.accRole}}</p>
+                    <p class="text-muted email">{{currentUser.accPosition}}</p> -->
+        <!-- </div> -->
+      </div>
+    </mat-toolbar>
+
+
+    <mat-nav-list class="nav-list">
+      <div *ngIf="
+          currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
+          currentUser.accPosition != AccountPositionEnum.MANAGER
+        " class="field-checkbox text-center">
+        <button (click)="getMyOpenToWork()" class="btn openToWorkBTN" data-bs-toggle="modal"
+          data-bs-target="#openToWork">
+          Open To Work
+        </button>
+      </div>
+
+
+      <!-- <div class="layout-menu menu-vertical menu bg-menu-theme">
+                <ul class="menu-inner py-1">
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Management</span>
+                    </li>
+                    <li class="menu-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#lead" aria-expanded="true" aria-controls="lead">
+                            <div data-i18n="Analytics">
+                                <i class="menu-icon tf-icons bx bx-user"></i> Reports
+                                <i class="menu-icon tf-icons bx bx-plus"></i>
+                            </div>
+                        </a>
+                        <div class="collapse" id="lead">
+                            <ul class="nav flex-column ms-4 me-4 ">
+                                <li class="nav-item">
+                                    <a class="nav-link " href="" aria-expanded="true">test 2 </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link " href="" aria-expanded="true">test 3 </a>
+                                </li>
+
+
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div> -->
+
+
+      <!-- <a mat-list-item routerLink="/my_work" routerLinkActive="active" *ngIf="checkIfHasPerm(12)">
+                My Work
+            </a> -->
+
+
+      <!-- <a href="" class="m-2">Main</a> -->
+      <!-- <mat-divider></mat-divider> -->
+
+
+      <a *ngIf="checkIfHasPerm(12)" mat-list-item routerLink="/my_work" routerLinkActive="active">
+        Time Sheet
+        <!-- <mat-divider></mat-divider> -->
+      </a>
+      <a mat-list-item routerLink="/admin-panel/dashboard" routerLinkActive="active">
+        <img src="../../../assets/img/home.png" width="24" hight="24" class="me-2" >
+        <span>Dashboard</span>
+      </a>
+
+
+      <a *ngIf="checkIfHasPerm(25) == true" mat-list-item routerLink="/support-reports" routerLinkActive="active">
+        <!-- <img src="../../../assets/img/home.png" width="24" hight="24" class="me-2" alt=""> -->
+        <span>Support Reports</span>
+      </a>
+
+
+      <!-- <mat-divider></mat-divider> -->
+
+
+      <!-- ===================================== CRM =============================================== -->
+
+
+      <a *ngIf="
+          currentUser.department == DepartmentEnum.MANAGEMENT ||
+          (!!userPerms && !!checkIfHasPerm(15))
+        " (dblclick)="crmOpened = !crmOpened" (click)="crmOpened = !crmOpened" mat-list-item class="nav-link"
+        data-bs-toggle="collapse" href="#crmOpened" aria-expanded="true" aria-controls="lead">
+        <div data-i18n="Analytics">
+          <i class="menu-icon tf-icons bx bx-line-chart"></i>
+          CRM
+          <i *ngIf="!crmOpened" class="menu-icon tf-icons bx bx-chevron-right"></i>
+          <i *ngIf="crmOpened" class="menu-icon tf-icons bx bx-chevron-down"></i>
+          <span *ngIf="
+              !!myNavParams &&
+              myNavParams.myPendingPOCRequest &&
+              myNavParams.myPendingPOCRequest > 0
+            " class="ml-1 badge badge-dark customBagdeBG">
+            {{ myNavParams.myPendingPOCRequest }}
+          </span>
+        </div>
+      </a>
+
+
+      <div class="collapse" id="crmOpened">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/dashboard" routerLinkActive="active">
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2">
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2">
+              <!-- <i class="menu-icon tf-icons bx bx-line-chart"></i> -->
+              Insights
+            </a>
+          </li>
+           <li class="nav-item" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT ">
+            <a mat-list-item routerLink="/CRM/reports" routerLinkActive="active">
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              <!-- <i class="menu-icon tf-icons bx bx-line-chart"></i> -->
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/accounts" routerLinkActive="active">
+              <!-- <i class="menu-icon tf-icons bx bx-buildings"></i> -->
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              Organizations
+            </a>
+          </li>
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/contacts" routerLinkActive="active">
+              <!-- <i class="menu-icon tf-icons bx bx-user"></i> -->
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              Contacts
+            </a>
+          </li>
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/activities" routerLinkActive="active">
+              <!-- <i class="menu-icon tf-icons bx bx-calendar-event"></i> -->
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              Activities
+            </a>
+          </li>
+
+
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/poc-requests" routerLinkActive="active">
+              <!-- <i class="menu-icon tf-icons bx bx-git-pull-request"></i> -->
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              Requests
+              <span *ngIf="!!totalCRMReqsCounter && totalCRMReqsCounter > 0"
+                class="ml-1 badge badge-dark customBagdeBG">
+                {{ totalCRMReqsCounter }}
+              </span>
+            </a>
+          </li>
+
+
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/leads" routerLinkActive="active">
+              <!-- <i class="menu-icon tf-icons bx bx-user-check"></i> -->
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              Leads
+            </a>
+          </li>
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/opportunity" routerLinkActive="active">
+              <!-- <i class="menu-icon tf-icons bx bx-dollar-circle"></i> -->
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              Opportunity
+            </a>
+          </li>
+          <li class="nav-item">
+            <a mat-list-item routerLink="/CRM/closed" routerLinkActive="active">
+              <!-- <i class="menu-icon tf-icons bx bx-shield-x"></i> -->
+              <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+              <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+              Closed Deal
+            </a>
+          </li>
+        </ul>
+      </div>
+
+
+      <!-- <mat-divider></mat-divider> -->
+      <!-- <a mat-list-item routerLink="/reports_approval" routerLinkActive="active" *ngIf="currentUser.department== DepartmentEnum.MANAGEMENT || (!!userPerms && !!checkIfHasPerm(16))">
+                Other pending Reports
+                <mat-divider></mat-divider>
+            </a> -->
+
+
+      <div *ngIf="isManager || isAdmin" class="managerModule">
+        <!-- <a mat-list-item routerLink="/admin-panel/timesheet" routerLinkActive="active" *ngIf="currentUser.department== DepartmentEnum.ADMINSTRATION && currentUser.accPosition != AccountPositionEnum.MANAGER">
+                    Time Sheet
+                    <mat-divider></mat-divider>
+                </a> -->
+
+
+        <!-- ===================================== Project Management =============================================== -->
+
+
+        <a *ngIf="
+            currentUser.department == DepartmentEnum.MANAGEMENT ||
+            (!!userPerms && !!checkIfHasPerm(5))
+          " [routerLinkActiveOptions]="{ exact: true }" (dblclick)="pmOpened = !pmOpened"
+          (click)="pmOpened = !pmOpened" mat-list-item class="nav-link" routerLinkActive="active"
+          data-bs-toggle="collapse" href="#reports" aria-expanded="true" aria-controls="lead">
+          <div data-i18n="Analytics">
+            <img src="../../../assets/img/chart-success.png" width="22" height="22" class="me-1">
+            Project Management
+            <span *ngIf="!!totalManageCounter && totalManageCounter > 0" class="ml-1 badge badge-dark customBagdeBG">
+              {{ totalManageCounter }}
+            </span>
+            <!-- <i class="menu-icon tf-icons bx bx-chevron-right m-0" *ngIf="!pmOpened"></i>
+                        <i class="menu-icon tf-icons bx bx-chevron-down m-0" *ngIf="pmOpened"></i> -->
+          </div>
+        </a>
+
+
+        <div class="collapse" id="reports">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a *ngIf="
+                  isManager ||
+                  currentUser.accPosition == AccountPositionEnum.MANAGER
+                " mat-list-item routerLink="/manager/apporval" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-timer"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Pending Reports
+                <span *ngIf="
+                    !!myNavParams &&
+                    myNavParams.pendingReport &&
+                    myNavParams.pendingReport > 0
+                  " class="ml-1 badge badge-dark customBagdeBG">
+                  {{ myNavParams.pendingReport }}
+                </span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="isManager || checkIfHasPerm(13) == true" mat-list-item routerLink="/manager/projects"
+                routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-chart"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Projects
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              <a *ngIf="isManager || checkIfHasPerm(4) == true" mat-list-item routerLink="/manager/reports"
+                routerLinkActive="active">
+                <!-- <i class="pi pi-file pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Reports
+              </a>
+            </li>
+
+
+            <li *ngIf="
+                currentUser.department == DepartmentEnum.ADMINSTRATION &&
+                !!userPerms && !!checkIfHasPerm(3)
+              " class="nav-item">
+              {{ currentUser.accRole_name }}
+              <a mat-list-item routerLink="/manager/costs" routerLinkActive="active">
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Project Cost
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              <a *ngIf="
+                  currentUser.department == DepartmentEnum.MANAGEMENT ||
+                  (!!userPerms && !!checkIfHasPerm(19))
+                " mat-list-item routerLink="/manager/devprog" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-line-chart pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Devloper Progress
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" mat-list-item
+                routerLink="/manager/available" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-check-square"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Available To Work
+                <span *ngIf="
+                    !!myNavParams &&
+                    myNavParams.open_to_work_counter &&
+                    myNavParams.open_to_work_counter > 0
+                  " class="ml-1 badge badge-dark customBagdeBG">
+                  {{ myNavParams.open_to_work_counter }}
+                </span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="
+                  currentUser.department == DepartmentEnum.MANAGEMENT ||
+                  checkIfHasPerm(16) == true
+                " mat-list-item routerLink="/manager/public_reports" routerLinkActive="active">
+                <!-- <i class="pi pi-file pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Public Reports
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="
+                  currentUser.department == DepartmentEnum.MANAGEMENT ||
+                  checkIfHasPerm(17) == true
+                " mat-list-item routerLink="/manager/admin_tasks" routerLinkActive="active">
+                <!-- <i class="pi pi-file pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Admin Tasks
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="
+                  currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
+                  currentUser.accPosition == AccountPositionEnum.MANAGER
+                " mat-list-item routerLink="/manager/project-manager-reports" routerLinkActive="active">
+                <!-- <i class="pi pi-file pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Report to Manager
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" mat-list-item
+                routerLink="/manager/project-manager-reports" routerLinkActive="active">
+                <!-- <i class="pi pi-file pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Project Manager Reports
+                <span *ngIf="
+                    !!myNavParams &&
+                    myNavParams.project_manager_reports &&
+                    myNavParams.project_manager_reports > 0
+                  " class="ml-1 badge badge-dark customBagdeBG">
+                  {{ myNavParams.project_manager_reports }}
+                </span>
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              <a mat-list-item routerLink="/manager/rating" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-star"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Rating
+              </a>
+            </li>
+          </ul>
+        </div>
+        <!-- <mat-divider *ngIf=" !!userPerms && !!checkIfHasPerm(5)"></mat-divider> -->
+
+
+        <!-- ===================================== Support =============================================== -->
+        <!-- <mat-divider></mat-divider> -->
+
+
+        <a *ngIf="
+            currentUser.department == DepartmentEnum.MANAGEMENT ||
+            (!!userPerms && !!checkIfHasPerm(14))
+          " (dblclick)="SupportOpened = !SupportOpened" (click)="SupportOpened = !SupportOpened" mat-list-item
+          class="nav-link" data-bs-toggle="collapse" href="#support" aria-expanded="true" aria-controls="lead">
+          <div data-i18n="Analytics">
+            <i class="menu-icon tf-icons bx bx-support"></i>
+            Support
+            <!-- <i class="menu-icon tf-icons bx bx-chevron-right" *ngIf="!SupportOpened"></i>
+                        <i class="menu-icon tf-icons bx bx-chevron-down" *ngIf="SupportOpened"></i> -->
+          </div>
+        </a>
+
+
+        <div class="collapse" id="support">
+          <ul class="nav flex-column">
+            <li *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT ||(!!userPerms && !!checkIfHasPerm(6))" class="nav-item">
+              <a mat-list-item routerLink="/manager/client-support" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-support"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Support Contract
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="
+                  currentUser.department == DepartmentEnum.MANAGEMENT ||
+                  (currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
+                    currentUser.accPosition == AccountPositionEnum.MANAGER) ||
+                  (!!userPerms && !!hasPermTOFollowTicket)
+                " mat-list-item routerLink="/tickets" routerLinkActive="active">
+                <!-- <i class="pi pi-ticket pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Tickets
+              </a>
+            </li>
+            <li *ngIf="
+                currentUser.department == DepartmentEnum.MANAGEMENT ||
+                (!!userPerms && !!checkIfHasPerm(9))
+              " class="nav-item">
+              <a *ngIf="
+                  currentUser.department == DepartmentEnum.MANAGEMENT ||
+                  (currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
+                    currentUser.accPosition == AccountPositionEnum.MANAGER)
+                " mat-list-item routerLink="/manager/license" routerLinkActive="active">
+                <!-- <i class="pi pi-book pr-1"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                License
+              </a>
+            </li>
+            <li *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT ||(!!userPerms && !!checkIfHasPerm(7))"
+              class="nav-item">
+              <a mat-list-item routerLink="/manager/partners" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-user"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Clients
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
+        <!-- ===================================== HR =============================================== -->
+        <mat-divider></mat-divider>
+
+
+        <a (dblclick)="hrOpened = !hrOpened" (click)="hrOpened = !hrOpened" mat-list-item class="nav-link"
+          data-bs-toggle="collapse" href="#hr" aria-expanded="true" aria-controls="hr">
+          <div data-i18n="Analytics">
+            <i class="menu-icon tf-icons bx bx-file"></i>
+            HR
+            <i *ngIf="!hrOpened" class="menu-icon tf-icons bx bx-chevron-right"></i>
+            <i *ngIf="hrOpened" class="menu-icon tf-icons bx bx-chevron-down"></i>
+
+
+            <span *ngIf="!!hrCounter && hrCounter > 0" class="ml-1 badge badge-dark customBagdeBG">
+              {{ hrCounter }}
+            </span>
+          </div>
+        </a>
+
+
+        <div class="collapse" id="hr">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT ||(!!userPerms && !!hasPermTOShowSalaries)"
+                mat-list-item routerLink="/manager/salaries" routerLinkActive="active">
+                <i class="menu-icon tf-icons bx bx-money"></i>
+                Salaries
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              <a *ngIf="isManager ||currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE " mat-list-item
+                routerLink="/admin-panel/vacations" routerLinkActive="active">
+                <i class="menu-icon tf-icons bx bx-run"></i>
+                Vacations
+                <span
+                  *ngIf="!!myNavParams &&myNavParams.pendingVacationsRequest &&myNavParams.pendingVacationsRequest > 0"
+                  class="ml-1 badge badge-dark customBagdeBG">
+                  {{ myNavParams.pendingVacationsRequest }}
+                </span>
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              <a *ngIf="isManager ||currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE" mat-list-item
+                routerLink="/admin-panel/announces" routerLinkActive="active">
+                <i class="menu-icon tf-icons bx bx-microphone"></i>
+                Announces
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
+        <mat-divider></mat-divider>
+
+
+        <a *ngIf="checkIfHasPerm(34) ||checkIfHasPerm(28)||checkIfHasPerm(31)"
+          mat-list-item class="nav-link" data-bs-toggle="collapse" href="#hr-process" aria-expanded="true"
+          aria-controls="hr-process">
+          <div data-i18n="Analytics">
+            <i class="menu-icon tf-icons bx bx-file"></i>
+            Hiring Process
+
+          </div>
+        </a>
+
+        <div class="collapse" id="hr-process">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a *ngIf="checkIfHasPerm(34)" mat-list-item
+                routerLink="/hr/hiring-process/candidates" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-money"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Candidates
+              </a>
+            </li>
+
+
+            <li class="nav-item">
+              <a *ngIf="checkIfHasPerm(28)" mat-list-item
+                routerLink="/hr/hiring-process/job-profiles" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-money"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Job Profiles
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="checkIfHasPerm(31)" mat-list-item
+                routerLink="/hr/hiring-process/job-skills" routerLinkActive="active">
+                <!-- <i class="menu-icon tf-icons bx bx-money"></i> -->
+                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
+                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
+                Job Skills
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
+        <mat-divider></mat-divider>
+
+
+        <a mat-list-item routerLink="/notes" routerLinkActive="active">
+          <mat-icon class="myIcon mr-1">note</mat-icon>
+          Notes
+          <mat-divider></mat-divider>
+        </a>
+
+
+        <!-- <a mat-list-item routerLink="/manager/finance" routerLinkActive="active" *ngIf="!!checkIfHasPerm(18)">
+                    <i class="pi pi-money-bill pr-1"></i> Finance
+                    <mat-divider></mat-divider>
+                </a> -->
+
+
+        <!-- ===================================== Finance =============================================== -->
+
+
+        <a *ngIf="!!checkIfHasPerm(18)" (dblclick)="financeOpened = !financeOpened"
+          (click)="financeOpened = !financeOpened" mat-list-item class="nav-link" data-bs-toggle="collapse"
+          href="#finance" aria-expanded="true" aria-controls="finance">
+          <div data-i18n="Analytics">
+            <i class="pi pi-money-bill pr-1"></i>
+            Finance
+            <i *ngIf="!financeOpened" class="menu-icon tf-icons bx bx-chevron-right"></i>
+            <i *ngIf="financeOpened" class="menu-icon tf-icons bx bx-chevron-down"></i>
+          </div>
+        </a>
+
+
+        <div class="collapse" id="finance">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a *ngIf="!!checkIfHasPerm(18)" [routerLink]="['/manager/installments', 't']" mat-list-item
+                routerLinkActive="active">
+                Installments
+              </a>
+            </li>
+            <li class="nav-item">
+              <a *ngIf="!!checkIfHasPerm(18)" [routerLink]="['/manager/installments', 'v']" mat-list-item
+                routerLinkActive="active">
+                Investment and expenses
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
+        <mat-divider></mat-divider>
+
+
+        <!-- ===================================== Requests =============================================== -->
+
+
+        <a (dblclick)="requestsOpened = !requestsOpened" (click)="requestsOpened = !requestsOpened" mat-list-item
+          class="nav-link" data-bs-toggle="collapse" href="#requests" aria-expanded="true" aria-controls="requests">
+          <div data-i18n="Analytics">
+            <i class="menu-icon tf-icons bx bx-paper-plane"></i>
+            Requests
+            <i *ngIf="!requestsOpened" class="menu-icon tf-icons bx bx-chevron-right"></i>
+            <i *ngIf="requestsOpened" class="menu-icon tf-icons bx bx-chevron-down"></i>
+
+
+            <span *ngIf="!!totalRequestsCounter && totalRequestsCounter > 0"
+              class="ml-1 badge badge-dark customBagdeBG">
+              {{ totalRequestsCounter }}
+            </span>
+          </div>
+        </a>
+
+
+        <div class="collapse" id="requests">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a *ngIf="
+                  currentUser.department == DepartmentEnum.MANAGEMENT ||
+                  !!isAdmin
+                " mat-list-item routerLink="/manager/publicreqs" routerLinkActive="active">
+                <i class="menu-icon tf-icons bx bx-paper-plane"></i>
+                Public
+                requests
+                <span *ngIf="
+                    !!myNavParams &&
+                    myNavParams.pendingPublicRequest &&
+                    myNavParams.pendingPublicRequest > 0
+                  " class="ml-1 badge badge-dark customBagdeBG">
+                  {{ myNavParams.pendingPublicRequest }}
+                </span>
+              </a>
+            </li>
+            <li *ngIf="
+                !!isManager || currentUser.accRole == AccountRolesEnum.FINANCE
+              " class="nav-item">
+              <a mat-list-item routerLink="/admin-panel/pendingtransportations" routerLinkActive="active">
+                <i class="pi pi-car pr-1"></i>
+                Transportations Requests
+                <span *ngIf="
+                    !!myNavParams &&
+                    myNavParams.pendingTransportationRequest &&
+                    myNavParams.pendingTransportationRequest > 0
+                  " class="ml-1 badge badge-dark customBagdeBG">
+                  {{ myNavParams.pendingTransportationRequest }}
+                </span>
+              </a>
+            </li>
+
+
+            <li *ngIf="
+                !!isManager || currentUser.accRole == AccountRolesEnum.FINANCE
+              " class="nav-item">
+              <a mat-list-item routerLink="/admin-panel/transportationsheet" routerLinkActive="active">
+                <i class="pi pi-file pr-1"></i>
+                Transportation Sheet
+              </a>
+            </li>
+
+
+            <li *ngIf="
+                !!isManager || currentUser.accRole == AccountRolesEnum.FINANCE
+              " class="nav-item">
+              <a mat-list-item routerLink="/manager/incentive" routerLinkActive="active">
+                <i class="pi pi-wallet pr-1"></i>
+                Incentive Requests
+                <span *ngIf="
+                    !!myNavParams &&
+                    myNavParams.pendingIncentiveRequest &&
+                    myNavParams.pendingIncentiveRequest > 0
+                  " class="ml-1 badge badge-dark customBagdeBG">
+                  {{ myNavParams.pendingIncentiveRequest }}
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
+        <mat-divider></mat-divider>
+
+
+        <!-- ===================================== Adminstration =============================================== -->
+
+
+        <a (dblclick)="adminOpened = !adminOpened" (click)="adminOpened = !adminOpened" mat-list-item class="nav-link"
+          data-bs-toggle="collapse" href="#admin" aria-expanded="true" aria-controls="lead">
+          <div data-i18n="Analytics">
+            <i class="menu-icon tf-icons bx bx-slider"></i>
+            Adminstration
+            <i *ngIf="!adminOpened" class="menu-icon tf-icons bx bx-chevron-right"></i>
+            <i *ngIf="adminOpened" class="menu-icon tf-icons bx bx-chevron-down"></i>
+
+
+            <span *ngIf="!!totalAdminCounter && totalAdminCounter > 0" class="ml-1 badge badge-dark customBagdeBG">
+              {{ totalAdminCounter }}
+            </span>
+          </div>
+        </a>
+
+
+        <div class="collapse" id="admin">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a mat-list-item routerLink="/manager/addusers" routerLinkActive="active">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                Users
+              </a>
+            </li>
+            <li *ngIf="
+                currentUser.department == DepartmentEnum.MANAGEMENT ||
+                (this.currentUser.department == DepartmentEnum.ADMINSTRATION &&
+                  this.currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE)
+              " class="nav-item">
+              <a mat-list-item routerLink="/admin-panel/usersdata" routerLinkActive="active">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                All User Data
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
+        <mat-divider></mat-divider>
+
+
+        <!-- <a mat-list-item routerLink="/manager/salaries" routerLinkActive="active" *ngIf="(currentUser.department== DepartmentEnum.MANAGEMENT) || (!!userPerms && !!hasPermTOShowSalaries)">
+                    <i class="menu-icon tf-icons bx bx-money"></i> Salaries
+                    <mat-divider></mat-divider>
+                </a> -->
+
+
+        <!-- <div class="commonModule">
+                    <a mat-list-item routerLink="/manager/publicreqs" routerLinkActive="active" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || !!isAdmin">
+                        <i class="menu-icon tf-icons bx bx-paper-plane"></i> Public requests
+                        <span class="ml-1 badge badge-dark customBagdeBG" *ngIf="!!myNavParams && myNavParams.pendingPublicRequest && myNavParams.pendingPublicRequest > 0">{{myNavParams.pendingPublicRequest}}</span>
+                        <mat-divider></mat-divider>
+                    </a>
+                </div> -->
+
+
+        <a *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" mat-list-item routerLink="/manager/config"
+          routerLinkActive="active">
+          <mat-icon class="myIcon mr-1">settings</mat-icon>
+          Configurations
+          <mat-divider></mat-divider>
+        </a>
+
+
+        <!-- <a mat-list-item routerLink="/manager/org" routerLinkActive="active" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+                    <i class="menu-icon tf-icons bx bx-network-chart"></i> Organization Chart
+                    <mat-divider></mat-divider>
+                </a> -->
+      </div>
+
+
+      <div *ngIf="
+          currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
+          currentUser.accPosition != AccountPositionEnum.MANAGER
+        " class="devModule">
+        <a mat-list-item routerLink="/dev/timesheet" routerLinkActive="active">
+          Time Sheet
+          <mat-divider></mat-divider>
+        </a>
+        <a mat-list-item routerLink="/notes" routerLinkActive="active">
+          Notes
+          <mat-divider></mat-divider>
+        </a>
+        <a *ngIf="currentUser.accPosition == AccountPositionEnum.SENIOR" mat-list-item
+          routerLink="/dev/reportsToApprove" routerLinkActive="active">
+          Reports To Approve
+          <span *ngIf="
+              !!myNavParams &&
+              myNavParams.pendingReport &&
+              myNavParams.pendingReport > 0
+            " class="ml-1 badge badge-dark customBagdeBG">
+            {{ myNavParams.pendingReport }}
+          </span>
+          <mat-divider></mat-divider>
+        </a>
+        <a mat-list-item routerLink="/dev/reports" routerLinkActive="active">
+          Reports
+          <!-- <span class="ml-1 badge badge-dark customBagdeBG" *ngIf="!!myNavParams &&
+                     myNavParams.devPendingReports && myNavParams.devPendingReports > 0">
+                     {{myNavParams.devPendingReports}}</span> -->
+          <span *ngIf="!!myNavParams && totalReports > 0" class="ml-1 badge badge-dark customBagdeBG">
+            {{ totalReports }}
+          </span>
+          <mat-divider></mat-divider>
+        </a>
+        <div class="commonModule">
+          <a mat-list-item routerLink="/dev/requests" routerLinkActive="active">
+            requests
+          </a>
+        </div>
+
+
+        <div *ngIf="isLoggedIn" class="commonModule">
+          <a mat-list-item routerLink="/tickets" routerLinkActive="active">
+            Tickets
+            <mat-divider></mat-divider>
+          </a>
+        </div>
+
+
+        <a mat-list-item routerLink="/dev/myprojects" routerLinkActive="active">
+          Projects
+          <mat-divider></mat-divider>
+        </a>
+
+
+        <!-- <a mat-list-item routerLink="/dev/transportaions" routerLinkActive="active">
+                    Transportaions
+                    <mat-divider></mat-divider>
+                </a> -->
+
+
+        <!-- <a mat-list-item routerLink="/dev/rejected" routerLinkActive="active">
+                    Rejected Reports
+                    <span class="ml-1 badge badge-dark customBagdeBG"
+                     *ngIf="!!myNavParams && myNavParams.rejectedReport && myNavParams.rejectedReport> 0">
+                     {{myNavParams.rejectedReport}}</span>
+                    <mat-divider></mat-divider>
+                </a> -->
+
+
+        <!-- <a mat-list-item routerLink="/dev/history" routerLinkActive="active">
+                    History
+                    <mat-divider></mat-divider>
+                </a> -->
+        <a mat-list-item routerLink="/users" routerLinkActive="active">
+          Users
+          <mat-divider></mat-divider>
+        </a>
+      </div>
+
+
+      <div *ngIf="currentUser.department == DepartmentEnum.Business_Development" class="businessDevelopmentModule">
+        <a mat-list-item routerLink="/CRM/accounts" routerLinkActive="active">
+          Organizations
+        </a>
+
+
+        <a mat-list-item routerLink="/CRM/contacts" routerLinkActive="active">
+          Contacts
+          <mat-divider></mat-divider>
+        </a>
+
+
+        <a mat-list-item routerLink="/CRM/activities" routerLinkActive="active">
+          Activities
+        </a>
+        <a mat-list-item routerLink="/CRM/leads" routerLinkActive="active">
+          Leads
+          <mat-divider></mat-divider>
+        </a>
+
+
+        <a mat-list-item routerLink="/CRM/opportunity" routerLinkActive="active">
+          Opportunity
+          <mat-divider></mat-divider>
+        </a>
+        <a mat-list-item routerLink="/CRM/closed" routerLinkActive="active">
+          Closed
+          <mat-divider></mat-divider>
+        </a>
+
+
+        <a mat-list-item routerLink="/CRM/poc-requests" routerLinkActive="active">
+          Requests
+          <span *ngIf="!!totalCRMReqsCounter && totalCRMReqsCounter > 0" class="ml-1 badge badge-dark customBagdeBG">
+            {{ totalCRMReqsCounter }}
+          </span>
+          <mat-divider></mat-divider>
+        </a>
+
+
+        <a *ngIf="checkIfHasPerm(11)" mat-list-item routerLink="/publicReqsApply" routerLinkActive="active">
+          Handle Public requests
+          <span *ngIf="
+              !!myNavParams &&
+              myNavParams.pendingPublicRequest &&
+              myNavParams.pendingPublicRequest > 0
+            " class="ml-1 badge badge-dark customBagdeBG">
+            {{ myNavParams.pendingPublicRequest }}
+          </span>
+        </a>
+
+
+        <a mat-list-item routerLink="/CRM/requests" routerLinkActive="active">
+          Public requests
+        </a>
+      </div>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <!-- <button class="btn" *ngIf="drawerClose" type="button" id="menu-button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle();drawerClose = false">
+            <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+            <img src="../../../assets/img/arrow-circle-left.png" alt="" srcset="">
+        </button> -->
+    <button (click)="drawer.toggle()" class="btn" type="button" id="menu-button" aria-label="Toggle sidenav"
+      mat-icon-button>
+      <img *ngIf="drawer.opened" src="../../../assets/img/arrow-circle-left.png" alt srcset>
+      <img *ngIf="!drawer.opened" src="../../../assets/img/arrow-circle-left.png" class="reserve" alt srcset>
+      <!-- <mat-icon aria-label="Side nav toggle icon">menu</mat-icon> -->
+    </button>
+    <div style="clear: both"></div>
+
+
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+
+<p-dialog *ngIf="runningAnnounces.length > 0" [(visible)]="displayAnnounce" [style]="{ width: '70vw', scale: '0.9' }"
+  [breakpoints]="{ '960px': '50vw', '640px': '100vw' }" [modal]="true" [draggable]="false" [resizable]="false" header>
+  <ng-template pTemplate="header">
+    <div class="announeHeader m-auto">
+      <h3>
+        {{ announceToDisplay.title }}
+      </h3>
+    </div>
+  </ng-template>
+  <div [dir]="announceToDisplay.language" class="container">
+    <div *ngIf="!!announceToDisplay.imgURL && announceToDisplay.imgURL.length > 0" class="row">
+      <div class="col-md-6">
+        <div class="announceImg">
+          <img src="{{ newServerApi }}{{ announceToDisplay.imgURL }}" alt width="100%" height="100%">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div [style.text-align]="
+            announceToDisplay.language == 'rtl' ? 'right' : 'left'
+          " [innerHTML]="announceToDisplay.body" class="announceBody ql-editor"></div>
+      </div>
+    </div>
+    <div *ngIf="!announceToDisplay.imgURL" class="row">
+      <div class="col-12">
+        <div [style.text-align]="
+            announceToDisplay.language == 'rtl' ? 'right' : 'left'
+          " [innerHTML]="announceToDisplay.body" class="announceBody ql-editor"></div>
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button (click)="displayAnnounce = false; markAsView()" icon="pi pi-check" label="Ok" styleClass="p-button-text">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+
+<div class="modal modal-top fade" id="openToWork" data-bs-backdrop="static" aria-hidden="true">
+  <div class="modal-dialog modal-top modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalCenter">
+          Open To Work
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-2">
+        <!-- <div *ngIf="!!myOpenToWorkLoading"></div> -->
+        <p-blockUI [blocked]="myOpenToWorkLoading">
+          <p-progressSpinner></p-progressSpinner>
+        </p-blockUI>
+        <table *ngIf="!myOpenToWorkLoading && myOpenToWork.length > 0" class="table table-hover">
+          <thead>
+            <th>From</th>
+            <th>To</th>
+            <th>Deactivate</th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let open of myOpenToWork">
+              <td>
+                {{ open.from_date_time | date : "medium" }}
+              </td>
+              <td>
+                {{ open.to_date_time | date : "medium" }}
+              </td>
+              <td>
+                <button (click)="deactivateOpenToWork(open)" class="btn openToWorkBTN">
+                  Deactivate
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+
+        <form *ngIf="!myOpenToWorkLoading && myOpenToWork.length == 0" [formGroup]="newOpenToWorkForm"
+          (ngSubmit)="createOpenToWork()" form class="example-form">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width w-100">
+                  <mat-label>From</mat-label>
+                  <input matInput type="datetime-local" id="Date" formControlName="from">
+                  <mat-error *ngIf="
+                      !newOpenToWorkForm.get('from')?.valid &&
+                      newOpenToWorkForm.get('from')?.touched
+                    " class="alert help-block">
+                    *From Date Required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width w-100">
+                  <mat-label>To</mat-label>
+                  <input matInput type="datetime-local" id="Date" formControlName="to">
+                  <mat-error *ngIf="
+                      !newOpenToWorkForm.get('to')?.valid &&
+                      newOpenToWorkForm.get('to')?.touched
+                    " class="alert help-block">
+                    *To Date Required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-md-12">
+                <button class="btn openToWorkBTN">Submit</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+@import '../../../../colors';
+.dash {
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: $mainFontFamily;
+    }
+    .chartValueCard {
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgb(33, 35, 44);
+            line-height: 21px;
+            .date {
+                font-size: 10px;
+                font-weight: 600;
+                color: rgb(101, 104, 111);
+                line-height: 16px;
+                margin-top: 5px;
+            }
+        }
+    }
+    .singleValueCard {
+        .card-title {
+            // background-color: #09c;
+            font-size: 16px;
+            font-weight: 600;
+            color: rgb(33, 35, 44);
+            line-height: 21px;
+            .date {
+                font-size: 10px;
+                font-weight: 600;
+                color: rgb(101, 104, 111);
+                line-height: 16px;
+                margin-top: 5px;
+            }
+        }
+        .card-body {
+            h2 {
+                font-size: 35px;
+                font-weight: 600;
+                color: rgb(33, 35, 44);
+                line-height: 48px;
+            }
+            h6 {
+                font-size: 14px;
+                font-weight: 450;
+                color: rgb(101, 104, 111);
+                line-height: 21px;
+            }
+        }
+    }
+}

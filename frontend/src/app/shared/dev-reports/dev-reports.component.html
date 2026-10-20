@@ -1,0 +1,161 @@
+<div class="mx-3 my-3">
+    <div class="row tabheader">
+        <div class="col-md-4">
+            <label for="dev">Employees LIST</label>
+            <select class="form-control" name="dev" id="dev" (change)="getDevTasks($event)" [(ngModel)]="devKey">
+                <option value=""></option>
+                <option *ngFor="let user of allDevs" value="{{user.key}}">{{user.username}}</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="task">Developer Tasks</label>
+            <select class="form-control" name="task" id="task" [(ngModel)]="taskKey">
+                <option value=""></option>
+                <option *ngFor="let task of devTasks" value="{{task.key}}">{{task.project_title}}: {{task.title}}</option>
+            </select>
+        </div>
+        <div class="col-md-2 mt-auto">
+            <button class="btn developersReport" (click)="getDevReports()" [disabled]="!devKey || !fromDate || !toDate">Get Reports</button>
+        </div>
+    </div>
+
+    <div class="row tabheader">
+        <!-- <div class="col-md-2"></div> -->
+        <div class="col-md-4">
+            <label for="">From Date:</label>
+            <input class="form-control" type="date" #date [(ngModel)]="fromDate">
+        </div>
+        <div class="col-md-4">
+            <label for="">To Date:</label>
+            <input class="form-control" type="date" #date [(ngModel)]="toDate">
+        </div>
+        <div class="col-md-2 mt-auto">
+            <a style="cursor: pointer" (click)="exportexcel()" class="downloadFile">
+                <mat-icon style="color: #f4831f;" matTooltip="Download File">cloud_download</mat-icon>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2" *ngIf="myReports.length > 0">
+            <label>
+                TOTAL WORKING HOURS
+                <br>
+                <span>
+                    <img style="cursor: pointer;" matTooltip="Working Hours" src="../../../assets/img/working-time.svg" alt="working hours icon">
+                </span> {{calculateWorkingHours()}}
+            </label>
+        </div>
+    </div>
+</div>
+
+<div>
+    <table class="my-3 table table-hover newTableCustom" id="excel-table">
+        <thead>
+            <tr>
+                <td>#</td>
+                <td>Dev Name</td>
+                <td>Date</td>
+                <td>Duration</td>
+                <td>Time Activity</td>
+                <td>Project Name</td>
+                <td>Process Name</td>
+                <td>Task Name</td>
+                <td>Progress</td>
+                <td>Details</td>
+                <td>Status</td>
+                <td>Approve BY / To Approve</td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let report of myReports ; let i = index">
+                <td>{{i + 1}}</td>
+                <td>{{report.devName}}</td>
+                <td>{{report.reportDate}}</td>
+                <td>{{report.durationByHours}}</td>
+                <td>{{report.time_activity_name}}</td>
+                <td *ngIf="report.projectName" class="details">{{report.projectName}}</td>
+                <td *ngIf="!report.projectName">-</td>
+
+                <td *ngIf="report.processName" class="details">{{report.processName}}</td>
+                <td *ngIf="!report.processName">-</td>
+
+                <td *ngIf="report.taskTitle" class="details">{{report.taskTitle}}</td>
+                <td *ngIf="!report.taskTitle">-</td>
+
+
+
+                <td *ngIf="report.progress">{{report.progress}}</td>
+                <td *ngIf="!report.progress">-</td>
+                <td class="details">{{report.details}}</td>
+
+
+                <td class="text-center" *ngIf="report.approved" style="color:green;">Approved</td>
+                <td class="text-center" *ngIf="!report.approved && !report.rejected">Pending</td>
+                <td class="text-center" *ngIf="report.rejected" style="color:brown;">Rejected</td>
+
+
+                <td *ngIf="!report.approved">{{report.managerApprovalname}}</td>
+                <td *ngIf="report.approved">{{report.approvedByName}}</td>
+
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+
+<!-- <div class="tasksTable m-3 p-2">
+    <div class="days m-2" *ngFor="let day of currentWeekDays ; let i = index ">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3 day">
+                    <h3>{{day | date : 'fullDate'}}</h3>
+                </div>
+                <div class="col-md-7 tasks">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-3 " class="report" *ngFor="let report of myReportsList">
+                                <ng-container *ngIf="getDate(day) == report.reportDate">
+                                    <div class="task m-2 p-2">
+                                        <div class="working">Working On : {{report.time_activity}}</div>
+                                        <div class="working" *ngIf="!!report.projectName">Project Title: {{report.projectName}}</div>
+                                        <div class="working" *ngIf="!!report.processName">Process Title: {{report.processName}}</div>
+                                        <div class="working" *ngIf="!!report.taskTitle">Task Title: {{report.taskTitle}}</div>
+                                        <div class="working" *ngIf="!!report.progress">Progress: {{report.progress}} %</div>
+                                        <div class="working" *ngIf="!!report.details">Details: {{report.details}}</div>
+                                        <div class="working">Duration : {{report.durationByHours}}</div>
+                                        <div class="working" *ngIf="!!report.approvedByName">Approved By : {{report.approvedByName}}</div>
+                                        <div class="working text-right" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT || report.managerApprovalKey == currentUser.key && report.approvedByKey == currentUser.key">
+                                            <span class="material-icons returnReportToPending" matTooltip="Return Report To Pending" (click)="returnReportToPending(report)">
+                                                    assignment_return
+                                                </span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="totalHours" *ngFor="let oneDayTotalHours of totalHours ; let e = index">
+                        <ng-container *ngIf="i == e">
+                            {{oneDayTotalHours}} Hours
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="days m-2">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3">
+                    <h3>Total Working Hours: </h3>
+                </div>
+                <div class="col-md-7"></div>
+                <div class="col-md-2">{{totalHours[totalHours.length - 1]}} Hours</div>
+            </div>
+        </div>
+    </div>
+
+</div> -->

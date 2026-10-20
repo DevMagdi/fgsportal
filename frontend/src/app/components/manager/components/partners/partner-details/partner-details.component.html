@@ -1,0 +1,535 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="partnerDetailsLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="all">
+    <div class="container-fluid">
+        <div class="row" *ngIf="!!partnerDetails">
+            <div class="col-12">
+                <div class="pageHeader d-flex justify-content-between">
+                    <div class="title d-flex justify-content-start">
+                        <i class="material-icons arrowIcon p-1" [routerLink]="['/manager/partners']">arrow_back</i>
+                        <h1>Client Details</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="" *ngIf="!!partnerDetails">
+            
+            <div class=" projectDetailsRow p-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="normalMode">
+                            <div class="d-flex justify-content-start gap-5 align-items-center mb-2">
+
+                                <h2 class="fw-bold main-color m-0">{{partnerDetails.partner_name}}</h2>
+                                <div class="partner dropdown cursor">
+                                    <a class="dropdown-toggle" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14.75 19C14.75 20.52 13.52 21.75 12 21.75C10.48 21.75 9.25 20.52 9.25 19C9.25 17.48 10.48 16.25 12 16.25C13.52 16.25 14.75 17.48 14.75 19ZM10.75 19C10.75 19.69 11.31 20.25 12 20.25C12.69 20.25 13.25 19.69 13.25 19C13.25 18.31 12.69 17.75 12 17.75C11.31 17.75 10.75 18.31 10.75 19Z" fill="#292D32"/>
+                                        <path d="M14.75 5C14.75 6.52 13.52 7.75 12 7.75C10.48 7.75 9.25 6.52 9.25 5C9.25 3.48 10.48 2.25 12 2.25C13.52 2.25 14.75 3.48 14.75 5ZM10.75 5C10.75 5.69 11.31 6.25 12 6.25C12.69 6.25 13.25 5.69 13.25 5C13.25 4.31 12.69 3.75 12 3.75C11.31 3.75 10.75 4.31 10.75 5Z" fill="#292D32"/>
+                                        <path d="M14.75 12C14.75 13.52 13.52 14.75 12 14.75C10.48 14.75 9.25 13.52 9.25 12C9.25 10.48 10.48 9.25 12 9.25C13.52 9.25 14.75 10.48 14.75 12ZM10.75 12C10.75 12.69 11.31 13.25 12 13.25C12.69 13.25 13.25 12.69 13.25 12C13.25 11.31 12.69 10.75 12 10.75C11.31 10.75 10.75 11.31 10.75 12Z" fill="#292D32"/>
+                                        </svg>
+        
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                                        <li><a class="dropdown-item"  *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" (click)="editPartner();mymodal=true">Update Partner</a></li>
+                                        <li><a class="dropdown-item" 
+                                            *ngIf="currentUser.accRole == AccountRolesEnum.SUPER_USER || currentUser.department == DepartmentEnum.MANAGEMENT"
+                                             (click)="deletePartner()">Delete Partner</a></li>
+        
+
+                                        <!-- <div class="ctrBtns text-center">
+                                            <span class="material-icons edit" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" (click)="editPartner();open(mymodal)">
+                                                edit
+                                            </span>
+                                            <span class="material-icons delete" *ngIf="currentUser.accRole == AccountRolesEnum.SUPER_USER || currentUser.accPosition == AccPositionEnum.MANAGER" (click)="deletePartner()">
+                                                delete
+                                            </span>
+                                        </div> -->
+                                    </ul>
+                                </div>
+                            </div>
+                            <!-- <div class="pData d-flex justify-content-between">
+                                <p>Name:
+                                </p>
+                                <span class="fw-bold">{{partnerDetails.partner_name}}</span>
+                            </div> -->
+
+                            <div class="pData">
+                                <p>{{partnerDetails.partner_description}}</p>
+                            </div>
+                            <div class="pData">
+                                <p class="fw-bold"># {{partnerDetails.partner_industry_name}}</p>
+                               
+                            </div>
+                           
+
+                           
+
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <div class="normalMode">
+
+                            <div class="pData d-flex gap-5">
+                                <p class="w-50">Address: </p><span class="fw-bold w-50">{{partnerDetails.partner_address}}</span>
+                            </div>
+
+                            <!-- <div class="pData d-flex gap-5">
+                                <p class="w-50">industry </p><span class="fw-bold w-50">{{partnerDetails.partner_industry_name}}</span>
+                            </div> -->
+
+                            <div class="pData d-flex gap-5">
+                                <p class="w-50">Country </p><span class="fw-bold w-50">{{getCountryName(partnerDetails.country)}}</span>
+                            </div>
+
+                            <div class="pData d-flex gap-5">
+                                <p class="w-50">Organization Type</p><span class="fw-bold w-50">{{partnerDetails.organize_type_name}}</span>
+                            </div>
+
+                            <div class="pData d-flex gap-5">
+                                <p class="w-50">Is Client ? </p><span class="fw-bold w-50">{{partnerDetails.is_org == '0' ? 'True' : 'False' }}</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="pData d-flex gap-2">
+                            <p class="w-50">Email </p><span class="fw-bold w-50">{{partnerDetails.email}}</span>
+                        </div>
+
+                        <div class="pData d-flex gap-2">
+                            <p class="w-50">Phone </p><span class="fw-bold w-50">{{partnerDetails.phone}}</span>
+                        </div>
+
+                        <div class="pData d-flex gap-2">
+                            <p class="w-50">Website</p><span class="fw-bold w-50">{{partnerDetails.website}}</span>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+             
+
+            <!-- <div class="row mb-4" *ngIf="!!partnerDetails.comment">
+                    <div class="col-12">
+                        <div class="p-3">
+                            <div class="devDetailsData d-flex align-items-center">
+                                <div class="container-fluid p-3">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="pData">
+                                                <h2>Comment :</h2>
+                                                <div [innerHTML]="partnerDetails.comment" class="px-5 ql-editor"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4" *ngIf="!!partnerDetails.fileURL">
+                    <div class="col-12">
+                        <div class="p-3">
+                            <div class="devDetailsData d-flex align-items-center">
+                                <div class="container-fluid p-3">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="pData">
+                                                <h2>Attach :</h2>
+                                                <a href="{{newServerApi}}{{partnerDetails.fileURL}}" target="_blank">{{partnerDetails.fileName}}</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+
+            
+        </div>
+
+
+        <div class=" my-3 mt-5 d-flex justify-content-between align-items-center">
+            <h1 class="text-start fw-bold headerTxt mb-1"> Accounts</h1>
+            <button class="btn btnStyle" (click)="accountModal=true" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || !!checkIfHasPerm('39')">
+                Add account
+            </button>
+        </div>
+
+
+        <div class="row my-2">
+            <div class="col-12">
+                <section class="">
+                    <table class="table table-hover newTableCustom ">
+                        <thead class="theader">
+                            <tr>
+                                <td>#</td>
+                                <td>Email</td>
+                                <td>Full Name</td>
+                                <td>phone</td>
+                                <td>Active</td>
+                                <td>Type</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let client of clientAccounts;let i=index;" class="trow">
+                                <td>{{ i + 1}}</td>
+                                <td>{{client.email}}</td>
+                                <td>{{client.fullname}}</td>
+                                <td>
+                                    <span *ngFor="let num of client.phone;let i=index">
+                                        <span *ngIf="i+1 == client.phone?.length">
+                                            {{num.phone}} 
+                                        </span>
+                                    <span *ngIf="i+1 != client.phone?.length">
+                                            {{num.phone}} - 
+                                        </span>
+
+                                    </span>
+                                </td>
+
+                                <td>{{client.active == true? 'Active' : 'Deactive'}}</td>
+                                <td>{{client.primary == true? 'Primary' : 'Secondary'}}</td>
+                                <td>
+                                    <img src="../../../../../assets/img/menu.svg" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT" [matMenuTriggerFor]="menu" style=" cursor: pointer;" class="Component-22-1">
+                                    <mat-menu #menu="matMenu">
+                                        <button mat-menu-item (click)="changeActivateUser(client)">
+                                            {{client.active == true ? 'Deactivate' : 'Activate'}} User
+                                        </button>
+                                        <button mat-menu-item (click)="openEditClient(client);editAccModal=true;">
+                                                Edit Account
+                                        </button>
+                                        <button mat-menu-item (click)="resetPasswordForClient(client)">
+                                            Reset Password
+                                    </button>
+                                        <button mat-menu-item (click)="deleteClientAccount(client)">Delete Account</button>
+                                    </mat-menu>
+                                </td>
+                            </tr>
+                           
+                        </tbody>
+
+
+                    </table>
+
+
+                </section>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+<!-- Edit Partner Modal-->
+<p-sidebar styleClass="p-sidebar-md" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="mymodal" position="right" 
+[transitionOptions]="'350ms'">
+
+    <h4 class="modal-title" id="modal-basic-title">Edit Partner</h4>
+
+    <!-- <form [formGroup]="editPartnerForm" (ngSubmit)="saveEditPartner()" class="example-form">
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Company Name</mat-label>
+                            <input matInput type="text" id="partner_name" formControlName="partner_name">
+                            <mat-error class="alert help-block" *ngIf="!editPartnerForm.get('partner_name')?.valid && editPartnerForm.get('partner_name')?.touched">
+                                Partner Name Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Address</mat-label>
+                            <input matInput type="text" id="partner_address" formControlName="partner_address">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Description</mat-label>
+                            <input matInput type="text" id="partner_description" formControlName="partner_description">
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn submitFormBtn" [disabled]="editPartnerForm.invalid">Submit</button>
+        </div>
+    </form> -->
+    <form [formGroup]="editPartnerForm" (ngSubmit)="saveEditPartner()" class="example-form">
+        <div class="">
+            <div class="">
+                <!-- <h4 class="formHeader">
+                    Company Info :
+                </h4> -->
+                <!-- <mat-divider></mat-divider> -->
+
+                <div class="row">
+                    <div class="col-lg-6 ">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Company Name</mat-label>
+                            <input matInput type="text" id="partner_name" formControlName="partner_name">
+                            <mat-error class="alert help-block" *ngIf="!editPartnerForm.get('partner_name')?.valid && editPartnerForm.get('partner_name')?.touched">
+                                Partner Name Is Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Partner Name"
+                        [control]="editPartnerForm.get('partner_name')"
+                        placeholder="Write Company Name"></app-form-input>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="formLables">Industry</mat-label>
+                            <mat-select formControlName="industry" class="form-control">
+                                <mat-option *ngFor="let ind of partnerIndustry" [value]="ind.id">{{ind.partner_industry_name}}</mat-option>
+                            </mat-select>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="formLables">Type</mat-label>
+                            <mat-select formControlName="organize_type_id" class="form-control">
+                                <mat-option *ngFor="let type of organizationTypes" [value]="type.id">{{type.organize_type}}</mat-option>
+                            </mat-select>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="formLables">Country</mat-label>
+                            <mat-select formControlName="country" class="form-control">
+                                <mat-option *ngFor="let country of CurrencyList" [value]="country.countryCode">
+                                    <div class="country-item d-flex align-items-center justify-content-start">
+                                        <img src="../../../../../assets/img/flags/{{country.countryCode}}.png" width="17px" height="20px" [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                        <div>{{country.countryName}}</div>
+                                    </div>
+                                </mat-option>
+                            </mat-select>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <label class="form-label" for="email">Email</label>
+                        <div class="input-group input-group-merge">
+                            <input class="form-control" type="text" placeholder="Ex@Examble.com" formControlName="partner_email" />
+                        </div>
+                    </div>
+                    <div class="col-lg-6 my-3">
+                        <label class="form-label" for="phone">Phone</label>
+                        <div class="input-group input-group-merge">
+                            <input class="form-control" type="text" placeholder="0123456789" formControlName="partner_phone" />
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <label class="form-label">Address</label>
+                            <input class="form-control" type="text" id="partner_address" formControlName="partner_address">
+                        <!-- </mat-form-field> -->
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <label class="form-label" for="Website">Website</label>
+                        <div class="input-group input-group-merge">
+                            <input class="form-control" type="url" placeholder="Website" formControlName="website" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="formLables">Description</mat-label>
+                            <textarea rows="5" class="form-control" type="text" id="partner_description" formControlName="partner_description">
+                            </textarea>
+                        <!-- </mat-form-field> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btnStyle w-50" [disabled]="editPartnerForm.invalid">Submit</button>
+        </div>
+    </form>
+
+
+
+</p-sidebar>
+
+
+
+<!-- Create Account Modal-->
+<p-sidebar styleClass="p-sidebar-sm" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="accountModal" position="right" 
+[transitionOptions]="'350ms'">
+<!-- <ng-template class="myModal" #accModal let-c="close" let-d="dismiss"> -->
+    <h4 class="modal-title" id="modal-basic-title">Create Account</h4>
+
+    <form [formGroup]="createClientAccountForm" (ngSubmit)="createClientAccount()" class="example-form">
+        <div class="">
+            <div class="">
+                <div class="row">
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Primary Contact Email</mat-label>
+                            <input matInput type="email" id="email" formControlName="email">
+                            <mat-error class="alert help-block" *ngIf="!createClientAccountForm.get('email')?.valid && createClientAccountForm.get('email')?.touched">
+                                Primary Contact Email Is Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Primary Contact Email"
+                        [control]="createClientAccountForm.get('email')"
+                        placeholder="Write Email"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Password</mat-label>
+                            <input matInput type="password" id="password" formControlName="password">
+                            <mat-error class="alert help-block" *ngIf="!createClientAccountForm.get('password')?.valid && createClientAccountForm.get('password')?.touched">
+                                Password Is Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Password"
+                        [control]="createClientAccountForm.get('password')"
+                        placeholder="Write Password"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Primary Contact Name</mat-label>
+                            <input matInput type="text" id="fullname" formControlName="fullname">
+                            <mat-error class="alert help-block" *ngIf="!createClientAccountForm.get('fullname')?.valid && createClientAccountForm.get('fullname')?.touched">
+                                Primary Contact Name Is Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Primary Contact Name"
+                        [control]="createClientAccountForm.get('fullname')"
+                        placeholder="Write Name"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Phone Number</mat-label>
+                            <input matInput type="text" id="phone" formControlName="phone">
+                        </mat-form-field> -->
+                        <app-form-input label="Phone Number"
+                        [control]="createClientAccountForm.get('phone')"
+                        placeholder="Write Phone Number"></app-form-input>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Is Active</mat-label>
+                        <br>
+                        <p-inputSwitch formControlName="isActive"></p-inputSwitch>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Is Primary</mat-label>
+                        <br>
+                        <p-inputSwitch formControlName="isPrimary"></p-inputSwitch>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-2">
+            <button type="submit" class="btn btnStyle w-100" [disabled]="createClientAccountForm.invalid">Submit</button>
+        </div>
+    </form>
+
+<!-- </ng-template> -->
+</p-sidebar>
+
+
+<!-- Edit Account Modal-->
+<p-sidebar styleClass="p-sidebar-sm" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="editAccModal" position="right" 
+[transitionOptions]="'350ms'">
+
+
+    <h4 class="modal-title" id="modal-basic-title">Edit Account</h4>
+
+    <form [formGroup]="updateClientAccountForm" (ngSubmit)="updateClientAccount()" class="example-form">
+        <div class="">
+            <div class="">
+                <div class="row">
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Primary Contact Email</mat-label>
+                            <input matInput type="email" id="email" formControlName="email">
+                            <mat-error class="alert help-block" *ngIf="!updateClientAccountForm.get('email')?.valid && updateClientAccountForm.get('email')?.touched">
+                                Primary Contact Email Is Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Primary Contact Email"
+                        [control]="updateClientAccountForm.get('email')"
+                        placeholder="Write Email"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Primary Contact Name</mat-label>
+                            <input matInput type="text" id="fullname" formControlName="fullname">
+                            <mat-error class="alert help-block" *ngIf="!updateClientAccountForm.get('fullname')?.valid && updateClientAccountForm.get('fullname')?.touched">
+                                Primary Contact Name Is Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <app-form-input label="Primary Contact Name"
+                        [control]="updateClientAccountForm.get('fullname')"
+                        placeholder="Write Name"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Phone Number</mat-label>
+                            <input matInput type="text" id="phone" formControlName="phone">
+                        </mat-form-field> -->
+                        <app-form-input label="Phone Number"
+                        [control]="updateClientAccountForm.get('phone')"
+                        placeholder="Write Phone Number"></app-form-input>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Is Active</mat-label>
+                        <br>
+                        <p-inputSwitch formControlName="isActive"></p-inputSwitch>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Is Primary</mat-label>
+                        <br>
+                        <p-inputSwitch formControlName="isPrimary"></p-inputSwitch>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="mt-2">
+            <button type="submit" class="btn btnStyle w-100" [disabled]="updateClientAccountForm.invalid">Submit</button>
+        </div>
+    </form>
+
+
+</p-sidebar>

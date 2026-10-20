@@ -1,0 +1,231 @@
+<div class="tClientTickets">
+    <div class="container-fluid mt-4">
+        <div class="row align-items-end">
+            <div class="col-6">
+                <h1 class="pageTitle mb-0">License</h1>
+            </div>
+            <div class="col-6 text-right">
+                <button type="button" class="btn btnStyle mx-1" (click)="ticketDisplay=true;getLicenstType();getProduct();getClients()">New License</button>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <div class="ProjectCostData">
+        <div class="container-fluid">
+            
+
+            <div class="row my-5">
+                <div class="col-12">
+                    <div class="projectCost">
+
+                        <div class="card">
+                            <p-table id="dt1" #dt1 styleClass="p-datatable-sm" sortField="endDate" sortMode="single" 
+                            [value]="licenses" [paginator]="licenses.length > 10 ? true : false" [rows]="10"
+                             [showCurrentPageReport]="true" responsiveLayout="scroll" 
+                             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                                [rowsPerPageOptions]="[10,25,50]">
+                                <ng-template pTemplate="header">
+                                    <tr class="tHeader">
+                                        <th pSortableColumn="accountName">Account Name
+                                            <p-sortIcon field="accountName"></p-sortIcon>
+                                        </th>
+                                        <th pSortableColumn="clientName">Client
+                                            <p-sortIcon field="clientName"></p-sortIcon>
+                                        </th>
+                                        <th pSortableColumn="product">Product
+                                            <p-sortIcon field="product"></p-sortIcon>
+                                        </th>
+                                        <th pSortableColumn="type">Type
+                                            <p-sortIcon field="type"></p-sortIcon>
+                                        </th>
+                                        <th pSortableColumn="startDate">Start
+                                            <p-sortIcon field="startDate"></p-sortIcon>
+                                        </th>
+                                        <th pSortableColumn="endDate">End
+                                            <p-sortIcon field="endDate"></p-sortIcon>
+                                        </th>
+                                        <th pSortableColumn="status">Status
+                                            <p-sortIcon field="status"></p-sortIcon>
+                                        </th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-license>
+                                    <tr class="tbody">
+                                        <td class="time">
+                                            <a class="title" [routerLink]="['/manager/license',license.key]">
+                                                {{license.accountName}}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a class="title" [routerLink]="['/manager/license',license.key]">
+                                                {{license.clientName}}
+                                            </a>
+                                            <!-- {{license.clientName}} -->
+                                        </td>
+                                        <td>
+                                            {{license.product_name}}
+                                        </td>
+                                        <td>
+                                            {{license.type_name}}
+                                        </td>
+                                        <td>
+                                            <!-- {{getRunningUpdate(true, license.key) | date:'d/M/yyyy'}} -->
+                                            {{license.startDate | date:'d/M/yyyy'}}
+
+                                        </td>
+                                        <td>
+                                            {{license.endDate | date:'d/M/yyyy'}}
+
+                                            <!-- {{getRunningUpdate(false, license.key) | date:'d/M/yyyy'}} -->
+                                        </td>
+                                        <td>
+                                            {{license.status_name}}
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="paginatorleft">
+                                    <p-button (click)="ticketDisplay=true" type="button" icon="pi pi-plus" styleClass="p-button-text"></p-button>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- Modal -->
+<!-- <ng-template class="myModal" #mymodal let-c="close" let-d="dismiss"> -->
+    <!-- <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">New Ticket</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div> -->
+    <p-sidebar styleClass="p-sidebar-md" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="ticketDisplay" position="right" 
+[transitionOptions]="'350ms'" (onHide)="newLicenseForm.reset()">
+    <form [formGroup]="newLicenseForm" (ngSubmit)="validateDate()" class="example-form">
+        <div class="">
+            <div class="container">
+                <div class="row">
+                    <!-- <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="">Account Name</mat-label>
+                            <input matInput type="text" id="title" formControlName="accountName">
+                            <mat-error class="alert help-block" *ngIf="!newLicenseForm.get('accountName')?.valid && newLicenseForm.get('accountName')?.touched">
+                                Account Name Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div> -->
+
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="">Client</mat-label>
+                            <mat-select formControlName="client" class="form-control">
+                                <mat-option *ngFor="let client of allClients" [value]='client.id'>{{client.partner_name}}</mat-option>
+                            </mat-select>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="">License Type</mat-label>
+                            <mat-select formControlName="type" class="form-control"
+                            [ngClass]="{'is-invalid':!newLicenseForm.get('type')?.valid &&
+                                 newLicenseForm.get('type')?.touched}">
+                                <mat-option *ngFor="let type of licenseTypes" [value]='type.id'>{{type.license_type}}</mat-option>
+                            </mat-select>
+                            <small class="invalid-feedback" *ngIf="!newLicenseForm.get('type')?.valid && newLicenseForm.touched">
+                                License Type Is Required
+                            </small>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="">License Product</mat-label>
+                            <mat-select formControlName="product" class="form-control"
+                            [ngClass]="{'is-invalid':!newLicenseForm.get('product')?.valid &&
+                                 newLicenseForm.get('product')?.touched}">
+                                <ng-container *ngFor="let product of products">
+                                    <mat-option *ngIf="product.id != '1'" [value]='product.id'>{{product.product_name}}</mat-option>
+                                </ng-container>
+                            </mat-select>
+                            <small class="invalid-feedback" *ngIf="!newLicenseForm.get('product')?.valid && newLicenseForm.touched">
+                                License Product Is Required
+                            </small>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="">Contract Start Date</mat-label>
+                        <p-calendar (ngModelChange)="getDateAfterYear()" formControlName="start" [showIcon]="true" inputId="icon"></p-calendar>
+                        <mat-error class="alert help-block" *ngIf="!newLicenseForm.get('start')?.valid && newLicenseForm.get('start')?.touched">
+                            Start Date is Required
+                        </mat-error>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="">Contract End Date</mat-label>
+                        <p-calendar formControlName="end" [showIcon]="true" inputId="icon"></p-calendar>
+                        <mat-error class="alert help-block" *ngIf="!newLicenseForm.get('end')?.valid && newLicenseForm.get('end')?.touched">
+                            End Date is Required
+                        </mat-error>
+                    </div>
+
+
+
+
+                    <div class="col-lg-12 my-3">
+                        <label class="">Comment:</label>
+                        <p-editor formControlName="comment" [modules]="quillOPT" [style]="{'height':'210px'}">
+                            <ng-template pTemplate="header">
+                                <span class="ql-format-group">
+                                </span>
+                            </ng-template>
+                        </p-editor>
+                        <mat-error class="alert help-block" *ngIf="!newLicenseForm.get('comment')?.valid && newLicenseForm.touched">
+                            Description Is Required
+                        </mat-error>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+
+                        <div class="container-fluid">
+                            <div class="row">
+                                <img *ngIf="!!urls" [src]="urls" alt="ticketImages" width="100">
+                            </div>
+                        </div>
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-5">
+
+                <button *ngIf="!uploading" type="submit" class="btn btnStyle w-100" [disabled]="newLicenseForm.invalid">Submit</button>
+                <button *ngIf="uploading" type="submit" class="btn btnStyle w-100" disabled>Loading...</button>
+            </div>
+            <div class="col-2">
+
+                <button type="button" class="btn btnOutLine" (click)="fileInput.click()">Attach File</button>
+                <input hidden (change)="imagesupload($event)" #fileInput type="file" id="file" accept="image/*">
+            </div>
+        
+        </div>
+    </form>
+    </p-sidebar>
+
+<!-- </ng-template> -->

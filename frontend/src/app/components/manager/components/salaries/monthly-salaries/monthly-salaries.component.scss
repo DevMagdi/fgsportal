@@ -1,0 +1,67 @@
+@import '../../../../../colors';
+.spinner ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: $mainThemeColor !important;
+}
+
+.generateBtn {
+    background-color: $mainThemeColor;
+    color: #fff;
+    margin: auto;
+}
+
+// .positionForDownload {
+//     position: relative;
+// }
+// .downloadFile {
+//     position: absolute;
+//     top: 0px;
+//     right: -20%;
+//     z-index: 99999;
+// }
+.spinner {
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: #100f0f;
+        line-height: 50px;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+        }
+    }
+}
+
+.approveAll {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+}
+
+.commentIcon {
+    cursor: pointer;
+    color: $mainThemeColor;
+}
+
+.sendIcon {
+    cursor: pointer;
+    color: $buttonMainBackgroundColor;
+}
+
+.modalInfo {
+    color: $mainThemeColor;
+    font-weight: 500;
+}
+
+.modalData {
+    color: $mainThemeColor;
+    // font-weight: 500;
+}

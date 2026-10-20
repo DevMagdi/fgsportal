@@ -1,0 +1,29 @@
+@import '../../../../../colors';
+.p-accordion .p-accordion-header .p-accordion-header-link {
+    padding: .6rem;
+    border:none;
+    color: #6c757d;
+    background:$softThemeColor;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: box-shadow 0.2s;
+    &:hover{
+    background:$softThemeColor;
+
+    }
+}
+
+.p-accordion .p-accordion-header:not(.p-highlight):not(.p-disabled):hover .p-accordion-header-link ,
+.p-accordion .p-accordion-header:not(.p-disabled).p-highlight:hover .p-accordion-header-link,
+.p-accordion .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link  {
+    background:$softThemeColor;
+    border-color: #dee2e6;
+    color: #343a40;
+    box-shadow: none;
+}
+
+.permissions-sidebar{
+    .p-sidebar-content {
+        padding: 1rem;
+    }
+}

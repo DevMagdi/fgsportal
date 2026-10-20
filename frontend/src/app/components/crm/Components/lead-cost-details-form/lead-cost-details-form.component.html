@@ -1,0 +1,31 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="costDetailsLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+<form [formGroup]="costDetailsForm" (ngSubmit)="createCostDetails()" class="example-form">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <label class="form-label" for="Title">Costs</label>
+                    <ng-container formArrayName="costs">
+                        <div class="d-flex my-1" *ngFor="let h of costs.controls; index as i" [formGroupName]="i">
+                            <input class="form-control mx-1" type="number" placeholder="Cost" formControlName="cost" />
+                            <!-- <p-autoComplete optionValue="id" [maxlength]="50" [size]="50" inputStyleClass="form-control" [completeOnFocus]="true" lazy="true" formControlName="cost_type" field="lead_cost_type" [showEmptyMessage]="true" [suggestions]="filteredCosts" (completeMethod)="filterTypes($event)"></p-autoComplete> -->
+                            <mat-select class="form-control" formControlName="cost_type">
+                                <mat-option *ngFor="let cost of allCostTypes" [value]='cost.id'>{{cost.lead_cost_type}}</mat-option>
+                            </mat-select>
+                            <span (click)="delCost(i)" class="material-icons delete">
+                                delete
+                            </span>
+                        </div>
+                    </ng-container>
+                    <button class="btn btn-outline-info" type="button" (click)="addCost()">add</button>
+                </div>
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close" [disabled]="costDetailsForm.invalid">Save</button>
+            </div>
+        </div>
+    </div>
+</form>

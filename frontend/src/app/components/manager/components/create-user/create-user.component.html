@@ -1,0 +1,396 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="createUserLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<button *ngIf="!!currentUser && currentUser.accRole == accRolesEnum.SUPER_USER"
+    (click)="addRefreshRequiredForAllUsers()">
+    refresh all
+</button>
+<button *ngIf="!!currentUser && currentUser.accRole == accRolesEnum.SUPER_USER"
+    (click)="addRefreshRequiredForAllClients()">
+    refresh all Clients
+</button>
+<div class="container-fluid mt-3" id="table">
+    <!-- <div class="row" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT ||
+     (currentUser.department == DepartmentEnum.ADMINSTRATION &&  (!!userPerms && !!checkIfHasPerm(8)))">
+        <div class="col-12 mt-2">
+            <div class="btns text-center">
+                <button class="btn deleted m-2" (click)="getDeletedAccounts()">Get Deleted Accounts</button>
+                <button style="background-color: #f5831fd3;color: #fff;" class="btn m-2" (click)="getAllUser()">Return To Normal Accounts</button>
+            </div>
+        </div>
+        
+    </div> -->
+    <mat-tab-group mat-align-tabs="start" class="" (selectedTabChange)="tabChange($event)">
+        <mat-tab label="Normal Accounts">
+            <div class="d-flex justify-content-between align-items-center my-4">
+
+                <div class="">
+                    <!-- <input type="text" class="form-control searchInput" [(ngModel)]="searchKey" (keyup)="userSearch()"
+                        placeholder="search by Username / Email / Account Type">
+                    <span class="material-icons searchIcon p-2">
+                        search
+                    </span> -->
+                    <span class="p-input-icon-left search">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" [(ngModel)]="searchKey" (keyup)="userSearch()"
+                            placeholder="Search keyword" />
+                    </span>
+                </div>
+                <div class="text-end"
+                    *ngIf="!!currentUser && (currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department == DepartmentEnum.ADMINSTRATION &&  (!!userPerms && !!checkIfHasPerm(8))))">
+                    <button class="btn btnStyle" (click)="userToCreate();">
+                        Add new user
+                    </button>
+                </div>
+            </div>
+            <div *ngIf="!deletedMode">
+                <table class="table table-hover newTableCustom">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Avatar</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Department</th>
+                            <th scope="col"
+                                *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department == DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPositionEnum.MANAGER ) || (currentUser.department == DepartmentEnum.ADMINSTRATION &&  (!!userPerms && !!checkIfHasPerm(8)))">
+                                Allow Previous Reports</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- | paginate: { id: 'product_pagination',
+                        itemsPerPage: 10,
+                        currentPage: productpage,
+                        totalItems: totalProductsRecords}  -->
+                        <tr *ngFor="let user of newUserList ; let i=index">
+                            <td [routerLink]="['/user',user.key]" class="routing">{{i + 1}}</td>
+                            <td [routerLink]="['/user',user.key]" class="routing">
+                                <img *ngIf="!!user.photoURL" src="{{newServerApi}}{{user.photoURL}}"
+                                    class="rounded-circle" width="25px" height="25px" alt="">
+                                <img *ngIf="!user.photoURL && (!user.gender || user.gender == 'Male' || user.gender == 'male')"
+                                    class="rounded-circle" src="../../../../../assets/img/avatarman.png" width="25px"
+                                    height="25px" alt="img">
+                                <img *ngIf="!user.photoURL && user.gender == 'female'" class="rounded-circle"
+                                    src="../../../../../assets/img/girlmyavatar.png" width="25px" height="25px" alt="">
+                            </td>
+                            <td [routerLink]="['/user',user.key]" class="routing">{{user.username}}</td>
+                            <td [routerLink]="['/user',user.key]" class="routing">{{user.email}}</td>
+                            <td [routerLink]="['/user',user.key]" class="routing">{{user.department_name}}</td>
+                            <td class="routing"
+                                *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department == DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPositionEnum.MANAGER ) || (currentUser.department == DepartmentEnum.ADMINSTRATION &&  (!!userPerms && !!checkIfHasPerm(8)))">
+                                <mat-slide-toggle [checked]="user.canAddPreviousReports" class="position-relative"
+                                    style="z-index: 0;" (change)="allowPreviousReports(user)"></mat-slide-toggle>
+                            </td>
+                            <td *ngIf="!currentUser || currentUser.department != DepartmentEnum.MANAGEMENT"></td>
+                            <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT">
+
+                                <!-- <span class="material-icons" >
+                                        list
+                                    </span> -->
+                                <img src="../../../../../assets/img/menu.svg" [matMenuTriggerFor]="menu"
+                                    style=" cursor: pointer;" class="Component-22-1">
+
+                                <mat-menu #menu="matMenu">
+                                    <button mat-menu-item (click)="resetPassword(user)">
+                                        <!-- <span class="material-icons" style="color: #694796; cursor: pointer; font-size: small;">
+                                                manage_accounts
+                                            </span> -->
+                                        Reset Password
+                                    </button>
+
+                                    <button mat-menu-item (click)="userToEdit(user);editMode=true;">
+                                        <!-- <span class="material-icons" style="color: #694796; cursor: pointer; font-size: small;">
+                                                edit
+                                            </span> -->
+                                        Edit Account
+                                    </button>
+
+                                    <button mat-menu-item (click)="disableUser(user)"
+                                        *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT">Delete
+                                        Account</button>
+                                    <button mat-menu-item (click)="addRefreshRequiredForUser(user)"
+                                        *ngIf="!!currentUser && currentUser.accRole == accRolesEnum.SUPER_USER">Refresh</button>
+
+                                </mat-menu>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Modal -->
+            <p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false"
+                [(visible)]="sidebarDisplay" position="right" [transitionOptions]="'350ms'"
+                (onHide)="newUserForm.reset()">
+                <!-- <ng-template class="myModal" #mymodal let-c="close" let-d="dismiss"> -->
+                <h3 class="modal-title fw-bold" id="modal-basic-title">New User</h3>
+
+                <form [formGroup]="newUserForm" (ngSubmit)="validateNewUser()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="Email" [control]="newUserForm.get('email')"
+                                        placeholder="Write email"></app-form-input>
+                                </div>
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="User Name" [control]="newUserForm.get('username')"
+                                        placeholder="Write username"></app-form-input>
+                                </div>
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="First Name" [control]="newUserForm.get('firstName')"
+                                        placeholder="Write First Name"></app-form-input>
+                                </div>
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="Last Name" [control]="newUserForm.get('lastName')"
+                                        placeholder="Write Last Name"></app-form-input>
+                                </div>
+
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="Password" type="password"
+                                        [control]="newUserForm.get('password')"
+                                        placeholder="Write password"></app-form-input>
+                                </div>
+
+
+
+                                <div class="col-lg-6 my-3">
+                                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label class="formLables">Department</label>
+                                    <mat-select (ngModelChange)="getSubDepartment()" formControlName="department"
+                                        [ngClass]="{'is-invalid':!newUserForm.get('department')?.valid &&
+                                        newUserForm.get('department')?.touched}" class="form-control">
+                                        <mat-option *ngFor="let dept of allDepartments"
+                                            [value]='dept.id'>{{dept.department_name}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback"
+                                        *ngIf="!newUserForm.get('department')?.valid && newUserForm.touched">
+                                        Department Is Required
+                                    </div>
+                                    <!-- </mat-form-field> -->
+                                </div>
+
+                                <div class="col-lg-6 my-3">
+                                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <mat-label class="formLables" *ngIf="!subdeptLoading">Role</mat-label>
+                                    <mat-label class="formLables">
+                                        <div class="loading-dots" *ngIf="subdeptLoading">
+                                            <div class="loading-dots--dot"></div>
+                                            <div class="loading-dots--dot"></div>
+                                            <div class="loading-dots--dot"></div>
+                                        </div>
+                                    </mat-label>
+                                    <mat-select formControlName="role" [ngClass]="{'is-invalid':!newUserForm.get('role')?.valid &&
+                                        newUserForm.get('role')?.touched}" class="form-control">
+                                        <mat-option *ngFor="let role of allSubdepartments"
+                                            [value]='role.id'>{{role.sub_department_name}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback"
+                                        *ngIf="!newUserForm.get('role')?.valid && newUserForm.touched">
+                                        Role Is Required
+                                    </div>
+                                    <!-- </mat-form-field> -->
+                                </div>
+
+                                <div class="col-lg-6 my-3">
+                                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <mat-label class="formLables">Work Degree</mat-label>
+                                    <mat-select formControlName="position" [ngClass]="{'is-invalid':!newUserForm.get('position')?.valid &&
+                                        newUserForm.get('position')?.touched}" class="form-control">
+                                        <mat-option *ngFor="let pos of allPositions"
+                                            [value]='pos.id'>{{pos.work_degree_name}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback"
+                                        *ngIf="!newUserForm.get('position')?.valid && newUserForm.touched">
+                                        Position Is Required
+                                    </div>
+                                    <!-- </mat-form-field> -->
+                                </div>
+
+
+                                <div class="col-lg-6 my-3 d-flex align-items-center">
+                                    <p-checkbox class="mx-1" formControlName="notify" [binary]="true"
+                                        inputId="binary"></p-checkbox>
+                                    <label for="binary" class="mx-1 mb-0">Notify</label>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btnStyle" [disabled]="newUserForm.invalid">Submit</button>
+                    </div>
+                </form>
+
+                <!-- </ng-template> -->
+            </p-sidebar>
+
+            <p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false"
+                [(visible)]="editMode" position="right" [transitionOptions]="'350ms'" (onHide)="newUserForm.reset()">
+                <!-- <ng-template class="myModal" #mymodal let-c="close" let-d="dismiss"> -->
+                <h3 class="modal-title fw-bold" id="modal-basic-title">Edit User</h3>
+
+                <form [formGroup]="newUserForm" (ngSubmit)="editUser()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="Email" [control]="newUserForm.get('email')"
+                                        placeholder="Write email"></app-form-input>
+                                </div>
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="User Name" [control]="newUserForm.get('username')"
+                                        placeholder="Write username"></app-form-input>
+                                </div>
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="First Name" [control]="newUserForm.get('firstName')"
+                                        placeholder="Write First Name"></app-form-input>
+                                </div>
+                                <div class="col-lg-6 my-3">
+
+                                    <app-form-input label="Last Name" [control]="newUserForm.get('lastName')"
+                                        placeholder="Write Last Name"></app-form-input>
+                                </div>
+
+                                <div class="col-lg-6 my-3">
+                                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label class="formLables">Department</label>
+                                    <mat-select (ngModelChange)="getSubDepartment()" formControlName="department"
+                                        [ngClass]="{'is-invalid':!newUserForm.get('department')?.valid &&
+                                     newUserForm.get('department')?.touched}" class="form-control">
+                                        <mat-option *ngFor="let dept of allDepartments"
+                                            [value]='dept.id'>{{dept.department_name}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback"
+                                        *ngIf="!newUserForm.get('department')?.valid && newUserForm.touched">
+                                        Department Is Required
+                                    </div>
+                                    <!-- </mat-form-field> -->
+                                </div>
+
+                                <div class="col-lg-6 my-3">
+                                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <mat-label class="formLables" *ngIf="!subdeptLoading">Role</mat-label>
+                                    <mat-label class="formLables">
+                                        <div class="loading-dots" *ngIf="subdeptLoading">
+                                            <div class="loading-dots--dot"></div>
+                                            <div class="loading-dots--dot"></div>
+                                            <div class="loading-dots--dot"></div>
+                                        </div>
+                                    </mat-label>
+                                    <mat-select formControlName="role" [ngClass]="{'is-invalid':!newUserForm.get('role')?.valid &&
+                                     newUserForm.get('role')?.touched}" class="form-control">
+                                        <mat-option *ngFor="let role of allSubdepartments"
+                                            [value]='role.id'>{{role.sub_department_name}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback"
+                                        *ngIf="!newUserForm.get('role')?.valid && newUserForm.touched">
+                                        Role Is Required
+                                    </div>
+                                    <!-- </mat-form-field> -->
+                                </div>
+
+                                <div class="col-lg-6 my-3">
+                                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <mat-label class="formLables">Position</mat-label>
+                                    <mat-select formControlName="position" [ngClass]="{'is-invalid':!newUserForm.get('position')?.valid &&
+                                     newUserForm.get('position')?.touched}" class="form-control">
+                                        <mat-option *ngFor="let pos of allPositions"
+                                            [value]='pos.id'>{{pos.work_degree_name}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback"
+                                        *ngIf="!newUserForm.get('position')?.valid && newUserForm.touched">
+                                        Position Is Required
+                                    </div>
+                                    <!-- </mat-form-field> -->
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btnStyle" [disabled]="newUserForm.invalid">Submit</button>
+                    </div>
+                </form>
+
+            </p-sidebar>
+        </mat-tab>
+        <mat-tab label="Get Deleted Accounts" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT ||
+     (currentUser.department == DepartmentEnum.ADMINSTRATION &&  (!!userPerms && !!checkIfHasPerm(8)))">
+            <div *ngIf="deletedMode">
+                <div class="my-4">
+
+                    <span class="p-input-icon-left search">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" [(ngModel)]="searchKey" (keyup)="userSearch()"
+                            placeholder="Search keyword" />
+                    </span>
+                </div>
+
+                <table class="table table-hover newTableCustom">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Avatar</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Department</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- | paginate: { id: 'product_pagination',
+                        itemsPerPage: 10,
+                        currentPage: productpage,
+                        totalItems: totalProductsRecords}  -->
+                        <tr *ngFor="let user of newUserList ; let i=index">
+                            <td class="routing">{{i + 1}}</td>
+                            <td class="routing">
+                                <img *ngIf="!!user.photoURL" src="{{user.photoURL}}" class="rounded-circle" width="25px"
+                                    height="25px" alt="">
+                                <img *ngIf="!user.photoURL && (!user.gender || user.gender == 'male')"
+                                    class="rounded-circle" src="https://bootdey.com/img/Content/avatar/avatar7.png"
+                                    width="25px" height="25px" alt="">
+                                <img *ngIf="!user.photoURL && user.gender == 'female'" class="rounded-circle"
+                                    src="https://i2.wp.com/nofiredrills.com/wp-content/uploads/2016/10/myavatar.png?fit=400%2C400&ssl=1"
+                                    width="25px" height="25px" alt="">
+                            </td>
+                            <td class="routing">{{user.username}}</td>
+                            <td class="routing">{{user.email}}</td>
+                            <td class="routing">{{user.department_name}}</td>
+                            <td *ngIf="!currentUser || currentUser.department != DepartmentEnum.MANAGEMENT"></td>
+                            <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT">
+                                <img src="../../../../../assets/img/menu.svg" [matMenuTriggerFor]="menu"
+                                    style=" cursor: pointer;" class="Component-22-1">
+
+                                <mat-menu #menu="matMenu">
+                                    <button mat-menu-item (click)="activateUser(user)">ReActivate Account</button>
+                                </mat-menu>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </mat-tab>
+
+    </mat-tab-group>
+
+
+
+
+</div>
+<!-- <div class="flex-container">
+    <div class="button-container">
+        
+    </div>
+</div> -->

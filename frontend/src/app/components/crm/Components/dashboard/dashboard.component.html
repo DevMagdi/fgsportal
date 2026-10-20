@@ -1,0 +1,129 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="crmdashloader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="container-fluid dash">
+    <div class="row">
+        <div class="col-lg-5">
+            <input type="date" class="form-control" [(ngModel)]="start_date">
+        </div>
+        <div class="col-lg-5">
+            <input type="date" class="form-control" [(ngModel)]="end_date">
+        </div>
+        <div class="col-lg-2">
+            <button class="btn btn-outline-success" (click)="getCRMDashboardData()">Get</button>
+        </div>
+    </div>
+    <div class="row my-5">
+        <div class="col-lg-6 p-1">
+            <div class="card chartValueCard p-2 m-0" style="height: 100%;">
+                <div class="card-title">
+                    Revenue forcasting
+                    <p class="date">By USD - {{start_date | date:'shortDate'}}-{{end_date | date:'shortDate'}}</p>
+                </div>
+                <p-chart type="bar" [data]="revenueforcastData" [options]="revenueforcastOptions"
+                    (onDataSelect)="revenueforcastDataSelect($event)"></p-chart>
+            </div>
+        </div>
+        <div class="col-lg-3 p-1">
+            <div class="card singleValueCard p-2 m-0" style="height: 100%;">
+                <div class="card-title">
+                    <i class="menu-icon tf-icons bx bx-buildings"></i> Total value of won deals
+                    <p class="date">{{start_date | date:'shortDate'}}-{{end_date | date:'shortDate'}}</p>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center flex-column"
+                    *ngIf="!!totalValueOfWonDeals">
+                    <h6 style="cursor: pointer;" (click)="getTotalData(0)">USD {{totalValueOfWonDeals.lastValue |
+                        number}}
+                    <span>
+                        <i class="bx bxs-up-arrow bx-fade-up" *ngIf="totalValueOfWonDeals.upOrDown == 'up'"
+                            style="color: green;"></i>
+                        <i class="bx bxs-down-arrow bx-fade-down" *ngIf="totalValueOfWonDeals.upOrDown == 'down'"
+                            style="color: red;"></i>
+                        <!-- <i class="bx bxs-down-arrow bx-fade-down" *ngIf="upOrDown == 'eq'" style="color: red;"></i> -->
+                    </span>
+                    </h6>
+                    <h2 style="cursor: pointer;" (click)="getTotalData(1)">USD {{totalValueOfWonDeals.currentValue |
+                        number}}</h2>
+                    <h6>Total won opportunities</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 p-1">
+            <div class="card singleValueCard p-2 m-0" style="height: 100%;">
+                <div class="card-title">
+                    <i class="menu-icon tf-icons bx bx-user-check"></i> Revenue Over Product
+                    <p class="date">By USD - {{start_date | date:'shortDate'}}-{{end_date | date:'shortDate'}}</p>
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                    <p-chart (onDataSelect)="revenuePerProductDataSelect($event)" type="pie"
+                        [data]="revenueOverProductData" [options]="revenueOverProductOptions"></p-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-lg-3 p-1">
+            <div class="card singleValueCard p-2 m-0" style="height: 100%;">
+                <div class="card-title">
+                    <i class="menu-icon tf-icons bx bx-user-check"></i> Number of leads
+                    <p class="date">{{start_date | date:'shortDate'}}-{{end_date | date:'shortDate'}}</p>
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                    <p-chart type="pie" (onDataSelect)="numberOfLeadsDataSelect($event)" [data]="leadsForSalesData"
+                        [options]="numOfLeadsOptions"></p-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 p-1">
+            <div class="card singleValueCard p-2 m-0" style="height: 100%;">
+                <div class="card-title my-0">
+                    <i class="menu-icon tf-icons bx bx-user-check"></i> Activities completed and planned
+                    <p class="date">Current Month</p>
+                </div>
+                <div class="card-body d-flex justify-content-center my-0">
+                    <p-chart type="bar" [data]="activitesData" [options]="activitesOptions" height="100%"></p-chart>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 p-1">
+            <div class="card chartValueCard p-2 m-0" style="height: 100%;">
+                <div class="card-title">
+                    Deal Progress
+                </div>
+                <p-chart type="bar" (onDataSelect)="dealProgressDataSelect($event)" [data]="dealProgressData"
+                    [options]="dealProgressOptions"></p-chart>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3 p-1">
+            <div class="card singleValueCard p-2 m-0" style="height: 100%;">
+                <div class="card-title">
+                    <i class="menu-icon tf-icons bx bx-user-check"></i> Revenue Over Sales
+                    <p class="date">{{start_date | date:'shortDate'}}-{{end_date | date:'shortDate'}}</p>
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                    <p-chart type="pie" (onDataSelect)="revenuePerSalesDataSelect($event)" [data]="revenueOverSalesData"
+                        [options]="revenueOverSalesOptions"></p-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<button class="btn requestPocBTN mx-1" id="showModal" style="display: none;" data-bs-toggle="modal"
+    data-bs-target="#showDashboardData"></button>
+<!-- ============================================= Show Data Modal ========================================= -->
+<div class="modal modal-top fade" id="showDashboardData" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">{{modalTitle}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-2" id="showDashboardDataBody">
+
+            </div>
+        </div>
+    </div>
+</div>

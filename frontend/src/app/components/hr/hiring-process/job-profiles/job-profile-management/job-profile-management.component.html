@@ -1,0 +1,86 @@
+<div>
+    <div class="sidebar-header">
+        <h1 class="main-color">
+            {{ jobProfile ? "Update Job Profile" : "Create Job Profile" }}
+        </h1>
+    </div>
+    <form [formGroup]="jobProfileForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+            <div class="col-lg-6">
+                <app-form-input label="Job Title" [control]="jobProfileForm.get('hr_job_title')"
+                    placeholder="Write Job Title"></app-form-input>
+            </div>
+            <div class="col-lg-6 my-2">
+                <label>Job Skills</label>
+                <p-multiSelect [options]="jobSkills" formControlName="job_skills_id" #select
+                     [baseZIndex]="0" [autoZIndex]="true"
+                    [dropdownIcon]="jobSkillsLoading ? 'pi pi-spin pi-spinner':'pi pi-angle-down'"
+                    class="jop-profile-select" defaultLabel="Select Job Skills" optionLabel="job_skill" optionValue="id"
+                    display="chip" appendTo="body"
+                    [ngClass]="{'is-invalid':!jobProfileForm.get('job_skills_id')?.valid &&jobProfileForm.get('job_skills_id')?.touched}">
+
+                    <ng-template pTemplate="footer">
+                        <div class="bg-light p-2 cursor" (click)="addSkillDialog=true;select.hide()">
+
+                            <i class="pi pi-plus add-skill-icon"></i>
+                            <span class="px-2">Add other Job Skill</span>
+                        </div>
+
+                    </ng-template>
+
+                </p-multiSelect>
+                <div class="invalid-feedback" 
+                *ngIf="!jobProfileForm.get('job_skills_id')?.valid &&jobProfileForm.get('job_skills_id')?.touched">
+                    Job Skill Is Required
+                </div>
+
+            </div>
+            <div class="col-lg-6 my-2">
+                <!-- <span class="p-float-label w-100"> -->
+                <label>Status</label>
+                <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="JobProfileStatus|keyvalue"
+                    formControlName="job_status" optionLabel="key" optionValue="value" class="w-100 jop-profile-status"
+                    placeholder="job title status"
+                    [ngClass]="{'is-invalid':!jobProfileForm.get('status')?.valid && jobProfileForm.get('status')?.touched}"></p-dropdown>
+                <div *ngIf="!jobProfileForm.get('status')?.valid && jobProfileForm.get('status')?.touched"
+                    class="invalid-feedback">
+
+                    <small>*Job Profile Status is Required</small>
+                </div>
+                <!-- </span> -->
+            </div>
+
+            <div class="col-lg-12 my-2">
+                <label>Description</label>
+                <!-- <textarea class="form-control" rows="5" formControlName="description">
+               </textarea> -->
+
+                <p-editor formControlName="description" [style]="{ height: '320px' }"
+                [ngClass]="{'is-invalid':!jobProfileForm.get('description')?.valid &&jobProfileForm.get('description')?.touched}"
+                
+                ></p-editor>
+                <div class="invalid-feedback" 
+                *ngIf="!jobProfileForm.get('description')?.valid &&jobProfileForm.get('description')?.touched">
+                description Is Required
+                </div>
+
+            </div>
+
+
+        </div>
+
+        <div class="row my-4">
+            <div class="col-lg-12">
+                <button type="submit" class="btn btnStyle w-100">
+                    {{ jobProfile ? "Update" : "Create" }}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<p-dialog [(visible)]="addSkillDialog" [baseZIndex]="9999999999999999" [autoZIndex]="true" [style]="{width: '30vw'}"
+    [modal]="true" [draggable]="false" [resizable]="false">
+    <app-job-skill-manangement (updateJobSkillList)="updateJobSkillList($event)"
+        [inJobProfileComponent]="true"></app-job-skill-manangement>
+</p-dialog>

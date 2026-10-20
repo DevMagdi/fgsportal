@@ -1,0 +1,12 @@
+@import '../../../../../colors';
+.candidate-details{
+
+    background-color: $softThemeColor;
+    padding: 4px;
+    .candidate-file{
+        // background-color: lightgray;
+        padding: 8px;
+        border-radius: 8px;
+        color: black;
+    }
+}

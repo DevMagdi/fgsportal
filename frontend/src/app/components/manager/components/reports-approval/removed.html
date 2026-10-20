@@ -1,0 +1,116 @@
+<h3 *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">Technical Team Reports</h3>
+<div class="row tableRow" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+    <div class="col-10"></div>
+    <div class="col-2">
+        <button class="btn btn-success" [disabled]="myReportsToApprove.length == 0" (click)="approveAllMyReports()">Approve All</button>
+    </div>
+</div>
+<div class="row tableRow" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department == DepartmentEnum.TECHNICAL_TEAM">
+    <div class="col-12">
+        <table class="my-3 table table-hover newTableCustom">
+            <thead>
+                <tr>
+                    <td>#</td>
+                    <td>Dev Name</td>
+                    <td>Date</td>
+                    <td>Duration</td>
+                    <td>Time Activity</td>
+                    <td>Project Name</td>
+                    <td>Process Name</td>
+                    <td>Task Name</td>
+                    <td>Progress</td>
+                    <!-- <td>Details</td>
+                    <td>Created At</td> -->
+                    <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">To Approve</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let report of myReportsToApprove ; let i = index">
+                    <tr *ngIf="!report.rejected == true">
+                        <td>{{i + 1}}</td>
+                        <td>{{report.devName}}</td>
+                        <td>{{report.reportDate}}</td>
+                        <td>{{report.preApprovedDuration}}</td>
+                        <td>{{report.time_activity_name}}</td>
+                        <td *ngIf="report.projectName" class="details">{{report.projectName}}</td>
+                        <td *ngIf="!report.projectName">-</td>
+
+                        <td *ngIf="report.processName" class="details">{{report.processName}}</td>
+                        <td *ngIf="!report.processName">-</td>
+
+                        <td *ngIf="report.taskTitle" class="details">{{report.taskTitle}}</td>
+                        <td *ngIf="!report.taskTitle">-</td>
+
+
+
+                        <td *ngIf="report.progress">{{report.progress}} %</td>
+                        <td *ngIf="!report.progress">-</td>
+                        <!-- <td class="details">{{report.details}}</td> -->
+                        <!-- <td>{{report.createdAt}}</td> -->
+                        <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">{{report.report_status_id == ReportStatusEnum.Pending_On_Manager ? report.managerApprovalname : report.seniorToApproveName}}</td>
+                        <td>
+                            <button (click)="openApproveDialog(report)" class="btn approvalBtn mx-1">Review</button>
+                            <!-- <button (click)="rejectReport(report)" class="btn rejectBtn mx-1">Reject</button> -->
+                        </td>
+                    </tr>
+                </ng-container>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<h3 *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">Other Reports</h3>
+
+
+<div class="row tableRow"
+*ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department != DepartmentEnum.TECHNICAL_TEAM">
+    <div class="col-12">
+        <table class="my-3 table table-hover newTableCustom">
+            <thead>
+                <tr>
+                    <td>#</td>
+                    <td>Emp Name</td>
+                    <td>Date</td>
+                    <td>Duration</td>
+                    <td>Time Activity</td>
+                    <td>Task Name</td>
+                    <td>Progress</td>
+                    <!-- <td>Details</td>
+                    <td>Created At</td> -->
+                    <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">To Approve</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let report of adminReports ; let i = index">
+                    <tr>
+                        <td>{{i + 1}}</td>
+                        <td>{{report.devName}}</td>
+                        <td>{{report.report_date}}</td>
+                        <td>{{report.duration}}</td>
+                        <td>{{report.report_status_name}}</td>
+
+                        <td *ngIf="report.task_name" class="details">{{report.task_name}}</td>
+                        <td *ngIf="!report.task_name">-</td>
+
+
+
+                        <td *ngIf="report.report_progress">{{report.report_progress}} %</td>
+                        <td *ngIf="!report.report_progress">-</td>
+                        <!-- <td class="details">{{report.details}}</td> -->
+                        <!-- <td>{{report.createdAt}}</td> -->
+                        <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">{{report.manager_approve_name}}</td>
+                        <td>
+                            <button (click)="openAdminApproveDialog(report)" class="btn approvalBtn mx-1">Review</button>
+                            <!-- <button (click)="rejectReport(report)" class="btn rejectBtn mx-1">Reject</button> -->
+                        </td>
+                    </tr>
+                </ng-container>
+
+            </tbody>
+        </table>
+    </div>
+</div>

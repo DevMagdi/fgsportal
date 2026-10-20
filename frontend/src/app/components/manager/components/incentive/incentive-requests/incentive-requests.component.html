@@ -1,0 +1,348 @@
+<div class="container-fluid my-2" *ngIf="!!currentUser">
+        
+    <div class="row p-3 my-1">
+        <div class="col-md-10"></div>
+        <div class="col-md-2">
+            <button class="btn btnStyle text-right">
+                <span *ngIf="!!currentUser && (currentUser.department == DepartmentEnum.MANAGEMENT || 
+                currentUser.accPosition == accPosistionEnum.MANAGER)" (click)="openForAdd=true;openCreateModal();dismissEditIncentive()"
+                 style="cursor: pointer;">
+                    Add new Request
+                </span>
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+
+        <table class="table newTableCustom">
+            <thead>
+                <tr class="p-3">
+                    <td class="">Employee Name</td>
+                    <td class="">Project</td>
+                    <!-- <td class="">Process</td> -->
+                    <td class="">Amount</td>
+                    <td class="">Date</td>
+                    <td class="" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">Review</td>
+                    <td class="" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPosistionEnum.MANAGER">Pending On</td>
+                    <td class=""></td>
+                    <!-- <div class="col-md-2"> {{currentUser.department == DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPosistionEnum.MANAGER ? 'Pending On' : 'Approve/Reject'}} </div> -->
+                    <!-- <div class="col-md-2" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">Pending On</div> -->
+                </tr> 
+            </thead>
+            <tbody>
+                <tr class="" *ngFor="let incentive of pendingIncentive">
+                    <td class="col-md-2">{{incentive.empName}}</td>
+                    <td class="col-md-2">{{incentive.projectName}}</td>
+                    <!-- <td class="col-md-2">{{incentive.processName}}</td> -->
+                    <td class="col-md-2">{{incentive.incentiveAmount}}</td>
+                    <td class="col-md-2">{{incentive.date}}</td>
+                    <td class="col-md-2" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPosistionEnum.MANAGER">
+                        {{incentive.incentive_status_name}}
+                    </td>
+                    <td class="col-md-2" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+                        <button class="btn btn-outline-success" (click)="openDialogForReview('mymodal' , incentive)">Review</button>
+                    </td>
+                    <td class="col-md-2" *ngIf="incentive.incentive_status_id == incentiveFinalStatusEnum.Pending && incentive.createdByKey == currentUser.key">
+                        <span class="material-icons issueEditIcon m-1" (click)="editIncentive(incentive);openCreateModal();openForAdd=true">
+                            edit
+                        </span>
+                        <span class="material-icons issueDelIcon m-1" (click)="deleteIncentive(incentive)">
+                            delete
+                        </span>
+                    </td>
+                </tr>
+            
+                <tr class="" *ngFor="let incentive of managerPendingIncentive">
+                    <td >{{incentive.empName}}</td>
+                    <td >{{incentive.projectName}}</td>
+                    <!-- <td >{{incentive.processName}}</td> -->
+                    <td >{{incentive.incentiveAmount}}</td>
+                    <td >{{incentive.date}}</td>
+                    
+                    <td >
+                        {{incentive.incentive_status_name}}
+                    </td>
+                    <td></td>
+            
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+
+<!-- Modal -->
+<p-sidebar styleClass="p-sidebar-sm" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="openForAdd" position="right" 
+[transitionOptions]="'350ms'">
+<h4 class="modal-title" id="modal-basic-title">New Incentive</h4>
+<form [formGroup]="createNewIncentiveForm" (ngSubmit)="validateIncentive()">
+    <div class="">
+        <div class="">
+            <div class="row">
+                <div class="col-lg-12 my-2">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>Project</mat-label>
+                        <mat-select formControlName="projectKey" (selectionChange)="getProjectTeam();getProcesses()">
+                            <mat-option *ngFor="let project of myProjects" [value]='project.key'>{{project.title}}</mat-option>
+                        </mat-select>
+                        <mat-error class="alert help-block" *ngIf="!createNewIncentiveForm.get('projectKey')?.valid && createNewIncentiveForm.get('projectKey')?.touched">
+                            *Project Required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-lg-12 my-2">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>Process</mat-label>
+                        <mat-select formControlName="processKey" (selectionChange)="getProjectTeam()">
+                            <mat-option *ngFor="let process of myProcess" [value]='process.key'>{{process.title}}</mat-option>
+                        </mat-select>
+                        <mat-error class="alert help-block" *ngIf="!createNewIncentiveForm.get('processKey')?.valid && createNewIncentiveForm.get('processKey')?.touched">
+                            *Process Required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-lg-12 my-2">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>Project Team</mat-label>
+                        <mat-select formControlName="empKey" (selectionChange)="getEmpName()">
+                            <mat-option *ngFor="let emp of emps" [value]='emp.user_team_id'>{{emp.user_team_name}}</mat-option>
+                        </mat-select>
+                        <mat-error class="alert help-block" *ngIf="!createNewIncentiveForm.get('empKey')?.valid && createNewIncentiveForm.get('empKey')?.touched">
+                            *Developer Name Required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-12 my-2">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>Apply On</mat-label>
+                        <input matInput id="applyfrom" [matDatepicker]="picker" formControlName="date" (click)="openDatePicker(picker)">
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker startView="multi-year" (monthSelected)="closeDatePicker($event, picker)"></mat-datepicker>
+                        <mat-error class="alert help-block" *ngIf="!createNewIncentiveForm.get('date')?.valid && createNewIncentiveForm.get('date')?.touched">
+                            *Apply From Required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-12 my-2">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>Amount</mat-label>
+                        <input matInput type="number" id="Amount" formControlName="incentiveAmount">
+                        <mat-error class="alert help-block" *ngIf="!createNewIncentiveForm.get('incentiveAmount')?.valid && createNewIncentiveForm.get('incentiveAmount')?.touched">
+                            *Amount Required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+
+                <div class="col-lg-12 my-2" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPosistionEnum.MANAGER">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>Manager To Approve</mat-label>
+                        <mat-select formControlName="managerToApproveKey">
+                            <mat-option *ngFor="let manager of managers" [value]='manager.key'>{{manager.username}}</mat-option>
+                        </mat-select>
+                        <mat-error class="alert help-block" *ngIf="!createNewIncentiveForm.get('managerToApproveKey')?.valid && createNewIncentiveForm.get('managerToApproveKey')?.touched">
+                            *Manager To Approve Required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+
+                <!-- <div class="col-lg-6" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>Finance To Approve</mat-label>
+                        <mat-select formControlName="financeToApproveKey">
+                            <mat-option *ngFor="let admin of admins" [value]='admin.key'>{{admin.username}}</mat-option>
+                        </mat-select>
+                        <mat-error class="alert help-block" *ngIf="!createNewIncentiveForm.get('financeToApproveKey')?.valid && createNewIncentiveForm.get('financeToApproveKey')?.touched">
+                            *Finance To Approve Required
+                        </mat-error>
+                    </mat-form-field>
+                </div> -->
+
+                <div class="col-lg-12 my-2">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label>comment</mat-label>
+                        <input matInput type="text" id="comment" formControlName="comment">
+                    </mat-form-field>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <!-- (click)="modal.close('Save click')" -->
+        <button type="submit" class="btn btnStyle w-100" [disabled]="!createNewIncentiveForm.valid">Submit</button>
+    </div>
+</form>
+</p-sidebar>
+
+<p-sidebar styleClass="p-sidebar-sm" class="side" *ngIf="incentiveForReview"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="openForReview" position="right" 
+[transitionOptions]="'350ms'">
+<h4 class="modal-title" id="modal-basic-title">Review Incentive</h4>
+
+<div class="">
+    <div class="review">
+        <div class="row">
+            <div class="d-flex justify-content-between my-2">
+                <label class="modalInfo">Project: </label>
+                <p class="pl-2">{{incentiveForReview.projectName}}</p>
+            </div>
+            <div class="d-flex justify-content-between my-2">
+                <label class="modalInfo">Project Team: </label>
+                <p class="pl-2">{{incentiveForReview.empName}}</p>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="d-flex justify-content-between my-2">
+                <label class="modalInfo">Amount: </label>
+                <p class="pl-2">{{incentiveForReview.incentiveAmount}}</p>
+            </div>
+            <div class="d-flex justify-content-between my-2">
+                <label class="modalInfo">Apply On: </label>
+                <p class="pl-2">{{incentiveForReview.date}}</p>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="d-flex justify-content-between my-2">
+                <label class="modalInfo">Created By: </label>
+                <p class="pl-2">{{incentiveForReview.createdByName}}</p>
+            </div>
+            <div class="d-flex justify-content-between my-2">
+                <label class="modalInfo">PM Comment: </label>
+                <p class="pl-2">{{incentiveForReview.comment}}</p>
+            </div>
+            <ng-container *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+
+                <!-- <div class="col-lg-6" *ngIf="incentiveForReview.financeDissisionComment">
+                    <label class="modalInfo">Finance Dissision: </label>
+                    <p class="pl-2">{{incentiveForReview.financeDissision == false? 'Rejected' : 'Approved'}}</p>
+                </div> -->
+
+                <!-- <div class="col-lg-6" *ngIf="!!incentiveForReview.financeDissisionComment">
+                    <label class="modalInfo">Finance Comment: </label>
+                    <p class="pl-2">{{incentiveForReview.financeDissisionComment}}</p>
+                </div> -->
+
+                <!-- <div class="col-lg-6">
+                    <label class="modalInfo">Assign To: </label>
+                    <select name="" id="" class="form-control" [(ngModel)]="incentiveForReview.financeToApproveKey">
+                        <option *ngFor="let admin of admins" [value]="admin.key">{{admin.username}}</option>
+                    </select>
+                </div> -->
+
+                <div class="col-lg-12 my-2">
+                    <label class="modalInfo">Comment: </label>
+                    <input type="text" class="form-control" [(ngModel)]="incentiveForReview.managerDissisionComment">
+                </div>
+
+
+
+            </ng-container>
+            <!-- <ng-container *ngIf="currentUser.department == DepartmentEnum.ADMINSTRATION">
+                <div class="col-lg-6" *ngIf="!!incentiveForReview.managerDissision">
+                    <label class="modalInfo">Approved By: </label>
+                    <p class="pl-2">{{incentiveForReview.managerDissisionName}}</p>
+                </div>
+                <div class="col-lg-6" *ngIf="!!incentiveForReview.managerDissisionComment">
+                    <label class="modalInfo">Manager Comment: </label>
+                    <p class="pl-2">{{incentiveForReview.managerDissisionComment}}</p>
+                </div>
+                <div class="col-lg-6">
+                    <label class="modalInfo">Your Comment: </label>
+                    <input type="text" class="form-control" [(ngModel)]="incentiveForReview.financeDissisionComment">
+                </div>
+            </ng-container> -->
+        </div>
+    </div>
+</div>
+<div class="row gap-4 ml-2 mt-4">
+    <ng-container *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+        <button type="submit" class="btn btnStyle col-lg-5 " (click)="openForReview=false;managerDissision(true)">Approve</button>
+        <button type="submit" [disabled]="!incentiveForReview.managerDissisionComment" class="btn btn-outline-danger col-lg-5" (click)="openForReview=false;managerDissision(false)">Reject</button>
+    </ng-container>
+
+    <!-- <ng-container *ngIf="currentUser.department == DepartmentEnum.ADMINSTRATION">
+        <button type="submit" class="btn btn-outline-success" (click)="modal.close('Save click');financeDissision(true)">Approve</button>
+        <button type="submit" [disabled]="!incentiveForReview.financeDissisionComment" class="btn btn-outline-danger" (click)="modal.close('Save click');financeDissision(false)">Reject</button>
+    </ng-container> -->
+</div>
+</p-sidebar>
+<!-- <ng-template #mymodal let-modal>
+    <ng-container *ngIf="!openForReview">
+        <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">New Incentive</h4>
+            <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+     
+    </ng-container>
+
+
+    <ng-container *ngIf="openForReview">
+        <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Review Incentive</h4>
+            <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Project: </label>
+                        <p class="pl-2">{{incentiveForReview.projectName}}</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Project Team: </label>
+                        <p class="pl-2">{{incentiveForReview.empName}}</p>
+                    </div>
+                    <mat-divider></mat-divider>
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Amount: </label>
+                        <p class="pl-2">{{incentiveForReview.incentiveAmount}}</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Apply On: </label>
+                        <p class="pl-2">{{incentiveForReview.date}}</p>
+                    </div>
+                    <mat-divider></mat-divider>
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Created By: </label>
+                        <p class="pl-2">{{incentiveForReview.createdByName}}</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <label class="modalInfo">PM Comment: </label>
+                        <p class="pl-2">{{incentiveForReview.comment}}</p>
+                    </div>
+                    <ng-container *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+
+
+
+                        <div class="col-lg-6">
+                            <label class="modalInfo">Comment: </label>
+                            <input type="text" class="form-control" [(ngModel)]="incentiveForReview.managerDissisionComment">
+                        </div>
+
+
+
+                    </ng-container>
+  
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <ng-container *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+                <button type="submit" class="btn btn-outline-success" (click)="modal.close('Save click');managerDissision(true)">Approve</button>
+                <button type="submit" [disabled]="!incentiveForReview.managerDissisionComment" class="btn btn-outline-danger" (click)="modal.close('Save click');managerDissision(false)">Reject</button>
+            </ng-container>
+
+        </div>
+    </ng-container>
+
+
+</ng-template> -->

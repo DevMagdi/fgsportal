@@ -1,0 +1,48 @@
+<div class="container-fluid" *ngIf="!!currentUser">
+    <div class="row">
+        <div class="col-md-12 my-2 text-end">
+            <a style="cursor: pointer" (click)="exportCloserprojectsReport()" class="">
+                <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+            </a>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-hover newTableCustom" id="closedProjectsReport">
+                <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Project Name</td>
+                        <td>Project type</td>
+                        <td>Start Date</td>
+                        <td>Expected End Date</td>
+                        <td>Project Manager Name</td>
+                        <td>Project Status</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let project of closedProjects ; let i = index">
+                        <tr *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department == DepartmentEnum.ADMINSTRATION || (currentUser.accPosition == accPosistionEnum.MANAGER && currentUser.key == project.PMID)">
+                            <td>{{i + 1}}</td>
+                            <td [routerLink]="['/manager/projects',project.key]" style="cursor: pointer;">{{project.title}}</td>
+                            <td>{{project.type_name}}</td>
+                            <td>{{project.start_date}}</td>
+                            <!-- | date:'M/d/yyyy' -->
+                            <td>{{project.end_date }}</td>
+                            <td>{{project.PMName}}</td>
+                            <td *ngIf="(currentUser.department != DepartmentEnum.MANAGEMENT && currentUser.accPosition == accPosistionEnum.MANAGER ) && currentUser.key != project.PMID">{{project.status_name}}</td>
+                            <td *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.accPosition == accPosistionEnum.MANAGER && currentUser.key == project.PMID)">
+                                <mat-select class="form-control" name="" id="" [(ngModel)]="project.status" (selectionChange)="changePrjectStatus(project)">
+                                    <mat-option *ngFor="let status of projectStatus" [value]="status.id">{{status.project_status_name}}</mat-option>
+                                    <!-- <option value="scheduled">scheduled</option>
+                                    <option value="running">running</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="On_Hold">Hold</option>
+                                    <option value="Customer Pending">Customer Pending</option> -->
+                                </mat-select>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

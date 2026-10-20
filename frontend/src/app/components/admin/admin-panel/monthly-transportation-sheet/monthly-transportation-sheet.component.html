@@ -1,0 +1,96 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <form [formGroup]="getTransForm" (ngSubmit)="getTransportations()" class="example-form">
+                <div class="container-fluid">
+                    <div class="row align-items-end">
+                        <div class="col-md-3 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>From</mat-label>
+                                <input matInput type="date" id="fromDate" formControlName="fromDate">
+                            </mat-form-field>
+                        </div>
+                        <div class="col-md-3 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>To</mat-label>
+                                <input matInput type="date" id="toDate" formControlName="toDate">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-3 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>Emp Name</mat-label>
+                                <!-- <input matInput type="date" id="devName" formControlName="devName"> -->
+                                <mat-select formControlName="devKey">
+                                    <mat-option value='0'>All</mat-option>
+                                    <mat-option *ngFor="let user of users" [value]='user.key'>{{user.username}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-3 my-3">
+                            <button class="btn btnStyle my-3" [disabled]="getTransForm.invalid" type="submit">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <a style="cursor: pointer" (click)="exportDevsMonthlyReport()" class="">
+                <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+            </a>
+        </div>
+    </div>
+</div>
+
+<table mat-table id="monthlyTransportations" [dataSource]="transportations" class="mat-elevation-z8">
+
+    <ng-container matColumnDef="Name">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let request"> {{request.empName}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Date">
+        <th mat-header-cell *matHeaderCellDef> Date </th>
+        <td mat-cell *matCellDef="let request"> {{request.date}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="From">
+        <th mat-header-cell *matHeaderCellDef> From </th>
+        <td mat-cell *matCellDef="let request"> {{request.fromLocation}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="To">
+        <th mat-header-cell *matHeaderCellDef> To </th>
+        <td mat-cell *matCellDef="let request"> {{request.toLocation}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Purpose">
+        <th mat-header-cell *matHeaderCellDef> Purpose </th>
+        <td mat-cell *matCellDef="let request"> {{request.purpose}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Project">
+        <th mat-header-cell *matHeaderCellDef> Project </th>
+        <td mat-cell *matCellDef="let request"> {{request.projectName}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Amount">
+        <th mat-header-cell *matHeaderCellDef> Amount </th>
+        <td mat-cell *matCellDef="let request"> {{request.amountByEGP}} </td>
+    </ng-container>
+    <ng-container matColumnDef="Status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let request"> {{request.trans_status_name}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell text-center" [attr.colspan]="displayedColumns.length">
+            <span> No data matching the filter.</span>
+        </td>
+    </tr>
+</table>

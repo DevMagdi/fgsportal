@@ -1,0 +1,590 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="approveReportsLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+<div class="container-fluid reports-approval">
+    <div class="row " *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT">
+        <div class="col-12">
+            <div class="supportMode d-flex justify-content-center mb-5">
+                <div class="btn myReportsBtn myReports" (click)="getMyReports()">My Pending Reports</div>
+                <div class="btn allReportsBtn allReports" (click)="getAllReports()">All Pending Reports</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div data-aos="fade-down" class="col-12 text-center" *ngIf="!!recallGetMyReportsFunction">
+            <button (click)="recallGetMyReports()" pButton pRipple type="button" icon="pi pi-replay" class="p-button-rounded p-button-info"></button>
+        </div>
+    </div>
+    <!-- removed code here -->
+
+    <p-tabView>
+        <p-tabPanel header="Technical Team Reports" *ngIf="!!currentUser && (currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department == DepartmentEnum.TECHNICAL_TEAM)">
+            <ng-template pTemplate="content">
+                <div class="row tableRow text-end" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT">
+
+                    <button class="btn btnStyle ms-auto me-md-3" style="width: fit-content;" [disabled]="myReportsToApprove.length == 0" (click)="approveAllMyReports()">Approve All</button>
+
+                </div>
+                <div class="row tableRow">
+                    <div class="col-12 table-responsive">
+                        <table class="my-3 table table-hover newTableCustom">
+                            <thead>
+                                <tr>
+                                    <td>#</td>
+                                    <td>Dev Name</td>
+                                    <td>Date</td>
+                                    <td>Duration</td>
+                                    <td>Time Activity</td>
+                                    <td>Project Name</td>
+                                    <td>Process Name</td>
+                                    <td>Task Name</td>
+                                    <td>Progress</td>
+                                    <!-- <td>Details</td>
+                                    <td>Created At</td> -->
+                                    <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">To Approve</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let report of myReportsToApprove ; let i = index">
+                                    <tr *ngIf="!report.rejected == true">
+                                        <td>{{i + 1}}</td>
+                                        <td>{{report.devName |maxLength:10}}</td>
+                                        <td>{{report.reportDate}}</td>
+                                        <td>{{report.preApprovedDuration}}</td>
+                                        <td>{{(report.time_activity_name ||'')|maxLength:10}}</td>
+                                        <td *ngIf="report.projectName" class="details">{{report.projectName |maxLength:10}}</td>
+                                        <td *ngIf="!report.projectName">-</td>
+
+                                        <td *ngIf="report.processName" class="details">{{report.processName |maxLength:10}}</td>
+                                        <td *ngIf="!report.processName">-</td>
+
+                                        <td *ngIf="report.taskTitle" class="details">{{report.taskTitle |maxLength:10}}</td>
+                                        <td *ngIf="!report.taskTitle">-</td>
+
+
+
+                                        <td *ngIf="report.progress">{{report.progress}} %</td>
+                                        <td *ngIf="!report.progress">-</td>
+                                        <!-- <td class="details">{{report.details}}</td> -->
+                                        <!-- <td>{{report.createdAt}}</td> -->
+                                        <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">{{report.report_status_id == ReportStatusEnum.Pending_On_Manager ? report.managerApprovalname : report.seniorToApproveName}}</td>
+                                        <td>
+                                            <button (click)="openApproveDialog(report)" class="btn approvalBtn mx-1">Review</button>
+                                            <!-- <button (click)="rejectReport(report)" class="btn rejectBtn mx-1">Reject</button> -->
+                                        </td>
+                                    </tr>
+                                </ng-container>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </ng-template>
+        </p-tabPanel>
+
+
+        <p-tabPanel header="Other Reports" *ngIf="!!currentUser &&(currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department != DepartmentEnum.TECHNICAL_TEAM)">
+            <ng-template pTemplate="content">
+                <div class="row tableRow">
+                    <div class="col-12">
+                        <table class="my-3 table table-hover newTableCustom">
+                            <thead>
+                                <tr>
+                                    <td>#</td>
+                                    <td>Emp Name</td>
+                                    <td>Date</td>
+                                    <td>Duration</td>
+                                    <td>Time Activity</td>
+                                    <td>Task Name</td>
+                                    <td>Progress</td>
+                                    <!-- <td>Details</td>
+                                    <td>Created At</td> -->
+                                    <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">To Approve</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let report of adminReports ; let i = index">
+                                    <tr>
+                                        <td>{{i + 1}}</td>
+                                        <td>{{report.devName}}</td>
+                                        <td>{{report.report_date}}</td>
+                                        <td>{{report.duration}}</td>
+                                        <td>{{report.report_status_name}}</td>
+
+                                        <td *ngIf="report.task_name" class="details">{{report.task_name}}</td>
+                                        <td *ngIf="!report.task_name">-</td>
+
+
+
+                                        <td *ngIf="report.report_progress">{{report.report_progress}} %</td>
+                                        <td *ngIf="!report.report_progress">-</td>
+                                        <!-- <td class="details">{{report.details}}</td> -->
+                                        <!-- <td>{{report.createdAt}}</td> -->
+                                        <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allReports">{{report.manager_approve_name}}</td>
+                                        <td>
+                                            <button (click)="openAdminApproveDialog(report)" class="btn approvalBtn mx-1">Review</button>
+                                            <!-- <button (click)="rejectReport(report)" class="btn rejectBtn mx-1">Reject</button> -->
+                                        </td>
+                                    </tr>
+                                </ng-container>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </ng-template>
+        </p-tabPanel>
+
+        <p-tabPanel header="Ticket Support Reports" *ngIf="!!currentUser && (currentUser.department == DepartmentEnum.MANAGEMENT || checkIfHasPerm(25))">
+            <ng-template pTemplate="content">
+                
+                <div class="row tableRow">
+                    <div class="col-12 table-responsive">
+                        <table class="my-3 table table-hover newTableCustom">
+                            <thead>
+                                <tr>
+                                    <td>#</td>
+                                    <td>Dev Name</td>
+                                    <td>Date</td>
+                                    <td>Duration</td>
+                                    <td>Time Activity</td>
+                                    <!-- <td>Project Name</td>
+                                    <td>Process Name</td>
+                                    <td>Task Name</td> -->
+                                    <!-- <td>Progress</td> -->
+                                    <td>Details</td>
+                                    <!--  <td>Created At</td> -->
+                                    <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allSupportReports">To Approve</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngFor="let report of allSupportReports ; let i = index">
+                                    <tr *ngIf="!report.rejected == true">
+                                        <td>{{i + 1}}</td>
+                                        <td>{{report.devName |maxLength:10}}</td>
+                                        <td>{{report.reportDate}}</td>
+                                        <td>{{report.preApprovedDuration}}</td>
+                                        <td>{{(report.time_activity_name ||'')|maxLength:10}}</td>
+                                        <!-- <td *ngIf="report.projectName" class="details">{{report.projectName |maxLength:10}}</td>
+                                        <td *ngIf="!report.projectName">-</td> -->
+
+                                        <!-- <td *ngIf="report.processName" class="details">{{report.processName |maxLength:10}}</td>
+                                        <td *ngIf="!report.processName">-</td> -->
+
+                                        <!-- <td *ngIf="report.taskTitle" class="details">{{report.taskTitle |maxLength:10}}</td>
+                                        <td *ngIf="!report.taskTitle">-</td> -->
+
+
+
+                                        <!-- <td *ngIf="report.progress">{{report.progress}} %</td>
+                                        <td *ngIf="!report.progress">-</td> -->
+                                        <td class="details">{{(report.details || '') |maxLength:15}}</td>
+                                        <!-- <td>{{report.createdAt}}</td> -->
+                                        <td *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT && allSupportReports">{{report.report_status_id == ReportStatusEnum.Pending_On_Manager ? report.managerApprovalname : (report.seniorToApproveName || '-')}}
+                                        </td>
+                                        <td>
+                                            <button (click)="openApproveDialog(report)" class="btn approvalBtn mx-1">Review</button>
+                                            <!-- <button (click)="rejectReport(report)" class="btn rejectBtn mx-1">Reject</button> -->
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <tr *ngIf="allSupportReports.length==0">
+                                    <td colspan="11" class="text-center">No Reports to review</td>
+                                    </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </ng-template>
+        </p-tabPanel>
+
+    </p-tabView>
+</div>
+
+
+<p-sidebar *ngIf="!!this.reportToApprove" header="Approve Report" [(visible)]="approveReportDialog" styleClass="p-sidebar-md" [modal]="true" [draggable]="false" position="right" [autoZIndex]="false" [baseZIndex]="9999">
+
+    <div class="container-fluid myCardStyle">
+        <h2 class="fw-bold mb-3 text-dark">Approve Report</h2>
+        <div class="row user-details">
+            <div class="col-6 text-center">
+                <div>
+                    <!-- <img class="rounded-circle p-1 cardImg" width="70px" src="{{this.reportToApprove.devImgURL ? '{{newServerApi}}{{this.reportToApprove.devImgURL}}' : '../../../../../../../assets/img/avatarman.png'}}" alt=""> -->
+                    <img *ngIf="this.reportToApprove.devImgURL" class="rounded-circle p-1 cardImg" width="100px" src="{{newServerApi}}{{this.reportToApprove.devImgURL}}" alt="">
+                    <img *ngIf="!this.reportToApprove.devImgURL" class="rounded-circle p-1 cardImg" width="100px" src="../../../../../../../assets/img/avatarman.png" alt="">
+                </div>
+                <p class="empName ml-3">
+                    {{this.reportToApprove.devName}}
+                </p>
+            </div>
+
+            <div class="col-6">
+                <!-- <span>
+                    {{this.reportToApprove.createdAt | date:'medium'}}
+                </span> -->
+                <div class="my-3">
+                    <span class="myLable" pTooltip="Report Date" tooltipPosition="left">
+                        <!-- Report Date: -->
+                        <i class="pi pi-calendar"></i>
+    
+                    </span>
+                    <span>
+                        {{this.reportToApprove.reportDate}}
+                    </span>
+                </div>
+                <div class="my-3">
+                    <span class="myLable" pTooltip="Duration" tooltipPosition="top">
+                        <!-- Duration: -->
+                        <i class="pi pi-clock"></i>
+                    </span>
+                    <span>
+                        {{this.reportToApprove.preApprovedDuration}} Hours
+                    </span>
+                </div>
+                <div class="my-3 d-flex">
+                    <span class="myLable" pTooltip="Time Activity" tooltipPosition="right">
+                        <span class="material-icons-outlined">
+                            work_outline
+                        </span>
+                    </span>
+                    <span class="ml-2 mt-1">
+                        {{reportToApprove.time_activity_name}}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="row mt-3 ml-2">
+            <div class="col-4">
+                <span class="myLable" pTooltip="Report Date" tooltipPosition="left">
+                    
+                    <i class="pi pi-calendar"></i>
+
+                </span>
+                <span>
+                    {{this.reportToApprove.reportDate}}
+                </span>
+            </div>
+            <div class="col-4">
+                <span class="myLable" pTooltip="Duration" tooltipPosition="top">
+                   
+                    <i class="pi pi-clock"></i>
+                </span>
+                <span>
+                    {{this.reportToApprove.preApprovedDuration}} Hours
+                </span>
+            </div>
+            <div class="col-4 d-flex">
+                <span class="myLable" pTooltip="Time Activity" tooltipPosition="right">
+                    <span class="material-icons-outlined">
+                        work_outline
+                    </span>
+                </span>
+                <span class="ml-2 mt-1">
+                    {{reportToApprove.time_activity_name}}
+                </span>
+            </div>
+        </div> -->
+        <div class="row mt-3 ml-2">
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom"
+            *ngIf="!reportToApprove.ticket_id">
+                <span class="">
+                    Project Name:
+                </span>
+                <span class="ml-2 fw-bold">
+                    {{!!this.reportToApprove.projectName ? this.reportToApprove.projectName : '-'}}
+                </span>
+            </div>
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom"
+            *ngIf="!reportToApprove.ticket_id">
+                <span class="">
+                    Process Name:
+                </span>
+                <span class="ml-2 fw-bold">
+                    {{!!this.reportToApprove.processName? this.reportToApprove.processName : '-'}}
+                </span>
+            </div>
+
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom"
+            *ngIf="!reportToApprove.ticket_id">
+                <span class="">
+                    Task Name:
+                </span>
+                <span class="ml-2 fw-bold">
+                    {{!!this.reportToApprove.taskTitle? this.reportToApprove.taskTitle : '-'}}
+                </span>
+            </div>
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom" 
+            *ngIf="!reportToApprove.ticket_id">
+                <span class="">
+                    
+                        Progress:
+                   
+                </span>
+                <span class="ml-2 fw-bold">
+                    {{!!this.reportToApprove.progress ? this.reportToApprove.progress : '0'}} %
+                </span>
+            </div>
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom" 
+            *ngIf="reportToApprove.ticket_id">
+                <span class="">
+
+                    Ticket Number:
+
+                </span>
+                <span class="ml-2 fw-bold cursor" routerLink="/tickets/{{reportToApprove.ticket_id}}">
+                    {{!!this.reportToApprove.ticket_id ?'# '+ this.reportToApprove.ticket_number : '0'}} 
+                </span>
+            </div>
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom">
+                <span class="">
+                    Details:
+                </span>
+                <span class="ml-2 fw-bold text-break">
+                    {{this.reportToApprove.details}}
+                </span>
+            </div>
+        </div>
+
+        <div class="row mt-3 ml-2" *ngIf="!!this.reportToApprove.seniorDecision">
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom">
+                <span class="">
+                    Senior:
+                </span>
+                <span class="ml-2 fw-bold">
+                    {{this.reportToApprove.seniorDecisionName}}
+                </span>
+            </div>
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom">
+                <span class="">
+                    Senior Decision:
+                </span>
+                <span class="ml-2 fw-bold">
+                    {{this.reportToApprove.seniorDecision == true? 'Approve' : 'Reject'}}
+                </span>
+            </div>
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom">
+
+                <span class="">
+                        At:
+                    </span>
+
+                <span class="ml-2 fw-bold">
+                    {{this.reportToApprove.seniorDecisionAt}}
+                </span>
+            </div>
+
+            <div class="col-12 pb-2 d-flex justify-content-between my-2 border-bottom" *ngIf="!!this.reportToApprove.seniorDecisionComment">
+                <span class="">
+                    
+                        Comment:
+                   
+                </span>
+                <span class="ml-2 fw-bold">
+                    {{this.reportToApprove.seniorDecisionComment}}
+                </span>
+            </div>
+        </div>
+
+
+
+        <div class="row mt-3 ml-2">
+            <div class="col-12">
+                <h3 class="fw-bold">
+                    Manager Decision!!
+                </h3>
+            </div>
+        </div>
+
+        <div class="row mt-3 ml-2">
+            <div class="col-12 mb-2">
+                <span class="myLable">
+                    Edit Duration ?
+                </span>
+            </div>
+            <div class="col-12 my-2 text-dark">
+                <span class="myLable">
+                    Duration To Approve
+                </span>
+                <span class="ml-2">
+                    <input required type="number" class="form-control" [(ngModel)]="this.reportToApprove.durationByHours">
+                </span>
+            </div>
+            <div class="col-12 my-2 text-dark">
+                <span class="myLable">
+                    Reason
+                </span>
+                <span class="ml-2">
+                    <input required type="text" class="form-control" [(ngModel)]="this.reportToApprove.managerChangeDurationComment">
+                </span>
+            </div>
+            <div class="col-12 my-2 text-dark">
+                <span class="myLable">
+                    Rejection Reason
+                </span>
+                <span class="ml-2">
+                    <input required type="text" class="form-control" [(ngModel)]="this.reportToApprove.rejectionReason">
+                </span>
+            </div>
+        </div>
+
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="d-flex gap-2 justify-content-end">
+
+            <p-button matTooltip="Rejection Reason Required" [disabled]="!this.reportToApprove.rejectionReason" (click)="validateDecision(false)" label="Reject" styleClass="p-button-text p-button-warning" class="btn btnOutLine p-0"></p-button>
+            <p-button (click)="validateDecision(true)" [disabled]="(this.reportToApprove.durationByHours
+             != this.reportToApprove.preApprovedDuration) && !this.reportToApprove.managerChangeDurationComment" label="Approve" styleClass="p-button-text" class="btn btnStyle p-0"></p-button>
+        </div>
+    </ng-template>
+
+
+</p-sidebar>
+
+
+<p-dialog *ngIf="!!this.AdminReportToApprove" header="Approve Report" [(visible)]="approveAdminReportDialog" [style]="{width: '50vw'}" [breakpoints]="{'960px': '50vw', '640px': '100vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+
+    <div class="container-fluid myCardStyle">
+        <div class="row">
+            <div class="col-4">
+                <span>
+                    <!-- <img class="rounded-circle p-1 cardImg" width="70px" src="{{this.AdminReportToApprove.devImgURL ? '{{newServerApi}}{{this.AdminReportToApprove.devImgURL}}' : '../../../../../../../assets/img/avatarman.png'}}" alt=""> -->
+                    <img *ngIf="this.AdminReportToApprove.devImgURL" class="rounded-circle p-1 cardImg" width="70px" src="{{newServerApi}}{{this.AdminReportToApprove.devImgURL}}" alt="">
+                    <img *ngIf="!this.AdminReportToApprove.devImgURL" class="rounded-circle p-1 cardImg" width="70px" src="../../../../../../../assets/img/avatarman.png" alt="">
+                </span>
+                <span class="empName ml-3">
+                    {{this.AdminReportToApprove.devName}}
+                </span>
+            </div>
+            <div class="col-4">
+
+            </div>
+            <div class="col-4">
+                <span>
+                    {{this.AdminReportToApprove.createdAt | date:'medium'}}
+                </span>
+            </div>
+        </div>
+        <div class="row mt-3 ml-2">
+            <div class="col-4">
+                <span class="myLable" pTooltip="Report Date" tooltipPosition="left">
+                    <!-- Report Date: -->
+                    <i class="pi pi-calendar"></i>
+
+                </span>
+                <span>
+                    {{this.AdminReportToApprove.report_date}}
+                </span>
+            </div>
+            <div class="col-4">
+                <span class="myLable" pTooltip="Duration" tooltipPosition="top">
+                    <!-- Duration: -->
+                    <i class="pi pi-clock"></i>
+                </span>
+                <span>
+                    {{this.AdminReportToApprove.duration}} Hours
+                </span>
+            </div>
+            <div class="col-4 d-flex">
+                <span class="myLable" pTooltip="Time Activity" tooltipPosition="right">
+                    <span class="material-icons-outlined">
+                        work_outline
+                    </span>
+                </span>
+                <span class="ml-2 mt-1">
+                    {{AdminReportToApprove.report_type_name}}
+                </span>
+            </div>
+        </div>
+        <div class="row mt-3 ml-2">
+            <div class="col-6">
+                <span class="myLable">
+                    Task Name:
+                </span>
+                <span class="ml-2">
+                    {{!!this.AdminReportToApprove.task_name? this.AdminReportToApprove.task_name : '-'}}
+                </span>
+            </div>
+            <div class="col-6">
+                <span class="myLable">
+                    <span class="myLable">
+                        Progress:
+                    </span>
+                </span>
+                <span class="ml-2">
+                    {{!!this.AdminReportToApprove.report_progress ? this.AdminReportToApprove.report_progress : '0'}} %
+                </span>
+            </div>
+        </div>
+        <!-- <div class="row mt-3 ml-2">
+            
+        </div> -->
+
+        <div class="row mt-3 ml-2">
+            <div class="col-12">
+                <span class="myLable">
+                    Details:
+                </span>
+                <span class="ml-2">
+                    {{this.AdminReportToApprove.report_details}}
+                </span>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row mt-3 ml-2">
+            <div class="col-12">
+                <span class="myLable">
+                    Manager Decision!!
+                </span>
+            </div>
+        </div>
+
+        <!-- <div class="row mt-3 ml-2">
+            <div class="col-12">
+                <span class="myLable">
+                    Edit Duration ?
+                </span>
+            </div>
+            <div class="col-6">
+                <span class="myLable">
+                    Duration To Approve
+                </span>
+                <span class="ml-2">
+                    <input required type="number" class="form-control" [(ngModel)]="this.AdminReportToApprove.durationByHours">
+                </span>
+            </div>
+            <div class="col-6">
+                <span class="myLable">
+                    Reason
+                </span>
+                <span class="ml-2">
+                    <input required type="text" class="form-control" [(ngModel)]="this.AdminReportToApprove.managerChangeDurationComment">
+                </span>
+            </div>
+        </div> -->
+
+        <div class="row mt-3 ml-2">
+            <div class="col-12">
+                <span class="myLable">
+                    Rejection Reason
+                </span>
+                <span class="ml-2">
+                    <input required type="text" class="form-control" [(ngModel)]="this.AdminReportToApprove.reject_reason">
+                </span>
+            </div>
+        </div>
+
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button (click)="validateAdminDecision(true)" icon="pi pi-check" label="Approve" styleClass="p-button-text"></p-button>
+        <p-button icon="pi pi-times" matTooltip="Rejection Reason Required" [disabled]="!this.AdminReportToApprove.reject_reason" (click)="validateAdminDecision(false)" label="Reject" styleClass="p-button-text p-button-danger"></p-button>
+    </ng-template>
+
+
+</p-dialog>

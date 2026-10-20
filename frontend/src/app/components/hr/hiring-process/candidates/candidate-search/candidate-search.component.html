@@ -1,0 +1,71 @@
+<form [formGroup]="candidateForm" (ngSubmit)="filterCandidates()">
+    <div class="row">
+        <div class="col-lg-6">
+            <app-form-input label="First Name" [control]="candidateForm.get('first_name')"
+                placeholder="Write Candidate First Name"></app-form-input>
+        </div>
+        <div class="col-lg-6">
+            <app-form-input label="Last Name" [control]="candidateForm.get('last_name')"
+                placeholder="Write Candidate Last Name"></app-form-input>
+        </div>
+
+        <div class="col-lg-6">
+            <app-form-input label="Email" [control]="candidateForm.get('email')" type="email"
+                placeholder="Write Candidate Email" ></app-form-input>
+            <div *ngIf="
+        candidateForm.get('email')?.errors &&
+        (candidateForm.get('email')?.errors)!['exist']
+      ">
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <app-form-input label="Phone Number" [control]="candidateForm.get('phone_number')"
+                placeholder="Write Candidate Phone Number"
+                ></app-form-input>
+           
+        </div>
+        <div class="col-lg-6">
+            <app-form-input label="Graduated Year" [control]="candidateForm.get('graduated_year')" type="Number"
+                placeholder="Write Graduated Year"></app-form-input>
+        </div>
+        <div class="col-lg-6">
+            <app-form-input label="Years of Experience" [control]="candidateForm.get('experience')" type="Number"
+                placeholder="Write Candidate Experience"></app-form-input>
+        </div>
+
+        <div class="col-lg-6 my-2">
+            <label>Job Title</label>
+            <p-multiSelect #sss [options]="jobProfiles" formControlName="job_title_id"
+            [dropdownIcon]="jobProfilesLoading ?'pi pi-spin pi-spinner' : 'pi pi-angle-down'" 
+            class="jop-profile-select" defaultLabel="Select Job Title" optionLabel="hr_job_title" optionValue="id"
+                display="chip" appendTo="body">
+            </p-multiSelect>
+
+        </div>
+        <div class="col-lg-6 my-2">
+            <label>Job Skills</label>
+            <p-multiSelect #sss [options]="jobSkills" formControlName="job_skills_id"
+            [dropdownIcon]="jobSkillsLoading ?'pi pi-spin pi-spinner' : 'pi pi-angle-down'" 
+            class="jop-profile-select" defaultLabel="Select Job Skill" optionLabel="job_skill" optionValue="id"
+                display="chip" appendTo="body">
+            </p-multiSelect>
+
+        </div>
+
+
+    </div>
+
+    <div class="row my-4">
+        <div class="col-lg-6 d-flex gap-2">
+            <button type="submit" class="btn btnStyle w-50">
+                Search
+            </button>
+            <button *ngIf="resetFilter" type="reset" class="btn btnOutLine w-50" (click)="candidateForm.reset();filterCandidates()">
+                reset
+            </button>
+
+        
+        </div>
+    </div>
+</form>

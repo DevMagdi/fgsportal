@@ -1,0 +1,200 @@
+<div>
+    <div class="sidebar-header">
+        <h1 class="main-color">
+            {{ candidate ? "Update Candidate" : "Add Candidate" }}
+        </h1>
+    </div>
+    <form [formGroup]="candidateForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+            <div class="col-lg-6">
+                <app-form-input label="First Name" [control]="candidateForm.get('first_name')"
+                    placeholder="Write Candidate First Name"></app-form-input>
+            </div>
+            <div class="col-lg-6">
+                <app-form-input label="Last Name" [control]="candidateForm.get('last_name')"
+                    placeholder="Write Candidate Last Name"></app-form-input>
+            </div>
+
+            <div class="col-lg-6">
+                <app-form-input label="Email" [control]="candidateForm.get('email')" type="email"
+                    placeholder="Write Candidate Email" (focusout)="checkExistedCandidate('email')"></app-form-input>
+                <div *ngIf="
+            candidateForm.get('email')?.errors &&
+            (candidateForm.get('email')?.errors)!['exist']
+          ">
+                    <div class="my-2">
+                        <div class="email-error-message">
+                            <p>
+                                {{ (candidateForm.get("email")?.errors)!["exist"] }}
+                                <span class="text-info text-decoration-underline cursor"
+                                    (click)="goToExistedCandidate('email')">View Candidate</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <app-form-input label="Phone Number" [control]="candidateForm.get('phone_number')"
+                    placeholder="Write Candidate Phone Number"
+                    (focusout)="checkExistedCandidate('phone_number')"></app-form-input>
+                <div *ngIf="
+            candidateForm.get('phone_number')?.errors &&
+            (candidateForm.get('phone_number')?.errors)!['exist']
+          ">
+                    <div class="my-2">
+                        <div class="email-error-message">
+                            <p>
+                                {{ (candidateForm.get("phone_number")?.errors)!["exist"] }}
+                                <span class="text-info text-decoration-underline cursor"
+                                    (click)="goToExistedCandidate('phone_number')">View Candidate</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <app-form-input label="Graduated Year" [control]="candidateForm.get('graduated_year')" type="Number"
+                    placeholder="Write Graduated Year"></app-form-input>
+            </div>
+            <div class="col-lg-6">
+                <app-form-input label="Years of Experience" [control]="candidateForm.get('experience')" type="Number"
+                    placeholder="Write Candidate Experience"></app-form-input>
+            </div>
+
+            <div class="col-lg-6 my-2">
+                <label>Job Title</label>
+                <p-multiSelect #sss [options]="jobProfiles" formControlName="job_title_id"
+                    
+                    [dropdownIcon]="jobProfilesLoading ? 'pi pi-spin pi-spinner' : 'pi pi-angle-down'"
+                    class="jop-profile-select" defaultLabel="Select Job Title" optionLabel="hr_job_title"
+                    optionValue="id" display="chip" appendTo="body"
+                    [ngClass]="{'is-invalid':!candidateForm.get('job_title_id')?.valid &&candidateForm.get('job_title_id')?.touched}"
+                    (onChange)="onChangeJobTitle($event)">
+                </p-multiSelect>
+
+                <div class="invalid-feedback" 
+                *ngIf="!candidateForm.get('job_title_id')?.valid &&candidateForm.get('job_title_id')?.touched">
+                    Job Title Is Required
+                </div>
+            </div>
+            <!-- <div class="col-lg-6 my-2">
+
+                <label>Job Skills</label>
+
+                <p-multiSelect [options]="jobSkills" [group]="true" formControlName="job_skills_id" #skillSelect
+                    [emptyMessage]="'no skills founded'" [emptyFilterMessage]="'no skills founded'"
+                    defaultLabel="Select Skills" scrollHeight="250px" display="chip" optionLabel="job_skill" optionValue="id" 
+                    class="jop-skills-select" [ngClass]="{'is-invalid':!candidateForm.get('job_skills_id')?.valid && 
+                    candidateForm.get('job_skills_id')?.touched}">
+                    <ng-template let-group pTemplate="group">
+                        <div class="flex align-items-center">
+                            <span>{{group.job_skill}} Skills</span>
+                        </div>
+                    </ng-template>
+
+                    <ng-template pTemplate="footer">
+                        <div class="bg-light p-2 cursor" (click)="loadAllSkills()" *ngIf="!jobSkillsLoaded">
+
+                            <i class="add-skill-icon"
+                                [class]="jobSkillsLoading?' pi pi-spin pi-spinner':' pi pi-plus'"></i>
+                            <span class="px-2">Load More Skills</span>
+                        </div>
+                    </ng-template>
+
+                </p-multiSelect>
+                <div class="invalid-feedback"
+                    *ngIf="!candidateForm.get('job_skills_id')?.valid && candidateForm.get('job_skills_id')?.touched">
+                    Job Skills Is Required
+                </div>
+            </div> -->
+
+            <div class="col-lg-6 my-2">
+                <label for="cv_file"> Upload CV </label>
+                <div class="candidate-file bg-light" *ngIf="file">
+                    <a class="text-dark" target="_blank">
+                        <i class="pi pi-file-pdf"></i> {{ file.name }}</a>
+                </div>
+                <div class="candidate-file bg-light" *ngIf="candidate?.file_name && !file">
+                    <a href="{{ newServerApi }}{{ candidate.file_path }}" class="text-dark" target="_blank">
+                        <i class="pi pi-file-pdf"></i>
+                        {{ candidate.file_name }}
+                    </a>
+                </div>
+
+                <input type="file" name="" id="cv_file" (change)="uploadFile($event)" class="form-control"
+                    accept=".pdf,.docx" [ngClass]="{
+            'is-invalid':
+              !candidateForm.get('file_name')?.valid &&
+              candidateForm.get('file_name')?.touched
+          }" />
+
+                <div class="invalid-feedback" *ngIf="
+            !candidateForm.get('file_name')?.valid &&
+            candidateForm.get('file_name')?.touched
+          ">
+                    Candidate Cv Is Required
+                </div>
+            </div>
+
+            <div class="col-lg-12 my-2">
+                <mat-form-field class="example-chip-list w-100" appearance="fill">
+                    <mat-label> job Skills</mat-label>
+                    <mat-chip-list #chipList aria-label="Fruit selection">
+                        <mat-chip *ngFor="let jobSkill of selectedSkills; let i = index" (removed)="removeSkill(i)">
+                            {{ jobSkill.job_skill }}
+                            <button matChipRemove>
+                                <mat-icon>cancel</mat-icon>
+                            </button>
+                        </mat-chip>
+                        <input placeholder="Job Skills..." #skillInput formControlName="job_skills_id"
+                            [matAutocomplete]="auto" [matChipInputFor]="chipList"
+                            (matChipInputTokenEnd)="addSkill($event)" [ngClass]="{
+                'is-invalid':
+                  selectedSkills.length == 0 &&
+                  candidateForm.get('job_skills_id')?.touched
+              }" />
+                        <div class="invalid-feedback" *ngIf="
+                selectedSkills.length == 0 &&
+                candidateForm.get('job_skills_id')?.touched
+              ">
+                            job skills are Required
+                        </div>
+                    </mat-chip-list>
+                    <!-- [matChipInputSeparatorKeyCodes]="separatorKeysCodes" -->
+                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectingSkill($event)">
+                        <mat-option *ngFor="let skill of filteredSkills | async" [value]="skill.job_skill">
+                            {{ skill.job_skill }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+            </div>
+
+            <div class="col-lg-12 my-2">
+                <label>Address</label>
+                <textarea class="form-control" rows="5" formControlName="address">
+        </textarea>
+            </div>
+            <div class="col-lg-12 my-2">
+                <label>Notes</label>
+                <textarea class="form-control" rows="5" formControlName="note">
+        </textarea>
+            </div>
+        </div>
+
+        <div class="row my-4">
+            <div class="col-lg-6">
+                <button type="submit" class="btn btnStyle w-100">
+                    {{ candidate ? "Update" : "Create" }}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false"
+    [(visible)]="showCandidateDetails" position="right" [transitionOptions]="'350ms'">
+    <ng-template pTemplate="content">
+        <app-candidate-details [candidate]="selectedCandidate"></app-candidate-details>
+    </ng-template>
+</p-sidebar>

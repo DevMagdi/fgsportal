@@ -1,0 +1,91 @@
+@import '../../colors';
+.mainPage {
+    overflow: hidden;
+    // background-color: #F7F7F7;
+    background: linear-gradient(180deg, $mainThemeColor 23.44%, $subThemeColor 100%);
+
+    .arrowIcon {
+        color: $mainThemeColor;
+        cursor: pointer;
+    }
+    .imgSec {
+        // width: 50%;
+        height: 100%;
+        // background-image: url('../../../assets/img/newLogin.png');
+        // background-image: url('https://www.processmaker.com/wp-content/uploads/2021/07/process-mapping-rpa-768x768.jpg');
+        // background-size: cover;
+        // background-repeat: no-repeat;
+        // background-position: center;
+    }
+    .formSection {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: $bgLight;
+        background-image: url('../../../assets/img/new\ logo.png');
+        background-position: left top;
+        background-repeat: no-repeat;
+        padding: 4px !important;
+        background-position-x: 22px;
+        background-position-y: 22px;
+        background-size: 140px;
+
+        .form_header {
+            color: $mainThemeColor;
+            font-family: $mainFontFamily;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        label {
+            color: #333 !important;
+            font-weight: bolder;
+            // text-align: start;
+        }
+
+        input {
+            // border: solid 1px $mainThemeColor;
+            border-radius: 4px;
+            border: 1px solid #BABABA;
+            background: #FFF;
+            color: $mainThemeColor !important;
+        }
+        .resetPass {
+            text-decoration: underline;
+        }
+        .submitFormBtn {
+            // border: solid 1px $mainThemeColor;
+            color: $whiteColor;
+            border-radius: 20px;
+            // background-color: $mainThemeColor;
+            padding: 10px 30px;
+            width: 100%;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #FFAB00 0%, #FE7E15 100%);
+            // width: 175px;
+            // height: 62px;
+        }
+
+    }
+    .arrowIcon {
+        color: $mainThemeColor;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .backToLogin{
+        color: $mainThemeColor;
+        cursor: pointer;
+        font-size: 16px;
+
+    }
+}
+
+@media (max-width: 768px) {
+    .mainPage {
+        margin-top: 60px;
+        .imgSec {
+            height: 25vh;
+            background-size: cover;
+        }
+    }
+}

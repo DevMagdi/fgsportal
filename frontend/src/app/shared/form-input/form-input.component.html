@@ -1,0 +1,12 @@
+<div class="example-full-width w-100 my-2">
+  <label>{{ label }}</label>
+    <input class="form-control" [formControl]="control" (change)="inputChange($event)"
+    [ngClass]="{'is-invalid':!control?.valid && control?.touched}" [type]="type" [placeholder]="placeholder"
+    [accept]="accept" (focusout)="focusout()"/>
+    <div *ngIf="!control?.valid && control?.touched" class="invalid-feedback">
+
+      <span *ngIf="control.errors['required']">{{label}} is Required</span>
+      <span *ngIf="control.errors['email']">enter valid Email</span>
+      <span *ngIf="control.errors['graduated_year_range']">{{control.errors['graduated_year_range']}} </span>
+    </div>
+</div>

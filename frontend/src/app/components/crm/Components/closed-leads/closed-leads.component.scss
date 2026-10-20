@@ -1,0 +1,137 @@
+@import '../../../../colors';
+.addLeadBTN {
+    color: $buttonMainBackgroundColor;
+    border-color: $buttonMainBackgroundColor;
+}
+
+.isnew {
+    color: #4ffa54;
+    border-color: #4ffa54;
+    background-color: #fff;
+}
+
+// .myTable {
+//     min-height: 250px;
+// }
+.noActivity {
+    color: rgb(255, 171, 0);
+}
+
+.coloredIcon {
+    color: $mainThemeColor;
+}
+
+.coloredIconSec {
+    color: $buttonMainBackgroundColor;
+}
+
+.avatar {
+    width: fit-content;
+}
+
+.labelOption {
+    color: #fff;
+    border-radius: 5px;
+    padding: 0px 5px;
+}
+
+.addPhone,
+.trashIcon {
+    cursor: pointer;
+}
+
+.trashIcon {
+    color: #bebebe;
+}
+
+
+/* Chrome, Safari, Edge, Opera */
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    appearance: none;
+}
+
+@keyframes dot-keyframes {
+    0% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2, 1.2);
+    }
+    100% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+}
+
+.loading-dots {
+    text-align: center;
+    width: 100%;
+    &--dot {
+        animation: dot-keyframes 1.5s infinite ease-in-out;
+        background-color: $mainThemeColor;
+        border-radius: 10px;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+        &:nth-child(2) {
+            animation-delay: .5s;
+        }
+        &:nth-child(3) {
+            animation-delay: 1s;
+        }
+    }
+}
+
+.delete {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+::ng-deep {
+    .p-selectbutton .p-button.p-highlight {
+        background: rgba($color: $mainThemeColor, $alpha: 0.3);
+    }
+    .p-selectbutton .p-button.p-highlight:hover {
+        background: rgba($color: $mainThemeColor, $alpha: 0.5);
+    }
+}
+
+@media (max-width:992px) {
+    .quickPlan {
+        .quickPlanForm {
+            width: 850% !important;
+        }
+    }
+}
+
+// :host ::ng-deep {
+//     #dt1 {
+//         .p-datatable-header {
+//             background: rgba($color: $mainThemeColor, $alpha: 0.1);
+//         }
+//     }
+// }
+
+// :host ::ng-deep {
+//     #dt1 {
+//         .p-datatable-thead {
+//             // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+//             background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+//         }
+//         .p-datatable .p-datatable-thead>tr>th {
+//             color: $mainThemeColor;
+//             background: inherit;
+//             text-align: left;
+//             font-size: 14px;
+//         }
+//     }
+// }
+
+td {
+    text-align: left !important;
+    font-size: 12px;
+}

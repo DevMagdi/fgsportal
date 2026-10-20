@@ -1,0 +1,30 @@
+@import '../../../../../colors';
+.spinner ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: $mainThemeColor !important;
+}
+
+.generateBtn {
+    background-color: $mainThemeColor;
+    color: #fff;
+    margin: auto;
+}
+
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: #100f0f;
+        line-height: 50px;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+        }
+    }
+}
+
+.approveAll {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+}

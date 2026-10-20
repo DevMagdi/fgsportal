@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+    <defs>
+        <clipPath id="clip-path">
+            <path d="M0 0H15.557V15.557H0z" class="cls-1"/>
+        </clipPath>
+        <style>
+            .cls-1{fill:none}
+        </style>
+    </defs>
+    <g id="Group_131" transform="translate(-1597 -377)">
+        <g id="Rectangle_699" fill="#fff" stroke="#a19ea0">
+            <path stroke="none" d="M0 0H40V40H0z" transform="translate(1597 377)"/>
+            <path d="M0.5 0.5H39.5V39.5H0.5z" class="cls-1" transform="translate(1597 377)"/>
+        </g>
+        <g id="Component_71_5" clip-path="url(#clip-path)" transform="translate(1609 389)">
+            <path id="Union_3" fill="#7a7879" d="M7.778 9.192l-6.364 6.365L0 14.142l6.364-6.364L0 1.414 1.414 0l6.364 6.364L14.142 0l1.415 1.414-6.365 6.364 6.364 6.364-1.415 1.415z"/>
+        </g>
+    </g>
+</svg>

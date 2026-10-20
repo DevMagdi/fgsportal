@@ -1,0 +1,243 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="editSalaryLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <form [formGroup]="getEmpSalaryForm" (ngSubmit)="getEmpSalaries()" class="example-form">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-3 my-3 d-flex align-items-end">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>Emp Name</mat-label>
+                                <mat-select formControlName="empKey">
+                                    <mat-option value='all'>All</mat-option>
+                                    <mat-option *ngFor="let user of allUsers" [value]='user.key'>{{user.username}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-3 my-3">
+                            <button class="btn btnOutLine my-3" [disabled]="getEmpSalaryForm.invalid" type="submit">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row" *ngIf="!!userToDisplay && allMode == false">
+        <div class="col-6 text-start">
+            <h1 style="cursor: pointer;" class="main-color" [routerLink]="['/user/',userToDisplay.key]">{{userToDisplay.username}}</h1>
+        </div>
+        <div class="col-6 text-end">
+            <div class="">
+                <button  (click)="open(mymodal)" class="btn btnStyle" style="cursor: pointer;">
+                    Add new salary
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<table mat-table [dataSource]="empSalaries" class="mat-elevation-z8" *ngIf="allMode == false">
+
+    <ng-container matColumnDef="Salary">
+        <th mat-header-cell *matHeaderCellDef> Salary </th>
+        <td mat-cell *matCellDef="let salary ;let i = index">
+            <ng-container *ngIf="salaryOnEditMode">
+                <span *ngIf="i == salaryToEditIndex">
+                    <input type="number" class="form-control w-50" [(ngModel)]="salaryToEdit.salary">
+                </span>
+                <span *ngIf="i != salaryToEditIndex">
+                    {{salary.salary}}
+                </span>
+            </ng-container>
+            <span *ngIf="!salaryOnEditMode">
+                {{salary.salary}}
+            </span>
+        </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="ApplyFrom">
+        <th mat-header-cell *matHeaderCellDef> Apply From </th>
+        <td mat-cell *matCellDef="let salary;let i = index">
+            {{salary.applyfrom}}
+
+            <!-- <ng-container *ngIf="salaryOnEditMode">
+                <span *ngIf="i == salaryToEditIndex">
+                    <input type="date" class="form-control w-75" [ngModel] ="salaryToEdit.applyfrom | date:'yyyy-MM-dd'" (ngModelChange)="salaryToEdit.applyfrom = $event">
+                </span>
+                <span *ngIf="i != salaryToEditIndex">
+                </span>
+            </ng-container> -->
+            <!-- <span *ngIf="!salaryOnEditMode">
+                {{salary.applyfrom}}
+            </span> -->
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="IsCurrent">
+        <th mat-header-cell *matHeaderCellDef> Is Current </th>
+        <td mat-cell *matCellDef="let salary"> {{salary.isActive}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="EndedAt">
+        <th mat-header-cell *matHeaderCellDef> Ended At </th>
+        <td mat-cell *matCellDef="let salary"> {{salary.endedAt ? salary.endedAt : '--'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="CreatedAt">
+        <th mat-header-cell *matHeaderCellDef> Created At </th>
+        <td mat-cell *matCellDef="let salary"> {{salary.createdAt | date :'MM/dd/yyyy HH:mm:ss'}} </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="CreatedBy">
+        <th mat-header-cell *matHeaderCellDef> Created By</th>
+        <td mat-cell *matCellDef="let salary"> {{salary.createdByName}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="edit">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let salary ;let i = index">
+            <span *ngIf="!!salary.isActive && !salaryOnEditMode" class="material-icons edit" matTooltip="Edit" (click)="editSalary(salary, i)">
+                edit
+            </span>
+
+            <span class="material-icons save" matTooltip="Save" (click)="saveSalary()" *ngIf="salaryOnEditMode">
+                save
+            </span>
+
+            <span class="material-icons cancel" matTooltip="Cancel" (click)="cancelEditSalary()" *ngIf="salaryOnEditMode">
+                cancel
+            </span>
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell text-center" [attr.colspan]="displayedColumns.length" >
+          <span *ngIf="!userToDisplay && allMode == false">
+
+            Select employee to generate salary
+          </span>
+          <span *ngIf="!!userToDisplay && allMode == false">
+
+            no  salaries for {{userToDisplay.firstname}}
+          </span>
+        </td>
+      </tr>
+</table>
+
+
+<table mat-table [dataSource]="empSalaries" class="mat-elevation-z8" *ngIf="allMode == true">
+    <ng-container matColumnDef="Name">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let salary"> {{salary.empName}} </td>
+    </ng-container>
+    <ng-container matColumnDef="Salary">
+        <th mat-header-cell *matHeaderCellDef> Salary </th>
+        <td mat-cell *matCellDef="let salary"> {{salary.salary}} </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="ApplyFrom">
+        <th mat-header-cell *matHeaderCellDef> Apply From </th>
+        <td mat-cell *matCellDef="let salary">
+            {{salary.applyfrom ? salary.applyfrom : '--'}}
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="EndedAt">
+        <th mat-header-cell *matHeaderCellDef> Ended At </th>
+        <td mat-cell *matCellDef="let salary"> {{salary.endedAt ? salary.endedAt : '--'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="CreatedAt">
+        <th mat-header-cell *matHeaderCellDef> Created At </th>
+        <td mat-cell *matCellDef="let salary">
+            <span *ngIf="!!salary.createdAt">{{salary.createdAt | date :'MM/dd/yyyy HH:mm:ss'}}</span>
+            <span *ngIf="!salary.createdAt"> -- </span>
+        </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="CreatedBy">
+        <th mat-header-cell *matHeaderCellDef> Created By</th>
+        <td mat-cell *matCellDef="let salary"> {{salary.createdByName ? salary.createdByName : '--'}} </td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="reportDisplayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: reportDisplayedColumns;"></tr>
+    <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          No data matching the filter.
+        </td>
+      </tr>
+    
+</table>
+
+<!-- <div class="container my-2" *ngIf="allMode == false">
+    <div class="row">
+        <div class="col-12">
+            <div class="addBtn text-right">
+                <span *ngIf="!!userToDisplay" matTooltip="Add" (click)="open(mymodal)" class="material-icons text-info hover" style="cursor: pointer;">
+                    add_circle
+                </span>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+
+<!-- Modal -->
+<ng-template #mymodal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">New Salary for {{userToDisplay.username}}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <form [formGroup]="createNewSalaryForm" (ngSubmit)="createNewSalary()">
+        <div class="modal-body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Salary</mat-label>
+                            <input matInput type="number" id="salary" formControlName="salary">
+                            <mat-error class="alert help-block" *ngIf="!createNewSalaryForm.get('salary')?.valid && createNewSalaryForm.get('salary')?.touched">
+                                *Salary Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-12">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label>Apply From</mat-label>
+                            <input matInput type="date" id="applyfrom" formControlName="applyfrom">
+                            <mat-error class="alert help-block" *ngIf="!createNewSalaryForm.get('applyfrom')?.valid && createNewSalaryForm.get('applyfrom')?.touched">
+                                *Apply From Required
+                            </mat-error>
+                        </mat-form-field> -->
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Apply From</mat-label>
+                            <input matInput id="applyfrom" [matDatepicker]="picker" formControlName="applyfrom" (click)="openDatePicker(picker)">
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker startView="multi-year"></mat-datepicker>
+                            <mat-error class="alert help-block" *ngIf="!createNewSalaryForm.get('applyfrom')?.valid && createNewSalaryForm.get('applyfrom')?.touched">
+                                *Apply From Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btnStyle" [disabled]="!createNewSalaryForm.valid" (click)="modal.close('Save click')">Submit</button>
+        </div>
+    </form>
+
+</ng-template>

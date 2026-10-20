@@ -1,0 +1,2084 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="contactLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">CRM /</span> Leads</h4>
+
+        <div class="">
+            <p-table responsiveLayout="scroll" id="dt1" styleClass="p-datatable-sm" #dt1 [value]="myContacts"
+                dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]"
+                [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [globalFilterFields]="['title','partner_name','next_action_type_name','label_name','user_creator_name']">
+                <ng-template pTemplate="caption">
+                    <div class="d-flex justify-content-between">
+                        <div class="views">
+                            <i class="pi pi-inbox viewIcon viewActive mx-1" id="allView"
+                                (click)="changeView('all')"></i>
+                            <i class="pi pi-briefcase viewIcon mx-1" id="archView" (click)="changeView('arch')"></i>
+
+                            <button (click)="openAddContactForm();addLead=true" type="button" class="btn btnStyle"
+                                style="max-height: 36px;">
+                                <i class="menu-icon tf-icons bx bx-plus"></i>
+                                Lead
+                            </button>
+                        </div>
+                        <div>
+                            <span class="p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text"
+                                    (input)="dt1.filterGlobal($any($event.target).value, 'contains')"
+                                    placeholder="Search keyword" />
+                            </span>
+                            <button pButton label="Clear" class="btnOutLine p-button-sm mx-1" icon="pi pi-filter-slash"
+                                (click)="clear(dt1)"></button>
+                        </div>
+
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Name
+                                <p-columnFilter type="text" field="name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Organization
+                                <p-columnFilter type="text" field="partner_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Next Activity
+                                <p-columnFilter type="date" field="next_action_date" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Labels
+                                <p-columnFilter type="text" field="label_id" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Lead Creator
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Lead Created
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Owner
+                            </div>
+                        </th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-contact>
+                    <tr>
+                        <td (click)="showContactDetails(contact)" style="cursor: pointer;"><i
+                                class="fab fa-angular fa-lg text-danger"></i> <strong>{{contact.title}}</strong></td>
+                        <td (click)="showContactDetails(contact)" style="cursor: pointer;"><i
+                                class="fab fa-angular fa-lg text-danger"></i> {{contact.partner_name}}</td>
+                        <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                            <div *ngIf="!!contact.next_action_date">
+                                <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Call"
+                                    class="pi pi-phone coloredIcon"></i>
+                                <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.SendEmail"
+                                    class="pi pi-envelope coloredIcon"></i>
+                                <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Meeting"
+                                    class="pi pi-users coloredIcon"></i>
+                                <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Task"
+                                    class="pi pi-clock coloredIcon"></i>
+                                <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Deadline"
+                                    class="pi pi-flag coloredIcon"></i>
+                                <span *ngIf="contact.next_action_type_id == ActivityTypesEnum.Lunch"
+                                    class="material-symbols-outlined coloredIcon">
+                                    restaurant
+                                </span>
+                                <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Other"
+                                    class="pi pi-check coloredIcon"></i>
+                                <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Notes"
+                                    class="pi pi-book coloredIcon"></i>
+                                <span [ngStyle]="{color: getTimeColor(contact.next_action_date)}">
+                                    {{contact.next_action_date | date:'medium'}}
+                                </span>
+                            </div>
+                            <div class="noActivity" *ngIf="!contact.next_action_date">
+                                <i class="pi pi-exclamation-triangle"></i> No Activity
+                            </div>
+                        </td>
+                        <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                            <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
+                                <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
+                                    class="avatar avatar-sm pull-up" *ngFor="let label of contact.label">
+                                    <span class="labelOption"
+                                        [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                        {{label.label_name}}
+                                    </span>
+                                </li>
+                            </ul>
+                        </td>
+
+                        <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                            {{contact.user_creator_name}}
+                        </td>
+                        <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                            {{contact.created_at | date:'medium'}}
+                        </td>
+                        <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                            {{contact.sales_name}}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                    data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a *ngIf="contact.lead_sub_status_id != CloseLeadSubStatusEnum.Archive"
+                                        class="dropdown-item" href="javascript:void(0);"
+                                        (click)="archiveContact(contact.id)"><i class="bx bx-edit-alt me-1"></i>
+                                        Archive</a>
+                                    <a *ngIf="contact.lead_sub_status_id == CloseLeadSubStatusEnum.Archive"
+                                        class="dropdown-item" href="javascript:void(0);" (click)="reopen(contact)"><i
+                                            class="bx bx-edit-alt me-1"></i> Re-open</a>
+                                    <a class="dropdown-item" href="javascript:void(0);"
+                                        (click)="deleteContact(contact.id)"><i class="bx bx-trash me-1"></i> Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="7">No customers found.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+
+        <!-- Basic Bootstrap Table -->
+        <!-- <div class="card">
+            <div class="card-header views">
+                <i class="pi pi-inbox viewIcon viewActive mx-1" id="allView" (click)="changeView('all')"></i>
+                <i class="pi pi-briefcase viewIcon mx-1" id="archView" (click)="changeView('arch')"></i>
+
+                <button (click)="openAddContactForm()" type="button" class="btn createContact" data-bs-toggle="modal" data-bs-target="#largeModal">
+                    <i class="menu-icon tf-icons bx bx-plus"></i>
+                    Lead
+                </button>
+            </div>
+            <div class="table-responsive text-nowrap">
+                <table class="table myTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Organization</th>
+                            <th>Next Activity</th>
+                            <th>Labels</th>
+                            <th>Lead Creator</th>
+                            <th>Lead Created</th>
+                            <th>Owner</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        <tr *ngFor="let contact of myContacts">
+                            <td (click)="showContactDetails(contact)" style="cursor: pointer;"><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>{{contact.title}}</strong></td>
+                            <td (click)="showContactDetails(contact)" style="cursor: pointer;"><i class="fab fa-angular fa-lg text-danger me-3"></i> {{contact.partner_name}}</td>
+                            <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                                <div *ngIf="!!contact.next_action_date">
+                                    <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Call" class="pi pi-phone coloredIcon"></i>
+                                    <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Meeting" class="pi pi-users coloredIcon"></i>
+                                    <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Task" class="pi pi-clock coloredIcon"></i>
+                                    <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Deadline" class="pi pi-flag coloredIcon"></i>
+                                    <span *ngIf="contact.next_action_type_id == ActivityTypesEnum.Lunch" class="material-symbols-outlined coloredIcon">
+                                        restaurant
+                                    </span>
+                                    <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Other" class="pi pi-check coloredIcon"></i>
+                                    <i *ngIf="contact.next_action_type_id == ActivityTypesEnum.Notes" class="pi pi-book coloredIcon"></i>
+                                    <span [ngStyle]="{color: getTimeColor(contact.next_action_date)}">
+                                        {{contact.next_action_date}}
+                                    </span>
+                                </div>
+                                <div class="noActivity" *ngIf="!contact.next_action_date">
+                                    <i class="pi pi-exclamation-triangle"></i> No Activity
+                                </div>
+                            </td>
+                            <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                                <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
+                                    <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-xs pull-up" title="Lilian Fuller" *ngFor="let label of contact.label">
+                                        <span class="labelOption" [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                            {{label.label_name}}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </td>
+
+                            <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                                {{contact.user_creator_name}}
+                            </td>
+                            <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                                {{contact.created_at | date:'medium'}}
+                            </td>
+                            <td (click)="showContactDetails(contact)" style="cursor: pointer;">
+                                {{contact.sales_name}}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a *ngIf="contact.lead_sub_status_id != CloseLeadSubStatusEnum.Archive" class="dropdown-item" href="javascript:void(0);" (click)="archiveContact(contact.id)"><i class="bx bx-edit-alt me-1"></i> Archive</a>
+                                        <a *ngIf="contact.lead_sub_status_id == CloseLeadSubStatusEnum.Archive" class="dropdown-item" href="javascript:void(0);" (click)="reopen(contact)"><i class="bx bx-edit-alt me-1"></i> Re-open</a>
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="deleteContact(contact.id)"><i class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div> -->
+
+    </div>
+
+</div>
+
+
+<p-sidebar *ngIf="!!contactToShow" [style]="{width:getSideWidth()}" class="side" utoZIndex="true"
+    (onHide)="getMyContacts()" [baseZIndex]="-1" [(visible)]="sidebarDisplay" position="right"
+    [transitionOptions]="'350ms'">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-4 col-sm-6">
+                <div class="sidebarContactInfo">
+                    <!-- Name Section -->
+                    <div class="header d-flex justify-content-between my-2">
+                        <h3 class="titles" *ngIf="!nameOnEditMode">
+                            {{contactToShow.title}}
+                        </h3>
+                        <input *ngIf="!!nameOnEditMode" class="form-control" [(ngModel)]="contactToShow.title">
+                        <span (click)="nameOnEditMode = !nameOnEditMode" class="material-icons edit"
+                            *ngIf="!nameOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('title')" class="material-icons save" *ngIf="!!nameOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!nameOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+                    <h3 class="titles">
+                        DETAILS
+                    </h3>
+                    <!-- Labels Section -->
+
+                    <div class="header d-flex justify-content-between my-2">
+                        <div *ngIf="!!contactToShow.label && contactToShow.label.length > 0">
+                            <i class="menu-icon tf-icons bx bx-label"></i>
+                            <span *ngFor="let label of contactToShow.label" class="labelOption"
+                                [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                {{label.label_name}}
+                            </span>
+                        </div>
+                        <span (click)="labelOnEditMode = !labelOnEditMode;openEditLabel()" class="material-icons edit"
+                            *ngIf="!!contactToShow.label && contactToShow.label.length > 0">
+                            edit
+                        </span>
+                        <div *ngIf="!contactToShow.label || contactToShow.label.length <= 0">
+                            <p class="emptyLabel">
+                                <i class="menu-icon tf-icons bx bx-label"></i>
+                                <span class="hideLabelWord">
+                                    Labels
+                                </span>
+                                <span>
+                                    <a class="addLabel" href="javascript: void(0)"
+                                        (click)="labelOnEditMode = !labelOnEditMode;openEditLabel()"> + Add Label</a>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="header d-flex justify-content-between my-2" *ngIf="!!labelOnEditMode">
+                        <mat-select [compareWith]="comparer" class="form-control " multiple="true"
+                            [(ngModel)]="contactToShow.label">
+                            <mat-option *ngFor="let label of lables" [value]="label">
+                                <span class="labelOption"
+                                    [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                    {{label.label_name}}
+                                </span>
+                            </mat-option>
+                        </mat-select>
+                        <span (click)="savContactEdit('label')" class="material-icons save" *ngIf="!!labelOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!labelOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+                    <!-- Owner Section -->
+
+                    <div class="header d-flex justify-content-between my-2">
+                        <h3 class="titles" *ngIf="!salesOnEditMode && !!contactToShow.sales_id">
+                            <i class="menu-icon tf-icons bx bx-user coloredIcon"></i> {{contactToShow.sales_name}}
+                        </h3>
+                        <p class="emptyLabel" *ngIf="!salesOnEditMode && !contactToShow.sales_id">
+                            <i class="menu-icon tf-icons bx bx-user coloredIcon"></i>
+                            <span class="hideLabelWord">
+                                Owner
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)"
+                                    (click)="salesOnEditMode = !salesOnEditMode;openSalesEdit()"> + Add Owner</a>
+                            </span>
+                        </p>
+                        <mat-select *ngIf="!!salesOnEditMode" class="form-control" [(ngModel)]="contactToShow.sales_id">
+                            <mat-option *ngFor="let sales of salesTeam" [value]="sales.key">
+                                {{sales.username}}
+                            </mat-option>
+                        </mat-select>
+                        <span (click)="salesOnEditMode = !salesOnEditMode;openSalesEdit()" class="material-icons edit"
+                            *ngIf="!salesOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('sales_id')" class="material-icons save"
+                            *ngIf="!!salesOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!salesOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+                    <h3 class="titles">
+                        Lead Source
+                    </h3>
+
+                    <!-- Lead Source Section -->
+
+                    <div class="header d-flex justify-content-between my-2">
+                        <h3 class="titles" *ngIf="!campaignOnEditMode && !!contactToShow.campagin_id">
+                            <i class="menu-icon tf-icons bx bx-data coloredIcon"></i> {{contactToShow.campagin_name}}
+                        </h3>
+                        <p class="emptyLabel" *ngIf="!campaignOnEditMode && !contactToShow.campagin_id">
+                            <i class="menu-icon tf-icons bx bx-data coloredIcon"></i>
+                            <span class="hideLabelWord">
+                                Lead Source
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)"
+                                    (click)="campaignOnEditMode = !campaignOnEditMode;getAllCampaigns()"> + Add
+                                    Source</a>
+                            </span>
+                        </p>
+                        <mat-select *ngIf="!!campaignOnEditMode" class="form-control"
+                            [(ngModel)]="contactToShow.campagin_id">
+                            <mat-option *ngFor="let camp of allCampaign" [value]="camp.id">
+                                {{camp.campagin_name}}
+                            </mat-option>
+                        </mat-select>
+                        <span (click)="campaignOnEditMode = !campaignOnEditMode;getAllCampaigns()"
+                            class="material-icons edit" *ngIf="!campaignOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('campagin_id')" class="material-icons save"
+                            *ngIf="!!campaignOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!campaignOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+                    <!-- Contact Data Section -->
+
+                    <h3 class="titles">
+                        Person
+                    </h3>
+
+                    <!-- Contact Address Section -->
+
+                    <!-- <div class="header d-flex justify-content-between my-2">
+                        <p *ngIf="!addressOnEditMode && !!contactToShow.address">
+                            <i class="menu-icon tf-icons bx bx-map"></i> {{contactToShow.address}}
+                        </p>
+                        <p class="emptyLabel" *ngIf="!addressOnEditMode && !contactToShow.address">
+                            <i class="menu-icon tf-icons bx bx-map"></i>
+                            <span class="hideLabelWord">
+                                Address
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)" (click)="addressOnEditMode = !addressOnEditMode"> + Add Address</a>
+                            </span>
+                        </p>
+                        <input *ngIf="!!addressOnEditMode" class="form-control" [(ngModel)]="contactToShow.address">
+
+                        <span (click)="addressOnEditMode= !addressOnEditMode" class="material-icons edit" *ngIf="!addressOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('address')" class="material-icons save" *ngIf="!!addressOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!addressOnEditMode">
+                            cancel
+                        </span>
+                    </div> -->
+
+                    <!-- Contact Email Section -->
+
+                    <!-- <div class="header d-flex justify-content-between my-2">
+                        <p *ngIf="!emailOnEditMode && !!contactToShow.email">
+                            <i class="menu-icon tf-icons bx bx-envelope coloredIconSec"></i> {{contactToShow.email}}
+                        </p>
+                        <p class="emptyLabel" *ngIf="!emailOnEditMode && !contactToShow.email">
+                            <i class="menu-icon tf-icons bx bx-envelope coloredIconSec"></i>
+                            <span class="hideLabelWord">
+                                Email
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)" (click)="emailOnEditMode = !emailOnEditMode"> + Add Email</a>
+                            </span>
+                        </p>
+                        <input *ngIf="!!emailOnEditMode" class="form-control" [(ngModel)]="contactToShow.email">
+
+                        <span (click)="emailOnEditMode= !emailOnEditMode" class="material-icons edit" *ngIf="!emailOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('email')" class="material-icons save" *ngIf="!!emailOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!emailOnEditMode">
+                            cancel
+                        </span>
+                    </div> -->
+
+                    <!-- Contact Phone Section -->
+
+                    <!-- <div *ngIf="!!contactToShow.phone && contactToShow.phone.length > 0">
+                        <div class="header d-flex justify-content-between my-2" *ngFor="let phone of contactToShow.phone;let i = index">
+                            <i class="menu-icon tf-icons bx bx-phone coloredIcon"></i>
+                            <span *ngIf="!phoneOnEditMode[i]">{{phone.phone}}</span> &nbsp;
+                            <span *ngIf="!phoneOnEditMode[i]">{{phone.phone_type}}</span>
+                            <input *ngIf="!!phoneOnEditMode[i]" type="number" id="basic-default-phone" class="form-control phone-mask" [(ngModel)]="phone.phone" placeholder="658 799 8941" />
+                            <select *ngIf="!!phoneOnEditMode[i]" class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" [(ngModel)]="phone.phone_type">
+                                <option value="Work">Work</option>
+                                <option value="Home">Home</option>
+                                <option value="Mobile">Mobile</option>
+                                <option value="Whatsapp">Whatsapp</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span (click)="editPhone(i)" class="material-icons edit" *ngIf="!phoneOnEditMode[i]">
+                                edit
+                            </span>
+                            <span (click)="delPhone(i)" class="material-icons delete" *ngIf="!phoneOnEditMode[i]">
+                                delete
+                            </span>
+                            <span (click)="savContactEdit('phone')" class="material-icons save" *ngIf="!!phoneOnEditMode[i]">
+                                save
+                            </span>
+                            <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!phoneOnEditMode[i]">
+                                cancel
+                            </span>
+                        </div>
+                    </div> -->
+
+                    <!-- <a href="javascript: void(0);" (click)="addPhoneNewNumber()" *ngIf="!!contactToShow.phone && contactToShow.phone.length < 5"> + Add Phone</a> -->
+
+                    <!-- Organization Section -->
+
+                    <h3 class="titles mt-2">
+                        Organization
+                    </h3>
+
+                    <div class="header d-flex justify-content-between my-2">
+                        <h3 *ngIf="!organizationOnEditMode && !!contactToShow.partner_id">
+                            <i class="menu-icon tf-icons bx bx-buildings coloredIconSec"></i>
+                            {{contactToShow.partner_name}}
+                        </h3>
+                        <p class="emptyLabel" *ngIf="!organizationOnEditMode && !contactToShow.partner_id">
+                            <i class="menu-icon tf-icons bx bx-buildings coloredIconSec"></i>
+                            <span class="hideLabelWord">
+                                Organization
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)"
+                                    (click)="organizationOnEditMode = !organizationOnEditMode;getAllPartners()"> + Link
+                                    an organization</a>
+                            </span>
+                        </p>
+                        <mat-select *ngIf="!!organizationOnEditMode" class="form-control"
+                            (selectionChange)="getMyContcats()" [(ngModel)]="contactToShow.partner_id">
+                            <mat-option *ngFor="let part of allPartners" [value]="part.id">
+                                {{part.partner_name}}
+                            </mat-option>
+                        </mat-select>
+                        <span
+                            (click)="organizationOnEditMode = !organizationOnEditMode;getAllPartners();getMyContcats()"
+                            class="material-icons edit" *ngIf="!organizationOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('partner_id')" class="material-icons save"
+                            *ngIf="!!organizationOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!organizationOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+                    <div class="header d-flex justify-content-between my-1">
+                        <mat-select *ngIf="!!organizationOnEditMode" class="form-control"
+                            [(ngModel)]="contactToShow.contact_id">
+                            <mat-option *ngFor="let contact of personContacts" [value]="contact.id">
+                                {{contact.name}}
+                            </mat-option>
+                        </mat-select>
+                        <h3 *ngIf="!organizationOnEditMode && !!contactToShow.contact_id">
+                            <i class="menu-icon tf-icons bx bx-user coloredIconSec"></i> {{contactToShow.contact_name}}
+                        </h3>
+                    </div>
+                    <div class="header d-flex justify-content-between my-1"
+                        *ngIf="!organizationOnEditMode && !!contactToShow.contact_id">
+                        <h3>
+                            <i class="menu-icon tf-icons bx bx-envelope coloredIconSec"></i>
+                            <!-- {{contactToShow.email}} -->
+                            <a href="mailto:{{contactToShow.email}}?subject=welcome from FGS &body=Hello,{{contactToShow.contact_name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}"
+                                target="_blank" rel="noopener noreferrer">
+                                {{contactToShow.email}}
+                            </a>
+                        </h3>
+                    </div>
+                    <div class="header d-flex justify-content-between my-1"
+                        *ngIf="!organizationOnEditMode && !!contactToShow.contact_id">
+                        <div *ngIf="!!contactToShow.phone && contactToShow.phone.length > 0">
+                            <div *ngFor="let phone of contactToShow.phone;let i = index">
+                                <i class="menu-icon tf-icons bx bx-phone coloredIcon"></i>
+                                <span *ngIf="!phoneOnEditMode[i]">
+                                    <!-- {{phone.phone}} -->
+                                    <a href="tel:{{phone.country_code}}{{phone.phone}}"
+                                        *ngIf="phone.phone_type != 'Whatsapp'"
+                                        [matTooltip]="'Call Phone ('+phone.phone+' )'">
+                                        {{phone.country_code?phone.country_code :'+2'}}-{{phone.phone}}
+                                    </a>
+
+                                    <a href="https://api.whatsapp.com/send?phone={{phone.phone}}" target="_blank"
+                                        *ngIf="phone.phone_type == 'Whatsapp'"
+                                        [matTooltip]="'Message ( '+phone.phone+' ) On Whatsapp'">
+                                        {{phone.country_code?phone.country_code :'+2'}}-{{phone.phone}}
+                                    </a>
+                                </span> &nbsp;
+                                <span *ngIf="!phoneOnEditMode[i]">{{phone.phone_type}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- <h3 class="titles mt-2">
+                        Contact
+                    </h3>
+
+                    <div class="header d-flex justify-content-between my-2">
+                        <h3 *ngIf="!contactOnEditMode && !!contactToShow.contact_id">
+                            <i class="menu-icon tf-icons bx bx-buildings coloredIconSec"></i> {{contactToShow.contact_name}}
+                        </h3>
+                        <p class="emptyLabel" *ngIf="!contactOnEditMode && !contactToShow.contact_id">
+                            <i class="menu-icon tf-icons bx bx-user coloredIconSec"></i>
+                            <span class="hideLabelWord">
+                                Contact
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)" (click)="contactOnEditMode = !contactOnEditMode;getMyContcats()"> + Add Contact</a>
+                            </span>
+                        </p>
+                        <mat-select *ngIf="!!contactOnEditMode" class="form-control" [(ngModel)]="contactToShow.contact_id">
+                            <mat-option *ngFor="let contact of personContacts" [value]="contact.id">
+                                {{contact.name}}
+                            </mat-option>
+                        </mat-select>
+                        <span (click)="contactOnEditMode = !contactOnEditMode;getMyContcats()" class="material-icons edit" *ngIf="!contactOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('contcat_id')" class="material-icons save" *ngIf="!!contactOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!contactOnEditMode">
+                            cancel
+                        </span>
+                    </div> -->
+
+                    <!-- Product Section -->
+                    <h3 class="titles">
+                        Product
+                    </h3>
+                    <div class="header d-flex justify-content-between my-2">
+                        <h3 *ngIf="!productOnEditMode && !!contactToShow.product_id">
+                            <i class="menu-icon tf-icons bx bx-network-chart"></i> {{contactToShow.product_name}}
+                        </h3>
+                        <p class="emptyLabel" *ngIf="!productOnEditMode && !contactToShow.product_id">
+                            <i class="menu-icon tf-icons bx bx-network-chart"></i>
+                            <span class="hideLabelWord">
+                                Product
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)"
+                                    (click)="productOnEditMode = !productOnEditMode;getAllProducts()"> + Product</a>
+                            </span>
+                        </p>
+                        <mat-select *ngIf="!!productOnEditMode" class="form-control"
+                            [(ngModel)]="contactToShow.product_id">
+                            <mat-option *ngFor="let prod of products" [value]="prod.id">
+                                {{prod.product_name}}
+                            </mat-option>
+                        </mat-select>
+                        <span (click)="productOnEditMode = !productOnEditMode;getAllProducts()"
+                            class="material-icons edit" *ngIf="!productOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('product_id')" class="material-icons save"
+                            *ngIf="!!productOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!productOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+                    <!-- Type Section -->
+                    <h3 class="titles">
+                        Type
+                    </h3>
+                    <div class="header d-flex justify-content-between my-2">
+                        <h3 *ngIf="!typeOnEditMode && !!contactToShow.lead_type_id">
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2 coloredIcon"></i>
+                            {{contactToShow.lead_type_name}}
+                        </h3>
+                        <p class="emptyLabel" *ngIf="!typeOnEditMode && !contactToShow.lead_type_id">
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2 coloredIcon"></i>
+                            <span class="hideLabelWord">
+                                Product
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)"
+                                    (click)="typeOnEditMode = !typeOnEditMode;getAllTypes()"> + Product</a>
+                            </span>
+                        </p>
+                        <mat-select *ngIf="!!typeOnEditMode" class="form-control"
+                            [(ngModel)]="contactToShow.lead_type_id">
+                            <mat-option *ngFor="let type of contactTypes" [value]="type.id">
+                                {{type.lead_type_name}}
+                            </mat-option>
+                        </mat-select>
+                        <span (click)="typeOnEditMode = !typeOnEditMode;getAllTypes()" class="material-icons edit"
+                            *ngIf="!typeOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('lead_type_id')" class="material-icons save"
+                            *ngIf="!!typeOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!typeOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+                    <!-- Status Section -->
+
+                    <!-- <h3 class="titles">
+                        Pipeline
+                    </h3>
+
+                    <div class="steps" id="stepsContainer">
+                        <ng-container *ngFor="let status of contactStatus;let i=index">
+                            <div class="first" (click)="selectSteps(i);this.savContactEdit('status_id')" routerLinkActive="active" *ngIf="i==0" [matTooltip]="status.contact_status_name">
+                            </div>
+                            <div class="middle" (click)="selectSteps(i);this.savContactEdit('status_id')" *ngIf="i > 0 && i != contactStatus.length - 1" [matTooltip]="status.contact_status_name">
+                            </div>
+
+                            <div class="last" (click)="selectSteps(i);this.savContactEdit('status_id')" *ngIf="i == contactStatus.length - 1" [matTooltip]="status.contact_status_name">
+                            </div>
+                        </ng-container>
+                    </div> -->
+
+                    <h3 class="titles">
+                        Deal Size
+                    </h3>
+
+
+                    <div class="header d-flex justify-content-between my-2">
+                        <p *ngIf="!costOnEditMode && !!contactToShow.cost">
+                            <i class="menu-icon tf-icons bx bx-money coloredIconSec"></i> {{contactToShow.cost |
+                            currency:contactToShow.currency?contactToShow.currency:''}}
+
+                        </p>
+                        <p class="emptyLabel" *ngIf="!costOnEditMode && !contactToShow.cost">
+                            <i class="menu-icon tf-icons bx bx-money coloredIconSec"></i>
+                            <span class="hideLabelWord">
+                                Deal Size
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)"
+                                    (click)="costOnEditMode = !costOnEditMode"> + Add Deal Size</a>
+                            </span>
+                        </p>
+                        <!-- <input type="number"  class="form-control" [(ngModel)]="contactToShow.cost"> -->
+                        <div *ngIf="!!costOnEditMode" class="container-fluid">
+                            <div class="row" *ngIf="!costDetailsFormOpened">
+                                <div class="col-8 p-0 m-0">
+                                    <input type="number" class="form-control" [(ngModel)]="contactToShow.cost">
+
+                                </div>
+                                <div class="col-4 p-0 m-0">
+                                    <mat-select class="form-control" [(ngModel)]="contactToShow.currency">
+                                        <mat-option *ngFor="let country of CurrencyList" [value]="country.currencyCode">
+                                            <div class="country-item d-flex">
+                                                <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                    width="17px" height="20px"
+                                                    [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                <div>{{country.currencyName}}</div>
+                                            </div>
+                                        </mat-option>
+                                    </mat-select>
+                                    <!-- <p-dropdown styleClass="w-100" [options]="CurrencyList" optionValue="currencyCode" [(ngModel)]="contactToShow.currency" optionLabel="currencyCode">
+                                        <ng-template let-country pTemplate="item">
+                                            <div class="country-item d-flex">
+                                                <img src="../../../../../assets/img/flags/{{country.countryCode}}.png" width="17px" height="20px" [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                <div>{{country.currencyName}}</div>
+                                            </div>
+                                        </ng-template>
+                                    </p-dropdown> -->
+
+                                </div>
+                                <!-- <div class="row" *ngIf="!costDetailsFormOpened">
+                                    <div class="col-12">
+                                        <a href="javascript:void(0)" (click)="costDetailsFormOpened = true">Details</a>
+                                    </div>
+                                </div> -->
+                            </div>
+                            <div class="row" *ngIf="!!costDetailsFormOpened">
+                                <div class="col-12 p-0 m-0">
+                                    <app-lead-cost-details-form
+                                        (dataEvent)="costDetailsFormOpened = false;receiveData($event)"
+                                        [leadData]="contactToShow"></app-lead-cost-details-form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <span (click)="costOnEditMode= !costOnEditMode" class="material-icons edit"
+                            *ngIf="!costOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('cost')" class="material-icons save"
+                            *ngIf="!!costOnEditMode && !costDetailsFormOpened">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!costOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+                    <h3 class="titles">
+                        Notes
+                    </h3>
+
+
+                    <div class="header d-flex justify-content-between my-2">
+                        <p *ngIf="!notesOnEditMode && !!contactToShow.notes">
+                            <i class="menu-icon tf-icons bx bx-note coloredIcon"></i> {{contactToShow.notes}}
+                        </p>
+                        <p class="emptyLabel" *ngIf="!notesOnEditMode && !contactToShow.notes">
+                            <i class="menu-icon tf-icons bx bx-note coloredIcon"></i>
+                            <span class="hideLabelWord">
+                                Notes
+                            </span>
+                            <span>
+                                <a class="addLabel" href="javascript: void(0)"
+                                    (click)="notesOnEditMode = !notesOnEditMode"> + Add Notes</a>
+                            </span>
+                        </p>
+                        <input *ngIf="!!notesOnEditMode" class="form-control" [(ngModel)]="contactToShow.notes">
+
+                        <span (click)="notesOnEditMode= !notesOnEditMode" class="material-icons edit"
+                            *ngIf="!notesOnEditMode">
+                            edit
+                        </span>
+                        <span (click)="savContactEdit('notes')" class="material-icons save" *ngIf="!!notesOnEditMode">
+                            save
+                        </span>
+                        <span (click)="cancelEdit()" class="material-icons cancel" *ngIf="!!notesOnEditMode">
+                            cancel
+                        </span>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="col-lg-8 col-sm-6 p-0 m-0">
+                <div class="sidebarActivity">
+                    <div class="new my-2">
+                        <p-tabMenu [model]="items" #tab [activeItem]="activeItem"
+                            (click)="selectActiveTab(tab)"></p-tabMenu>
+                        <div class="card" *ngIf="activeItem.label == 'Notes' && !!openNotesForm">
+                            <form [formGroup]="newActivityForm" (ngSubmit)="addQuickNote()">
+                                <p-editor [modules]="quillOPT" formControlName="comment" [style]="{'height':'100px'}">
+                                    <ng-template pTemplate="header">
+                                        <span class="ql-format-group">
+                                        </span>
+                                    </ng-template>
+                                </p-editor>
+                                <div class="ActivityFormFooter">
+                                    <button type="button"
+                                        (click)="openNotesForm = !openNotesForm;newActivityForm.reset()"
+                                        class="btn cancelBTN btn-sm mx-1">Discard</button>
+                                    <button type="submit" class="btn saveBTN btn-sm mx-1">Save</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card openNotesForm pl-3 d-flex justify-content-center"
+                            (click)="openNotesForm = !openNotesForm"
+                            *ngIf="activeItem.label == 'Notes' && !openNotesForm">
+                            Click Here To Add Note...
+                        </div>
+
+                        <div class="card openActivityForm pl-3 d-flex justify-content-center"
+                            (click)="openActivityForm = !openActivityForm;newActivityForm.reset();activityOnEditMOde=false;"
+                            *ngIf="activeItem.label == 'Activity' && !openActivityForm">
+                            Click Here To create an activity...
+                        </div>
+                        <div class="card" *ngIf="activeItem.label == 'Activity'&& !!openActivityForm">
+                            <form [formGroup]="newActivityForm" (ngSubmit)="submitSaveActivityForm()">
+
+                                <div class="container-fluid">
+                                    <div class="row my-2">
+                                        <div class="col-12 my-2">
+                                            <input type="text" class="form-control" formControlName="comment"
+                                                [placeholder]="getSelectedActivity(newActivityForm.get(['type_id'])?.value)">
+                                        </div>
+                                        <div class="col-12 my-2">
+                                            <p-selectButton [options]="ActivityTypesEnum | keyvalue" optionLabel="key"
+                                                optionValue="value" formControlName="type_id"
+                                                (onChange)="activityTypeChanged($event)">
+                                                <ng-template let-type>
+                                                    <div [matTooltip]="type.key">
+                                                        <i *ngIf="type.value == ActivityTypesEnum.Call"
+                                                            class="pi pi-phone selectBTN coloredIcon"></i>
+                                                        <i *ngIf="type.value == ActivityTypesEnum.SendEmail"
+                                                            class="pi pi-envelope selectBTN coloredIcon"></i>
+                                                        <i *ngIf="type.value == ActivityTypesEnum.Meeting"
+                                                            class="pi pi-users selectBTN coloredIcon"></i>
+                                                        <i *ngIf="type.value == ActivityTypesEnum.Task"
+                                                            class="pi pi-clock selectBTN coloredIcon"></i>
+                                                        <i *ngIf="type.value == ActivityTypesEnum.Deadline"
+                                                            class="pi pi-flag selectBTN coloredIcon"></i>
+                                                        <span *ngIf="type.value == ActivityTypesEnum.Lunch"
+                                                            class="material-symbols-outlined selectBTN coloredIcon">
+                                                            restaurant
+                                                        </span>
+                                                        <i *ngIf="type.value == ActivityTypesEnum.Other"
+                                                            class="pi pi-check selectBTN coloredIcon"></i>
+                                                        <i *ngIf="type.value == ActivityTypesEnum.Notes"
+                                                            class="pi pi-book selectBTN coloredIcon"></i>
+                                                    </div>
+                                                </ng-template>
+                                            </p-selectButton>
+                                        </div>
+                                    </div>
+                                    <div class="row my-2">
+                                        <div class="col-1 my-2">
+                                            <i class="pi pi-clock clock coloredIcon"></i>
+                                        </div>
+                                        <div class="col-4 my-2">
+                                            <input matInput type="datetime-local" id="fromDate"
+                                                formControlName="start_date">
+                                        </div>
+                                        <div class="col-4 my-2">
+                                            <input matInput type="datetime-local" id="toDate"
+                                                formControlName="end_date">
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row my-2 " *ngIf="activityOnEditMOde">
+
+                                        <div class="row"
+                                            *ngIf="
+                                                        newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting || newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Call">
+                                            <div class="col-12 my-2">
+                                                <i class="pi pi-clock clock coloredIcon"></i>
+                                                <span class="fw-bold">
+                                                    Acutal Activity Time
+                                                </span>
+                                            </div>
+
+                                            <div class="col-4 my-2">
+                                                <input class="form-control" matInput placeholder="date" type="date"
+                                                    id="activity_day_date" formControlName="activity_day_date">
+                                            </div>
+                                            <div class="col-4 my-2">
+                                                <input class="form-control" matInput placeholder="time" type="time"
+                                                    id="toDate" format="HH:mm" formControlName="activity_start_date">
+                                            </div>
+
+                                            <div class="col-4 my-2"
+                                                *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting">
+                                                <input class="form-control" matInput placeholder="Duration"
+                                                    type="number" id="duration" formControlName="duration">
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label class="" for="notes">Description</label>
+                                            <textarea formControlName="description" class="form-control" rows="5"
+                                                placeholder="Activity Description"></textarea>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ActivityFormFooter">
+                                    <ng-container
+                                        *ngIf="newActivityForm.get(['type_id'])?.value != ActivityTypesEnum.Meeting && newActivityForm.get(['type_id'])?.value != ActivityTypesEnum.Call">
+                                        <!-- <p-checkbox #activityStatus id="status" value="1"
+                                            class="mx-1 mb-1" formControlName="status"></p-checkbox>
+                                        <label for="status" class="mx-1 mt-1">Mark As Done</label> -->
+
+                                        <mat-radio-group formControlName="status" class="mt-2">
+                                            <mat-radio-button class="mx-2" [value]="'1'">
+                                                Mark As Done</mat-radio-button>
+                                        </mat-radio-group>
+
+                                    </ng-container>
+
+                                    <ng-container
+                                        *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting">
+
+
+                                        <mat-radio-group formControlName="status" class="mt-2">
+                                            <mat-radio-button class="mx-2" [value]="'8'">Scheduled</mat-radio-button>
+                                            <mat-radio-button class="mx-2" [value]="'6'">Rescheduled</mat-radio-button>
+                                            <mat-radio-button class="mx-2" [value]="'5'">Completed</mat-radio-button>
+                                            <mat-radio-button class="mx-2" [value]="'7'">Cancelled</mat-radio-button>
+                                        </mat-radio-group>
+
+                                    </ng-container>
+                                    <ng-container
+                                        *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Call">
+
+
+                                        <mat-radio-group formControlName="status" class="mt-2">
+                                            <mat-radio-button class="mx-2" [value]="'8'">
+                                                Scheduled </mat-radio-button>
+                                            <mat-radio-button class="mx-2" [value]="'3'">
+                                                Answered </mat-radio-button>
+                                            <mat-radio-button class="mx-2" [value]="'4'">
+                                                Not Answered </mat-radio-button>
+                                        </mat-radio-group>
+
+                                    </ng-container>
+                                    <!-- <p-checkbox #activityStatus id="status" [binary]="true" inputId="binary" class="mx-1 mb-1" formControlName="status"></p-checkbox>
+                                    <label for="status" class="mx-1 mt-1" *ngIf="newActivityForm.get(['type_id'])?.value != ActivityTypesEnum.Call">Mark As Done</label>
+
+                                    <label for="status" class="mx-1 mt-1" *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Call">
+                                    
+                                        <span *ngIf="!activityStatus.checked()"> Answered</span>
+                                        <span *ngIf="activityStatus.checked()">Not Answered</span>
+                                    
+                                    </label> -->
+                                    <button type="button"
+                                        (click)="openActivityForm = !openActivityForm;newActivityForm.reset();activityOnEditMOde=false;"
+                                        class="btn cancelBTN btn-sm mx-1">Cancel</button>
+                                    <button type="submit" class="btn saveBTN btn-sm mx-1">Save</button>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- <div class="card" *ngIf="activeItem.label == 'Email'">
+                            Hello Email
+                        </div> -->
+                    </div>
+                    <!-- <div class="planned my-2">
+                        <div class="secTitle">
+                            <p>Planned</p>
+                        </div>
+                        <p-timeline [value]="plannedActivity" align="alternate" styleClass="customized-timeline">
+                            <ng-template pTemplate="marker" let-activity>
+                              
+
+                                <span class="custom-marker shadow-2">
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Call"
+                                        class="pi pi-phone coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.SendEmail"
+                                        class="pi pi-envelope coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Meeting"
+                                        class="pi pi-users coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Task"
+                                        class="pi pi-clock coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Deadline"
+                                        class="pi pi-flag coloredIcon"></i>
+                                    <span *ngIf="activity.activity_type_id == ActivityTypesEnum.Lunch"
+                                        class="material-symbols-outlined coloredIcon">
+                                        restaurant
+                                    </span>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Other"
+                                        class="pi pi-check coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Notes"
+                                        class="pi pi-book coloredIcon"></i>
+                                </span>
+                            </ng-template>
+                            <ng-template pTemplate="content" let-activity>
+                                <div class="card p-3 my-1">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-11">
+                                                <span class="activityComment">
+                                                    <i (click)="markAsDone(activity)" matTooltip="Mark As Done"
+                                                        class="menu-icon tf-icons bx bx-radio-circle markAsDoneIcon"></i>
+                                                    {{activity.comment}}
+                                                </span>
+                                                <br>
+                                                <span class="activityDate"
+                                                    [ngStyle]="{color: getTimeColor(activity.from_date)}">
+                                                    {{activity.from_date | date:'medium'}} . {{activity.createdBy_name}}
+                                                </span>
+                                            </div>
+                                            <div class="col-1">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                                        data-bs-toggle="dropdown">
+                                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="javascript:void(0);"
+                                                            (click)="editActivity(activity)"><i
+                                                                class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                        <a class="dropdown-item" href="javascript:void(0);"
+                                                            (click)="deleteActivity(activity)"><i
+                                                                class="bx bx-trash me-1"></i> Delete</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </p-timeline>
+                    </div>
+                    <div class="quickPlan my-2">
+                        <div class="quickPlanForm">
+                            <form [formGroup]="newActivityForm" class="example-form">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-lg-2 col-lg-2 col-sm-6">
+                                            <div class="mt-2 ml-1">
+                                                <mat-select formControlName="type_id">
+                                                    <mat-select-trigger>
+                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Call"
+                                                            class="pi pi-phone coloredIcon"></i>
+                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.SendEmail"
+                                                            class="pi pi-envelope coloredIcon"></i>
+                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Meeting"
+                                                            class="pi pi-users coloredIcon"></i>
+                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Task"
+                                                            class="pi pi-clock coloredIcon"></i>
+                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Deadline"
+                                                            class="pi pi-flag coloredIcon"></i>
+                                                        <span
+                                                            *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Lunch"
+                                                            class="material-symbols-outlined coloredIcon">
+                                                            restaurant
+                                                        </span>
+                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Other"
+                                                            class="pi pi-check coloredIcon"></i>
+                                                        <i *ngIf="newActivityForm.get(['type_id'])?.value == ActivityTypesEnum.Notes"
+                                                            class="pi pi-book coloredIcon"></i>
+                                                    </mat-select-trigger>
+                                                    <ng-container *ngFor="let type of ActivityTypesEnum | keyvalue">
+
+                                                        <mat-option *ngIf="type.value != ActivityTypesEnum.Notes"
+                                                            [value]="type.value">
+                                                            <i *ngIf="type.value == ActivityTypesEnum.Call"
+                                                                class="pi pi-phone coloredIcon"></i>
+                                                            <i *ngIf="type.value == ActivityTypesEnum.SendEmail"
+                                                                class="pi pi-envelope coloredIcon"></i>
+                                                            <i *ngIf="type.value == ActivityTypesEnum.Meeting"
+                                                                class="pi pi-users coloredIcon"></i>
+                                                            <i *ngIf="type.value == ActivityTypesEnum.Task"
+                                                                class="pi pi-clock coloredIcon"></i>
+                                                            <i *ngIf="type.value == ActivityTypesEnum.Deadline"
+                                                                class="pi pi-flag coloredIcon"></i>
+                                                            <span *ngIf="type.value == ActivityTypesEnum.Lunch"
+                                                                class="material-symbols-outlined coloredIcon">
+                                                                restaurant
+                                                            </span>
+                                                            <i *ngIf="type.value == ActivityTypesEnum.Other"
+                                                                class="pi pi-check coloredIcon"></i>
+                                                           
+                                                            <span> {{ type.key }} </span>
+                                                        </mat-option>
+                                                    </ng-container>
+                                                </mat-select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-10 col-lg-10 col-sm-6">
+                                            <div class="m-1">
+                                                <input class="form-control" type="text" id="ContactPerson"
+                                                    [placeholder]="getSelectedActivity(newActivityForm.get(['type_id'])?.value)"
+                                                    formControlName="comment" />
+                                            </div>
+                                            <div class="m-1 d-flex justify-content-center">
+                                                <p-tag (click)="addQuickActivity('hour')"
+                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                    styleClass="m-1" class="myTag" value="in 1h"></p-tag>
+                                                <p-tag (click)="addQuickActivity('hours')"
+                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                    styleClass="m-1" class="myTag" value="in 3h"></p-tag>
+                                                <p-tag (click)="addQuickActivity('tomorrow')"
+                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                    styleClass="m-1" class="myTag" value="Tomorrow"></p-tag>
+                                                <p-tag (click)="addQuickActivity('week')"
+                                                    [style]="{'color':'#000','background-color':'#fff'}"
+                                                    styleClass="m-1" class="myTag" value="Next week"></p-tag>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div> -->
+                    <div class="done my-2">
+                        <div class="secTitle">
+                            <p>All Activities</p>
+                        </div>
+                        <p-timeline [value]="myLeadActivites" align="alternate" styleClass="customized-timeline">
+                            <ng-template pTemplate="marker" let-activity>
+                                <!-- [style.backgroundColor]="event.color" -->
+                                <span class="custom-marker shadow-2">
+                                    <!-- <i [ngClass]="event.icon"></i> -->
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Call"
+                                        class="pi pi-phone coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.SendEmail"
+                                        class="pi pi-envelope coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Meeting"
+                                        class="pi pi-users coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Task"
+                                        class="pi pi-clock coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Deadline"
+                                        class="pi pi-flag coloredIcon"></i>
+                                    <span *ngIf="activity.activity_type_id == ActivityTypesEnum.Lunch"
+                                        class="material-symbols-outlined coloredIcon">
+                                        restaurant
+                                    </span>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Other"
+                                        class="pi pi-check coloredIcon"></i>
+                                    <i *ngIf="activity.activity_type_id == ActivityTypesEnum.Notes"
+                                        class="pi pi-book coloredIcon"></i>
+                                </span>
+                            </ng-template>
+                            <ng-template pTemplate="content" let-activity>
+                                <div class="card p-3 my-1" *ngIf="activity.activity_type_id != ActivityTypesEnum.Notes">
+                                    <div class="row">
+                                        <div class="col-md-11">
+                                            <span class="activityComment">
+                                                <!-- <i (click)="markAsUnDone(activity)"
+                                                                    matTooltip="Mark As Not Done"
+                                                                    class="menu-icon tf-icons bx bx-check doneIcon"></i> -->
+                                                <span class="fw-bold">{{activity.comment}}</span>
+                                            </span>
+                                            <br>
+                                            <span class="activityDate"
+                                                [class.text-success]="
+                                                                activity.activity_status_id == ActivityStatusEnum.Completed ||
+                                                                 activity.activity_status_id == ActivityStatusEnum.Answered ||
+                                                                  activity.activity_status_id == ActivityStatusEnum.Done"
+                                                [class.text-danger]="activity.activity_status_id == ActivityStatusEnum.Cancelled ||
+                                                                activity.activity_status_id == ActivityStatusEnum.NotAnswered"
+                                                [class.text-warning]="activity.activity_status_id == ActivityStatusEnum.Pending ||
+                                                                activity.activity_status_id == ActivityStatusEnum.Rescheduled">
+                                                {{activity.from_date | date:'medium'}} .
+                                                {{activity.createdBy_name}}
+                                            </span>
+                                            <br>
+                                            <span class="activityDate mt-2"
+                                                *ngIf="activity.activity_start_date || activity.activity_end_date">
+
+
+                                                <span class="">Activity Time:</span>
+                                                {{activity.activity_start_date
+                                                | date:'dd-MM-yyyy hh:mm a'}}
+                                                <!-- {{ activity.activity_end_date
+                                                | date:'dd-MM-yyyy HH:mm a'}} . -->
+                                                <ng-container *ngIf="activity.duration > 0">
+                                                    .( {{activity.duration}} Hours )
+                                                </ng-container>
+                                            </span>
+
+                                        </div>
+                                        <div class="col-1">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                                    data-bs-toggle="dropdown">
+                                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="javascript:void(0);"
+                                                        (click)="editActivity(activity)"><i
+                                                            class="bx bx-edit-alt me-1"></i>
+                                                        Edit</a>
+                                                    <a *ngIf="
+                                            (activity.activity_status_id != ActivityStatusEnum.Completed &&
+                                                 activity.activity_status_id != ActivityStatusEnum.Answered &&
+                                                  activity.activity_status_id != ActivityStatusEnum.Done) || currentUser.accRole == AccountRoles.SUPER_USER"
+                                                        class="dropdown-item" href="javascript:void(0);"
+                                                        (click)="deleteActivity(activity)"><i
+                                                            class="bx bx-trash me-1"></i> Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card p-3 my-1" *ngIf="activity.activity_type_id == ActivityTypesEnum.Notes"
+                                    style="background-color:#FFFCDC ;">
+                                    <span class="activityDate">
+                                        <!-- <i (click)="markAsUnDone(activity)" matTooltip="Mark As Not Done" class="menu-icon tf-icons bx bx-check doneIcon"></i> -->
+                                        {{activity.from_date | date:'medium'}} .
+                                        {{activity.createdBy_name}}
+                                    </span>
+                                    <span class="activityComment">
+                                        <span [innerHTML]="activity.comment" class="px-5 ql-editor"></span>
+                                    </span>
+                                    <br>
+                                </div>
+                            </ng-template>
+                            <!-- <ng-template pTemplate="content">
+                                                    <span>
+                                                        <i class="menu-icon tf-icons bx bx-check coloredIcon"></i>
+                                                        {{this.contactToShow.user_creator_name}} → Lead created
+                                                    </span>
+                                                    <br>
+                                                    <span>
+                                                        {{this.contactToShow.created_at | date:'medium'}}
+                                                    </span>
+                                                </ng-template> -->
+                        </p-timeline>
+                        <div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <!-- Footer Section -->
+                <hr class="my-2">
+                <div class="contactDetailsFooterSection">
+                    <button (click)="openConvertTOLeadForm()" type="button" class="btn saveBTN" data-bs-toggle="modal"
+                        data-bs-target="#modalCenter">
+                        <i class="menu-icon tf-icons bx bx-plus"></i>
+                        Convert To Opportunity
+                    </button>
+                </div>
+
+
+            </div>
+            <div class="col-8"></div>
+        </div>
+    </div>
+</p-sidebar>
+
+<div class="modal fade" id="modalCenter" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCenter">Convert To Opportunity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="newLeadForm" (ngSubmit)="validateConvertToLead()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="" for="ContactPerson">Title</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="ContactPerson" class="input-group-text"><i
+                                                class="bx bx-heading"></i></span>
+                                        <input class="form-control" type="text" id="ContactPerson"
+                                            placeholder="RPA Bank Misr" formControlName="title" />
+                                    </div>
+                                    <mat-error class="alert help-block"
+                                        *ngIf="!newContactForm.get('title')?.valid && newContactForm.get('title')?.touched">
+                                        Title Is Required
+                                    </mat-error>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="" for="Organization">Organization</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="Organization" class="input-group-text">
+                                            <i class="bx bx-buildings"></i>
+                                        </span>
+                                        <mat-select class="form-control" formControlName="partner_id">
+                                            <mat-option *ngFor="let partner of allPartners" [value]='partner.id'>
+                                                {{partner.partner_name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+
+                                <!-- <div class="mb-3">
+                                    <label class="" for="address">Adress</label>
+                                    <input class="form-control" type="text" id="address" placeholder="6th October City" formControlName="address" />
+                                </div> -->
+
+                                <div class="mb-3">
+                                    <label class="" for="notes">Notes</label>
+                                    <textarea id="notes" class="form-control"
+                                        placeholder="Hi, Do you have a moment to talk Joe?"
+                                        formControlName="notes"></textarea>
+                                </div>
+                                <div class="mb-3 ">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label>Labels</mat-label>
+                                        <mat-select [compareWith]="comparer" formControlName="labels" multiple="true">
+                                            <mat-option *ngFor="let label of lables" [value]='label'>
+                                                <span class="labelOption"
+                                                    [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                                    {{label.label_name}}
+                                                </span>
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="mb-3 "
+                                    *ngIf="currentUser.department != departmentEnum.Business_Development">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label>Assign To Sales</mat-label>
+                                        <mat-select formControlName="sales_id">
+                                            <mat-option *ngFor="let sales of salesTeam" [value]='sales.key'>
+                                                {{sales.username}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3 ">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label>Type</mat-label>
+                                        <mat-select formControlName="type_id">
+                                            <mat-option *ngFor="let type of contactTypes" [value]='type.id'>
+                                                {{type.lead_type_name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label class="" for="address">Expected Close Date</label>
+                                    <input class="form-control" type="date" id="address" placeholder="6th October City"
+                                        formControlName="expected_close_date" />
+                                </div>
+
+                                <div class="mb-3 ">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label>Lead Source</mat-label>
+                                        <mat-select formControlName="campaign_id">
+                                            <mat-option *ngFor="let campaign of allCampaign" [value]='campaign.id'>
+                                                {{campaign.campagin_name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="mb-3 ">
+                                    <label class="" for="stepsContainer">Lead Status</label>
+                                    <div class="steps" id="stepsContainer">
+                                        <ng-container *ngFor="let status of contactSubStatus;let i=index">
+                                            <div class="first active" (click)="selectSteps(i)" routerLinkActive="active"
+                                                *ngIf="i==0" [matTooltip]="status.contact_sub_status_name">
+                                            </div>
+                                            <div class="middle" (click)="selectSteps(i)"
+                                                *ngIf="i > 0 && i != contactSubStatus.length - 1"
+                                                [matTooltip]="status.contact_sub_status_name">
+                                            </div>
+
+                                            <div class="last" (click)="selectSteps(i)"
+                                                *ngIf="i == contactSubStatus.length - 1"
+                                                [matTooltip]="status.contact_sub_status_name">
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="mb-3 ">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label>Product</mat-label>
+                                        <mat-select formControlName="product_id">
+                                            <mat-option *ngFor="let product of products" [value]='product.id'>
+                                                {{product.product_name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="" for="cost">Deal Size</label>
+                                    <div class="input-group input-group-merge">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-8 p-0 m-0">
+                                                    <p-inputNumber styleClass="w-100"
+                                                        formControlName="cost"></p-inputNumber>
+                                                </div>
+                                                <div class="col-4 p-0 m-0">
+                                                    <p-dropdown tyleClass="w-100" [options]="CurrencyList"
+                                                        formControlName="selectedCurrency" optionLabel="currencyCode">
+                                                        <ng-template let-country pTemplate="item">
+                                                            <div class="country-item d-flex">
+                                                                <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                                    width="17px" height="20px"
+                                                                    [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                                <div>{{country.currencyName}}</div>
+                                                            </div>
+                                                        </ng-template>
+                                                    </p-dropdown>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- <div class="mb-3">
+                                    <label class="" for="Email">Email</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="email" id="Email" class="form-control" placeholder="john.doe@gmail.com" aria-label="john.doe" aria-describedby="basic-default-email2" formControlName="Email" />
+                                    </div>
+                                </div> -->
+                                <!-- <div class="mb-3">
+                                    <label class="" for="basic-default-phone">Phone No</label>
+                                    <div class="container p-0 m-0" *ngFor="let phone of contactPhones;let i=index">
+                                        <div class="row p-0 m-0">
+                                            <div class="col-7 p-0 m-0">
+                                                <input type="number" id="basic-default-phone" class="form-control phone-mask" [(ngModel)]="phone.phone" placeholder="658 799 8941" [ngModelOptions]="{standalone: true}" />
+                                            </div>
+                                            <div class="col-4 p-0 m-0">
+                                                <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" [(ngModel)]="phone.phone_type" [ngModelOptions]="{standalone: true}">
+                                                    <option value="Work">Work</option>
+                                                    <option value="Home">Home</option>
+                                                    <option value="Mobile">Mobile</option>
+                                                    <option value="Whatsapp">Whatsapp</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-1 p-0 m-0">
+                                                <i class="menu-icon tf-icons bx bx-trash trashIcon" (click)="deletePhone(i)"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text addPhone" *ngIf="contactPhones.length < 5">
+                                        <a href="javascript: void(0)" (click)="addPhone()">+ Add</a>
+
+                                    </div>
+
+
+                                </div> -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" data-bs-dismiss="modal" aria-label="Close"
+                        [disabled]="newLeadForm.invalid">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="addLead"
+    position="right" [transitionOptions]="'350ms'" (onHide)="newContactForm.reset()">
+    <!-- <div class="modal modal-top fade" id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document"> -->
+    <div class="">
+        <!-- <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">New Lead</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+        <form [formGroup]="newContactForm" (ngSubmit)="validateRequest()" class="example-form">
+            <div class="modal-body leadForm">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="">
+                                <app-form-input label="Title" [control]="newContactForm.get('title')"
+                                    placeholder="Write title"></app-form-input>
+                                <!-- <label class="" for="ContactPerson">Title</label>
+                                    <div class="input-group input-group-merge">
+                                        <span id="ContactPerson" class="input-group-text"><i class="bx bx-heading"></i
+                                        ></span>
+                                        <input class="form-control" type="text" id="ContactPerson" placeholder="RPA Bank Misr" formControlName="title" />
+                                    </div>
+                                    <mat-error class="alert help-block" *ngIf="!newContactForm.get('title')?.valid && newContactForm.get('title')?.touched">
+                                        Title Is Required
+                                    </mat-error> -->
+                            </div>
+                            <div class="mb-3">
+                                <label class=" text-dark" for="cost">Deal Size</label>
+                                <div class="input-group input-group-merge">
+                                    <div class="container-fluid">
+                                        <div class="row gap-4">
+                                            <div class="col-6 p-0 m-0">
+                                                <p-inputNumber styleClass="w-100"
+                                                    formControlName="cost"></p-inputNumber>
+                                            </div>
+                                            <div class="col-3 p-0 m-0">
+                                                <p-dropdown tyleClass="w-100" [options]="CurrencyList"
+                                                    formControlName="selectedCurrency" optionLabel="currencyCode">
+                                                    <ng-template let-country pTemplate="item">
+                                                        <div class="country-item d-flex">
+                                                            <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                                width="17px" height="20px"
+                                                                [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                            <div>{{country.currencyName}}</div>
+                                                        </div>
+                                                    </ng-template>
+                                                </p-dropdown>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class=" text-dark" for="Organization">Organization</label>
+                                <div class="input-group input-group-merge">
+                                    <span id="Organization" class="input-group-text">
+                                        <i class="bx bx-buildings"></i>
+                                    </span>
+                                    <input type="text" id="Organization" class="form-control" placeholder="ACME Inc."
+                                        formControlName="partner_id" [matAutocomplete]="auto">
+                                    <span class="input-group-text isnew" *ngIf="!!newOrgAdded">
+                                        <i class="bx bx-star"></i>
+                                        New
+                                    </span>
+                                </div>
+                                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                                    (optionSelected)="getFromHTML($event)">
+                                    <mat-option *ngFor="let partner of filteredOptions | async" [value]="partner">
+                                        {{partner.partner_name}}
+                                    </mat-option>
+                                    <mat-option *ngIf="!!addNewOrgnization" data-aos=""
+                                        class="text-center align-items-baseline">
+                                        <p (click)="openAddPartnerForm(newContactForm.get(['partner_id'])?.value);
+                                            newPartnerFormopened = true" class="" data-bs-toggle="modal"
+                                            data-bs-target="#organizationModal">
+                                            <i class="menu-icon tf-icons bx bx-plus"></i>Add New
+                                        </p>
+                                    </mat-option>
+                                </mat-autocomplete>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class=" text-dark" for="Contact">Contact</label>
+                                <app-loading-dots *ngIf="contactLoading"></app-loading-dots>
+                                <p-autoComplete *ngIf="!contactLoading" placeholder="Ex. Ahmed" [size]="50"
+                                    inputStyleClass="form-control" [completeOnFocus]="true" formControlName="contact_id"
+                                    [showEmptyMessage]="true" [suggestions]="filteredContacts"
+                                    (completeMethod)="filterContacts($event)" field="name"
+                                    [minLength]="1"></p-autoComplete>
+                                <a *ngIf="!!newContactForm.get(['partner_id'])?.value && !addNewOrgnization"
+                                    href="javascript: void(0)" data-bs-toggle="modal" data-bs-target="#contactModal"
+                                    (click)="newContactFormopened=true;openNewContactForm()">+ Add New Contact</a>
+                            </div>
+
+                            <!-- <div class="mb-3">
+                                    <label class="" for="address">Adress</label>
+                                    <input class="form-control" type="text" id="address" placeholder="6th October City" formControlName="address" />
+                                </div> -->
+
+
+                            <div class="mb-3 ">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class=" text-dark">Product</label>
+                                <mat-select formControlName="product_id" class="form-control">
+                                    <mat-option *ngFor="let product of products" [value]='product.id'>
+                                        {{product.product_name}}
+                                    </mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                        </div>
+                        <div class="col-lg-6">
+
+                            <div class="my-2 ">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class=" text-dark">Lead Source</label>
+                                <mat-select formControlName="campaign_id" class="form-control">
+                                    <mat-option *ngFor="let campaign of allCampaign" [value]='campaign.id'>
+                                        {{campaign.campagin_name}}
+                                    </mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+                            <div class="mb-3 ">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class=" text-dark">Labels</label>
+                                <mat-select formControlName="labels" multiple="true" class="form-control">
+                                    <mat-option *ngFor="let label of lables" [value]='label'>
+                                        <span class="labelOption"
+                                            [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                            {{label.label_name}}
+                                        </span>
+                                    </mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                            <div class="mb-3 " *ngIf="currentUser.department != departmentEnum.Business_Development">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class=" text-dark">Assign To Sales</label>
+                                <mat-select formControlName="sales_id" class="form-control">
+                                    <mat-option *ngFor="let sales of salesTeam" [value]='sales.key'>
+                                        {{sales.username}}
+                                    </mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+
+
+                            <div class="mb-3 ">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class=" text-dark mb-2">Type</label>
+                                <mat-select formControlName="type_id" class="form-control">
+                                    <mat-option *ngFor="let type of contactTypes" [value]='type.id'>
+                                        {{type.lead_type_name}}
+                                    </mat-option>
+                                </mat-select>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+
+
+                            <!-- <div class="mb-3 ">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label>Status</mat-label>
+                                        <mat-select formControlName="substatus_id">
+                                            <mat-option *ngFor="let status of contactSubStatus" [value]='status.id'>
+                                                {{status.contact_sub_status_name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div> -->
+
+                            <!-- <div class="mb-3 ">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label *ngIf="!subStatusLoading">Sub Status</mat-label>
+                                        <mat-label class="formLables">
+                                            <div class="loading-dots" *ngIf="subStatusLoading">
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                                <div class="loading-dots--dot"></div>
+                                            </div>
+                                        </mat-label>
+                                        <mat-select formControlName="substatus_id">
+                                            <mat-option *ngFor="let sub of contactSubStatus" [value]='sub.id'>
+                                                {{sub.contact_sub_status_name}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div> -->
+
+
+
+                            <!-- <div class="mb-3">
+                                    <label class="" for="Email">Email</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="email" id="Email" class="form-control" placeholder="john.doe@gmail.com" aria-label="john.doe" aria-describedby="basic-default-email2" formControlName="Email" />
+                                    </div>
+                                </div> -->
+                            <!-- <div class="mb-3">
+                                    <label class="" for="basic-default-phone">Phone No</label>
+                                    <div class="container p-0 m-0" *ngFor="let phone of contactPhones;let i=index">
+                                        <div class="row p-0 m-0">
+                                            <div class="col-7 p-0 m-0">
+                                                <input type="number" id="basic-default-phone" class="form-control phone-mask" [(ngModel)]="phone.phone" placeholder="658 799 8941" [ngModelOptions]="{standalone: true}" />
+                                            </div>
+                                            <div class="col-4 p-0 m-0">
+                                                <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" [(ngModel)]="phone.phone_type" [ngModelOptions]="{standalone: true}">
+                                                    <option value="Work">Work</option>
+                                                    <option value="Home">Home</option>
+                                                    <option value="Mobile">Mobile</option>
+                                                    <option value="Whatsapp">Whatsapp</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-1 p-0 m-0">
+                                                <i class="menu-icon tf-icons bx bx-trash trashIcon" (click)="deletePhone(i)"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text addPhone" *ngIf="contactPhones.length < 5">
+                                        <a href="javascript: void(0)" (click)="addPhone()">+ Add</a>
+
+                                    </div>
+
+
+                                </div> -->
+
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="mb-3">
+                                <label class=" text-dark" for="notes">Notes</label>
+                                <textarea id="notes" class="form-control" rows="5"
+                                    placeholder="Hi, Do you have a moment to talk Joe?"
+                                    formControlName="notes"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer row">
+                <button type="button" class="btn btn-outline-danger col-4" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="submit" class="btn btnStyle col-4" [disabled]="newContactForm.invalid">Save</button>
+            </div>
+        </form>
+
+    </div>
+
+
+
+
+</p-sidebar>
+<!-- </div>
+</div> -->
+
+<div class="modal modal-top fade" id="organizationModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content" *ngIf="!!newPartnerFormopened">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">New Organization</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    (click)="newPartnerFormopened = false"></button>
+            </div>
+
+            <div class="mb-3">
+                <form [formGroup]="newPartnerForm" (ngSubmit)="addPartner()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="Title">Name</label>
+                                        <div class="">
+                                            <input class="form-control" type="text" placeholder="Bank Misr"
+                                                formControlName="partner_name" [ngClass]="{'is-invalid':!newPartnerForm.get('partner_name')?.valid &&
+                                            newPartnerForm.get('partner_name')?.touched}" />
+                                            <small class="invalid-feedback"
+                                                *ngIf="!newPartnerForm.get('partner_name')?.valid && newPartnerForm.get('partner_name')?.touched">
+                                                Partner Name Is Required
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Industry</label>
+                                        <mat-select formControlName="industry" class="form-control" [ngClass]="{'is-invalid':!newPartnerForm.get('industry')?.valid &&
+                                            newPartnerForm.get('industry')?.touched}">
+                                            <mat-option *ngFor="let ind of partnerIndustry"
+                                                [value]="ind.id">{{ind.partner_industry_name}}</mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                        <small class="invalid-feedback"
+                                            *ngIf="!newPartnerForm.get('industry')?.valid && newPartnerForm.get('industry')?.touched">
+                                            Industry Is Required
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Type</label>
+                                        <mat-select formControlName="organize_type_id" class="form-control">
+                                            <mat-option *ngFor="let type of organizationTypes"
+                                                [value]="type.id">{{type.organize_type}}</mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6"
+                                    *ngIf="currentUser.department == departmentEnum.MANAGEMENT || (currentUser.department == departmentEnum.Business_Development && currentUser.accPosition== AccountPositionsEnum.MANAGER)">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Assign To Sales</label>
+                                        <mat-select formControlName="sales_id" class="form-control">
+                                            <mat-option value=""></mat-option>
+                                            <mat-option *ngFor="let sales of allSales"
+                                                [value]="sales.key">{{sales.username}}</mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="">Country</label>
+                                        <mat-select formControlName="country" class="form-control">
+                                            <mat-option *ngFor="let country of CurrencyList"
+                                                [value]="country.countryCode">
+                                                <div
+                                                    class="country-item d-flex align-items-center justify-content-start">
+                                                    <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                        width="17px" height="20px"
+                                                        [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                    <div>{{country.countryName}}</div>
+                                                </div>
+                                            </mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="email">Email</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex@Examble.com"
+                                                formControlName="email" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="phone">Phone</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="0123456789"
+                                                formControlName="phone" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="address">Address</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. 6 October"
+                                                formControlName="partner_address" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="Website">Website</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="url" placeholder="Website"
+                                                formControlName="website" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="description">Description</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Description"
+                                                formControlName="partner_description" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" (click)="newPartnerFormopened = false">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btnStyle" [disabled]="newPartnerForm.invalid">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal modal-top fade" id="contactModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content" *ngIf="!!newContactFormopened">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    (click)="newContactFormopened = false;"></button>
+            </div>
+
+            <div class="mb-3">
+                <form [formGroup]="newPersonContactForm" (ngSubmit)="createNewContact()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <app-form-input label="Name" [control]="newPersonContactForm.get('name')"
+                                            placeholder="Write Name"></app-form-input>
+                                        <!-- <label class="" for="Title">Name</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. Ahmed" formControlName="name" />
+                                        </div>
+                                        <mat-error class="alert help-block" *ngIf="!newPersonContactForm.get('name')?.valid && newPersonContactForm.get('name')?.touched">
+                                            Name Is Required
+                                        </mat-error> -->
+                                    </div>
+                                </div>
+
+                                <!-- <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <mat-form-field class="example-full-width w-100">
+                                            <mat-label class="formLables">Organization</mat-label>
+                                            <mat-select formControlName="partner_id" class="form-control">
+                                                <mat-option *ngFor="let part of allPartners" [value]="part.id">{{part.partner_name}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                        <mat-error class="alert help-block" *ngIf="!newPersonContactForm.get('partner_id')?.valid && newPersonContactForm.get('partner_id')?.touched">
+                                            Organization Is Required
+                                        </mat-error>
+                                    </div>
+                                </div> -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="email">Email</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex@Examble.com"
+                                                formControlName="email" />
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="address">Address</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. 6 October"
+                                                formControlName="address" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label class="" for="title">Title</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="CEO"
+                                                formControlName="title" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label class="" for="phone">Phone</label>
+                                        <ng-container formArrayName="phones">
+                                            <div *ngFor="let h of phones.controls; index as i">
+                                                <ng-container [formGroupName]="i">
+                                                    <div class="d-flex my-1">
+                                                        <div class="ci">
+                                                            <ngx-intl-tel-input [cssClass]="'form-control'"
+                                                                [preferredCountries]="preferredCountries"
+                                                                [enableAutoCountrySelect]="true"
+                                                                [enablePlaceholder]="true" [searchCountryFlag]="true"
+                                                                [searchCountryField]="[
+                                                            SearchCountryField.Iso2,
+                                                            SearchCountryField.Name
+                                                            ]" [selectFirstCountry]="false"
+                                                                [selectedCountryISO]="CountryISO.Egypt" [maxLength]="15"
+                                                                [phoneValidation]="true"
+                                                                [separateDialCode]="separateDialCode"
+                                                                [numberFormat]="PhoneNumberFormat.National" name="phone"
+                                                                formControlName="phone">
+                                                            </ngx-intl-tel-input>
+                                                        </div>
+
+                                                        <select class="form-select w-25" id="exampleFormControlSelect1"
+                                                            aria-label="Default select example"
+                                                            formControlName="phone_type">
+                                                            <option value="Work">Work</option>
+                                                            <option value="Home">Home</option>
+                                                            <option value="Mobile">Mobile</option>
+                                                            <option value="Whatsapp">Whatsapp</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+
+                                                        <div *ngIf="h['controls'].phone_type?.value == 'Work'">
+                                                            <input class="form-control" type="text"
+                                                                formControlName="extend" placeholder="extend">
+                                                        </div>
+
+                                                        <span *ngIf="i>0" (click)="delPhone(i)"
+                                                            class="material-icons delete mx-2 my-auto">
+                                                            delete
+                                                        </span>
+
+                                                        <button class="btn btn-outline-success mx-2" type="button"
+                                                            (click)="addPhone()"
+                                                            *ngIf="newPersonContactForm.get('phones')?.value.length < 5 && i==0">+</button>
+
+                                                    </div>
+                                                    <div *ngIf="h.touched && h.invalid" class="alert alert-danger">
+                                                        <div *ngIf="h['controls'].phone.errors?.required">Please enter
+                                                            Phone number</div>
+                                                        <div *ngIf="h['controls'].phone.invalid">Phone Not Valid</div>
+                                                        <div *ngIf="h['controls'].phone_type.errors?.required">Please
+                                                            enter Phone type</div>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </ng-container>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger"
+                            (click)="newContactFormopened = false;newPersonContactForm.reset()">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btnStyle"
+                            [disabled]="newPersonContactForm.invalid">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,435 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="reatingLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+<div class="container" style="min-height: 500px;">
+    <!-- <div class="row">
+        <div class="col-12">
+            <div class="pageHeader d-flex justify-content-between">
+                <div class="title d-flex justify-content-start">
+                    <i class="material-icons arrowIcon p-1" [routerLink]="['/manager/rating']">arrow_back</i>
+                    <h1>Rating Configurations</h1>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <div class="row">
+        <div class="col-12">
+            <mat-form-field class="example-full-width w-100">
+                <mat-label>Select Type</mat-label>
+                <mat-select [(ngModel)]="selectedQGType" (selectionChange)="selectQGType()">
+                    <mat-option *ngFor="let type of allQGTypes" [value]='type'>{{type.group_type_name}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+    </div>
+    <!-- && selectedQGType.id == '1' -->
+    <div class="card" *ngIf="!!selectedQGType">
+        <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="allQG" dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            [globalFilterFields]="['name','partner_name','email','address']">
+            <ng-template pTemplate="caption">
+                <div class="d-flex justify-content-between">
+
+                    <button *ngIf="currentUser.accRole == AccountRolesEnum.SUPER_USER" type="button" class="btn btn-outline-success mx-2" data-bs-toggle="modal" data-bs-target="#largeModal" (click)="openNewQuestionGroupModal()">
+                        <i class="menu-icon tf-icons bx bx-plus"></i>
+                        Add New
+                    </button>
+                    <div>
+                        <!-- <p-button label="Clear" class="p-button-outlined" label="Small" icon="pi pi-filter-slash" styleClass="p-button-sm" (click)="clear(dt1)"></p-button> -->
+
+                        <span class="p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" placeholder="Search keyword" />
+                        </span>
+                        <button pButton label="Clear" class="p-button-outlined p-button-sm mx-1" icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                    </div>
+
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Title
+                            <!-- <p-columnFilter type="text" field="name" display="menu"></p-columnFilter> -->
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Type
+                            <!-- <p-columnFilter type="text" field="partner_name" display="menu"></p-columnFilter> -->
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Users
+                            <!-- <p-columnFilter type="text" field="email" display="menu"></p-columnFilter> -->
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Status
+                        </div>
+                    </th>
+
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-qg>
+                <tr>
+                    <td>
+                        <a href="#questionSection" (click)="selectedQG = qg;selectQG()">{{qg.question_group_title}}</a>
+                    </td>
+                    <td>
+                        {{qg.group_sub_type_name}}
+                    </td>
+                    <td>
+                        {{qg.users}}
+                    </td>
+                    <td>
+                        {{qg.status == '0'? 'Deactivated': 'Active' }}
+                    </td>
+
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="updateQG(qg)" data-bs-toggle="modal" data-bs-target="#largeModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="changeQGStatus(qg)">
+                                    <i class="bx bx-lock me-1" *ngIf="qg.status == '1'"></i>
+                                    <i class="bx bx-lock-open me-1" *ngIf="qg.status == '0'"></i> {{qg.status == '1' ? 'Deactivate' : 'Activate'}}</a>
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="deleteQG(qg)"><i class="bx bx-trash me-1"></i> Delete</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7">No Data found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+    <ng-container *ngIf="!!selectedQG">
+        <!-- 
+        <div class="row">
+            <div class="col-12">
+                <div class="searchInput d-flex justify-content-center">
+                    <p-autoComplete [(ngModel)]="selectedQG" (onSelect)="selectQG()" placeholder="Ex. Developers Questions" [completeOnFocus]="true" [showEmptyMessage]="true" [suggestions]="filteredQG" (completeMethod)="filterQG($event)" field="question_group_title" [minLength]="1"
+                        [dropdown]="true"></p-autoComplete>
+                    <button *ngIf="currentUser.accRole == AccountRolesEnum.SUPER_USER" type="button" class="btn btn-outline-success mx-2" data-bs-toggle="modal" data-bs-target="#largeModal" (click)="openNewQuestionGroupModal()">
+                        <i class="menu-icon tf-icons bx bx-plus"></i>
+                        Add New
+                    </button>
+                </div>
+
+            </div>
+        </div>
+         -->
+        <div class="row" *ngIf="!!selectedQG">
+            <!-- <div class="col-12">
+                <div class="ctrQG">
+                    <h4>
+                        <span>
+                            {{selectedQG.question_group_title}}
+                        </span>
+                        <span class="material-icons edit" (click)="updateQG(selectedQG)" data-bs-toggle="modal" data-bs-target="#largeModal">
+                            edit
+                        </span>
+                        <span class="material-icons delete" (click)="deleteQG(selectedQG)">
+                            delete
+                       </span>
+                    </h4>
+                </div>
+            </div> -->
+
+
+            <div class="col-12 my-2">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <h3>
+                            {{selectedQG.question_group_title}}
+                        </h3>
+                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#questionModal" (click)="opennewQModal()">
+                            <i class="menu-icon tf-icons bx bx-plus"></i>
+                            Add Question
+                        </button>
+                    </div>
+                    <table class="table table-hover" #questionSection id="questionSection">
+                        <thead>
+                            <th>#</th>
+                            <th>Question</th>
+                            <th>Type</th>
+                            <th>Created By</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let q of QGQuestions;let i=index">
+                                <td>{{i+1}}</td>
+                                <td>{{q.question}}</td>
+                                <td>
+                                    {{q.question_type_name}}
+                                    <!-- <i class="menu-icon tf-icons bx bx-comment" *ngIf="q.rate == '0'"></i>
+                                    <i class="menu-icon tf-icons bx bx-star" *ngIf="q.rate == '1'"></i> {{q.rate == '1'? 'Rating' : 'Comment'}} -->
+                                </td>
+                                <td>{{q.user_creator_name}}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#questionModal" (click)="updateQusetion(q)"><i class="bx bx-edit-alt me-1"></i>Edit</a>
+                                            <a class="dropdown-item" href="javascript:void(0);" (click)="deleteQuestion(q)"><i class="bx bx-trash me-1"></i>Delete</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="QGQuestions.length == 0 && !!selectedQG">
+                                No Questions Found
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-12 my-2" *ngIf="selectedQG.group_sub_type_id == '4'">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#afrModal">
+                            <i class="menu-icon tf-icons bx bx-plus"></i>
+                            Ask For Rate
+                        </button>
+                    </div>
+                    <table class="table table-hover">
+                        <thead>
+                            <th>#</th>
+                            <th>User Rate Name</th>
+                            <th>User To Rate Name</th>
+                            <th>Status</th>
+                            <th>Created By</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let afr of AFR;let i=index">
+                                <td>{{i+1}}</td>
+                                <td>{{afr.user_rate_name}}</td>
+                                <td>{{afr.user_to_rate_name}}</td>
+                                <td>{{afr.status == '1' ? 'Done' : afr.status == '2' ? 'Rejected' : 'Pending'}}</td>
+                                <td>{{afr.user_creator_name}}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#afrModal" (click)="updateAskForRate(afr)"><i class="bx bx-edit-alt me-1"></i>Edit</a>
+                                            <a class="dropdown-item" href="javascript:void(0);" (click)="deleteAskForRate(afr)"><i class="bx bx-trash me-1"></i>Delete</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="AFR.length == 0 && !!selectedQG">
+                                No Ask For Rate Found
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>
+
+
+
+<!-- New Question Group Modal -->
+
+<div class="modal modal-top fade" id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">{{questionGroupOnEditMode ? 'Edit Question Group': 'New Question Group'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="questionGroupOnEditMode = false;newQGForm.reset()"></button>
+            </div>
+            <form [formGroup]="newQGForm" (ngSubmit)="submitQGForm()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="title">Title</label>
+                                    <input class="form-control" type="text" id="title" placeholder="Developers Questions" formControlName="title" />
+                                    <mat-error class="alert help-block" *ngIf="!newQGForm.get('title')?.valid && newQGForm.get('title')?.touched">
+                                        Title Is Required
+                                    </mat-error>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label>Type</mat-label>
+                                    <mat-select formControlName="type" (selectionChange)="checkIfNormal()">
+                                        <mat-option *ngFor="let subtype of allQGSubTypes" [value]='subtype.id'>{{subtype.group_sub_type}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-6" *ngIf="!!selectedQGType && (selectedQGType.id != '1' && newQGForm.get('type')?.value != '4')">
+                                <label>User Rate</label>
+                                <br>
+                                <p-multiSelect defaultLabel="Select Users" [options]="allUsers" display="chip" optionValue="key" formControlName="to" optionLabel="username"></p-multiSelect>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" (click)="questionGroupOnEditMode = false;newQGForm.reset()">
+                    Close
+                </button>
+                    <button type="submit" class="btn btn-success" [disabled]="newQGForm.invalid">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- New Question Modal -->
+
+<div class="modal modal-top fade" id="questionModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">{{questionOnEditMode ? 'Edit Question': 'New Question'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="newQForm" (ngSubmit)="submitQuestionForm()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label>Type</mat-label>
+                                    <mat-select formControlName="question_type" (selectionChange)="checkType()">
+                                        <mat-option *ngFor="let qtype of questionTypes" [value]='qtype.id'>{{qtype.question_type}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-12" *ngIf="!!newQForm.get('question_type')?.valid">
+                                <div class="mb-3">
+                                    <label class="form-label" for="question">Question</label>
+                                    <input class="form-control" type="text" id="question" placeholder="Technical Skills" formControlName="question" />
+                                    <mat-error class="alert help-block" *ngIf="!newQForm.get('question')?.valid && newQForm.get('question')?.touched">
+                                        Question Is Required
+                                    </mat-error>
+                                </div>
+
+                                <div class="mb-3" *ngIf="newQForm.get('question_type')?.value == '2'">
+                                    <label class="form-label" for="answer">Answers</label>
+                                    <ng-container formArrayName="answer">
+                                        <div class="d-flex my-1" *ngFor="let h of answers.controls; index as i" [formGroupName]="i">
+                                            <input class="form-control mx-1" type="text" placeholder="Answer" formControlName="answer" />
+                                            <span (click)="delAnswer(i)" class="material-icons delete">
+                                                delete
+                                            </span>
+                                        </div>
+                                    </ng-container>
+                                    <button class="btn btn-outline-info" type="button" (click)="addAnswer()">add</button>
+                                </div>
+
+                                <div class="mb-3" *ngIf="newQForm.get('question_type')?.value == '2'">
+                                    <label class="form-label" for="isMulti">User can choose more than one answer?</label>
+                                    <p-checkbox formControlName="isMulti" [binary]="true" inputId="binary"></p-checkbox>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+                    <button type="submit" class="btn btn-success" [disabled]="newQForm.invalid">Save</button>
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Ask For Modal -->
+
+<div class="modal modal-top fade" id="afrModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">{{AFROnEditMode ? 'Edit Ask For Rate': 'New Ask For Rate'}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form [formGroup]="newAFRForm" (ngSubmit)="submitAFRForm()" class="example-form">
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <!-- <mat-form-field class="example-full-width w-100">
+                                        <mat-label>User Rate</mat-label>
+                                        <mat-select multiple formControlName="user_rate_id" *ngIf="!AFROnEditMode">
+                                            <mat-option *ngFor="let user of allUsers" [value]='user.key'>{{user.username}}</mat-option>
+                                        </mat-select>
+                                        <mat-select formControlName="user_rate_id" *ngIf="!!AFROnEditMode">
+                                            <mat-option *ngFor="let user of allUsers" [value]='user.key'>{{user.username}}</mat-option>
+                                        </mat-select>
+                                        
+                                        <mat-error class="alert help-block" *ngIf="!newAFRForm.get('user_rate_id')?.valid && newAFRForm.get('user_rate_id')?.touched">
+                                            User Rate Is Required
+                                        </mat-error>
+                                    </mat-form-field> -->
+                                    <label>User Rate</label>
+                                    <br>
+                                    <p-multiSelect *ngIf="!AFROnEditMode" defaultLabel="Select Users" [options]="allUsers" display="chip" optionValue="key" formControlName="user_rate_id" optionLabel="username"></p-multiSelect>
+                                    <p-multiSelect *ngIf="!!AFROnEditMode" defaultLabel="Select Users" [options]="allUsers" display="chip" optionValue="key" formControlName="user_rate_id" optionLabel="username"></p-multiSelect>
+                                </div>
+
+                                <div class="mb-3">
+                                    <!-- <mat-form-field class="example-full-width w-100">
+                                        <mat-label>User To Rate</mat-label>
+                                        <mat-select multiple formControlName="user_to_rate_id" *ngIf="!AFROnEditMode">
+                                            <mat-option *ngFor="let user of allUsers" [value]='user.key'>{{user.username}}</mat-option>
+                                        </mat-select> 
+                                        
+                                        <mat-select formControlName="user_to_rate_id" *ngIf="!!AFROnEditMode">
+                                            <mat-option *ngFor="let user of allUsers" [value]='user.key'>{{user.username}}</mat-option>
+                                        </mat-select>
+                                        <mat-error class="alert help-block" *ngIf="!newAFRForm.get('user_to_rate_id')?.valid && newAFRForm.get('user_to_rate_id')?.touched">
+                                            User To Rate Is Required
+                                        </mat-error>
+                                    </mat-form-field> -->
+                                    <label>User To Rate</label>
+                                    <br>
+                                    <p-multiSelect *ngIf="!AFROnEditMode" defaultLabel="Select Users" [options]="allUsers" display="chip" optionValue="key" formControlName="user_to_rate_id" optionLabel="username"></p-multiSelect>
+                                    <p-multiSelect *ngIf="!!AFROnEditMode" defaultLabel="Select Users" [options]="allUsers" display="chip" optionValue="key" formControlName="user_to_rate_id" optionLabel="username"></p-multiSelect>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-success" [disabled]="newAFRForm.invalid">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

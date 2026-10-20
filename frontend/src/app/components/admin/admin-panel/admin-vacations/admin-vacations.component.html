@@ -1,0 +1,14 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 mt-3">
+            <mat-tab-group mat-align-tabs="left" class="mx-3 px-3">
+                <mat-tab label="Pending Requests">
+                    <app-pending-vacation-requests></app-pending-vacation-requests>
+                </mat-tab>
+                <mat-tab *ngIf="!!currentUser && (currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE)" label="Official Vacations">
+                    <app-official-vacations></app-official-vacations>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

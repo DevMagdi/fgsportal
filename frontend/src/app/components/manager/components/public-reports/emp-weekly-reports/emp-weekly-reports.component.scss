@@ -1,0 +1,133 @@
+@import '../../../../../colors';
+* {
+    font-family: $mainFontFamily;
+}
+
+.material-icons {
+    font-family: 'Material Icons' !important;
+}
+
+.developersMonthlyReport {
+    // background-color: $mainThemeColor;
+    color: #fff;
+    // margin: auto;
+    padding: 8px 16px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+
+}
+
+.returnReportToPending {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.spinner ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: $mainThemeColor !important;
+}
+
+.spinner {
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tasksTable {
+    // .days {
+    //     // border: solid 1px $mainThemeColor;
+    //     border-radius: 10px;
+    //     box-shadow: 0 0 5px rgba($mainThemeColor, 0.5);
+    //     color: $mainThemeColor;
+    // }
+    .days {
+        // border: solid 1px $mainThemeColor;
+        // border-radius: 10px;
+        // box-shadow: 0 0 5px rgba($mainThemeColor, 0.5);
+        color: $mainThemeColor;
+        border-bottom: 1px solid $subSubThemeColor;
+    }
+    .days-header{
+        color: $mainThemeColor;
+        border-bottom: 1px solid $mainThemeColor;
+        background-color: $softThemeColor;
+    }
+}
+::ng-deep .p-dropdown {
+    border-color:$mainThemeColor;
+    min-width: 100%;
+}
+.date-input{
+    height: 45px;
+}
+.newTableCustom{
+    tr{
+        td{
+
+            color: $mainThemeColor !important;
+        }
+    }
+}
+
+.task {
+    // border: solid 1px $mainThemeColor;
+    border-radius: 6px;
+    // box-shadow: 0 0 5px $mainThemeColor;
+    // background-color: white; //rgba($color: $mainThemeColor, $alpha: 0.5); // rgba(165, 55, 155, 0.5) ;
+    color: $mainThemeColor;
+    box-shadow: 0 0 5px rgba($mainThemeColor, 0.5);
+    .working {
+        font-family: $mainFontFamily;
+    }
+    // font-family: 'Lato', sans-serif !important;
+    .icon {
+        text-align: right;
+        .delete {
+            color: #dcdcdc !important;
+            cursor: pointer;
+        }
+        .edit {
+            color: $buttonMainBackgroundColor !important;
+            cursor: pointer;
+        }
+    }
+}
+
+.tabheader {
+    input,
+    select {
+        border: solid 1px $mainThemeColor;
+        color: $mainThemeColor;
+    }
+}
+
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: #100f0f;
+        line-height: 50px;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+        }
+    }
+}
+
+.resetBtn {
+    background-color: $mainThemeColor;
+    color: $whiteColor;
+}
+
+.positionForDownload {
+    position: relative;
+}
+
+.downloadFile {
+    position: absolute;
+    top: 0px;
+    right: -20%;
+    z-index: 99999;
+}

@@ -1,0 +1,488 @@
+@import '../../../../../colors';
+.newTaskBtn {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+}
+
+.routingLink {
+    cursor: pointer;
+}
+
+.full {
+    position: relative;
+}
+
+.empty {
+    position: absolute;
+    top: 0;
+    left: 0.6vw;
+}
+
+@media (max-width: 1080px) {
+    .empty {
+        left: 1vw;
+    }
+}
+
+.projectDetailsRow,
+.devDetailsData {
+    // box-shadow: -10px -10px 0px $mainThemeColor, 10px 10px 0px $mainThemeColor, 3px 7px 10px 0 rgba(0, 0, 0, 0.3);
+    background-color: $softThemeColor;
+    position: relative;
+    // min-height: 200px;
+    //  ::after {
+    //     content: "";
+    //     position: absolute;
+    //     bottom: -20px;
+    //     left: 10px;
+    //     width: inherit;
+    //     height: 200px;
+    //     z-index: -1;
+    //     background-color: $mainThemeColor;
+    // }
+    //  ::before {
+    //     content: "";
+    //     position: absolute;
+    //     top: -5px;
+    //     right: 10px;
+    //     width: inherit;
+    //     height: 200px;
+    //     z-index: -1;
+    //     background-color: $mainThemeColor;
+    // }
+    // .pData {
+    //     h2 {
+    //         font-family: $mainFontFamily;
+    //         // font-family: 'Lato', sans-serif !important;
+    //         font-size: 20px;
+    //         font-weight: bold;
+    //         font-stretch: normal;
+    //         font-style: normal;
+    //         letter-spacing: normal;
+    //         color: $mainThemeColor;
+    //     }
+    //     span {
+    //         font-family: $mainFontFamily;
+    //         // font-family: 'Lato', sans-serif !important;
+    //         font-size: 18px;
+    //         font-weight: normal;
+    //         font-stretch: normal;
+    //         font-style: normal;
+    //         letter-spacing: normal;
+    //         color: rgba($mainThemeColor, 0.8);
+    //     }
+    // }
+    .ctrBtns {
+        .edit {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete {
+            color: #a19ea0;
+        }
+        .save {
+            background-color: $buttonMainBackgroundColor;
+            color: #fff;
+            width: 80px;
+        }
+    }
+}
+
+.customerInfo {
+    min-height: fit-content;
+}
+
+.devsDetailsRow {
+    box-shadow: -10px -10px 0px $mainThemeColor, 10px 10px 0px $mainThemeColor, 3px 7px 10px 0 rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+    position: relative;
+    // min-height: 150px;
+    //  ::after {
+    //     content: "";
+    //     position: absolute;
+    //     bottom: 0px;
+    //     left: 10px;
+    //     width: inherit;
+    //     height: 150px;
+    //     z-index: -2;
+    //     background-color: $mainThemeColor;
+    // }
+    //  ::before {
+    //     content: "";
+    //     position: absolute;
+    //     top: 0px;
+    //     right: 10px;
+    //     width: inherit;
+    //     height: 150px;
+    //     z-index: -2;
+    //     background-color: $mainThemeColor;
+    // }
+    .dData {
+        h2 {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+            color: $mainThemeColor;
+        }
+        span,
+        ul {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+            color: rgba($mainThemeColor, 0.8);
+        }
+        li {
+            list-style-type: square;
+        }
+    }
+    .ctrBtns {
+        .edit,
+        .save {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete,
+        .cancel {
+            color: #a19ea0;
+        }
+    }
+}
+
+.spinner ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: $buttonMainBackgroundColor;
+}
+
+.empty ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: #ebebeb;
+}
+
+.material-icons,
+.Backward-arrow,
+.Group-131,
+.edit-alt {
+    cursor: pointer;
+}
+
+.hrLine {
+    height: 2px;
+    background-color: $mainThemeColor;
+}
+
+.headerTxt {
+    color: $mainThemeColor;
+}
+
+.clr {
+    clear: both;
+}
+
+.renewBTN {
+    background-color: $mainThemeColor;
+    color: white;
+}
+
+.submitFormBtn {
+    border-color: $mainThemeColor;
+    color: $mainThemeColor;
+}
+
+.pdd,
+.testing {
+    box-shadow: 3px 9px 11px 0 rgba(0, 0, 0, 0.25);
+    background-color: #fff;
+    min-height: 250px;
+    .tasksCol {
+        height: 247px;
+        border: solid 1px #a19ea0;
+        h2 {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        .taskData {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+    }
+    .ctrBtns {
+        .edit {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete {
+            color: #a19ea0;
+        }
+    }
+}
+
+.tasks {
+    .search {
+        input {
+            border: $mainThemeColor solid 1px;
+            border-radius: 0;
+        }
+        .material-icons {
+            color: #fff;
+            background-color: $mainThemeColor;
+        }
+    }
+    .supportMode {
+        .allTasks {
+            background-color: $buttonMainBackgroundColor;
+            color: #fff;
+            border-radius: 0px !important;
+            width: 200px;
+        }
+        .supportedTasks {
+            width: 200px;
+            background-color: $tabBackGround;
+            color: #100f0f;
+            border-radius: 0px !important;
+        }
+    }
+    .table {
+        .theader {
+            background-color: rgba($color: $buttonMainBackgroundColor, $alpha: 0.2);
+            color: $mainThemeColor;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .trow {
+            border-top: 2px solid $mainThemeColor;
+            color: $mainThemeColor;
+            .ctrBtns {
+                .edit {
+                    color: $mainThemeColor;
+                    opacity: 0;
+                }
+                .delete {
+                    color: #a19ea0;
+                    opacity: 0;
+                }
+            }
+            &:hover {
+                box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+                background-color: #fff;
+                .ctrBtns {
+                    .edit {
+                        opacity: 1;
+                    }
+                    .delete {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.commentsSection {
+    .newCommentBtn {
+        @extend .newTaskBtn;
+    }
+    .bdge {
+        height: 21px;
+        background-color: orange;
+        color: #fff;
+        font-size: 11px;
+        padding: 8px;
+        border-radius: 4px;
+        line-height: 3px
+    }
+    .comments {
+        text-decoration: underline;
+        text-underline-position: under;
+        cursor: pointer
+    }
+    .dot {
+        height: 7px;
+        width: 7px;
+        margin-top: 3px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block
+    }
+    .hit-voting:hover {
+        color: blue
+    }
+    .hit-voting {
+        cursor: pointer
+    }
+    .commented-section {
+        .delIcon {
+            opacity: 0;
+            color: #a19ea0;
+        }
+        &:hover {
+            box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+            background-color: #fff;
+            .delIcon {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+.front-side {
+    width: 440px;
+    height: 220px;
+    display: grid;
+    grid-template-columns: 2% 96% 2%;
+    grid-template-rows: 4% 92% 4%;
+    position: relative;
+    margin: 20px auto;
+    overflow: hidden;
+    box-shadow: 2px 5px 15px 0px $mainThemeColor;
+    background-color: $mainThemeColor;
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 150px);
+    grid-template-rows: repeat(8, 50px);
+    grid-gap: 8px;
+    width: 150px;
+    height: 400px;
+    transform: rotate(-45deg);
+}
+
+.black {
+    background-color: #fff;
+    grid-column: 2 / span 2;
+    grid-row: 1 / span 3;
+}
+
+.red1 {
+    background-color: $buttonMainBackgroundColor;
+    grid-row: 2 / span 5;
+}
+
+.red2 {
+    background-color: $mainThemeColor;
+    grid-column: 2 / span 2;
+    grid-row: 4/7;
+}
+
+.green {
+    background-color: $buttonMainBackgroundColor;
+    grid-column: 2/4;
+    grid-row: 7/9;
+}
+
+.info-grid {
+    grid-column: 2/3;
+    grid-row: 2/3;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.056);
+    box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.432);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    /*12px;*/
+    display: grid;
+    grid-template-columns: 15px repeat(3, 1fr) 15px;
+    grid-template-rows: repeat(3, 1fr);
+    line-height: 1px;
+}
+
+.info-grid .name {
+    h2 {
+        color: $mainThemeColor;
+        font-weight: 800;
+        font-family: $mainFontFamily;
+        margin-left: 20px;
+    }
+    grid-column: 2 / span 2;
+    grid-row: 1 / span 1;
+    margin-top: 8px;
+}
+
+.info-grid .name h5 {
+    font-weight: unset;
+}
+
+.info-grid .addr {
+    p {
+        color: #fff;
+        font-weight: 400;
+        font-family: $mainFontFamily;
+    }
+    grid-column: 2 / span 2;
+    grid-row: 3;
+}
+
+.info-grid .phoneNo {
+    p {
+        color: #fff;
+        font-weight: 400;
+        font-family: $mainFontFamily;
+    }
+    grid-column: 3 / span 2;
+    grid-row: 2;
+    text-align: end;
+}
+
+.info-grid .emailId {
+    p {
+        color: #fff;
+        font-weight: 400;
+        font-family: #fff;
+    }
+    grid-column: 3 / span 2;
+    grid-row: 3;
+    text-align: end;
+    font-size: 1.1em;
+}
+
+.name-tag h1,
+h3 {
+    margin: 2px;
+    font-weight: unset;
+}
+
+.credits {
+    margin-top: 40px;
+    text-align: center;
+    color: #343536;
+}
+
+.arrowIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.addIcon {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+.partner.dropdown-toggle{
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+.dropdown-toggle::after{
+    display: none;
+}
+.dropdown-menu-dark .dropdown-item{
+    color: black;
+    cursor: pointer;
+    &:hover{
+        color: $mainThemeColor;
+    }
+}

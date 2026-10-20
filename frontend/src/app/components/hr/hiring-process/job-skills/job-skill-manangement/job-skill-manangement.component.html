@@ -1,0 +1,26 @@
+
+<div>
+    <div class="sidebar-header">
+        <h1 class="main-color">
+            {{ jobSkill ? "Update Job Skill" : "Create Job Skill" }}
+        </h1>
+    </div>
+    <form [formGroup]="jobSkillForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+            <div class="col-lg-12">
+                <app-form-input label="Job Skill" [control]="jobSkillForm.get('job_skill')"
+                    placeholder="Write Job Skill"></app-form-input>
+            </div>
+            
+       
+        </div>
+
+        <div class="row my-4">
+            <div class="col-lg-12">
+                <button type="submit" class="btn btnStyle w-100">
+                    {{ jobSkill ? "Update" : "Create" }}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,181 @@
+<div class="card report-card mt-3">
+    <div class="card-body">
+        <form class="row g-3 mb-4" (ngSubmit)="applyFilters()">
+            <div class="col-md-4">
+                <label class="form-label">Sales </label>
+                <p-dropdown styleClass="w-100" [options]="allSales" optionLabel="username" optionValue="key"
+                    name="ac-sales-id" [(ngModel)]="filter.sales_id" [filter]="true" [showClear]="true"
+                    placeholder="Select Sales">
+                </p-dropdown>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Contact Lead </label>
+                <p-dropdown styleClass="w-100" [options]="allContactLeads" optionLabel="title" optionValue="id"
+                    name="ac-contact-lead-id" [(ngModel)]="filter.contact_lead_id" [filter]="true" [showClear]="true"
+                    placeholder="Select Contact Lead">
+                </p-dropdown>
+            </div>
+
+
+            <div class="col-md-4">
+                <label class="form-label">Activity Type </label>
+                <p-dropdown styleClass="w-100" [options]="ActivityTypesEnum | keyvalue" optionLabel="key"
+                    optionValue="value" name="ac-activity-type-id" [(ngModel)]="filter.activity_type_id"
+                    [showClear]="true" placeholder="Select Activity Type">
+                </p-dropdown>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Activity Status </label>
+                <p-dropdown styleClass="w-100" [options]="ActivityStatusEnum | keyvalue" optionLabel="key"
+                    optionValue="value" name="ac-activity-status-id" [(ngModel)]="filter.activity_status_id"
+                    [showClear]="true" placeholder="Select Activity Status">
+                </p-dropdown>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">From Date</label>
+                <p-calendar styleClass="w-100" appendTo="body" [showIcon]="true" dateFormat="yy-mm-dd"
+                    name="ac-from-date" [(ngModel)]="filter.from_date" placeholder="Select From Date">
+                </p-calendar>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">To Date</label>
+                <p-calendar styleClass="w-100" appendTo="body" [showIcon]="true" dateFormat="yy-mm-dd" name="ac-to-date"
+                    [(ngModel)]="filter.to_date" placeholder="Select To Date">
+                </p-calendar>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Activity Start Date</label>
+                <p-calendar styleClass="w-100" appendTo="body" [showIcon]="true" dateFormat="yy-mm-dd"
+                    name="ac-activity-start-date" [(ngModel)]="filter.activity_start_date"
+                    placeholder="Select Start Date">
+                </p-calendar>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Activity End Date</label>
+                <p-calendar styleClass="w-100" appendTo="body" [showIcon]="true" dateFormat="yy-mm-dd"
+                    name="ac-activity-end-date" [(ngModel)]="filter.activity_end_date" placeholder="Select End Date">
+                </p-calendar>
+            </div>
+
+            <div class="col-12" *ngIf="dateRangeError">
+                <small class="text-danger">{{dateRangeError}}</small>
+            </div>
+
+            <div class="col-12 d-flex gap-2 justify-content-end">
+                <button type="submit" class="btn btnStyle" [disabled]="loading">
+                    {{loading ? 'Loading...' : 'Apply Filters'}}
+                </button>
+                <button type="button" class="btn btn-outline-success" (click)="exportAllData()"
+                    [disabled]="loading || !report.length">
+                    Export All Data
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()">Reset</button>
+            </div>
+        </form>
+
+        <p-table class="prim-table my-4" [value]="report" [loading]="loading" responsiveLayout="scroll" [rows]="10"
+            [paginator]="true" [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            [rowsPerPageOptions]="[10, 25, 50]">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Contact Lead</th>
+                    <th>Lead Sub Status</th>
+                    <th>Activity Type</th>
+                    <th>Activity Status</th>
+                    <th>From Date</th>
+                    <th>To Date</th>
+                    <!-- <th>Comment</th> -->
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Partner</th>
+                    <th>Person Contact</th>
+                    <th>Product</th>
+                    <th>Duration</th>
+                    <th></th>
+
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-row>
+                <tr>
+
+                    <td>{{row?.contact_lead_name ||'--'}}</td>
+                    <td>{{row?.lead_sub_status_name || '--'}}</td>
+                    <td>{{row?.activity_type_name}}</td>
+                    <td>{{row?.activity_status_name}}</td>
+                    <td>{{row?.from_date | date:'medium'}}</td>
+                    <td>{{row?.to_date | date:'medium'}}</td>
+                    <!-- <td>{{row?.comment}}</td> -->
+                    <td>{{row?.email ||'--'}}</td>
+                    <td>{{row?.phone || '--'}}</td>
+                    <td>{{row?.partner_name || '--'}}</td>
+                    <td>{{row?.person_contact_name}}</td>
+                    <td>{{row?.product_name}}</td>
+                    <td>{{row?.duration}}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-primary btn-sm" (click)="openViewSidebar(row)">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="14">No data found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <p-sidebar [(visible)]="viewSidebarVisible" position="right" [autoZIndex]="false" [baseZIndex]="999"
+            styleClass="p-sidebar-md" *ngIf="selectedActivity">
+            <h4 class="mb-3">Activity Details</h4>
+
+            <app-activity-details-view [activity]="selectedActivity"></app-activity-details-view>
+        </p-sidebar>
+
+        <div style="display: none;">
+            <table id="activitiesReportExport">
+                <thead>
+                    <tr>
+                        <th>Contact Lead</th>
+                        <th>Lead Sub Status</th>
+                        <th>Activity Type</th>
+                        <th>Activity Status</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Partner</th>
+                        <th>Person Contact</th>
+                        <th>Product</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of report">
+                        <td>{{row?.contact_lead_name || '--'}}</td>
+                        <td>{{row?.lead_sub_status_name || '--'}}</td>
+                        <td>{{row?.activity_type_name || '--'}}</td>
+                        <td>{{row?.activity_status_name || '--'}}</td>
+                        <td>{{row?.from_date | date:'medium'}}</td>
+                        <td>{{row?.to_date | date:'medium'}}</td>
+                        <td>{{row?.email || '--'}}</td>
+                        <td>{{row?.phone || '--'}}</td>
+                        <td>{{row?.partner_name || '--'}}</td>
+                        <td>{{row?.person_contact_name || '--'}}</td>
+                        <td>{{row?.product_name || '--'}}</td>
+                        <td>{{row?.duration || '--'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

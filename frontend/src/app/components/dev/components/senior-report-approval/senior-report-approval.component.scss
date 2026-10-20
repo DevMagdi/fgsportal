@@ -1,0 +1,75 @@
+@import '../../../../colors';
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: $mainThemeColor;
+        line-height: 50px;
+        font-family: $mainFontFamily;
+        font-weight: 800;
+        text-align: center;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+            text-align: center;
+            font-family: $mainFontFamily;
+            color: $mainThemeColor;
+            font-weight: 500;
+            .dateStyle,
+            .finalTotal {
+                font-family: $mainFontFamily;
+                font-weight: 800;
+                color: $mainThemeColor;
+            }
+        }
+    }
+}
+
+.approvalBtn {
+    background-color: $mainThemeColor;
+    color: #fff;
+}
+
+.rejectBtn {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+}
+
+.myReports {
+    background-color: $mainThemeColor;
+    color: #fff;
+    border-radius: 0px !important;
+    width: 200px;
+}
+
+.allReports {
+    width: 200px;
+    background-color: $tabBackGround;
+    color: #100f0f;
+    border-radius: 0px !important;
+}
+
+.cardHeader {
+    color: $mainThemeColor;
+    font-size: larger;
+    font-weight: 600;
+    font-family: $mainFontFamily;
+}
+
+.myCardStyle {
+    color: $mainThemeColor;
+    font-family: $mainFontFamily;
+    .cardImg {
+        border: solid 2px $buttonMainBackgroundColor;
+    }
+    .empName {
+        font-weight: 600;
+    }
+    .myLable {
+        font-weight: 600;
+    }
+    .optionColor {
+        color: $buttonMainBackgroundColor;
+    }
+}

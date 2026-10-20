@@ -1,0 +1,992 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="orgDetailsLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+<div class="leadDetails mt-5" *ngIf="!!currentOrgDetails">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between">
+                    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">
+                            <i class="pi pi-arrow-left backIcon mr-1" [routerLink]="['/CRM/accounts/']"></i>
+                            CRM /Organizations / </span>{{currentOrgDetails.partner_name}}
+                    </h4>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid" style="min-height: 100vh;">
+        <div class="row my-2">
+            <div class="col-12">
+                <div class=" mainInfo">
+                    <div class="container-fluid">
+                        <div class="row p-2">
+                            <div class="col-md-3 mt-2">
+                                <div class="d-flex justify-content-start">
+
+                                    <div class="leadName d-flex gap-2 align-items-center">
+                                        <div>
+                                            <div class="logo">
+                                                <p-image *ngIf="!imgOnEditMode && !!currentOrgDetails.partner_photoURL"
+                                                    src="{{newServerApi}}{{currentOrgDetails.partner_photoURL}}"
+                                                    alt="LOGO" width="80px" height="80px" [preview]="true"></p-image>
+                                                <div *ngIf="!imgOnEditMode">
+                                                    <a type="button" class="text-decoration-underline fs-6"
+                                                        (click)="editProfileIMG()">Edit Avatar</a>
+                                                </div>
+                                                <div *ngIf="imgOnEditMode">
+                                                    <img [src]="url" alt="Logo" width="100px">
+                                                    <br>
+                                                    <button type="button" mat-raised-button
+                                                        (click)="fileInput.click()">Choose File</button>
+                                                    <input hidden (change)="imageupload($event)" #fileInput type="file"
+                                                        id="file" accept="image/*">
+                                                    <br>
+                                                    <br>
+                                                    <button class="btn btn-info mx-2"
+                                                        (click)="saveEditIMg()">Save</button>
+                                                    <button class="btn btn-light mx-2"
+                                                        (click)="cancelEditIMg()">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+
+                                            <p (click)="openEditCurrentOrgDetails('name')">
+                                                {{currentOrgDetails.partner_name}}
+                                            </p>
+                                            <div class="myDialog card" *ngIf="!!editName" data-aos="fade-in">
+                                                <div class="dHeader my-2">
+                                                    Rename this Organization:
+                                                </div>
+                                                <div class="dContent my-2">
+                                                    <input type="text" class="form-control" [(ngModel)]="newValue">
+                                                </div>
+                                                <div class="card-footer dFooter">
+                                                    <button class="btn cancelBTN mx-1"
+                                                        (click)="editName = !editName;cancelEdit()">cancel</button>
+                                                    <button class="btn saveBTN mx-1"
+                                                        (click)="saveEditOrg('name')">Save</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="product">
+                                        <a href="javascript:void(0);" *ngIf="!!currentOrgDetails.partner_industry_name"
+                                            class="addProduct ml-2" (click)="openEditCurrentOrgDetails('industry')">
+                                            {{currentOrgDetails.partner_industry_name}}
+                                        </a>
+                                        <a href="javascript:void(0);" *ngIf="!currentOrgDetails.partner_industry_name"
+                                            class="addProduct ml-2" (click)="openEditCurrentOrgDetails('industry')">
+                                            + Add Industry
+                                        </a>
+                                        <div class="myDialog card" *ngIf="!!editIndustry" data-aos="fade-in">
+                                            <div class="dHeader my-2">
+                                                Add products:
+                                            </div>
+                                            <div class="dContent my-2">
+                                                <mat-select class="form-control" [(ngModel)]="newValue">
+                                                    <mat-option *ngFor="let ind of partnerIndustry"
+                                                        [value]='ind.id'>{{ind.partner_industry_name}}</mat-option>
+                                                </mat-select>
+                                            </div>
+                                            <div class="card-footer dFooter">
+                                                <button class="btn cancelBTN mx-1"
+                                                    (click)="cancelEdit()">cancel</button>
+                                                <button class="btn saveBTN mx-1"
+                                                    (click)="saveEditOrg('partner_industry_id')">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="closeDate">
+                                    <p (click)="openEditCurrentOrgDetails('description')">
+                                        <span *ngIf="!!currentOrgDetails.partner_description">
+                                            {{currentOrgDetails.partner_description}}
+                                        </span>
+                                        <span *ngIf="!currentOrgDetails.partner_description">
+                                            + Description
+                                        </span>
+                                    </p>
+                                    <div class="myDialog card" *ngIf="!!editDescription" data-aos="fade-in">
+                                        <div class="dHeader my-2">
+                                            Description:
+                                        </div>
+                                        <div class="dContent my-2">
+                                            <textarea class="form-control" [(ngModel)]="newValue"
+                                                placeholder="Description"></textarea>
+                                        </div>
+                                        <div class="card-footer dFooter">
+                                            <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                                            <button class="btn saveBTN mx-1"
+                                                (click)="saveEditOrg('partner_description')">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7 text-center mt-2 detail">
+                                <div class="d-sm-flex justify-content-between">
+
+                                    <div class="container-fluid ">
+                                        <div class="row">
+                                            <div class="col-4 text-left">
+                                                <p class="dLabel">
+                                                    Type
+                                                </p>
+                                            </div>
+                                            <div class="col-8 text-left fw-bold value">
+                                                <p *ngIf="!editType" (click)="openEditCurrentOrgDetails('type')"
+                                                    class="dData">
+                                                    <span *ngIf="!!currentOrgDetails.organize_type_name">
+                                                        {{currentOrgDetails.organize_type_name}}
+                                                    </span>
+                                                    <span *ngIf="!currentOrgDetails.organize_type_name">
+                                                        + Add Type
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editType" data-aos="fade-in">
+                                                    <mat-select class="form-control" [(ngModel)]="newValue">
+                                                        <mat-option *ngFor="let type of organizationTypes"
+                                                            [value]='type.id'>{{type.organize_type}}</mat-option>
+                                                    </mat-select>
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1"
+                                                            (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn saveBTN mx-1"
+                                                            (click)="saveEditOrg('organize_type_id')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 text-left">
+                                                <p class="dLabel">
+                                                    Country
+                                                </p>
+                                            </div>
+                                            <div class="col-8 text-left fw-bold value">
+                                                <p *ngIf="!editCountry" (click)="openEditCurrentOrgDetails('country')"
+                                                    class="dData">
+                                                    <span *ngIf="!!currentOrgDetails.country">
+                                                        {{getCountry(currentOrgDetails.country)?.countryName}}
+                                                    </span>
+                                                    <span *ngIf="!currentOrgDetails.country">
+                                                        + Add Country
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editCountry" data-aos="fade-in">
+                                                    <mat-select class="form-control" [(ngModel)]="newValue">
+                                                        <mat-option *ngFor="let country of CurrencyList"
+                                                            [value]="country.countryCode">
+                                                            <div
+                                                                class="country-item d-flex align-items-center justify-content-start">
+                                                                <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                                    width="17px" height="20px"
+                                                                    [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                                <div>{{country.countryName}}</div>
+                                                            </div>
+                                                        </mat-option>
+                                                    </mat-select>
+
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1"
+                                                            (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn saveBTN mx-1"
+                                                            (click)="saveEditOrg('country')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-4 text-left">
+                                                <p class="dLabel">
+                                                    Address
+                                                </p>
+                                            </div>
+                                            <div class="col-8 text-left fw-bold value">
+                                                <p *ngIf="!editAddress" (click)="openEditCurrentOrgDetails('address')"
+                                                    class="dData">
+                                                    <span *ngIf="!!currentOrgDetails.partner_address">
+                                                        {{currentOrgDetails.partner_address}}
+                                                    </span>
+                                                    <span *ngIf="!currentOrgDetails.partner_address">
+                                                        + Add Address
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editAddress" data-aos="fade-in">
+                                                    <input type="text" class="form-control" [(ngModel)]="newValue">
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1"
+                                                            (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn saveBTN mx-1"
+                                                            (click)="saveEditOrg('partner_address')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-4 text-left">
+                                                <p class="dLabel">
+                                                    Email
+                                                </p>
+                                            </div>
+                                            <div class="col-8 text-left fw-bold value">
+                                                <p *ngIf="!editEmail" (click)="openEditCurrentOrgDetails('email')"
+                                                    class="dData">
+                                                    <span *ngIf="!!currentOrgDetails.email">
+                                                        {{currentOrgDetails.email}}
+                                                    </span>
+                                                    <span *ngIf="!currentOrgDetails.email">
+                                                        + Add Email
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editEmail" data-aos="fade-in">
+                                                    <input type="text" class="form-control" [(ngModel)]="newValue">
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1"
+                                                            (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn saveBTN mx-1"
+                                                            (click)="saveEditOrg('email')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 text-left">
+                                                <p class="dLabel">
+                                                    Phone
+                                                </p>
+                                            </div>
+                                            <div class="col-8 text-left fw-bold value">
+                                                <p *ngIf="!editPhone" (click)="openEditCurrentOrgDetails('phone')"
+                                                    class="dData">
+                                                    <span *ngIf="!!currentOrgDetails.phone">
+                                                        {{currentOrgDetails.phone}}
+                                                    </span>
+                                                    <span *ngIf="!currentOrgDetails.phone">
+                                                        + Add Phone
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editPhone" data-aos="fade-in">
+                                                    <input type="text" class="form-control" [(ngModel)]="newValue">
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1"
+                                                            (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn saveBTN mx-1"
+                                                            (click)="saveEditOrg('phone')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 text-left">
+                                                <p class="dLabel">
+                                                    Website
+                                                </p>
+                                            </div>
+                                            <div class="col-8 text-left fw-bold value">
+                                                <p *ngIf="!editWebsite" (click)="openEditCurrentOrgDetails('website')"
+                                                    class="dData">
+                                                    <span *ngIf="!!currentOrgDetails.website">
+                                                        {{currentOrgDetails.website}}
+                                                    </span>
+                                                    <span *ngIf="!currentOrgDetails.website">
+                                                        + Add Website
+                                                    </span>
+                                                </p>
+                                                <div *ngIf="!!editWebsite" data-aos="fade-in">
+                                                    <input type="text" class="form-control" [(ngModel)]="newValue">
+                                                    <div class="formFooter my-2">
+                                                        <button class="btn cancelBTN mx-1"
+                                                            (click)="cancelEdit()">Cancel</button>
+                                                        <button class="btn saveBTN mx-1"
+                                                            (click)="saveEditOrg('website')">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-2 d-flex justify-content-md-end mt-2">
+                                <div class="closeLead ">
+                                    <div class="owner mx-1">
+                                        <span class="material-icons mx-1 ">
+                                            account_circle
+                                        </span>
+                                        <div class="OwnerData mx-1 ">
+                                            <p class="salesName">
+                                                {{currentOrgDetails.sales_name ? currentOrgDetails.sales_name :
+                                                currentOrgDetails.user_creator_name}}
+                                                <i class="pi pi-angle-down"
+                                                    *ngIf="currentUser.department == departmentEnum.MANAGEMENT || (currentUser.department == departmentEnum.Business_Development && currentUser.accPosition == AccountPositionsEnum.MANAGER)"
+                                                    (click)="openEditCurrentOrgDetails('sales_id')"></i>
+                                            </p>
+                                            <p class="ownerTXT ">
+                                                Owner
+                                            </p>
+
+                                            <div class="myDialog card" *ngIf="!!editOwner" data-aos="fade-in">
+                                                <div class="dHeader my-2">
+                                                    Transfer ownership:
+                                                </div>
+                                                <div class="dContent my-2">
+                                                    <mat-select class="form-control" [(ngModel)]="newValue">
+                                                        <mat-option *ngFor="let sales of salesTeam"
+                                                            [value]='sales.key'>{{sales.username}}</mat-option>
+                                                    </mat-select>
+                                                </div>
+                                                <div class="dFooter my-2">
+                                                    <button class="btn cancelBTN m-1"
+                                                        (click)="editOwner = !editOwner;cancelEdit()">cancel</button>
+                                                    <button class="btn saveBTN m-1"
+                                                        (click)="saveEditOrg('sales_id')">Save</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="winAndLose mx-1">
+                                        <p-splitButton styleClass="p-button-success mx-1 p-button-sm" icon="pi pi-plus" label="Opportunity" (onClick)="openAddOppModal.click()" [model]="items"></p-splitButton>
+                                        <button #openAddOppModal id="openAddOppModal" style="display: none;" data-bs-toggle="modal" data-bs-target="#oppModal" (click)="isLead = false;openAddLeadForm();"></button>
+                                        <button id="openAddLeadModal" style="display: none;" data-bs-toggle="modal" data-bs-target="#oppModal" (click)="isLead = true;openAddLeadForm();"></button>
+                                        
+                                        <button id="openAddContactModal" style="display: none;" data-bs-toggle="modal" data-bs-target="#contactModal"
+                                        (click)="sidebarDisplay=true"></button>
+                                    </div> -->
+                                    <div class="dropdown"
+                                        *ngIf="currentUser.department == departmentEnum.MANAGEMENT || (currentUser.department == departmentEnum.Business_Development && currentUser.accPosition == AccountPositionsEnum.MANAGER)">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                            data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <!-- <a class="dropdown-item" href="javascript:void(0);"  data-bs-toggle="modal" data-bs-target="#oppModal" (onClick)="openAddLeadForm()">+ Add New Opportunity</a> -->
+                                            <!-- <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#oppModal" (click)="isLead = true;openAddLeadForm();">+ Add New Lead</a> -->
+                                            <a class="dropdown-item" href="javascript:void(0);"
+                                                (click)="switchIsOrg()"><i class="bx bx-edit-alt me-1"></i> Mark As
+                                                {{currentOrgDetails.is_org == '1' ? 'Client' : 'Not Client'}}</a>
+                                            <a class="dropdown-item" href="javascript:void(0);"
+                                                (click)="deletePart()"><i class="bx bx-trash me-1"></i> Delete</a>
+                                            <!-- <a class="dropdown-item" href="javascript:void(0);" (click)="sidebarDisplay=true">+ Add new Contact</a> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-start">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-3 mb-2">
+                <div class="leadActivity ">
+                    <div class="card">
+                        <div class="ms-2 my-card-title py-3 pt-4">
+                            Contacts
+                        </div>
+                        <div class="">
+                            <div class="container-fluid list">
+                                <div class="item-card my-2" *ngFor="let contact of myPersonContacts;let i=index">
+                                    <div class="card-body">
+
+                                        <div class="name">
+                                            <p class="font-bold"> {{contact.name}}</p>
+                                        </div>
+                                        <div class="mb-1">
+                                            <span *ngIf="!!contact.email">
+                                                <a class="text-muted"
+                                                    href="mailto:{{contact.email}}?subject=welcome from FGS &body=Hello,{{contact.name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}"
+                                                    target="_blank" rel="noopener noreferrer">{{contact.email}}</a>
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <span *ngIf="!!contact.phone && !!contact.phone[0]">
+                                                <a class="text-muted"
+                                                    href="tel:{{contact.phone[0].country_code}}{{contact.phone[0].phone}}">{{contact.phone[0].phone}}</a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-2 text-center">
+                                <a class="addBtn btn w-100" href="javascript: void(0)" (click)="sidebarDisplay=true">+
+                                    Add New Contact</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <div class="leadActivity">
+                    <div class="card">
+                        <div class="ms-2 my-card-title py-3">
+                            <p>Leads</p>
+                        </div>
+                        <div class="">
+                            <div class="container-fluid list">
+
+                                <div class="item-card p-3 my-1" *ngFor="let opp of myLeads">
+                                    <div class="car-body">
+
+                                        <div class="name">
+                                            <p class="font-bold">{{opp.product_name}}</p>
+                                        </div>
+                                        <a class="text-muted mb-2" [routerLink]="['/CRM/leads',opp.id]">{{opp.title}} -
+                                            {{opp.cost | currency:opp.currency?opp.currency:''}}</a>
+                                        <br>
+                                        <span class="activityDate text-muted">
+                                            {{opp.created_at | date:'medium'}} . {{opp.sales_name ? opp.sales_name :
+                                            opp.user_creator_name}}
+                                        </span>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                            <div class="p-2 text-center">
+                                <a class="addBtn btn w-100" href="javascript: void(0)"
+                                    (click)="oopDisplay=true;isLead = true;openAddLeadForm();">+ Add New Lead</a>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <div class="leadActivity">
+                    <div class="card">
+
+                        <div class="ms-2 my-card-title py-3">
+                            <p>Opportunities</p>
+                        </div>
+                        <div class="">
+                            <div class="container-fluid list">
+                                <div class="item-card my-1" *ngFor="let opp of myOpps">
+
+                                    <div class="card-body">
+                                        <div class="">
+                                            <p class="font-bold name">{{opp.product_name}}</p>
+                                            <p class="font-bold name">{{opp.lead_sub_status_name}}</p>
+                                        </div>
+                                        <div class="">
+                                            <a class="text-muted" [routerLink]="['/CRM/leads',opp.id]">{{opp.title}} -
+                                                {{opp.cost | currency:opp.currency?opp.currency:''}}</a>
+                                            <br>
+                                            <span class="activityDate text-muted">
+                                                {{opp.created_at | date:'medium'}} . {{opp.sales_name ? opp.sales_name :
+                                                opp.user_creator_name}}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="p-2 text-center">
+                                <a class="addBtn btn w-100" href="javascript: void(0)"
+                                    (click)="oopDisplay=true;openAddLeadForm();">+ Add New Opportunity</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="leadActivity">
+                    <div class="card">
+
+                        <div class="ms-2 my-card-title py-3">
+                            <p>Activities</p>
+                        </div>
+                        <div class="">
+                            <div class="container-fluid list">
+                                <div class="item-card my-1" *ngFor="let activity of leadActivities">
+                                    <div class="card-body">
+                                        <div class="name">
+                                            <p class="font-bold">{{activity.activity_type_name || 'Activity'}}</p>
+                                        </div>
+                                        <div class="mb-1">
+                                            <a class="text-muted"
+                                                [routerLink]="['/CRM/leads' , activity.contact_lead_id]">
+                                                {{activity.contact_lead_name}} -
+                                                {{activity.comment}}
+
+                                            </a>
+                                        </div>
+                                        <div class="">
+                                            <span class="activityDate text-muted">
+                                                {{activity.from_date | date:'medium'}} . {{activity.createdBy_name}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-2 text-center">
+                                <a class="addBtn btn w-100" (click)="showActivityForm=true">+
+                                    Add New Activity</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================= Add Contact Modal ========================================= -->
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="sidebarDisplay"
+    position="right" [transitionOptions]="'350ms'">
+    <!-- <div class="modal fade" id="contactModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content"> -->
+    <!-- <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+    <h3 class="modal-title fw-bold" id="modalCenter">Add New Contact</h3>
+    <form [formGroup]="newPersonContactForm" (ngSubmit)="createNewContact()" class="example-form add-form">
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label" for="Title">Name</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="text" placeholder="Write name"
+                                    formControlName="name" />
+                            </div>
+                            <mat-error class="alert help-block"
+                                *ngIf="!newPersonContactForm.get('name')?.valid && newPersonContactForm.get('name')?.touched">
+                                Name Is Required
+                            </mat-error>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label" for="email">Email</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="text" placeholder="Write Email Address"
+                                    formControlName="email" />
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label" for="phone">Phone</label>
+                            <ng-container formArrayName="phones">
+                                <div class="align-items-center" *ngFor="let h of phones.controls; index as i">
+                                    <ng-container [formGroupName]="i">
+                                        <div class="d-flex my-1">
+                                            <div class="ci">
+                                                <ngx-intl-tel-input [cssClass]="'form-control'"
+                                                    [preferredCountries]="preferredCountries"
+                                                    [enableAutoCountrySelect]="true" [enablePlaceholder]="true"
+                                                    [searchCountryFlag]="true" [searchCountryField]="[
+                                                            SearchCountryField.Iso2,
+                                                            SearchCountryField.Name
+                                                            ]" [selectFirstCountry]="false"
+                                                    [selectedCountryISO]="CountryISO.Egypt" [maxLength]="15"
+                                                    [phoneValidation]="true" [separateDialCode]="separateDialCode"
+                                                    [numberFormat]="PhoneNumberFormat.National" name="phone"
+                                                    formControlName="phone">
+                                                </ngx-intl-tel-input>
+                                            </div>
+
+                                            <select class="form-select w-25" id="exampleFormControlSelect1"
+                                                aria-label="Default select example" formControlName="phone_type">
+                                                <option value="Work">Work</option>
+                                                <option value="Home">Home</option>
+                                                <option value="Mobile">Mobile</option>
+                                                <option value="Whatsapp">Whatsapp</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                            <span (click)="delPhone(i)" class="material-icons delete my-auto">
+                                                delete
+                                            </span>
+                                        </div>
+                                        <div *ngIf="h['controls'].phone_type?.value == 'Work'">
+                                            <input class="form-control" type="text" formControlName="extend"
+                                                placeholder="extend">
+                                        </div>
+                                        <div *ngIf="h.touched && h.invalid" class="alert alert-danger">
+                                            <div *ngIf="h['controls'].phone.errors?.required">Please enter Phone number
+                                            </div>
+                                            <div *ngIf="h['controls'].phone.invalid">Phone Not Valid</div>
+                                            <div *ngIf="h['controls'].phone_type.errors?.required">Please enter Phone
+                                                type</div>
+                                        </div>
+                                    </ng-container>
+
+                                </div>
+                            </ng-container>
+                            <button class="btn btnOutLine mt-2"
+                                *ngIf="newPersonContactForm.get('phones')?.value.length < 5" type="button"
+                                (click)="addPhone()">add new phone number</button>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label" for="address">Address</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="text" placeholder="Write Address"
+                                    formControlName="address" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label" for="title">Title</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="text" placeholder="Write Title"
+                                    formControlName="title" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" (click)="sidebarDisplay=false" class="btn btn-outline-secondary"
+                data-bs-dismiss="modal" aria-label="Close">
+                Close
+            </button>
+            <button type="submit" class="btn btnStyle" [disabled]="newPersonContactForm.invalid" data-bs-dismiss="modal"
+                aria-label="Close">Save</button>
+        </div>
+    </form>
+
+    <!-- </div>
+    </div>
+</div> -->
+</p-sidebar>
+
+
+<!-- ============================================= Add Opp Modal ========================================= -->
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="oopDisplay"
+    position="right" [transitionOptions]="'350ms'" (onHide)="isLead=false">
+    <!-- <div class="modal fade" id="oppModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" *ngIf="!newContactFormopened"> -->
+    <!-- <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div> -->
+    <h5 class="modal-title" id="modalCenter">New {{!!isLead ? 'Lead' :'Opportunity'}}</h5>
+    <form [formGroup]="newLeadForm" (ngSubmit)="createNewLead()" class="example-form">
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" for="ContactPerson">Title</label>
+                            <div class="input-group input-group-merge">
+                                <span id="ContactPerson" class="input-group-text"><i class="bx bx-heading"></i></span>
+                                <input class="form-control" type="text" id="ContactPerson" placeholder="RPA Bank Misr"
+                                    formControlName="title" />
+                            </div>
+                            <mat-error class="alert help-block"
+                                *ngIf="!newLeadForm.get('title')?.valid && newLeadForm.get('title')?.touched">
+                                Title Is Required
+                            </mat-error>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="Contact">Contact</label>
+                            <app-loading-dots *ngIf="contactLoading"></app-loading-dots>
+                            <p-autoComplete *ngIf="!contactLoading" placeholder="Ex. Ahmed" [size]="50"
+                                inputStyleClass="form-control" [completeOnFocus]="true" formControlName="contact_id"
+                                [showEmptyMessage]="true" [suggestions]="filteredContacts"
+                                (completeMethod)="filterContacts($event)" field="name" [minLength]="1"></p-autoComplete>
+                            <a href="javascript: void(0)" href="javascript: void(0)" data-bs-toggle="modal"
+                                data-bs-target="#contactModal2" (click)="newContactFormopened=true">+ Add New
+                                Contact</a>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="notes">Notes</label>
+                            <textarea id="notes" class="form-control"
+                                placeholder="Hi, Do you have a moment to talk Joe?" formControlName="notes"></textarea>
+                        </div>
+                        <div class="mb-3 ">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>Labels</mat-label>
+                                <mat-select [compareWith]="comparer" formControlName="labels" multiple="true">
+                                    <mat-option *ngFor="let label of lables" [value]='label'>
+                                        <span class="labelOption"
+                                            [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                            {{label.label_name}}
+                                        </span>
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="mb-3 " *ngIf="currentUser.department != departmentEnum.Business_Development">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>Assign To Sales</mat-label>
+                                <mat-select formControlName="sales_id">
+                                    <mat-option *ngFor="let sales of salesTeam" [value]='sales.key'>
+                                        {{sales.username}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3 ">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>Type</mat-label>
+                                <mat-select formControlName="type_id">
+                                    <mat-option *ngFor="let type of contactTypes" [value]='type.id'>
+                                        {{type.lead_type_name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="mb-3 ">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>Lead Source</mat-label>
+                                <mat-select formControlName="campaign_id">
+                                    <mat-option *ngFor="let campaign of allCampaign" [value]='campaign.id'>
+                                        {{campaign.campagin_name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="mb-3" *ngIf="!isLead">
+                            <label class="form-label" for="address">Expected Close Date</label>
+                            <input class="form-control" type="date" id="address" placeholder="6th October City"
+                                formControlName="expected_close_date" />
+                        </div>
+
+
+                        <div class="mb-3" *ngIf="!isLead">
+                            <label class="form-label" for="stepsContainer">Lead Status</label>
+                            <div class="steps" id="stepsContainer">
+                                <ng-container *ngFor="let status of contactSubStatus;let i=index">
+                                    <div class="first active" (click)="selectSteps(i)" routerLinkActive="active"
+                                        *ngIf="i==0" [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+                                    <div class="middle" (click)="selectSteps(i)"
+                                        *ngIf="i > 0 && i != contactSubStatus.length - 1"
+                                        [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+
+                                    <div class="last" (click)="selectSteps(i)" *ngIf="i == contactSubStatus.length - 1"
+                                        [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 ">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label>Product</mat-label>
+                                <mat-select formControlName="product_id">
+                                    <mat-option *ngFor="let product of products" [value]='product.id'>
+                                        {{product.product_name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="cost">Deal Size</label>
+                            <div class="input-group input-group-merge">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-8 p-0 m-0">
+                                            <p-inputNumber styleClass="w-100" formControlName="cost"></p-inputNumber>
+                                        </div>
+                                        <div class="col-4 p-0 m-0">
+                                            <p-dropdown tyleClass="w-100" [options]="CurrencyList"
+                                                formControlName="selectedCurrency" optionLabel="currencyCode"
+                                                appendTo="body">
+                                                <ng-template let-country pTemplate="item">
+                                                    <div class="country-item d-flex">
+                                                        <img src="../../../../../assets/img/flags/{{country.countryCode}}.png"
+                                                            width="17px" height="20px"
+                                                            [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                        <div>{{country.currencyName}}</div>
+                                                    </div>
+                                                </ng-template>
+                                            </p-dropdown>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" (click)="oopDisplay=false" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                Close
+            </button>
+            <button type="submit" class="btn btnStyle" data-bs-dismiss="modal" aria-label="Close"
+                [disabled]="newLeadForm.invalid">Save</button>
+        </div>
+    </form>
+    <!-- </div> -->
+
+    <!-- </div>
+</div> -->
+</p-sidebar>
+<div class="modal fade" id="contactModal2" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" *ngIf="!!newContactFormopened">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="mb-3">
+                <form [formGroup]="newPersonContactForm" (ngSubmit)="createNewContact()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="Title">Name</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. Ahmed"
+                                                formControlName="name" />
+                                        </div>
+                                        <mat-error class="alert help-block"
+                                            *ngIf="!newPersonContactForm.get('name')?.valid && newPersonContactForm.get('name')?.touched">
+                                            Name Is Required
+                                        </mat-error>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="email">Email</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex@Examble.com"
+                                                formControlName="email" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="phone">Phone</label>
+                                        <ng-container formArrayName="phones">
+                                            <div *ngFor="let h of phones.controls; index as i">
+                                                <ng-container [formGroupName]="i">
+                                                    <div class="d-flex my-1">
+                                                        <input class="form-control mx-1" type="text" placeholder="Phone"
+                                                            formControlName="phone" />
+                                                        <select class="form-select" id="exampleFormControlSelect1"
+                                                            aria-label="Default select example"
+                                                            formControlName="phone_type">
+                                                            <option value="Work">Work</option>
+                                                            <option value="Home">Home</option>
+                                                            <option value="Mobile">Mobile</option>
+                                                            <option value="Whatsapp">Whatsapp</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+
+                                                        <div *ngIf="h['controls'].phone_type?.value == 'Work'">
+                                                            <input class="form-control" type="text"
+                                                                formControlName="extend" placeholder="extend">
+                                                        </div>
+
+                                                        <span (click)="delPhone(i)" class="material-icons delete">
+                                                            delete
+                                                        </span>
+                                                    </div>
+                                                    <div *ngIf="h.touched && h.invalid" class="alert alert-danger">
+                                                        <div *ngIf="h['controls'].phone.errors?.required">Please enter
+                                                            mobile number</div>
+                                                        <div *ngIf="h['controls'].phone.errors?.pattern">Mobile number
+                                                            is not 11 digit</div>
+                                                        <div *ngIf="h['controls'].phone_type.errors?.required">Please
+                                                            enter mobile type</div>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </ng-container>
+                                        <button class="btn btn-outline-info"
+                                            *ngIf="newPersonContactForm.get('phones')?.value.length < 5" type="button"
+                                            (click)="addPhone()">add</button>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="address">Address</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. 6 October"
+                                                formControlName="address" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="title">Title</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="CEO"
+                                                formControlName="title" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary"
+                            (click)="oopDisplay=false; newContactFormopened = false">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btnStyle"
+                            [disabled]="newPersonContactForm.invalid">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<p-sidebar styleClass="p-sidebar-md" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="showActivityForm" position="right" 
+[transitionOptions]="'350ms'">
+<app-activity-form (closeForm)="showActivityForm=false" [leads]="myLeads" (onAddActivity)="GetLeadActivities(currentOrgDetails.id || '')" ></app-activity-form>
+</p-sidebar>

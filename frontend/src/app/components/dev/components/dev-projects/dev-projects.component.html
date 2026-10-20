@@ -1,0 +1,37 @@
+<div class="container mainPage dev-projects mt-4">
+    <div class="row">
+        <ng-container *ngFor="let project of myProjectsList">
+            <div class="col-md-3">
+
+                <div class="card mb-5 p-2">
+                    <div class="pCard_header globalFont text-start">{{ project.title }}</div>
+                    <a class="badge {{project.status_name |lowercase}} p-2" 
+                    [ngClass]="{'hold': (project.status_name|lowercase) =='on hold'}"
+                    style="width: fit-content;">{{project.status_name |uppercase}}</a>
+                    <!-- <div>
+                        <p class="text-start subTitel">Team</p>
+                        <p-avatarGroup styleClass="mb-3">
+                            <p-avatar image="https://raw.githubusercontent.com/solodev/layering-profile-images/master/images/baby-yoda.jpg" 
+                            size="small" shape="circle"></p-avatar>
+                            <p-avatar image="https://raw.githubusercontent.com/solodev/layering-profile-images/master/images/r2d2.jpg" 
+                            size="small" shape="circle"></p-avatar>
+        
+                            <p-avatar label="+2" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                        </p-avatarGroup>
+                    </div> -->
+                    <div>
+                        <p class="text-start subTitel">Progress</p>
+    
+                        <p-progressBar [value]="project.progress"  [style]="{'height': '10px'}"></p-progressBar>
+                        <p class="text-end subTitel">{{project.progress| number : '1.2-2'}}%</p>
+                   
+                    </div>
+                    <a class="btn btn-sm detailBtn m-2">
+                        <div class="globalFont" [routerLink]="['/dev/myprojects',project.key]">Details</div>
+                    </a>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+    
+</div>

@@ -1,0 +1,38 @@
+<table class="table table-hover newTableCustom" matSort (matSortChange)="sortData($event)">
+    <thead>
+        <tr>
+            <th mat-sort-header="order">NO.</th>
+            <th mat-sort-header="taskTitle">Task title</th>
+            <th mat-sort-header="projectTitle" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">Project title</th>
+            <th mat-sort-header="processTitle" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">Process title</th>
+            <th mat-sort-header="expectedDuration" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">Expected Duration</th>
+            <th mat-sort-header="realDuration" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">Real Duration</th>
+            <th mat-sort-header="startDate">Start Date</th>
+            <th mat-sort-header="endDate">End Date</th>
+            <th mat-sort-header="status">Status</th>
+        </tr>
+    </thead>
+    <tbody *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">
+        <tr *ngFor="let task of overDueTasks;let i=index">
+            <td>{{i + 1}}</td>
+            <td *ngIf="loggedInUser.department == DepartmentEnum.MANAGEMENT || loggedInUser.department == DepartmentEnum.ADMINSTRATION || loggedInUser.accPosition == accPositionEnum.MANAGER" [routerLink]="['/manager/projects',task.project_key,task.process_key]" style="cursor: pointer;">{{task.title}}</td>
+            <td *ngIf="loggedInUser.department == DepartmentEnum.TECHNICAL_TEAM" [routerLink]="['/dev/myprojects',task.project_key,task.process_key]" style="cursor: pointer;">{{task.title}}</td>
+            <td>{{task.project_title}}</td>
+            <td>{{task.process_title}}</td>
+            <td>{{task.ex_duration}}</td>
+            <td>{{task.real_duration}}</td>
+            <td>{{task.start_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.end_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.status_name}}</td>
+        </tr>
+    </tbody>
+    <tbody *ngIf="currentUser.department != DepartmentEnum.TECHNICAL_TEAM">
+        <tr *ngFor="let task of myTasksAsAdmin ; let i=index">
+            <td>{{i + 1}}</td>
+            <td style="cursor: pointer;">{{task.task_title}}</td>
+            <td>{{task.task_start_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.task_end_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.task_status_name}}</td>
+        </tr>
+    </tbody>
+</table>

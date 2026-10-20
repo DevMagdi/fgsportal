@@ -1,0 +1,41 @@
+<div class="container">
+    <div class="row my-2" *ngFor="let q of question;">
+        <div class="col-lg-3">
+            {{q.question}}
+        </div>
+        <ng-container *ngIf="(q.question_type_id == '2' || q.question_type_id == '1') && q.anss">
+            <div class="col-lg-6">
+                <p-rating *ngIf="q.question_type_id == '1'" [(ngModel)]="q.anss.rate" [cancel]="false" [stars]="5"></p-rating>
+                <div *ngIf="q.question_type_id == '2'">
+                    <ng-container *ngIf="q.isMulti == '0'">
+                        <div *ngFor="let ans of q.return_answer" class="field-checkbox">
+                            <p-radioButton styleClass="radio-inline" [inputId]="ans.id ? ans.id : ''" name="category" [value]="ans.id" [(ngModel)]="q.anss.answer"></p-radioButton>
+                            &nbsp;
+                            <label [for]="ans.id" styleClass="radio-inline">{{ans.answer}}</label>
+                        </div>
+                    </ng-container>
+                    <ng-container *ngIf="q.isMulti == '1'">
+                        <div class="field-checkbox" *ngFor="let ans of q.return_answer">
+                            <p-checkbox name="answers" [value]="ans.id" [(ngModel)]="q.anss.answer" [inputId]="ans.id ? ans.id : ''"></p-checkbox>
+                            &nbsp;
+                            <label [for]="ans.id">{{ans.answer}}</label>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <textarea [(ngModel)]="q.anss.comment" class="form-control" cols="30" rows="2" style="resize: none;" placeholder="Comment"></textarea>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="(q.question_type_id == '3') && !!q.anss">
+            <div class="col-lg-9">
+                <textarea [(ngModel)]="q.anss.comment" class="form-control" cols="30" rows="2" style="resize: none;" placeholder="Comment"></textarea>
+            </div>
+        </ng-container>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <button class="btn btn-outline-success" (click)="submitRate()">Submit</button>
+        </div>
+    </div>
+</div>

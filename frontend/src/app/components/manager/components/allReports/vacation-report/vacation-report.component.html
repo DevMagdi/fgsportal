@@ -1,0 +1,43 @@
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-11">
+            <button type="submit" class="btn vacationsBTN" (click)="getAllVacations()">GET Report</button>
+        </div>
+        <div class="col-1">
+            <mat-icon style="color: #f4831f;" matTooltip="Download File" (click)="exportVacationsReport()">cloud_download</mat-icon>
+        </div>
+    </div>
+</div>
+
+
+<table class="my-3 table table-hover newTableCustom" id="vacationReport">
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Hiring Date</td>
+            <td>Total Balance</td>
+            <td>Current Balance</td>
+            <td>Annual Leave</td>
+            <td>Sick Leave</td>
+            <td>Exam Leave</td>
+            <td>Unpaid</td>
+            <td>Permission</td>
+            <td>Total</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let leaveReport of vacationReport">
+            <td style="cursor: pointer;" [routerLink]="['/user' , leaveReport.empKey]">{{leaveReport.empName}}</td>
+            <td>{{leaveReport.hiringDate}}</td>
+            <td>{{leaveReport.totalBalance}}</td>
+            <td>{{leaveReport.currentBalance}}</td>
+            <td>{{leaveReport.annualLeave}}</td>
+            <td>{{leaveReport.SickLeave}}</td>
+            <td>{{leaveReport.examLeave}}</td>
+            <td>{{leaveReport.unpaid}}</td>
+            <td>{{math.floor(leaveReport.permission/ 60)| number : '2.0-0'}}:{{leaveReport.permission - (math.floor(leaveReport.permission / 60) * 60) | number : '2.0-0'}} hh:mm</td>
+            <td>{{leaveReport.total}}</td>
+        </tr>
+
+    </tbody>
+</table>

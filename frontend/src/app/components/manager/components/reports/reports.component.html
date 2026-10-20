@@ -1,0 +1,391 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 my-theme mt-5">
+            <mat-tab-group mat-align-tabs="left">
+
+                <mat-tab label="Developer Weekly Report">
+                    <div class="mx-3 my-3">
+                        <div class="row tabheader">
+                            <!-- <div class="col-md-2"></div> -->
+                            <div class="col-md-3 my-2">
+                                <!-- <label for="dev">Employees LIST</label> -->
+                                <!-- (change)="getDevReport($event)" -->
+                                <!-- <select class="form-control" name="dev" id="dev"
+                                 [(ngModel)]="devWeeklyReport_Dev_ID" placeholder="select employee">
+                                    <option value="" selected>select employee</option>
+                                    <option *ngFor="let user of myUsersList" value="{{user.key}}">{{user.username}}</option>
+                                </select> -->
+                                <span class="p-float-label w-100">
+                                    <p-dropdown inputId="dropdown" [autoDisplayFirst]="false" [options]="myUsersList"
+                                    [(ngModel)]="devWeeklyReport_Dev_ID" optionLabel="username" optionValue="key"
+                                     class="w-100" placeholder="select employee" 
+                                    ></p-dropdown>
+                                   
+                                </span>
+                            </div>
+                            <div class="col-md-3 my-2">
+                                <!-- <label for="">Date:</label> -->
+                                <input class="form-control date-input" type="date" placeholder="pick Date" #date>
+
+                                <!-- <p-calendar #date2 (ngModelChange)="getDevReportsByDate(this)"
+                                  [showIcon]="true" inputId="icon" class="w-100" placeholder="pick a Date"
+                                  ></p-calendar> -->
+                                <!-- (click)="getDevReports()" -->
+                            </div>
+                            <div class="col-md-2 my-2">
+                                <button class="btn developersMonthlyReport" (click)="getDevReportsByDate(date.value);getDevReports()">Get</button>
+                            </div>
+
+                            <!-- <div class="col-md-2"></div> -->
+
+                        </div>
+                        <div class="row">
+                            <!-- <div class="col-md-4"></div> -->
+                            <div class="col-md-4 d-flex  mt-4 my-2">
+                                <mat-slide-toggle (change)="changeReportMode()"></mat-slide-toggle>
+                                <label for="" class="mx-2">Get Reports by {{reportByMonth? 'Week' : 'Month'}} !</label>
+                            </div>
+                            <!-- <div class="col-md-2 mt-4 mb-2">
+                                <button class="btn developersMonthlyReport" (click)="getDevReports()">Get</button>
+                            </div> -->
+                        </div>
+                    </div>
+                    <div class="tasksTable my-3 py-2">
+                        <div class="days-header m-2">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-3 col-8">
+                                        <h3 class="">Date </h3>
+                                    </div>
+                                    <div class="col-md-7">Report</div>
+                                    <div class="col-md-2 col-4">
+                                        <h3>Hours</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="days m-2" *ngFor="let day of currentWeekDays ; let i = index ">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-3 col-8 day">
+                                        <h3>{{day | date : 'fullDate'}}</h3>
+                                    </div>
+                                    <div class="col-md-7 tasks">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-md-3 " class="report" *ngFor="let report of myReportsList">
+                                                    <ng-container *ngIf="getDate(day) == getDate(report.reportDate)">
+                                                        <div class="task m-2 p-2">
+                                                            <div class="container-fluid">
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <h5 class="text-center" *ngIf="report.report_status_id == '2'" style="color:green;">Approved</h5>
+                                                                        <h5 class="text-center" *ngIf="report.report_status_id == '3'" style="color:brown;">Rejected</h5>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="working">Working On : {{report.time_activity_name}}</div>
+                                                                        <div class="working" *ngIf="!!report.projectName">Project Title: {{report.projectName}}</div>
+                                                                        <div class="working" *ngIf="!!report.processName">Process Title: {{report.processName}}</div>
+                                                                        <div class="working" *ngIf="!!report.taskTitle">Task Title: {{report.taskTitle}}</div>
+                                                                        <div class="working" *ngIf="!!report.progress">Progress: {{report.progress}} %</div>
+                                                                        <div class="working" *ngIf="!!report.details">Details: {{report.details}}</div>
+                                                                        <div class="working">Duration : {{report.durationByHours}}</div>
+                                                                        <div class="working" *ngIf="!!report.approvedByName && report.report_status_id == '2'">Approved By : {{report.approvedByName}}</div>
+                                                                        <div class="working" *ngIf="!!report.approvedByName && report.report_status_id == '3'">Rejected By : {{report.approvedByName}}</div>
+
+                                                                        <div class="working text-right" *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT || report.managerApprovalKey == currentUser.key && report.approvedByKey == currentUser.key">
+                                                                            <span class="material-icons returnReportToPending" matTooltip="Return Report To Pending" (click)="returnReportToPending(report)">
+                                                                                assignment_return
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 col-4">
+                                        <div class="totalHours" *ngFor="let oneDayTotalHours of totalHours ; let e = index">
+                                            <ng-container *ngIf="i == e">
+                                                {{oneDayTotalHours}}
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="days m-2">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-3 col-8 fw-bold">
+                                        <h3 class="fw-bold">Total Working Hours: </h3>
+                                    </div>
+                                    <div class="col-md-7"></div>
+                                    <div class="col-md-2 col-4">
+                                        <h3 class="fw-bold">
+                                            {{totalHours[totalHours.length - 1]}}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </mat-tab>
+                <mat-tab label="Developer Availability">
+                    <app-available-dev></app-available-dev>
+                </mat-tab>
+                <mat-tab label="Developers Monthly Report ">
+
+                    <div *ngIf="loadingSpinnerMode" class="spinner">
+                        <mat-spinner></mat-spinner>
+                    </div>
+                    <div *ngIf="!loadingSpinnerMode" class="mx-3 mt-2">
+                        <div class="row my-3 tabheader">
+                            <div class="col-md-4 positionForDownload">
+                                <!-- <label for="date">Or Pick A Date:</label> -->
+
+                                <input class="form-control" id="date" type="date" #monthlyDate>
+
+
+                            </div>
+                            <div class="col-md-4">
+                                <!-- getTotalMonthlyReport(today) -->
+                                <!-- <label for="getReport">Get Current Month:</label> <br> -->
+                                <button class="btn developersMonthlyReport" (click)="getTotalMonthlyReport(monthlyDate.value)">Get</button>
+                            </div>
+                            <div class="col-md-3">
+
+                                <a style="cursor: pointer" (click)="exportDevsMonthlyReport()" class="downloadFile">
+                                    <mat-icon style="color: #f5831fd3;" matTooltip="Download File">
+                                        cloud_download</mat-icon>
+                                </a>
+                            </div>
+
+                            <div class="col-md-1">
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <table *ngIf="!loadingSpinnerMode" class="table table-hover newTableCustom" id="devsMonthlyReport">
+                        <thead>
+                            <tr>
+                                <td class="text-center">Dev Name</td>
+                                <td class="text-center">Actual Working Hours</td>
+                                <td class="text-center">idle Hours</td>
+                                <td class="text-center">Offical Vacations</td>
+                                <td class="text-center">Unpaid Vacations</td>
+                                <td class="text-center">Total</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let dev of finalMonthlyReport">
+                                <td class="text-center">{{dev.dev_name}}</td>
+                                <td class="text-center">{{dev.actual_working_hours}}</td>
+                                <td class="text-center">{{dev.idle_hours}}</td>
+                                <td class="text-center">{{dev.official_vacations}}</td>
+                                <td class="text-center">{{dev.unpaid_vacations}}</td>
+                                <td class="text-center">{{dev.total}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </mat-tab>
+
+                <mat-tab label="Vacations Report">
+                    <app-vacation-report></app-vacation-report>
+                </mat-tab>
+
+                <mat-tab label="Project Report">
+                    <app-project-report></app-project-report>
+                </mat-tab>
+
+                <mat-tab label="Developer Tasks Report">
+                    <app-dev-reports></app-dev-reports>
+                </mat-tab>
+
+                <mat-tab label="Overdue Tasks">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12 my-2 text-end">
+                                <a style="cursor: pointer" (click)="exportOverDueTasksReport()" class="">
+                                    <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+                                </a>
+                            </div>
+                            <div class="col-md-12">
+                                <table class="my-3 table table-hover newTableCustom" id="overDueTasksReport">
+                                    <thead>
+                                        <tr>
+                                            <td>#</td>
+                                            <td>Project Name</td>
+                                            <td>Process Name</td>
+                                            <td>Task Name</td>
+                                            <td>Developer Name</td>
+                                            <td>Expected End Date</td>
+                                            <td>Task Status</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let task of overDueTasks ; let i = index">
+                                            <td>{{i + 1}}</td>
+                                            <td>{{task.project_title}}</td>
+                                            <td>{{task.process_title}}</td>
+                                            <td [routerLink]="['/manager/projects',task.project_key]" style="cursor: pointer;">{{task.title}}</td>
+                                            <td>{{task.empName}}</td>
+                                            <!-- | date:'M/d/yyyy' -->
+                                            <td>{{task.end_date }}</td>
+                                            <td>{{task.status_name}}</td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                                <!-- <ul>
+                                    <ng-container *ngFor="let task of unCompletedTasks">
+                                        <li *ngIf="task.end_date < today">{{task.project_title}}: {{task.title}} // Dev Name : {{task.empName}} => Expected End Date : {{task.end_date | date:'M/d/yyyy'}} Today is : {{today}}</li>
+                                    </ng-container>
+                                </ul> -->
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <mat-tab label="Running Tasks">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- <div class="col-md-2">
+                                <a style="cursor: pointer" (click)="exportRunningTasksReport()" class="">
+                                    <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+                                </a>
+                            </div> -->
+
+                            <div class="col-md-12">
+                                <div class=" my-2">
+                                    <div class="row">
+
+                                        <div class="col-4">
+                                            <mat-label>Filter Tasks by Status</mat-label>
+                                            <mat-select class="form-control" (selectionChange)="filtertasks()" multiple [(ngModel)]="filtersList" [ngModelOptions]="{standalone: true}">
+                                                <ng-container *ngFor="let status of StatusEnum | keyvalue">
+                                                    <mat-option *ngIf="status.value!='5'" value="{{status.value}}">{{status.key}}</mat-option>
+                                                </ng-container>
+                                            </mat-select>
+                                        </div>
+                                        <div class="col-4">
+                                            <mat-label>Filter Tasks by Type</mat-label>
+                                            <mat-select class="form-control" (selectionChange)="filtertasks()" [(ngModel)]="taskTypefilter" [ngModelOptions]="{standalone: true}">
+                                                <mat-option value=""></mat-option>
+                                                <mat-option *ngFor="let status of taskTypeEnum | keyvalue" value="{{status.value}}">{{status.key == 'BA'? 'Analysis' : status.key == 'TASK' ? 'Development' : status.key == 'UAT' ? 'Testing' : ''}}</mat-option>
+                                            </mat-select>
+                                        </div>
+                                        <div class="col-2">
+                                            <br>
+                                            <button (click)="resetFilter()" class="btn resetBtn">
+                                                Reset
+                                            </button>
+                                        </div>
+                                        <div class="col-md-2 mt-auto text-end">
+                                            <a style="cursor: pointer" (click)="exportRunningTasksReport()" class="">
+                                                <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <table class="table table-hover newTableCustom" id="runningTasksReport">
+                                    <thead>
+                                        <tr>
+                                            <td>#</td>
+                                            <td>Project Name</td>
+                                            <td>Process Name</td>
+                                            <td>Task Name</td>
+                                            <td>Task Type</td>
+                                            <td>Developer Name</td>
+                                            <td>Start Date</td>
+                                            <td>Expected End Date</td>
+                                            <td>Task Status</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let task of unCompletedTasks ; let i = index">
+                                            <td>{{i + 1}}</td>
+                                            <td>{{task.project_title}}</td>
+                                            <td>{{task.process_title}}</td>
+                                            <td [routerLink]="['/manager/projects',task.project_key , task.process_key]" style="cursor: pointer;">{{task.title}}</td>
+                                            <td>{{task.type_name}}</td>
+                                            <td>{{task.empName}}</td>
+                                            <td>{{task.start_date}}</td>
+                                            <!-- | date:'M/d/yyyy' -->
+                                            <td>{{task.end_date }}</td>
+                                            <td>{{task.status_name}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <mat-tab label="Running Projects">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12 my-2 text-end">
+                                <a style="cursor: pointer" (click)="exportRunningprojectsReport()" class="">
+                                    <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+                                </a>
+                            </div>
+                            <div class="col-md-12">
+                                <table class="table table-hover newTableCustom" id="runningProjectsReport">
+                                    <thead>
+                                        <tr>
+                                            <td>#</td>
+                                            <td>Project Name</td>
+                                            <td>Project type</td>
+                                            <td>Start Date</td>
+                                            <td>Expected End Date</td>
+                                            <td>Project Status</td>
+                                            <td>Project Manager Name</td>
+                                            <td>Client</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ng-container *ngFor="let project of unCompletedProjects ; let i = index">
+                                            <tr *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department == DepartmentEnum.ADMINSTRATION || (currentUser.accPosition == AccountPositionsEnum.MANAGER && currentUser.key == project.PMID)">
+                                                <td>{{i + 1}}</td>
+                                                <td [routerLink]="['/manager/projects',project.key]" style="cursor: pointer;">{{project.title}}</td>
+                                                <td>{{project.type_name}}</td>
+                                                <td>{{project.start_date}}</td>
+                                                <!-- | date:'M/d/yyyy' -->
+                                                <td>{{project.end_date }}</td>
+                                                <td>{{project.status_name}}</td>
+                                                <td>{{project.PMName}}</td>
+                                                <td>{{project.partner_name}}</td>
+                                            </tr>
+                                        </ng-container>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <mat-tab label="Closed Projects">
+                    <app-closed-projects></app-closed-projects>
+                </mat-tab>
+
+
+
+            </mat-tab-group>
+
+        </div>
+    </div>
+</div>

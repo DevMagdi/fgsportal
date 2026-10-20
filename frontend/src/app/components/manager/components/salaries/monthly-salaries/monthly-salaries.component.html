@@ -1,0 +1,231 @@
+<div *ngIf="loadingSpinnerMode" class="spinner">
+    <mat-spinner></mat-spinner>
+</div>
+<div *ngIf="!loadingSpinnerMode && !!currentUser" class="container mt-2">
+    <div class="d-flex justify-content-between my-3 tabheader">
+        <div class="d-flex align-items-center">
+            <mat-form-field>
+                <input matInput [matDatepicker]="dp2" placeholder="Select a Date" (click)="openDatePicker(dp2)" [value]="date">
+                <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+                <mat-datepicker #dp2 startView="multi-year" (monthSelected)="closeDatePicker($event, dp2)"></mat-datepicker>
+            </mat-form-field>
+       
+            <!-- <label for="getReport">Generate Month Salaries:</label> <br> -->
+            <button *ngIf="currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE && (finalMonthlySalaries.length == 0 || finalMonthlySalaries[0].salary_status_id == SalaryFinalStatusEnum.PendingOnHR )" matTooltip="Generate Month Salaries" 
+            class="btn generateBtn me-4"
+                [disabled]="!date || loadingSpinnerMode" (click)="validateSalaryIfExists()">Generate</button>
+            <button *ngIf="(currentUser.accRole == AccountRolesEnum.CEO || currentUser.accRole == AccountRolesEnum.SUPER_USER) && (finalMonthlySalaries.length == 0 || (finalMonthlySalaries[0].salary_status_id != SalaryFinalStatusEnum.Approved && finalMonthlySalaries[0].salary_status_id != SalaryFinalStatusEnum.PAID))"
+                matTooltip="Generate Month Salaries" class="ms-4 btn btnOutLine" [disabled]="!date || loadingSpinnerMode" (click)="validateSalaryIfExists()">Generate</button>
+        </div>
+        <!-- <div class="col-md-3 positionForDownload"> -->
+        <!-- <label for="date">Get Month Salary:</label> -->
+        <!-- <br> -->
+        <!-- <button matTooltip="Get Month Salary" class="btn generateBtn" (click)="getMonthSalaries()" [disabled]="!date || loadingSpinnerMode">
+                Get
+            </button> -->
+        <!-- </div> -->
+        <!-- <div class="col-md-1">
+            <button class="btn btnOutLine" (click)="exportMonthlySalaries()" [disabled]="(!date || loadingSpinnerMode) && finalMonthlySalaries.length > 0">
+                <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon>
+           Download Pdf
+            </button>
+        </div> -->
+
+        <div class="d-flex gap-4 align-items-center">
+
+            <button *ngIf="date && !loadingSpinnerMode && finalMonthlySalaries.length >0" class="btn btnOutLine" (click)="exportMonthlySalaries()" [disabled]="loadingSpinnerMode || finalMonthlySalaries.length == 0">
+                <!-- <mat-icon style="color: #f5831fd3;" matTooltip="Download File">cloud_download</mat-icon> -->
+           Download 
+            </button>
+            <div class="" *ngIf="(finalMonthlySalaries.length > 0 && currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE ) && finalMonthlySalaries[0].salary_status_id == SalaryFinalStatusEnum.PendingOnHR">
+                <button class="btn approveAll" (click)="openDialogToSendToManager()">
+                    Send To Manager
+                </button>
+            </div>
+            <div class="" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT && (finalMonthlySalaries.length > 0 && (finalMonthlySalaries[0].salary_status_id == SalaryFinalStatusEnum.rejected || finalMonthlySalaries[0].salary_status_id == SalaryFinalStatusEnum.PendingOnHR || finalMonthlySalaries[0].salary_status_id == SalaryFinalStatusEnum.PendingOnManager))">
+                <button class="btn approveAll" (click)="managerApproveAll()">
+                   Approve All
+                </button>
+            </div>
+          
+        </div>
+
+    </div>
+</div>
+<table *ngIf="!loadingSpinnerMode && finalMonthlySalaries.length > 0" class="table table-hover newTableCustom" id="monthlySalary">
+    <thead *ngIf="!!currentUser">
+        <tr>
+            <td>Dev Name</td>
+            <td>Actual Working Hours</td>
+            <td>idle Hours</td>
+            <td>Offical Vacations</td>
+            <td>Unpaid Vacations</td>
+            <td>Month Working Hours</td>
+            <td>Total By Hours</td>
+            <td>Total In EGP</td>
+            <td>Status</td>
+            <!-- <td *ngIf="currentUser.accType == 'manager'"></td>
+            <td *ngIf="currentUser.accType == 'admin'"></td> -->
+        </tr>
+    </thead>
+    <tbody>
+        <!-- | number : '1.2-2' -->
+        <tr *ngFor="let salary of finalMonthlySalaries">
+            <td style="cursor: pointer;" [routerLink]="['/user/',salary.empKey]">{{salary.empName}}</td>
+            <td>{{salary.ActualWorkingHours}}</td>
+            <td>{{salary.IdealHours}}</td>
+            <td>{{salary.OfficalVacations}}</td>
+            <td>{{salary.UnpaidVacations}}</td>
+            <td>{{salary.thisMonthWorkingHours}}</td>
+            <td>{{salary.totalInHours}}</td>
+            <td>{{salary.Total}}</td>
+            <!-- <td *ngIf="salary.MonthSalaryFinalStatus == 1">{{getApprovalCycle(salary.monthSalaryApprovalCycle)}}</td> -->
+            <td>{{salary.salary_status_name}}</td>
+            <!-- <td *ngIf="currentUser.accType == 'manager'">
+                <div *ngIf="salary.monthSalaryApprovalCycle == 0 || salary.monthSalaryApprovalCycle == 1">
+                    <i *ngIf="!!salary.hrComment" class="pi pi-comment m-1 commentIcon" matTooltip="Show Comment" (click)="showModalDialog(salary)"></i>
+                    <i class="pi pi-send m-1 sendIcon" matTooltip="Comment This Salary" (click)="managerAction(salary)"></i>
+                </div>
+
+            </td>
+            <td *ngIf="currentUser.accType == 'admin'">
+                <div *ngIf="salary.monthSalaryApprovalCycle == 0">
+                    <i class="pi pi-comment m-1 commentIcon" matTooltip="Comment This Salary" (click)="adminAction(salary)"></i>
+                    <i class="pi pi-send m-1 sendIcon" matTooltip="Has Issue" (click)="adminAction(salary)"></i>
+                </div>
+            </td> -->
+        </tr>
+    </tbody>
+</table>
+
+<p *ngIf="!loadingSpinnerMode && finalMonthlySalaries.length == 0 && !!date" class="invalid mt-5 text-center text-danger">
+    there is no data for this month Or This Month Is Approved
+</p>
+
+
+
+<!-- <p-dialog *ngIf="!!salaryForReview" header="" [(visible)]="displayModal" [style]="{width: '50vw'}" [breakpoints]="{'960px': '50vw', '640px': '100vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+
+    <div class="container-fluid">
+        <div class="row">
+            <ng-container *ngIf="currentUser.accRole == AccountRolesEnum.CEO">
+                <div class="col-lg-12" *ngIf="!!salaryForReview.hrComment">
+                    <label class="modalInfo">Hr Comment: </label>
+                    <p class="pl-2 modalData">{{salaryForReview.hrComment}}</p>
+                </div>
+                <hr>
+                <hr>
+                <div class="col-12">
+                    <label class="modalInfo">Manager Comment: </label>
+                    <input class="pl-2 modalData form-control" type="text" [(ngModel)]="salaryForReview.managerDissisionComment">
+                </div>
+            </ng-container>
+            <ng-container *ngIf="currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE">
+                <hr>
+                <div class="col-lg-12">
+                    <label class="modalInfo">Hr Comment: </label>
+                    <input class="pl-2 modalData form-control" type="text" [(ngModel)]="salaryForReview.hrComment">
+                </div>
+            </ng-container>
+        </div>
+    </div>
+    <ng-template pTemplate="footer" *ngIf="currentUser.accRole == AccountRolesEnum.CEO">
+        <p-button icon="pi pi-check" (click)="displayModal=false" label="Send To {{salaryForReview.empName}}" styleClass="p-button-text" (click)="saveSalaryAfterEdit('comment')"></p-button>
+        <p-button icon="pi pi-check" (click)="displayModal=false" label="Ok" styleClass="p-button-text" (click)="saveSalaryAfterEdit('comment')"></p-button>
+    </ng-template>
+    <ng-template pTemplate="footer" *ngIf="currentUser.accRole == AccountRolesEnum.HUMAN_RESOURCE">
+        <p-button icon="pi pi-send" [disabled]="!salaryForReview.hrComment" (click)="displayModal=false" label="Send To Employee" styleClass="p-button-text" (click)="saveSalaryAfterEdit('sendToDev')"></p-button>
+        <p-button icon="pi pi-check" [disabled]="!salaryForReview.hrComment" (click)="displayModal=false" label="Ok" styleClass="p-button-text" (click)="saveSalaryAfterEdit('comment')"></p-button>
+    </ng-template>
+</p-dialog> -->
+
+<p-dialog header="Approve All" *ngIf="myManagers.length > 0" [(visible)]="sendToManagerDialog" [style]="{width: '50vw'}" [breakpoints]="{'960px': '50vw', '640px': '100vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+    <form [formGroup]="selectManagerToSendForm" (ngSubmit)="finalApprove()" class="example-form">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <mat-form-field class="example-full-width w-100">
+                        <mat-label class="modalInfo">Manager</mat-label>
+                        <mat-select formControlName="managerKey">
+                            <mat-option value=''></mat-option>
+                            <mat-option *ngFor="let manager of myManagers" [value]='manager.key'>{{manager.username}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+        <button #formClick hidden>send</button>
+    </form>
+    <ng-template pTemplate="footer">
+        <p-button icon="pi pi-check" (click)="formClick.click();sendToManagerDialog=false" label="Ok" styleClass="p-button-text"></p-button>
+    </ng-template>
+
+</p-dialog>
+
+<!-- Modal -->
+<!-- <ng-template #mymodal let-modal>
+    <ng-container *ngIf="!sendToManager">
+        <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Review Salary</h4>
+            <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                <span aria-hidden="true">×</span>
+              </button>
+        </div>
+        <div class="modal-body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Dev: </label>
+                        <p class="pl-2">{{salaryForReview.empName}}</p>
+                    </div>
+                    <mat-divider></mat-divider>
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Apply On: </label>
+                        <p class="pl-2">{{salaryForReview.date}}</p>
+                    </div>
+                    <mat-divider></mat-divider>
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Created By: </label>
+                        <p class="pl-2">{{salaryForReview.createdByName}}</p>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Manager Approved: </label>
+                        <p class="pl-2">{{salaryForReview.managerDissisionName}}</p>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <label class="modalInfo">Manager Comment: </label>
+                        <p class="pl-2">{{salaryForReview.managerDissisionComment}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" *ngIf="currentUser.accType == 'admin'">
+            <button type="submit" class="btn btn-outline-success" (click)="modal.close('Save click');">Pay</button>
+        </div>
+    </ng-container>
+
+
+    <ng-container *ngIf="sendToManager">
+        <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Choose Manager</h4>
+            <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                <span aria-hidden="true">×</span>
+              </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+
+
+</ng-template> -->

@@ -1,0 +1,72 @@
+@import '../../../../colors';
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: $mainThemeColor;
+        line-height: 50px;
+        font-family: $mainFontFamily;
+        font-weight: 600;
+        text-align: center;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+            text-align: center;
+            .dateStyle,
+            .finalTotal {
+                font-family: $mainFontFamily;
+                font-weight: 600;
+                color: $mainThemeColor;
+            }
+        }
+    }
+}
+
+.deleteIcon {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.editIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.addBtn {
+    background-color: $mainThemeColor;
+    color: #fff;
+    margin: auto;
+}
+.add_request{
+    border-radius: 4px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    color: white;
+}
+
+.search {
+    height: 42px;
+
+    input {
+        // border: $mainThemeColor solid 1px;
+        // border-radius: 0;
+        // background-color: $softThemeColor;
+        color: $subSubThemeColor;
+        font-size: 12px;
+        height: 42px;
+        &::placeholder {
+            color: $subSubThemeColor;
+            }
+
+    }
+    .p-inputtext{
+        border-right: 1px solid !important;
+        border-color: $subSubThemeColor;
+    }
+    i , span {
+        color: $subSubThemeColor;
+        // background-color: $softThemeColor;
+        // margin-right: 0;
+    }
+    
+}

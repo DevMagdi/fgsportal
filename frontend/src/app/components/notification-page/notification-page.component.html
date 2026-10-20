@@ -1,0 +1,72 @@
+<section class="section-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <div class="t">
+                    <h3 class="m-b-50 heading-line">Notifications <i class="fa fa-bell text-muted"></i></h3>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="t">
+                    <a routerLink="/notification" (click)="markAllAsRead()">Mark All As Read</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-ui_dd-content">
+            <ng-container *ngFor="let notify of myNotifications.slice().reverse()">
+                <div class="notification-list notification-list--unread" *ngIf="notify.status == 0">
+                    <div class="notification-list_content">
+                        <div class="notification-list_img" [routerLink]="['/user' , notify.senderKey]">
+                            <img *ngIf="!notify.senderImg" src="../../../../../assets/img/avatarman.png" alt="User" class="rounded-circle" width="150">
+                            <img *ngIf="!!notify.senderImg" src="{{newServerApi}}{{notify.senderImg}}" alt="user">
+                        </div>
+                        <div class="notification-list_detail" (click)="readNotification(notify)">
+                            <p><b>{{notify.senderName}}</b> {{notify.title}}</p>
+                            <p class="text-muted">{{notify.body}}</p>
+                            <p class="text-muted"><small>{{getTime(notify.createdAt)}}</small></p>
+                        </div>
+                    </div>
+                    <div class="notification-list_feature-img">
+                        <!-- <img src="images/features/random1.jpg" alt="Feature image"> -->
+                        <span class="material-icons mx-2 delete" matTooltip="Delete" (click)="deleteNotification(notify)">
+                            delete_sweep
+                        </span>
+                        <mat-icon matTooltip="Mark As Read" class="mx-2 markAsUnread" (click)="markAsSeen(notify)">markunread</mat-icon>
+
+                    </div>
+                </div>
+
+                <div class="notification-list" *ngIf="notify.status == 1">
+                    <div class="notification-list_content">
+                        <div class="notification-list_img" [routerLink]="['/user' , notify.senderKey]">
+                            <img *ngIf="!notify.senderImg" src="../../../../../assets/img/avatarman.png" alt="User" class="rounded-circle" width="150">
+                            <img *ngIf="!!notify.senderImg" src="{{newServerApi}}{{notify.senderImg}}" alt="user">
+                        </div>
+                        <div class="notification-list_detail" (click)="readNotification(notify)">
+                            <p><b>{{notify.senderName}}</b> {{notify.title}}</p>
+                            <p class="text-muted">{{notify.body}}</p>
+                            <p class="text-muted"><small>{{getTime(notify.createdAt)}}</small></p>
+                        </div>
+                    </div>
+                    <div class="notification-list_feature-img">
+                        <!-- <img src="images/features/random3.jpg" alt="Feature image"> -->
+                        <span class="material-icons mx-2 delete" matTooltip="Delete" (click)="deleteNotification(notify)">
+                            delete_sweep
+                        </span>
+                        <!-- <span class="material-icons mx-2 markAsUnread" (click)="markAsUnSeen(notify)" matTooltip="Mark As unRead">
+                            mark_as_unread
+                        </span> -->
+                        <span class="material-icons-outlined mx-2 markAsUnread" (click)="markAsUnSeen(notify)" matTooltip="Mark As unRead">
+                            mark_as_unread
+                        </span>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-info" (click)="loadMore()">Load more activity</button>
+        </div>
+    </div>
+</section>

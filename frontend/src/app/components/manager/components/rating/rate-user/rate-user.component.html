@@ -1,0 +1,98 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="rateUserLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="container">
+    <div class="row" *ngIf="!!askForRate">
+        <div class="col-12">
+            <div class="pageHeader d-flex justify-content-between">
+                <div class="title d-flex justify-content-start">
+                    <i class="material-icons arrowIcon p-1" [routerLink]="['/manager/rating']">arrow_back</i>
+                    <h1>Rate {{askForRate.user_to_rate_name}}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        {{!!askForRate ? askForRate.user_to_rate_name : ''}}
+                    </h3>
+                </div>
+                <div class="container">
+                    <div class="row my-2" *ngFor="let q of questions;">
+                        <div class="col-md-3">
+                            {{q.question}}
+                        </div>
+                        <ng-container *ngIf="(q.question_type_id == '2' || q.question_type_id == '1') && q.anss">
+                            <div class="col-md-6">
+                                <p-rating *ngIf="q.question_type_id == '1'" [(ngModel)]="q.anss.rate" [cancel]="false" [stars]="5"></p-rating>
+                                <div *ngIf="q.question_type_id == '2'">
+                                    <ng-container *ngIf="q.isMulti == '0'">
+                                        <div *ngFor="let ans of q.return_answer" class="field-checkbox">
+                                            <p-radioButton [inputId]="ans.id ? ans.id : ''" name="category" [value]="ans.id" [(ngModel)]="q.anss.answer"></p-radioButton>
+                                            &nbsp;
+                                            <label [for]="ans.id">{{ans.answer}}</label>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngIf="q.isMulti == '1'">
+                                        <div class="field-checkbox" *ngFor="let ans of q.return_answer">
+                                            <p-checkbox name="answers" [value]="ans.id" [(ngModel)]="q.anss.answer" [inputId]="ans.id ? ans.id : ''"></p-checkbox>
+                                            &nbsp;
+                                            <label [for]="ans.id">{{ans.answer}}</label>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <textarea [(ngModel)]="q.anss.comment" class="form-control" cols="30" rows="2" style="resize: none;" placeholder="Comment"></textarea>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="(q.question_type_id == '3') && !!q.anss">
+                            <div class="col-md-9">
+                                <textarea [(ngModel)]="q.anss.comment" class="form-control" cols="30" rows="2" style="resize: none;" placeholder="Comment"></textarea>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button class="btn btn-outline-success" (click)="submitRating()">Submit</button>
+                        </div>
+                    </div>
+                    <div *ngIf="questions.length == 0">
+                        No Questions Found
+                    </div>
+                </div>
+                <!-- <form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="example-form">
+                    <table class="table" formArrayName="rates">
+                        <tr *ngFor="let h of rates.controls; index as i" [formGroupName]="i">
+                            <td style="width: 10%;">
+                                <p>{{i+1}}</p>
+                            </td>
+                            <td>
+                                <p>
+                                    {{h['controls'].q.value}}
+                                </p>
+                            </td>
+                            <td>
+                                <p-rating *ngIf="h['controls'].is_rate.value == true" formControlName="q_rate" [cancel]="false" [stars]="5"></p-rating>
+                            </td>
+                            <td>
+                                <textarea formControlName="q_comment" class="form-control" cols="30" rows="2" style="resize: none;" placeholder="Comment"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="d-flex justify-content-end">
+                                <button class="btn btn-outline-success" [disabled]="ratingForm.invalid">Submit</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form> -->
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+@import '../../../../../colors';
+.backIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.delete {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}

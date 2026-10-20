@@ -1,0 +1,194 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 text-end px-0">
+            <p-sidebar header="" [(visible)]="isNewTransIsopened" position="right" [autoZIndex]="false" [baseZIndex]="9999"
+            styleClass="p-sidebar-md" [modal]="true" >
+                <form [formGroup]="newTransRequestForm" (ngSubmit)="createTransRequest()" class="example-form">
+                    <div class="container-fluid text-start">
+                        <div class="row">
+                            <div class="col-md-6 my-3 text-start">
+                                <!-- <mat-form-field class="example-full-width w-100">
+                                    <mat-label>Date</mat-label>
+                                    <input matInput type="date" id="date" formControlName="date">
+                                    <mat-error class="alert help-block" *ngIf="!newTransRequestForm.get('date')?.valid && newTransRequestForm.get('date')?.touched">
+                                        Date Is Required
+                                    </mat-error>
+                                </mat-form-field> -->
+                                <app-form-input label="Date" type="date"
+                                [control]="newTransRequestForm.get('date')"
+                                placeholder="pick date"></app-form-input>
+                            </div>
+
+                            <div class="col-md-6 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Manager To Approve</label>
+                                    <mat-select class="form-control" formControlName="pmToApproveKey"
+                                    [ngClass]="{'is-invalid':!newTransRequestForm.get('pmToApproveKey')?.valid &&
+                                     newTransRequestForm.get('pmToApproveKey')?.touched}"
+                                     placeholder="Select Manager" floatlLabel="never">
+                                        <mat-option *ngFor="let manager of allPmsAndManagers" 
+                                        [value]='manager.key'>{{manager.username}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback" *ngIf="!newTransRequestForm.get('pmToApproveKey')?.valid && newTransRequestForm.get('pmToApproveKey')?.touched">
+                                        <small>Manager To Approve Is Required</small>
+                                    </div>
+                                <!-- </mat-form-field> -->
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <!-- <label>From</label>
+                                    <input class="form-control" type="text" id="from" formControlName="from">
+                                    <mat-error class="alert help-block" *ngIf="!newTransRequestForm.get('from')?.valid && newTransRequestForm.get('from')?.touched">
+                                        From Is Required
+                                    </mat-error> -->
+                                <!-- </mat-form-field> -->
+                                <app-form-input label="From" type="text"
+                                [control]="newTransRequestForm.get('from')"
+                                placeholder="write Location"></app-form-input>
+                            </div>
+
+                            <div class="col-md-6 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100">
+                                    <mat-label>To</mat-label>
+                                    <input matInput type="text" id="To" formControlName="to">
+                                    <mat-error class="alert help-block" *ngIf="!newTransRequestForm.get('to')?.valid && newTransRequestForm.get('to')?.touched">
+                                        To Is Required
+                                    </mat-error>
+                                </mat-form-field> -->
+                                <app-form-input label="To" type="text"
+                                [control]="newTransRequestForm.get('to')"
+                                placeholder="write Location"></app-form-input>
+                                
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-6 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <mat-label>Project</mat-label>
+                                    <mat-select class="form-control" formControlName="projectkey" (selectionChange)="getProcesses()"
+                                    [ngClass]="{'is-invalid':!newTransRequestForm.get('projectkey')?.valid &&
+                                     newTransRequestForm.get('projectkey')?.touched}"
+                                     placeholder="Select Project" floatlLabel="never">
+                                        <mat-option *ngFor="let project of myProjects" [value]='project.key'>{{project.title}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback" *ngIf="!newTransRequestForm.get('projectkey')?.valid && newTransRequestForm.get('projectkey')?.touched">
+                                       <small> Project Is Required</small>
+                                    </div>
+                                <!-- </mat-form-field> -->
+                            </div>
+
+                            <div class="col-md-6 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Process</label>
+                                    <mat-select formControlName="processkey" class="form-control"
+                                    [ngClass]="{'is-invalid':!newTransRequestForm.get('processkey')?.valid &&
+                                     newTransRequestForm.get('processkey')?.touched}"
+                                     placeholder="Select Process" floatlLabel="never">
+                                        <mat-option *ngFor="let process of myProcess" [value]='process.key'>{{process.title}}</mat-option>
+                                    </mat-select>
+                                    <div class="invalid-feedback" *ngIf="!newTransRequestForm.get('processkey')?.valid && newTransRequestForm.get('processkey')?.touched">
+                                        Process Is Required
+                                    </div>
+                                <!-- </mat-form-field> -->
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100">
+                                    <mat-label>Purpose</mat-label>
+                                    <input matInput type="text" id="purpose" formControlName="purpose">
+                                    <mat-error class="alert help-block" *ngIf="!newTransRequestForm.get('purpose')?.valid && newTransRequestForm.get('purpose')?.touched">
+                                        Purpose Is Required
+                                    </mat-error>
+                                </mat-form-field> -->
+                                <app-form-input label="Purpose" type="text"
+                                [control]="newTransRequestForm.get('purpose')"
+                                placeholder="Write Project duration"></app-form-input>
+                            </div>
+                            <div class="col-md-6 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100">
+                                    <mat-label>Amount By EGP</mat-label>
+                                    <input matInput type="number" id="amountByEGP" formControlName="amountByEGP">
+                                    <mat-error class="alert help-block" *ngIf="!newTransRequestForm.get('amountByEGP')?.valid && newTransRequestForm.get('amountByEGP')?.touched">
+                                        Amount By EGP Is Required
+                                    </mat-error>
+                                </mat-form-field> -->
+                                <app-form-input label="Amount By EGP" type="number"
+                                [control]="newTransRequestForm.get('amountByEGP')"
+                                placeholder="Amount By EGP"></app-form-input>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 my-3">
+                                <!-- <mat-form-field class="example-full-width w-100"> -->
+                                    <label>Comment</label>
+                                    <textarea class="form-control" type="text" id="comment" formControlName="comment"></textarea>
+                                <!-- </mat-form-field> -->
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button class="btn add_request w-100 my-3"
+                                 [disabled]="newTransRequestForm.invalid" type="submit">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </p-sidebar>
+            <button class="m-3 add_request text-center mr-auto btn"
+             (click)="togglePanel()">Add New Request</button>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+
+    <table mat-table [dataSource]="myRequests.slice().reverse()" class=" newTableCustom">
+    
+        <ng-container matColumnDef="Date">
+            <th mat-header-cell *matHeaderCellDef> Date </th>
+            <td mat-cell *matCellDef="let request"> {{request.date |date:'dd MMM, yyyy'}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="From">
+            <th mat-header-cell *matHeaderCellDef> From </th>
+            <td mat-cell *matCellDef="let request"> {{request.fromLocation}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="To">
+            <th mat-header-cell *matHeaderCellDef> To </th>
+            <td mat-cell *matCellDef="let request"> {{request.toLocation}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="Purpose">
+            <th mat-header-cell *matHeaderCellDef> Purpose </th>
+            <td mat-cell *matCellDef="let request"> {{request.purpose}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="Project">
+            <th mat-header-cell *matHeaderCellDef> Project </th>
+            <td mat-cell *matCellDef="let request"> {{request.projectName}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="Amount">
+            <th mat-header-cell *matHeaderCellDef> Amount </th>
+            <td mat-cell *matCellDef="let request"> {{request.amountByEGP}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="Status">
+            <th mat-header-cell *matHeaderCellDef> Status </th>
+            <td mat-cell *matCellDef="let request">
+                {{request.trans_status_name}}
+                <!-- {{request.finalStatus == 0 ? 'Rejected' : request.finalStatus == 1 ? 'Pending' : request.finalStatus == 2 ? 'Approved' : ''}} -->
+            </td>
+        </ng-container>
+    
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>

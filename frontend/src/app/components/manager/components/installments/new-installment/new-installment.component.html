@@ -1,0 +1,323 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="newInstallmentLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mt-3 ml-3">
+                <span>
+                    <i class="pi pi-arrow-left backIcon mr-1" (click)="goBack();"></i>
+                </span> New Installment
+            </h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <form [formGroup]="newDebitForm" (ngSubmit)="submitNewDebitForm()" class="example-form">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Title">Title</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="text" placeholder="Ex. Loan" formControlName="title" />
+                                </div>
+                                <mat-error class="alert help-block" *ngIf="!newDebitForm.get('title')?.valid && newDebitForm.get('title')?.touched">
+                                    Title Is Required
+                                </mat-error>
+                            </div>
+                        </div>
+
+                        <!-- <div class="col-md-6">
+                            <div class="mb-3">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label class="formLables">Type</mat-label>
+                                    <mat-select formControlName="installment_type_id" class="form-control">
+                                        <mat-option *ngFor="let type of InstallmentTypeEnum | keyvalue" [value]="type.value">{{type.key}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-error class="alert help-block" *ngIf="!newDebitForm.get('installment_type_id')?.valid && newDebitForm.get('installment_type_id')?.touched">
+                                    Type Is Required
+                                </mat-error>
+                            </div>
+                        </div> -->
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Title">Description</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="text" placeholder="Desc" formControlName="main_description" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Title">Payment Bank</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="text" placeholder="Ex. CIB" formControlName="payment_bank" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label class="formLables">Currency</mat-label>
+                                    <mat-select formControlName="currency" class="form-control">
+                                        <mat-option *ngFor="let cur of CurrencyList" [value]="cur.currencyCode">
+                                            <div class="country-item d-flex justify-content-start align-items-center">
+                                                <img src="../../../../../assets/img/flags/{{cur.countryCode}}.png" width="17px" height="20px" [class]="'flag flag-' + cur.currencyName.toLowerCase()" />
+                                                <div>{{cur.currencyName}}</div>
+                                            </div>
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <!-- <p-dropdown tyleClass="example-full-width w-100" [options]="CurrencyList" formControlName="currency" optionLabel="currencyCode">
+                                    <ng-template let-country pTemplate="item">
+                                        <div class="country-item d-flex">
+                                            <img src="../../../../../assets/img/flags/{{country.countryCode}}.png" width="17px" height="20px" [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                            <div>{{country.currencyName}}</div>
+                                        </div>
+                                    </ng-template>
+                                </p-dropdown> -->
+                            </div>
+                        </div>
+
+                        <!-- {{newDebitForm.get('currency')?.value | json}} -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Title">Amount</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="0" formControlName="total_amount" (keyup)="syncAmount()" />
+                                </div>
+                                <mat-error class="alert help-block" *ngIf="!newDebitForm.get('total_amount')?.valid && newDebitForm.get('total_amount')?.touched">
+                                    Amount Is Required
+                                </mat-error>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="Title">{{newDebitForm.get(['installment_type_id'])?.value == InstallmentTypeEnum.Installment ? 'Maintenance' : 'Extra'}} Amount</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="0" formControlName="interest_amount" (keyup)="syncAmount()" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" *ngIf="newDebitForm.get(['installment_type_id'])?.value == InstallmentTypeEnum.Installment">
+                            <div class="mb-3">
+                                <label class="form-label" for="Title">Down Payment Amount</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="0" formControlName="down_payment_amount" (keyup)="syncAmount()" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- {{installment_period_array.value | json}} -->
+                        <!-- {{installment_period_array.value}}
+                        <br> {{newDebitForm.get(['installment_period_array'])?.value | json}} -->
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="phone">Installments</label>
+                                <ng-container formArrayName="installment_period_array">
+                                    <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="installment_period_array.controls" [reorderableColumns]="true">
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th></th>
+                                                <th>#</th>
+                                                <th>Date</th>
+                                                <th>Amount</th>
+                                                <th>Desc</th>
+                                                <th></th>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="body" let-inst ; let-i="rowIndex">
+                                            <tr [pReorderableRow]="i" [formGroupName]="i" (drop)="reorder()">
+                                                <!-- <ng-container > -->
+                                                <td>
+                                                    <span class="pi pi-bars"></span>
+                                                </td>
+                                                <td>
+                                                    {{i+1}}
+                                                </td>
+                                                <td>
+                                                    <input class="form-control" type="date" formControlName="incoming_date" placeholder="1/1/2024">
+                                                </td>
+                                                <td>
+                                                    <input class="form-control" type="number" formControlName="installment_amount" placeholder="10000">
+                                                </td>
+                                                <td>
+                                                    <input class="form-control" type="string" formControlName="installment_description" placeholder="Desc">
+                                                </td>
+                                                <td>
+                                                    <span (click)="delInstallment(i)" class="material-icons delete">
+                                                        delete
+                                                    </span>
+                                                </td>
+                                                <!-- </ng-container> -->
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="footer">
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <th></th>
+                                                <td>
+                                                    <button class="btn btn-outline-info" type="button" (click)="addInstallment()">add</button>
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+                                    <!-- <table class="table table-hover table-striped">
+                                        <thead>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Desc</th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let h of installment_period_array.controls; index as i">
+                                                <ng-container [formGroupName]="i">
+                                                    <td>
+                                                        {{i+1}}
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" type="date" formControlName="incoming_date" placeholder="1/1/2024">
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" type="number" formControlName="installment_amount" placeholder="10000">
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" type="string" formControlName="installment_description" placeholder="Desc">
+                                                    </td>
+                                                    <td>
+                                                        <span (click)="delInstallment(i)" class="material-icons delete">
+                                                            delete
+                                                        </span>
+                                                    </td>
+                                                </ng-container>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td>
+                                                    <button class="btn btn-outline-info" type="button" (click)="addInstallment()">add</button>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table> -->
+
+                                </ng-container>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="modal-body">
+                </div> -->
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close" (click)="closeForm()">
+                    Close
+                </button> -->
+                    <button type="submit" class="btn btn-success" [disabled]="newDebitForm.invalid" data-bs-dismiss="modal" aria-label="Close">Save</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <form [formGroup]="loanCalculatorForm" (ngSubmit)="calculateLoanInstallments()" class="example-form">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12">
+                                Loan Calculator:
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <label class="form-label" for="Title">Amount</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="Ex. 100,000" formControlName="amount" />
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="form-label" for="Title">{{newDebitForm.get(['installment_type_id'])?.value == InstallmentTypeEnum.Installment ? 'Maintenance' : 'Extra'}} Amount</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="Ex. 10,000" formControlName="interest_amount" />
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6" *ngIf="newDebitForm.get(['installment_type_id'])?.value == InstallmentTypeEnum.Installment">
+                                <label class="form-label" for="Title">Down Payment Amount</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="Ex. 10,000" formControlName="down_payment_amount" />
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="form-label" for="Title">Start Date</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="date" placeholder="Ex. Loan" formControlName="start_date" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label class="formLables">Type</mat-label>
+                                    <mat-select formControlName="type" class="form-control">
+                                        <mat-option value="0">Once</mat-option>
+                                        <mat-option value="1">Monthly</mat-option>
+                                        <mat-option value="3">Quarterly</mat-option>
+                                        <mat-option value="6">Semi-annually</mat-option>
+                                        <mat-option value="12">Annually</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-lg-6" *ngIf="loanCalculatorForm.get(['type'])?.value != '0'">
+                                <mat-form-field class="example-full-width w-100">
+                                    <mat-label class="formLables">Calculation Type</mat-label>
+                                    <mat-select formControlName="payment_type" class="form-control">
+                                        <mat-option value="period">Per Period</mat-option>
+                                        <mat-option value="amount">Per Amount</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg-6" *ngIf="loanCalculatorForm.get(['type'])?.value != '0' && loanCalculatorForm.get(['payment_type'])?.value == 'period'">
+                                <label class="form-label" for="Title">Period per months</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="Ex. 12 Months" formControlName="payment_period" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6" *ngIf="loanCalculatorForm.get(['type'])?.value != '0' && loanCalculatorForm.get(['payment_type'])?.value == 'amount'">
+                                <label class="form-label" for="Title">Enter installment amount</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="number" placeholder="Ex. 10000 Per Quarter" formControlName="payment_amount" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 my-1">
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-outline-secondary" [disabled]="loanCalculatorForm.invalid">Calculate</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

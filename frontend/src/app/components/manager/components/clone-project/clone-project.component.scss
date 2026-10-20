@@ -1,0 +1,56 @@
+@import '../../../../colors';
+
+.title{
+    color: $mainThemeColor;
+    font-weight: 600;
+}
+.mainColor{
+    color: $mainThemeColor;
+
+}
+:host ::ng-deep {
+    #dt1,
+    #dt2 {
+        .p-datatable-header {
+            // background: rgba($color: $mainThemeColor, $alpha: 0.1);
+            // background-color: white;
+            border: 0;
+        }
+    }
+}
+
+:host ::ng-deep {
+    #dt1
+     {
+        .p-datatable-thead {
+            // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+            // background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+            background-color: $softThemeColor;
+            border-bottom: 1px solid $mainThemeColor;
+        }
+        .p-datatable .p-datatable-thead>tr>th 
+         {
+            color: $mainThemeColor;
+            background: inherit;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid $mainThemeColor;
+            padding: .5rem .5rem !important;
+        }
+        .p-datatable .p-datatable-tbody>tr{
+            color: $mainThemeColor;
+
+            a{
+            color: $mainThemeColor;
+
+            }
+        }
+    }
+}
+.team{
+    background-color: $softThemeColor;
+    padding: 10px;
+    color: $mainThemeColor;
+    // border:1px solid $subSubThemeColor;
+    // width: fit-content;
+}

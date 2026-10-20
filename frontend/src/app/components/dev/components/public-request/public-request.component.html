@@ -1,0 +1,172 @@
+<div class="container-fluid">
+    <div class="row m-2">
+        <div class="col-12 text-end p-0">
+            <!-- <div class="newReq"> -->
+            <button class="btn add_request" (click)="openForm()">Add New Request</button>
+            <!-- </div> -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+
+                <table class="table table-hover newTableCustom" id="costLogs">
+                    <thead>
+                        <tr>
+                            <td>Dept</td>
+                            <td>Type</td>
+                            <td>Details</td>
+                            <td>Amount</td>
+                            <td>Status</td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let request of myRequests">
+                            <td class="dateStyle">{{request.dept_name}}</td>
+                            <td>{{request.type}}</td>
+                            <td>{{request.details}}</td>
+                            <td>{{request.amountByEGP}}</td>
+                            <td>{{request.req_status_name}}</td>
+                            <td>
+                                <ng-container *ngIf="request.req_status_id == '1'">
+                                    <i class="pi pi-edit m-1 editIcon" matTooltip="Edit"></i>
+                                    <i class="pi pi-trash m-1 deleteIcon" matTooltip="Delete" (click)="deleteRequest(request)"></i>
+                                </ng-container>
+                            </td>
+                        </tr>
+                        <!-- <tr *ngFor="let request of myApprovedRequests">
+                            <td class="dateStyle">{{request.dept_name}}</td>
+                            <td>{{request.type}}</td>
+                            <td>{{request.details}}</td>
+                            <td>{{request.amountByEGP}}</td>
+                            <td>{{request.req_status_name}}</td>
+                            <td>
+                                <ng-container *ngIf="request.approvalCycle == 0">
+                                    <i class="pi pi-edit m-1 editIcon" matTooltip="Edit"></i>
+                                    <i class="pi pi-trash m-1 deleteIcon" matTooltip="Delete" (click)="deleteRequest(request)"></i>
+                                </ng-container>
+                            </td>
+                        </tr> -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Modal-->
+<p-sidebar header="" [(visible)]="displayModal" position="right" [autoZIndex]="false" [baseZIndex]="9999"
+styleClass="p-sidebar-md" [modal]="true" >
+
+
+    <form [formGroup]="newReqForm" (ngSubmit)="createNewReq()" class="example-form">
+        <h3 class="fw-bold">Add New Request</h3>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12 my-3">
+                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <label>Department</label>
+                        <mat-select class="form-control"  formControlName="dept"
+                        [ngClass]="{'is-invalid':!newReqForm.get('dept')?.valid &&
+                                 newReqForm.get('dept')?.touched}" placeholder="Select Department" floatlLabel="never">
+                                  <!-- <mat-select-trigger>Select Department</mat-select-trigger> -->
+                            <mat-option value='9'>Finance</mat-option>
+                            <mat-option value='10'>Admin</mat-option>
+                        </mat-select>
+                        <div *ngIf="!newReqForm.get('dept')?.valid && newReqForm.get('dept')?.touched" class="invalid-feedback">
+    
+                            <small>Department is Required</small>
+                          </div>
+                    <!-- </mat-form-field> -->
+                </div>
+                <div class="col-md-12 my-3">
+                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <!-- <label>type</label> -->
+                        <!-- <input class="form-control" type="text" formControlName="type"> -->
+
+                        <app-form-input label="type"
+                                [control]="newReqForm.get('type')"
+                                placeholder="Write Request type"></app-form-input>
+                        <!-- <mat-select formControlName="type">
+                            <mat-option value='1'>Freelancing</mat-option>
+                            <mat-option value='0'>Other</mat-option>
+                        </mat-select> -->
+                    <!-- </mat-form-field> -->
+                </div>
+
+                <div class="col-md-12 my-3">
+                    <!-- <mat-form-field class="example-full-width w-100">
+                        <mat-label>Details</mat-label>
+                        <input matInput type="text" formControlName="details">
+                    </mat-form-field> -->
+                    <app-form-input label="details"
+                    [control]="newReqForm.get('details')"
+                    placeholder="Write Request details"></app-form-input>
+                </div>
+
+                <div class="col-md-12 my-3" *ngIf="currentUser.department != departmentEnum.Business_Development">
+                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <label>Project</label>
+                        <mat-select class="form-control" formControlName="projectKey"
+                         (selectionChange)="getProcesses()" placeholder="Select Project" floatlLabel="never">
+                            <mat-option value=''></mat-option>
+                            <mat-option *ngFor="let project of myProjects" [value]='project.key'>{{project.title}}</mat-option>
+                        </mat-select>
+                    <!-- </mat-form-field> -->
+                </div>
+                <div class="col-md-12 my-3" *ngIf="!!newReqForm.get(['projectKey'])?.value">
+                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <label>Process</label>
+                        <mat-select class="form-control" formControlName="processKey"
+                        placeholder="Select Process" floatlLabel="never">
+                            <mat-option *ngFor="let process of myProcesses" [value]='process.key'>{{process.title}}</mat-option>
+                        </mat-select>
+                    <!-- </mat-form-field> -->
+                </div>
+
+                <div class="col-md-12 my-3">
+                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <label>Manager To Approve</label>
+                        <mat-select class="form-control" formControlName="managerToApproveKey"
+                        [ngClass]="{'is-invalid':!newReqForm.get('managerToApproveKey')?.valid &&
+                                 newReqForm.get('managerToApproveKey')?.touched}"
+                                 placeholder="Select Manager" floatlLabel="never">
+                            <ng-container *ngFor="let manager of managers">
+                                <mat-option *ngIf="manager.key != '36'" [value]="manager.key">{{manager.username}}</mat-option>
+                            </ng-container>
+                            <!-- <mat-option *ngFor="let manager of managers" [value]='manager.key'>{{manager.username}}</mat-option> -->
+                        </mat-select>
+                        <div *ngIf="!newReqForm.get('managerToApproveKey')?.valid && newReqForm.get('managerToApproveKey')?.touched" class="invalid-feedback">
+    
+                            <small>Manager is Required</small>
+                          </div>
+                    <!-- </mat-form-field> -->
+                </div>
+                <div class="col-md-12 my-3">
+                    <!-- <mat-form-field class="example-full-width w-100">
+                        <mat-label>Amount</mat-label>
+                        <input matInput type="number" formControlName="amount">
+                    </mat-form-field> -->
+                    <app-form-input label="amount" type="number"
+                    [control]="newReqForm.get('amount')"
+                    placeholder="Write amount"></app-form-input>
+                </div>
+
+
+                <div class="col-md-12 my-3">
+                    <button class="btn add_request my-3 w-100"
+                     [disabled]="newReqForm.invalid" type="submit">Submit</button>
+                </div>
+
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <!-- <p-button icon="pi pi-check" (click)="displayModal=false" label="Send To {{salaryForReview.empName}}" styleClass="p-button-text" (click)="saveSalaryAfterEdit('comment')"></p-button> -->
+            <!-- <p-button icon="pi pi-check" (click)="displayModal=false" label="Ok" styleClass="p-button-text"></p-button> -->
+        </ng-template>
+    </form>
+
+
+</p-sidebar>

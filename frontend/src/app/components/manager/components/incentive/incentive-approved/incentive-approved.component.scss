@@ -1,0 +1,22 @@
+@import '../../../../../colors';
+
+.header {
+    font-weight: bold;
+    font-size: large;
+    border: solid 1px #a19ea0;
+    text-align: left;
+}
+
+.body {
+    border: solid 1px #a19ea0;
+    text-align: left;
+}
+
+.review{
+
+    color: $mainThemeColor;
+    .modalInfo {
+        font-weight: 600;
+    
+    }
+}

@@ -1,0 +1,95 @@
+@import '../../../../colors';
+.delete {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.coloredIcon {
+    color: $mainThemeColor;
+}
+
+.coloredIconSec {
+    color: $buttonMainBackgroundColor;
+}
+
+.ci {
+    .form-control {
+        width: 100000px !important;
+    }
+}
+
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-header {
+            background: rgba($color: $mainThemeColor, $alpha: 0.1);
+        }
+    }
+}
+
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-thead {
+            // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+            background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+        }
+        .p-datatable .p-datatable-thead>tr>th {
+            color: $mainThemeColor;
+            background: inherit;
+            text-align: left;
+            font-size: 14px;
+        }
+    }
+}
+
+td {
+    text-align: left !important;
+    font-size: 12px;
+}
+
+.overView {
+    padding: 10px;
+    margin: 10px;
+    .overViewCard {
+        height: 150px;
+        margin: 5px;
+        padding: 5px;
+        border-radius: 5px;
+        .cardTitle {
+            text-align: center;
+            height: 40%;
+            h3 {
+                color: #fff;
+                font-size: 20px;
+                font-family: $mainFontFamily;
+                font-weight: 600;
+            }
+        }
+        .cardBody {
+            height: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            p {
+                color: #fff; //$buttonMainBackgroundColor;
+                font-size: 20px;
+                font-family: $mainFontFamily;
+            }
+        }
+    }
+    .card1 {
+        background-image: linear-gradient(50deg, #09c, $mainThemeColor)!important;
+    }
+    .card2 {
+        background-image: linear-gradient(50deg, #8EF9FE, #263238)!important;
+    }
+    .card3 {
+        background-image: linear-gradient(50deg, #FF9E80, #D50000)!important;
+    }
+    .card4 {
+        background-image: linear-gradient(50deg, #C5D429, #2E7D32)!important;
+    }
+    .card5 {
+        background-image: linear-gradient(50deg, #ffd86f, #FF7043)!important;
+    }
+}

@@ -1,0 +1,20 @@
+@import '../../../colors';
+.edit {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.delete {
+    color: #a19ea0;
+    cursor: pointer;
+}
+
+.cancel {
+    color: #a19ea0;
+    cursor: pointer;
+}
+
+.save {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}

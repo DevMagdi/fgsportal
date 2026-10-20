@@ -1,0 +1,315 @@
+<table mat-table [dataSource]="myPendingRequests" class="mat-elevation-z8">
+
+    <ng-container matColumnDef="Name">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let request"> {{request.empName}} </td>
+    </ng-container>
+    <!-- <ng-container matColumnDef="appCycle" *ngIf="currentUser.key == 'jjuyajnYK6clqnD7PIMEuQesyiy2'">
+        <th mat-header-cell *matHeaderCellDef> appCycle </th>
+        <td mat-cell *matCellDef="let request"> {{request.approvalCycle}} </td>
+    </ng-container> -->
+
+    <ng-container matColumnDef="Date">
+        <th mat-header-cell *matHeaderCellDef> Date </th>
+        <td mat-cell *matCellDef="let request"> {{request.date}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="From">
+        <th mat-header-cell *matHeaderCellDef> From </th>
+        <td mat-cell *matCellDef="let request"> {{request.fromLocation}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="To">
+        <th mat-header-cell *matHeaderCellDef> To </th>
+        <td mat-cell *matCellDef="let request"> {{request.toLocation}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Purpose">
+        <th mat-header-cell *matHeaderCellDef> Purpose </th>
+        <td mat-cell *matCellDef="let request"> {{request.purpose}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Project">
+        <th mat-header-cell *matHeaderCellDef> Project </th>
+        <td mat-cell *matCellDef="let request"> {{request.projectName}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Amount">
+        <th mat-header-cell *matHeaderCellDef> Amount </th>
+        <td mat-cell *matCellDef="let request"> {{request.amountByEGP}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Decision">
+        <th mat-header-cell *matHeaderCellDef> Decision </th>
+        <td mat-cell *matCellDef="let request">
+            <!-- <div class="pm" *ngIf="request.approvalCycle == 0">
+                <button class="btn btn-outline-info mx-1" (click)="openForPm(mymodal , request , true)">Approve</button>
+                <button class="btn btn-outline-danger mx-1" (click)="openForPm(mymodal , request , false)">Reject</button>
+            </div>
+
+            <div class="finance" *ngIf="request.approvalCycle == 1">
+                <button class="btn btn-outline-info mx-1" (click)="openForFinance(mymodal , request , true)">Approve</button>
+                <button class="btn btn-outline-danger mx-1" (click)="openForFinance(mymodal , request , false)">Reject</button>
+            </div> -->
+
+            <button class="btn reviewBTN mx-1" (click)="transportationModal=true;reviewRequest(request)">Review</button>
+            <!-- <button class="btn btn-outline-info mx-1" (click)="openForManager(mymodal , request , true)">Approve</button>
+            <button class="btn btn-outline-danger mx-1" (click)="openForManager(mymodal , request , false)">Reject</button> -->
+            <!-- <div class="manager">
+            </div> -->
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+
+
+<!-- Modal -->
+<p-sidebar *ngIf="!!requestToReview" [(visible)]="transportationModal" styleClass="p-sidebar-sm" class="side" [baseZIndex]="999" [autoZIndex]="false" position="right" [transitionOptions]="'350ms'">
+    <!-- <ng-template #mymodal let-modal> -->
+    <!-- <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div> -->
+    <h4 class="modal-title" id="modal-basic-title">Transportation Request Review</h4>
+    <div class="">
+        <div class="container-fluid myCardStyle">
+            <div class="">
+                <div class="d-flex py-2 my-1 border-bottom justify-content-between">
+                    <span class="myLable">Request BY :
+                        
+                    </span>
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.empName}}
+                        </span>
+                </div>
+                <div class="d-flex py-2 my-1 border-bottom justify-content-between">
+                    <span class="myLable">Date :
+                    </span>
+
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.date}}
+                        </span>
+                </div>
+
+                <div class="d-flex py-2 my-1 border-bottom justify-content-between">
+                    <span class="myLable">From :
+                    </span>
+
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.fromLocation}}
+                        </span>
+                </div>
+                <div class="d-flex py-2 my-1 border-bottom justify-content-between">
+                    <span class="myLable">To :
+                    </span>
+
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.toLocation}}
+                        </span>
+                </div>
+
+                <div class="d-flex py-2 my-1 border-bottom justify-content-between">
+                    <span class="myLable">purpose :
+                        
+                    </span>
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.purpose}}
+                        </span>
+                </div>
+                <div class="d-flex py-2 my-1 border-bottom justify-content-between">
+                    <span class="myLable">Amount :
+                        
+                    </span>
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.amountByEGP}}
+                        </span>
+                </div>
+
+                <div class="d-flex py-2 my-1 border-bottom justify-content-between" *ngIf="requestToReview.projectName">
+                    <span class="myLable">Project Name :
+                        
+                    </span>
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.projectName}}
+                        </span>
+                </div>
+                <div class="d-flex py-2 my-1 justify-content-between" *ngIf="requestToReview.processName">
+                    <span class="myLable">Process Name :
+                    </span>
+
+                    <span class="modalInfo pl-2">
+                            {{requestToReview.processName}}
+                        </span>
+                </div>
+            </div>
+            <mat-divider></mat-divider>
+            <p-table *ngIf="!!requestToReview.history && requestToReview.history.length > 0" styleClass="p-datatable-sm" [value]="requestToReview.history" [paginator]="requestToReview.history.length > 10 ? true : false" [rows]="10" [showCurrentPageReport]="true"
+                responsiveLayout="scroll" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [rowsPerPageOptions]="[10,25,50]">
+                <ng-template pTemplate="header">
+                    <tr class="tHeader">
+                        <th pSortableColumn="user_name">Action By
+                        </th>
+                        <th pSortableColumn="status_name">Status
+                        </th>
+                        <th pSortableColumn="comment">Comment
+                        </th>
+                        <th pSortableColumn="action_date">Action Date
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-req>
+                    <tr class="tbody">
+                        <td>
+                            {{req.user_name}}
+                        </td>
+                        <td>
+                            {{req.status_name}}
+                        </td>
+                        <td>
+                            {{req.comment}}
+                        </td>
+                        <td>
+                            {{req.action_date | date :'dd/MM/yyyy HH:mm:ss'}}
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+
+            <mat-divider></mat-divider>
+            <div class="management" *ngIf="currentUser.accRole != AccountRolesEnum.FINANCE">
+                <div class="col-12" *ngIf="currentUser.department != DepartmentEnum.MANAGEMENT">
+                    <span class="myLable">Assign To :
+                        
+                        <mat-select class="form-control" [(ngModel)]="requestToReview.managerToApproveKey">
+                            <mat-option *ngFor="let man of managers" [value]='man.key'>{{man.username}}</mat-option>
+                        </mat-select>
+                    </span>
+                </div>
+                <!-- <div class="col-12" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+                    <span class="myLable">Assign To :
+                        
+                        <mat-select class="form-control" [(ngModel)]="requestToReview.managerToApproveKey">
+                            <mat-option *ngFor="let admin of admins" [value]='admin.key'>{{admin.username}}</mat-option>
+                        </mat-select>
+                    </span>
+                </div> -->
+                <div class=" my-4">
+                    <span class="myLable">Comment :
+                        
+                        <input type="text" class="form-control" [(ngModel)]="requestToReview.managerDissisionComment">
+                    </span>
+                </div>
+                <div class="">
+                    <button type="submit" class="btn mx-1 btnStyle" [disabled]="currentUser.department != DepartmentEnum.MANAGEMENT && !requestToReview.managerToApproveKey" (click)="flowDecision(true);transportationModal=false">Approve</button>
+                    <button type="submit" class="btn mx-1 rejectBTN" [disabled]="!requestToReview.managerDissisionComment" (click)="flowDecision(false);transportationModal=false">Reject</button>
+                </div>
+            </div>
+            <div class="finance" *ngIf="currentUser.accRole == AccountRolesEnum.FINANCE || currentUser.department == DepartmentEnum.MANAGEMENT">
+                <div class="modal-footer">
+                    <button type="submit" class="btn mx-1 approveBTN" (click)="markAsDone();transportationModal=false">Paid</button>
+                </div>
+            </div>
+
+            <!-- <div class="pmDecission" *ngIf="requestToReview.approvalCycle == 0">
+                <div class="row">
+                    <div class="col-12" *ngIf="requestToReview.pmDissision == true">
+                        <span class="myLable">Assign To :
+                            
+                            <mat-select class="form-control" [(ngModel)]="requestToReview.financeToApproveKey">
+                                <mat-option *ngFor="let admin of admins" [value]='admin.key'>{{admin.username}}</mat-option>
+                            </mat-select>
+                        </span>
+                    </div>
+                    <div class="col-12">
+                        <span class="myLable">Project Manager Comment : <span *ngIf="requestToReview.pmDissision == false" style="color: red; font-size: 13px;">*Required</span>
+                            
+                            <input type="text" class="form-control" [(ngModel)]="requestToReview.pmDissisionComment">
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info" [disabled]="(requestToReview.pmDissision == true && !requestToReview.financeToApproveKey) || (requestToReview.pmDissision == false && !requestToReview.pmDissisionComment)" (click)="pmDecision();modal.close('Save click')">Submit</button>
+                </div>
+            </div>
+
+            <div class="financeDecission" *ngIf="requestToReview.approvalCycle == 1">
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="myLable">Manager Approved :
+                             {{requestToReview.pmDissisionName}}
+                        </span>
+                    </div>
+                    <div class="col-md-6" *ngIf="!!requestToReview.pmDissisionComment">
+                        <span class="myLable">Project Manager Comment :
+                             {{requestToReview.pmDissisionComment}}
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12" *ngIf="requestToReview.financeDissision == true">
+                        <span class="myLable">Assign To :
+                            
+                            <mat-select class="form-control" [(ngModel)]="requestToReview.managerToApproveKey">
+                                <mat-option *ngFor="let manager of managers" [value]='manager.key'>{{manager.username}}</mat-option>
+                            </mat-select>
+                        </span>
+                    </div>
+                    <div class="col-12">
+                        <span class="myLable">Finance Comment : <span *ngIf="requestToReview.pmDissision == false" style="color: red; font-size: 13px;">*Required</span>
+                            
+                            <input type="text" class="form-control" [(ngModel)]="requestToReview.financeDissisionComment">
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info" [disabled]="(requestToReview.financeDissision == true && !requestToReview.managerToApproveKey) || (requestToReview.financeDissision == false && !requestToReview.financeDissisionComment)" (click)="financeDecision();modal.close('Save click')">Submit</button>
+                </div>
+            </div>
+
+            <div class="managerDecission" *ngIf="requestToReview.approvalCycle == 2">
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="myLable">Project Manager Approved :
+                             {{requestToReview.pmDissisionName}}
+                        </span>
+                    </div>
+                    <div class="col-md-6" *ngIf="!!requestToReview.pmDissisionComment">
+                        <span class="myLable">Project Manager Comment :
+                             {{requestToReview.pmDissisionComment}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="myLable">Finance Approved :
+                             {{requestToReview.financeDissisionName}}
+                        </span>
+                    </div>
+                    <div class="col-md-6" *ngIf="!!requestToReview.pmDissisionComment">
+                        <span class="myLable">Finance Comment :
+                             {{requestToReview.financeDissisionComment}}
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <span class="myLable">Manager Comment : <span *ngIf="requestToReview.managerDissision == false" style="color: red; font-size: 13px;">*Required</span>
+                            
+                            <input type="text" class="form-control" [(ngModel)]="requestToReview.managerDissisionComment">
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info" [disabled]="requestToReview.managerDissision == false && !requestToReview.managerDissisionComment" (click)="managerDecision();modal.close('Save click')">Submit</button>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <!-- </ng-template> -->
+</p-sidebar>

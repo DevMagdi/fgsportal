@@ -1,0 +1,43 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="availableDevLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="mx-3 my-3">
+    <div class="row tabheader">
+        <div class="col-md-3">
+            <label for="dev">Developers list</label>
+            <select class="form-control" name="dev" id="dev" [(ngModel)]="devKey">
+                <option value=""></option>
+                <option *ngFor="let user of allDevs" value="{{user.key}}">{{user.username}}</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="">From Date:</label>
+            <input class="form-control" type="date" #date [(ngModel)]="fromDate">
+        </div>
+        <div class="col-md-3">
+            <label for="">To Date:</label>
+            <input class="form-control" type="date" #date [(ngModel)]="toDate">
+        </div>
+        <div class="col-md-2 mt-auto">
+            <button class="btn btnStyle" (click)="getDevReports()" [disabled]="!devKey || !fromDate || !toDate">
+                check </button>
+        </div>
+
+    </div>
+    <div class="row mt-4">
+        <p class="fw-bold text-danger strong" *ngIf="notAvailable==true">* {{getSelcetedDevName()}} Not Available During this period</p>
+        <p class="fw-bold" *ngIf="availableDates.length>0">- Available days :</p>
+        <div class="col-sm-3 mb-2 p-1" *ngFor="let date of availableDates">
+
+            <div class="team border">
+                <ng-container>
+
+                    <p>{{date}}</p>
+
+                </ng-container>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,481 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="devProgressLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="pageTitle">Developer Progress</h1>
+        </div>
+    </div>
+    <form [formGroup]="getDevProgressForm" (ngSubmit)="getDevData()" class="example-form">
+        <div class="row">
+            <div class="col-lg-3 my-2">
+                <input type="date" class="form-control" formControlName="from">
+            </div>
+            <div class="col-lg-3 my-2">
+                <input type="date" class="form-control" formControlName="to">
+            </div>
+            <div class="col-lg-3 my-2">
+                <div>
+                    <!-- <mat-label>Select Developer</mat-label> -->
+                    <input type="text" *ngIf="devProgressLoader == false" class="form-control w-100" [formControl]="myControl" [matAutocomplete]="auto" placeholder="Select Employee">
+                    <app-loading-dots *ngIf="devProgressLoader == true"></app-loading-dots>
+                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getFromHTML($event)">
+                        <mat-option *ngFor="let user of filteredOptions | async" [value]="user">
+                            {{user.username}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </div>
+            </div>
+            <div class="col-lg-2 my-2">
+                <button class="btn get_progress w-100" [disabled]="getDevProgressForm.invalid">Get</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+
+<div class="container-fluid" *ngIf="!loaded">
+    <div class="row my-2">
+        <div class="col-lg-4 my-2">
+            <div class="card flex justify-content-center chartCard">
+                <div class="card-body">
+                    <p class="title">Developers Performance</p>
+
+                    <p-skeleton shape="circle" size="150px"></p-skeleton>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 my-2">
+            <div class="statistics_placeholder card mb-3">
+                <div class="card-body text-center">
+                    <h4 class="fw-bold">
+                        <p-skeleton width="5rem" styleClass="mb-2 m-auto"></p-skeleton>
+
+                    </h4>
+                    <p>
+                        Number Of tasks
+
+                    </p>
+                </div>
+
+            </div>
+            <div class="statistics_placeholder card">
+                <div class="card-body text-center">
+                    <h4>
+                        <p-skeleton width="10rem" styleClass="mb-2 m-auto"></p-skeleton>
+                    </h4>
+                    <p>
+                        Total Rate
+
+                    </p>
+
+                </div>
+            </div>
+
+
+        </div>
+        <div class="col-lg-4 my-2">
+            <div class="card dev">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <p-skeleton shape="circle" size="110px" styleClass="mb-2 m-auto"></p-skeleton>
+                    </div>
+                    <p>
+                        <p-skeleton width="10rem" styleClass="mb-2 m-auto"></p-skeleton>
+                    </p>
+                    <p>
+                        <p-skeleton width="10rem" styleClass="mb-2 m-auto"></p-skeleton>
+                    </p>
+
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="table-responsive">
+
+        <table class="table newTableCustom">
+
+            <thead>
+                <tr>
+                    <th style="width: 3rem"></th>
+                    <th>Project</th>
+                    <th> Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of [1,2,3,4,5]">
+                    <td style="width: 3rem"></td>
+                    <td>
+                        <p-skeleton width="10rem" styleClass="mb-2"></p-skeleton>
+
+                    </td>
+                    <td>
+                        <p-skeleton width="10rem" styleClass="mb-2"></p-skeleton>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="container-fluid" *ngIf="!!devProgressReport">
+    <div class="row my-2">
+        <div class="col-lg-4 my-2">
+            <div class="card flex justify-content-center chartCard">
+                <div class="card-body">
+                    <p class="title">Developers Performance</p>
+
+                    <p-chart type="pie" [data]="data" [options]="options"></p-chart>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-lg-4 my-2">
+            <div class="statistics card mb-3">
+                <div class="card-body text-center">
+                    <h4 class="fw-bold">
+                        {{numberOfTasks}}
+                    </h4>
+                    <p>
+                        Number Of tasks
+                    </p>
+                </div>
+
+            </div>
+            <div class="statistics card">
+                <div class="card-body text-center">
+                    <h4>
+                        <p-rating [disabled]="true" [readonly]="true" [(ngModel)]="devProgressReport.total_rate" [cancel]="false" [stars]="5"></p-rating>
+                    </h4>
+                    <p>
+                        Total Rate
+                    </p>
+
+                </div>
+            </div>
+
+
+        </div>
+        <div class="col-lg-4 my-2">
+            <div class="card dev">
+                <div class="card-body text-center">
+                    <div>
+                        <!-- {{currentUser.photoURL}} -->
+                        <img *ngIf="devProgressReport.photoURL" src="{{newServerApi}}{{devProgressReport.photoURL}}" width="150" class="rounded-circle" alt="" srcset="">
+                        <img *ngIf="!devProgressReport.photoURL" src="../../../../../assets/img/avatarman.png" width="150" class="rounded-circle" alt="" srcset="">
+                    </div>
+                    <h2>{{devProgressReport.username}}</h2>
+                    <p class="sub_title">{{devProgressReport.accRole_name}}</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <div>
+        <div class="my-2">
+            <div class="">
+                <p-table #dt1 id="dt1" [value]="devProgressReport.tasks_data" dataKey="projectID">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th style="width: 3rem"></th>
+                            <th>Project</th>
+                            <th> Hours</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-project let-expanded="expanded">
+                        <tr>
+                            <td>
+                                <button type="button" pButton pRipple [pRowToggler]="project" class="p-button-text p-button-rounded-1 p-button-plain border p-1 " [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-plus'"></button>
+                            </td>
+                            <td>
+                                <a [routerLink]="['/manager/projects',project.projectID]">
+                                    {{ project.projectName }}
+                                </a>
+                            </td>
+                            <td>{{ project.total_working_hours }}</td>
+                        </tr>
+
+                    </ng-template>
+                    <ng-template pTemplate="rowexpansion" let-project>
+                        <tr>
+                            <td colspan="7">
+                                <div class="p-3">
+                                    <p-table [value]="project.processes" dataKey="processID">
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th style="width: 5rem"></th>
+                                                <th>Process Name</th>
+                                                <th>Working Hours</th>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="body" let-process let-processExpanded="expanded">
+                                            <tr>
+                                                <td>
+                                                    <button type="button" pButton pRipple [pRowToggler]="process" class="p-button-text p-button-rounded-1 p-button-plain border p-1" [icon]="processExpanded ? 'pi pi-chevron-down' : 'pi pi-plus'"></button>
+                                                </td>
+                                                <td>
+                                                    <a [routerLink]="['/manager/projects',project.projectID,process.processID]">
+                                                        {{ process.processName }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ process.process_working_hours }}</td>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="rowexpansion" let-process>
+                                            <tr *ngIf="!!process.tasks">
+                                                <td colspan="7">
+                                                    <div class="p-3">
+                                                        <p-table [value]="process.tasks" dataKey="taskID">
+                                                            <ng-template pTemplate="header">
+                                                                <tr>
+                                                                    <th>Task Name</th>
+                                                                    <th>Working Hours</th>
+                                                                </tr>
+                                                            </ng-template>
+                                                            <ng-template pTemplate="body" let-task>
+                                                                <tr>
+                                                                    <td>{{ task.taskName }}</td>
+                                                                    <td>{{ task.task_working_hours }}</td>
+                                                                </tr>
+                                                            </ng-template>
+                                                            <ng-template pTemplate="emptymessage">
+                                                                <tr>
+                                                                    <td colspan="6">There are no tasks for this product yet.</td>
+                                                                </tr>
+                                                            </ng-template>
+                                                        </p-table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="emptymessage">
+                                            <tr>
+                                                <td colspan="6">There are no Process for this product yet.</td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+
+                        <tr>
+                            <!-- <td></td> -->
+                            <td colspan="2">Total Working Hours</td>
+                            <td>{{devProgressReport.total_working_hours}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="row overView">
+        <div class="col-lg-6">
+            <div class="overViewCard">
+                <div class="cardTitle">
+                    <h3>
+                        Total Working Hours
+                    </h3>
+                </div>
+                <div class="cardBody">
+                    <div class="card flex justify-content-center">
+                        <p-chart type="pie" [data]="data" [options]="options"></p-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="overViewCard card5">
+                <div class="cardTitle">
+                    <h3>
+                        Total Rate
+                    </h3>
+                </div>
+                <div class="cardBody">
+                    <p>
+                        <p-rating [disabled]="true" [readonly]="true" [(ngModel)]="devProgressReport.total_rate" [cancel]="false" [stars]="5"></p-rating>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="container m-0 p-0">
+                <div class="row overView">
+
+                    <div class="col-lg-3">
+                        <div class="overViewCard card4">
+                            <div class="cardTitle">
+                                <h3>
+                                    Idle Hours
+                                </h3>
+                            </div>
+                            <div class="cardBody">
+                                <p>
+                                    {{devProgressReport.idle_hours}}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="overViewCard card2">
+                            <div class="cardTitle">
+                                <h3>
+                                    number Of Tasks
+                                </h3>
+                            </div>
+                            <div class="cardBody">
+                                <p>
+                                    3
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+
+
+    <div class="row">
+        <div class="col-12">
+
+            <!-- <div class="card">
+                <p-table [value]="devProgressReport.tasks_data" dataKey="projectID">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th style="width: 5rem"></th>
+                            <th>Title</th>
+                            <th>Working Hours</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-project let-expanded="expanded">
+                        <tr>
+                            <td>
+                                <button type="button" pButton pRipple [pRowToggler]="project" class="p-button-text p-button-rounded p-button-plain" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                            </td>
+                            <td>
+                                <a [routerLink]="['/manager/projects',project.projectID]">
+                                    {{ project.projectName }}
+                                </a>
+                            </td>
+                            <td>{{ project.total_working_hours }}</td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="rowexpansion" let-project>
+                        <tr>
+                            <td colspan="7">
+                                <div class="p-3">
+                                    <p-table [value]="project.processes" dataKey="processID">
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th style="width: 5rem"></th>
+                                                <th>Process Name</th>
+                                                <th>Working Hours</th>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="body" let-process let-processExpanded="expanded">
+                                            <tr>
+                                                <td>
+                                                    <button type="button" pButton pRipple [pRowToggler]="process" class="p-button-text p-button-rounded p-button-plain" [icon]="processExpanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                                                </td>
+                                                <td>
+                                                    <a [routerLink]="['/manager/projects',project.projectID,process.processID]">
+                                                        {{ process.processName }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ process.process_working_hours }}</td>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="rowexpansion" let-process>
+                                            <tr *ngIf="!!process.tasks">
+                                                <td colspan="7">
+                                                    <div class="p-3">
+                                                        <p-table [value]="process.tasks" dataKey="taskID">
+                                                            <ng-template pTemplate="header">
+                                                                <tr>
+                                                                    <th>Task Name</th>
+                                                                    <th>Working Hours</th>
+                                                                </tr>
+                                                            </ng-template>
+                                                            <ng-template pTemplate="body" let-task>
+                                                                <tr>
+                                                                    <td>{{ task.taskName }}</td>
+                                                                    <td>{{ task.task_working_hours }}</td>
+                                                                </tr>
+                                                            </ng-template>
+                                                            <ng-template pTemplate="emptymessage">
+                                                                <tr>
+                                                                    <td colspan="6">There are no tasks for this product yet.</td>
+                                                                </tr>
+                                                            </ng-template>
+                                                        </p-table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="emptymessage">
+                                            <tr>
+                                                <td colspan="6">There are no Process for this product yet.</td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div> -->
+        </div>
+    </div>
+
+</div>
+
+
+
+<ng-template #mymodal let-modal>
+
+    <div class="modal-body" [formGroup]="getDevProgressForm">
+
+        <!-- <div class="my-2">
+            <input type="date" class="form-control" formControlName="to" placeholder="to">
+
+        </div> -->
+        <h4 class="modal-title" id="modal-basic-title">Select Developer</h4>
+
+        <div class="my-2">
+            <input type="text" *ngIf="devProgressLoader == false" class="form-control w-100" [formControl]="myControl" [matAutocomplete]="auto" placeholder="select Employee">
+            <app-loading-dots *ngIf="devProgressLoader == true"></app-loading-dots>
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getFromHTML($event)">
+                <mat-option *ngFor="let user of filteredOptions | async" [value]="user">
+                    {{user.username}}
+                </mat-option>
+            </mat-autocomplete>
+        </div>
+        <div class="my-2">
+            <label for="">From</label>
+            <input type="date" class="form-control" formControlName="from" placeholder="from">
+
+        </div>
+        <div class=" my-2">
+            <label for="">To</label>
+
+            <input type="date" class="form-control" formControlName="to">
+        </div>
+        <button class="btn get_progress w-100 mt-3" [disabled]="getDevProgressForm.invalid" (click)="getDevData()">Get</button>
+
+
+    </div>
+</ng-template>

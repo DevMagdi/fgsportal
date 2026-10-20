@@ -1,0 +1,131 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="loading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div *ngIf="!loading " class="container-fluid">
+
+    <div class="mb-4 mt-5 row text-start">
+        <div class="col-md-9">
+            <h1 class="main-color fw-bold" *ngIf="isManager">Project Manager Reports</h1>
+            <h1 class="main-color fw-bold" *ngIf="isProjectManager">Monthly report to Manager</h1>
+
+        </div>
+       
+        <div class="col-md-3 text-end" *ngIf="isProjectManager">
+
+            <button (click)="sidebarDisplay=true" type="button" class="btn btnStyle">
+                <i class="menu-icon tf-icons bx bx-plus"></i>
+                Add new Report
+            </button>
+        </div>
+       
+    </div>
+    <hr class="main-color">
+
+    <p-tabView *ngIf="isManager" [(activeIndex)]="activeIndex" (onChange)="loadReports($event)">
+        <p-tabPanel header="My Reports">
+
+            <ng-template pTemplate="content">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+
+                        <label for="monthYearPicker" class="form-label main-color">From</label>
+                        <input type="date" class="form-control" [(ngModel)]="start_date">
+                    </div>
+                    <div class="col-md-3">
+
+                        <label for="monthYearPicker" class="form-label main-color">To</label>
+                        <input type="date" class="form-control" [(ngModel)]="end_date">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btnStyle text-white" (click)="getManagerReports()"> Get </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <app-reports-table [reports]="reports" [isManager]="isManager" (approveMReport)="getManagerReports()"></app-reports-table>
+                </div>
+
+            </ng-template>
+            
+        </p-tabPanel>
+        <p-tabPanel header="All Pending Reports">
+
+            <ng-template pTemplate="content">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+
+                        <label for="monthYearPicker" class="form-label main-color">From</label>
+                        <input type="date" class="form-control" [(ngModel)]="start_date">
+                    </div>
+                    <div class="col-md-3">
+
+                        <label for="monthYearPicker" class="form-label main-color">To</label>
+                        <input type="date" class="form-control" [(ngModel)]="end_date">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btnStyle text-white" (click)="getAllPendingReports()"> Get </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <app-reports-table [reports]="reports" [isManager]="isManager" (approveMReport)="getAllPendingReports()"></app-reports-table>
+                </div>
+
+            </ng-template>
+            
+        </p-tabPanel>
+        <p-tabPanel header="My Pending Reports">
+
+            <ng-template pTemplate="content">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+
+                        <label for="monthYearPicker" class="form-label main-color">From</label>
+                        <input type="date" class="form-control" [(ngModel)]="start_date">
+                    </div>
+                    <div class="col-md-3">
+
+                        <label for="monthYearPicker" class="form-label main-color">To</label>
+                        <input type="date" class="form-control" [(ngModel)]="end_date">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btnStyle text-white" (click)="getManagerPendingReports()"> Get </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <app-reports-table [reports]="reports" [isManager]="isManager" (approveMReport)="getManagerPendingReports()"></app-reports-table>
+                </div>
+
+            </ng-template>
+            
+        </p-tabPanel>
+    </p-tabView>
+
+</div>
+<div *ngIf="isProjectManager">
+    <div class="row mx-0">
+        <div class="col-md-3">
+
+            <label for="monthYearPicker" class="form-label main-color">From</label>
+            <input type="date" class="form-control" [(ngModel)]="start_date">
+        </div>
+        <div class="col-md-3">
+
+            <label for="monthYearPicker" class="form-label main-color">To</label>
+            <input type="date" class="form-control"[(ngModel)]="end_date">
+        </div>
+    </div>
+    <app-reports-table [reports]="reports" [isManager]="isManager" [sidebarDisplay]="sidebarDisplay"></app-reports-table>
+</div>
+
+
+
+<p-sidebar styleClass="p-sidebar-md" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="showReport" position="right" 
+[transitionOptions]="'350ms'">
+<ng-template pTemplate="content">
+
+    <app-show-report [report]="report" ></app-show-report>
+</ng-template>
+</p-sidebar>

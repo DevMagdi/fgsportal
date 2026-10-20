@@ -1,0 +1,577 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="adminTasksLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+
+<!-- <header>
+    <h1>Admin Task Manager</h1>
+</header> -->
+
+<main>
+    <div class="">
+        <p-tabView class="p-0">
+            <p-tabPanel header="Running Tasks" class="running-tasks">
+
+                <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="runningTasks" dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [globalFilterFields]="['task_title','task_description']">
+                    <ng-template pTemplate="caption">
+                        <div class="d-flex justify-content-between">
+                            <span class="p-input-icon-left search">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text"
+                                    (input)="dt1.filterGlobal($any($event.target).value, 'contains')"
+                                    placeholder="Search" />
+                            </span>
+                            <div>
+                                <button pButton label="Clear" class="p-button-outlined p-button-sm mx-1" icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                                <button type="button" class="btn add_task" data-bs-toggle="modal" data-bs-target="#largeModal" (click)="getAdmins()">
+                                    Add Task
+                                    <i class="menu-icon tf-icons bx bx-plus"></i>
+                                </button>
+
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Task Title
+                                    <p-columnFilter type="text" field="task_title" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Task Details
+                                    <p-columnFilter type="text" field="task_description" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Owner
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Start Date
+                                    <p-columnFilter type="date" field="task_start_date" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    End Date
+                                    <p-columnFilter type="date" field="task_end_date" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Progress
+                                </div>
+                            </th>
+                            <th></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-task>
+                        <tr>
+                            <td>
+                                {{task.task_title}}
+                            </td>
+                            <td>
+                                {{task.task_description}}
+                            </td>
+                            <td>
+                                {{task.task_team[0].username}}
+                            </td>
+                            <td>
+                                {{task.task_start_date}}
+                            </td>
+                            <td>
+                                {{task.task_end_date}}
+                            </td>
+                            <td>
+                                {{task.task_progress}}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="editTask(task)" data-bs-toggle="modal" data-bs-target="#largeModal"><i
+                                                class="bx bx-edit-alt me-1"></i> Edit</a>
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="closeTask(task)"><i
+                                                class="bx bx-x me-1"></i> Close</a>
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="deleteTask(task)"><i class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="7">No Tasks found.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+
+            </p-tabPanel>
+            <p-tabPanel header="Admin Tasks">
+
+                <br>
+
+                <p-table responsiveLayout="scroll" id="dt2" #dt2 [value]="adminTasks" dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [globalFilterFields]="['task_title','task_description']">
+                    <ng-template pTemplate="caption">
+                        <div class="d-flex justify-content-between">
+                            <div class="d-flex gap-2">
+                                <!-- <div> -->
+
+                                <span class="p-input-icon-left search my-1">
+                                        <i class="pi pi-search"></i>
+                                        <input pInputText type="text"
+                                            (input)="dt2.filterGlobal($any($event.target).value, 'contains')"
+                                            placeholder="Search keyword" />
+                                    </span>
+
+                                <mat-select id="admin-select" [(ngModel)]="admin_id" class="form-control my-1" name="admin-select" placeholder="select Admin" floatlLabel="never" (mouseenter)="checkAdmins()" (selectionChange)="getAdminTasks()">
+                                    <!-- <mat-select-trigger>Select Admin</mat-select-trigger> -->
+                                    <!-- <mat-option value=""></mat-option> -->
+                                    <mat-option *ngFor="let admin of admins" [value]="admin.key">{{admin.username}}</mat-option>
+                                </mat-select>
+
+                            </div>
+
+                            <div>
+
+                                <button pButton label="Clear" class="p-button-outlined p-button-sm mx-1" icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                                <button type="button" class="btn add_task" data-bs-toggle="modal" data-bs-target="#largeModal" (click)="getAdmins()">
+                                Add Task
+                                <i class="menu-icon tf-icons bx bx-plus"></i>
+                            </button>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Task Title
+                                    <p-columnFilter type="text" field="task_title" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Task Details
+                                    <p-columnFilter type="text" field="task_description" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Owner
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Start Date
+                                    <p-columnFilter type="date" field="task_start_date" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    End Date
+                                    <p-columnFilter type="date" field="task_end_date" display="menu"></p-columnFilter>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    Progress
+                                </div>
+                            </th>
+                            <th></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-task>
+                        <tr>
+                            <td>
+                                {{task.task_title}}
+                            </td>
+                            <td>
+                                {{task.task_description}}
+                            </td>
+                            <td>
+                                {{task.task_team[0].username}}
+                            </td>
+                            <td>
+                                {{task.task_start_date}}
+                            </td>
+                            <td>
+                                {{task.task_end_date}}
+                            </td>
+                            <td>
+                                <mat-select class="form-control" [(ngModel)]="task.task_status_id" (selectionChange)="changeTaskStatus(task)">
+                                    <mat-option *ngFor="let status of taskStatus" value="{{status.id}}">{{status.task_status_name}}</mat-option>
+                                </mat-select>
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="editTask(task)" data-bs-toggle="modal" data-bs-target="#largeModal"><i
+                                                class="bx bx-edit-alt me-1"></i> Edit</a>
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="deleteTask(task)"><i
+                                                class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="7">No Tasks found.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel>
+
+        </p-tabView>
+    </div>
+
+
+    <!-- <section>
+        <h2>Running Tasks</h2>
+        <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="runningTasks" dataKey="id" [rows]="10"
+            [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            [globalFilterFields]="['task_title','task_description']">
+            <ng-template pTemplate="caption">
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                        data-bs-target="#largeModal" (click)="getAdmins()">
+                        <i class="menu-icon tf-icons bx bx-plus"></i>
+                        Task
+                    </button>
+                    <div>
+                        <span class="p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text"
+                                (input)="dt1.filterGlobal($any($event.target).value, 'contains')"
+                                placeholder="Search keyword" />
+                        </span>
+                        <button pButton label="Clear" class="p-button-outlined p-button-sm mx-1"
+                            icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Task Title
+                            <p-columnFilter type="text" field="task_title" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Task Details
+                            <p-columnFilter type="text" field="task_description" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Owner
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Start Date
+                            <p-columnFilter type="date" field="task_start_date" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            End Date
+                            <p-columnFilter type="date" field="task_end_date" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Progress
+                        </div>
+                    </th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-task>
+                <tr>
+                    <td>
+                        {{task.task_title}}
+                    </td>
+                    <td>
+                        {{task.task_description}}
+                    </td>
+                    <td>
+                        {{task.task_team[0].username}}
+                    </td>
+                    <td>
+                        {{task.task_start_date}}
+                    </td>
+                    <td>
+                        {{task.task_end_date}}
+                    </td>
+                    <td>
+                        {{task.task_team[0].username}}
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="editTask(task)"
+                                    data-bs-toggle="modal" data-bs-target="#largeModal"><i
+                                        class="bx bx-edit-alt me-1"></i> Edit</a>
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="closeTask(task)"><i
+                                        class="bx bx-x me-1"></i> Close</a>
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="deleteTask(task)"><i
+                                        class="bx bx-trash me-1"></i> Delete</a>
+                            </div>
+                        </div>
+                    </td>
+
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7">No Tasks found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </section>
+    <section>
+        <h2>Admin Tasks</h2>
+        <label for="admin-select">Select an Admin:</label>
+        <mat-select id="admin-select" [(ngModel)]="admin_id" class="form-control my-1" name="admin-select"
+            (mouseenter)="checkAdmins()" (selectionChange)="getAdminTasks()">
+            <mat-option value=""></mat-option>
+            <mat-option *ngFor="let admin of admins" [value]="admin.key">{{admin.username}}</mat-option>
+        </mat-select>
+        <br>
+
+        <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="adminTasks" dataKey="id" [rows]="10"
+            [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            [globalFilterFields]="['task_title','task_description']">
+            <ng-template pTemplate="caption">
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal"
+                        data-bs-target="#largeModal" (click)="getAdmins()">
+                        <i class="menu-icon tf-icons bx bx-plus"></i>
+                        Task
+                    </button>
+                    <div>
+                        <span class="p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text"
+                                (input)="dt1.filterGlobal($any($event.target).value, 'contains')"
+                                placeholder="Search keyword" />
+                        </span>
+                        <button pButton label="Clear" class="p-button-outlined p-button-sm mx-1"
+                            icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Task Title
+                            <p-columnFilter type="text" field="task_title" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Task Details
+                            <p-columnFilter type="text" field="task_description" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Owner
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Start Date
+                            <p-columnFilter type="date" field="task_start_date" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            End Date
+                            <p-columnFilter type="date" field="task_end_date" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex justify-content-start align-items-center">
+                            Progress
+                        </div>
+                    </th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-task>
+                <tr>
+                    <td>
+                        {{task.task_title}}
+                    </td>
+                    <td>
+                        {{task.task_description}}
+                    </td>
+                    <td>
+                        {{task.task_team[0].username}}
+                    </td>
+                    <td>
+                        {{task.task_start_date}}
+                    </td>
+                    <td>
+                        {{task.task_end_date}}
+                    </td>
+                    <td>
+                        <mat-select class="form-control" [(ngModel)]="task.task_status_id"
+                            (selectionChange)="changeTaskStatus(task)">
+                            <mat-option *ngFor="let status of taskStatus"
+                                value="{{status.id}}">{{status.task_status_name}}</mat-option>
+                        </mat-select>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="editTask(task)"
+                                    data-bs-toggle="modal" data-bs-target="#largeModal"><i
+                                        class="bx bx-edit-alt me-1"></i> Edit</a>
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="deleteTask(task)"><i
+                                        class="bx bx-trash me-1"></i> Delete</a>
+                            </div>
+                        </div>
+                    </td>
+
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7">No Tasks found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </section>  -->
+
+
+
+</main>
+
+
+
+
+
+<!-- <p-sidebar [(visible)]="sidebarVisible1" position="right" styleClass="p-sidebar-lg"
+[autoZIndex]="false" [baseZIndex]="9999" [closeOnEscape]="false"> -->
+
+<div class="modal modal-top fade" id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="exampleModalLabel3">New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeForm()"></button>
+            </div>
+
+            <div class="mb-3">
+                <form [formGroup]="newTaskForm" (ngSubmit)="addNewTask()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="Title">Title</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" formControlName="task_title" placeholder="Write Title" />
+                                        </div>
+                                        <mat-error class="alert help-block" *ngIf="!newTaskForm.get('task_title')?.valid && newTaskForm.get('task_title')?.touched">
+                                            Title Is Required
+                                        </mat-error>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="Title">Description</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" formControlName="task_description" placeholder="Write Description" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="Title">Start</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="date" formControlName="task_start_date" placeholder="pick date" />
+                                        </div>
+                                        <mat-error class="alert help-block" *ngIf="!newTaskForm.get('task_start_date')?.valid && newTaskForm.get('task_start_date')?.touched">
+                                            Start Date Is Required
+                                        </mat-error>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="Title">End</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="date" formControlName="task_end_date" placeholder="pick date" />
+                                        </div>
+                                        <mat-error class="alert help-block" *ngIf="!newTaskForm.get('task_end_date')?.valid && newTaskForm.get('task_end_date')?.touched">
+                                            End Date Is Required
+                                        </mat-error>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <mat-label class="formLables">Assign To</mat-label>
+                                        <mat-select formControlName="task_team" class="form-control" placeholder="Select Admin" floatlLabel="never">
+                                            <!-- <mat-select-trigger>Select Admin</mat-select-trigger> -->
+
+                                            <mat-option *ngFor="let admin of admins" [value]="admin.key">{{admin.username}}</mat-option>
+                                        </mat-select>
+                                        <!-- </mat-form-field> -->
+                                        <mat-error class="alert help-block" *ngIf="!newTaskForm.get('task_team')?.valid && newTaskForm.get('task_team')?.touched">
+                                            Assign To Is Required
+                                        </mat-error>
+                                    </div>
+                                </div>
+                                <!-- {{newTaskForm.get(['task_team'])?.value}} -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close" (click)="closeForm()">
+                            Close
+                        </button>
+                        <button type="submit" class="btn add_task" [disabled]="newTaskForm.invalid" data-bs-dismiss="modal" aria-label="Close">Add Task </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- </p-sidebar> -->

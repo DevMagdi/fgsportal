@@ -1,0 +1,153 @@
+@import '../../../colors';
+.ticket-details ,.ticket-content{
+    background-color: $softThemeColor;
+    h2 ,.ticket-date, .show-client{
+        color:$mainThemeColor;
+    }
+    .ticket-number{
+        color:$mainThemeColor;
+        font-weight: bold;
+
+    }
+}
+.tickets-container{
+
+    .tickets{
+        max-height: 44rem;
+        overflow-y: auto;
+    }
+    ::-webkit-scrollbar{
+        width:10px;
+        color: #a19ea0;
+
+    }
+}
+.tDetailsPage {
+    // scale: 1;
+    zoom: 0.8;
+    margin-top: 35px;
+}
+
+.projectDetails {
+    font-size: 26px;
+    font-weight: bold;
+    color: $mainThemeColor;
+}
+
+.issueDelIcon {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.issueEditIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.backIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.timelineTitle {
+    color: $mainThemeColor;
+    font-family: $mainFontFamily;
+}
+
+.timelineSubTitle {
+    color: $buttonMainBackgroundColor;
+    font-family: $mainFontFamily;
+}
+
+.typename,
+.productname {
+    color: $mainThemeColor;
+    font-family: $mainFontFamily;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.priority {
+    color: $whiteColor;
+    border-radius: 5px;
+    padding: 5px 10px;
+    width: 100px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.status {
+    color: $whiteColor;
+    border-radius: 5px;
+    padding: 5px 10px;
+    width: 100px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkIconColor {
+    color: $mainThemeColor;
+}
+
+.issueDetailsPage {
+    // background-color: $whiteColor;
+    // width: 95%;
+    // margin: auto;
+    // padding: 0px;
+    .secTitle {
+        color: $mainThemeColor;
+        // font-size: 20px;
+        font-weight: bold;
+        // border-left: solid 7px $buttonMainBackgroundColor;
+    }
+    .createdAt {
+        color: $buttonMainBackgroundColor;
+        font-size: 16px;
+    }
+   
+    .newCommentBtn {
+        color: #fff;
+        // margin: auto;
+        padding: 8px 16px;;
+        background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    
+    }
+    .commented-section {
+        .delIcon {
+            opacity: 0;
+            color: #a19ea0;
+            cursor: pointer;
+        }
+        &:hover {
+            box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+            background-color: #fff;
+            .delIcon {
+                opacity: 1;
+            }
+        }
+    }
+    .newComment {
+        box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+    }
+}
+
+@media (max-width: 768px) {
+    .issueDetailsPage {
+        .status {
+            padding: 2px 5px;
+            width: 75px;
+            height: 35px;
+        }
+        .createdAt {
+            font-size: 16px;
+        }
+    }
+    .projectDetails {
+        font-size: 20px;
+        margin: 25px !important;
+    }
+}

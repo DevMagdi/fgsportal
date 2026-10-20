@@ -1,0 +1,610 @@
+@import '../../colors';
+.project-detail{
+
+
+.newTaskBtn {
+    // background-color: $buttonMainBackgroundColor;
+    // color: #fff;
+    color: #fff;
+    // width: fit-content;
+    padding: 8px 16px; 
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    margin-left: auto;
+}
+
+.routingLink {
+    cursor: pointer;
+}
+
+.backIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.full {
+    position: relative;
+}
+
+.empty {
+    position: absolute;
+    top: 0;
+    left: 0.6vw;
+}
+
+@media (max-width: 1080px) {
+    .empty {
+        left: 1vw;
+    }
+}
+@media  (max-width: 600px) {
+    .p-inputtext ,.p-input-icon-left{
+    width: 100% !important;
+   }
+}
+
+.projectDetailsRow {
+    // box-shadow: -10px -10px 0px $mainThemeColor, 10px 10px 0px $mainThemeColor,
+    //  3px 7px 10px 0 rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+    position: relative;
+    min-height: 200px;
+    border: 1px solid $mainThemeColor;
+    border-radius: 8px;
+    //  ::after {
+    //     content: "";
+    //     position: absolute;
+    //     bottom: -20px;
+    //     left: 10px;
+    //     width: inherit;
+    //     height: 200px;
+    //     z-index: -1;
+    //     background-color: $mainThemeColor;
+    // }
+    //  ::before {
+    //     content: "";
+    //     position: absolute;
+    //     top: -5px;
+    //     right: 10px;
+    //     width: inherit;
+    //     height: 200px;
+    //     z-index: -1;
+    //     background-color: $mainThemeColor;
+    // }
+    .pData {
+        h2 {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        span {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+    }
+    .ctrBtns {
+        .edit {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete {
+            color: #a19ea0;
+        }
+        .save {
+            background-color: $buttonMainBackgroundColor;
+            color: #fff;
+            width: 80px;
+        }
+    }
+}
+.save2 {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+    // width: 80px;
+}
+
+.customerInfo {
+    min-height: fit-content;
+}
+
+.devsDetailsRow {
+    // box-shadow: -10px -10px 0px $mainThemeColor, 10px 10px 0px $mainThemeColor, 3px 7px 10px 0 rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+    position: relative;
+    min-height: 150px;
+    //  ::after {
+    //     content: "";
+    //     position: absolute;
+    //     bottom: 0px;
+    //     left: 10px;
+    //     width: inherit;
+    //     height: 150px;
+    //     z-index: -2;
+    //     background-color: $mainThemeColor;
+    // }
+    //  ::before {
+    //     content: "";
+    //     position: absolute;
+    //     top: 0px;
+    //     right: 10px;
+    //     width: inherit;
+    //     height: 150px;
+    //     z-index: -2;
+    //     background-color: $mainThemeColor;
+    // }
+    .dData {
+        h2 {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        span,
+        ul {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        li {
+            list-style-type: square;
+        }
+    }
+    .ctrBtns {
+        .edit,
+        .save {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete,
+        .cancel {
+            color: #a19ea0;
+        }
+    }
+}
+
+.spinner ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: $buttonMainBackgroundColor;
+}
+
+.empty ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: #ebebeb;
+}
+::ng-deep .mat-form-field-infix{
+    padding: 0 !important;
+}
+.material-icons,
+.Backward-arrow,
+.Group-131,
+.edit-alt {
+    cursor: pointer;
+}
+
+.hrLine {
+    height: 2px;
+    background-color: $mainThemeColor;
+}
+
+.clr {
+    clear: both;
+}
+
+.pdd,
+.testing {
+    box-shadow: 3px 9px 11px 0 rgba(0, 0, 0, 0.25);
+    background-color: #fff;
+    min-height: 250px;
+    .tasksCol {
+        height: 247px;
+        border: solid 1px #a19ea0;
+        h2 {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        .taskData {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+    }
+    .ctrBtns {
+        .edit {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete {
+            color: #a19ea0;
+        }
+    }
+}
+
+.tasks {
+    .search {
+        input {
+            border: $mainThemeColor solid 1px;
+            border-radius: 0;
+        }
+        .material-icons {
+            color: #fff;
+            background-color: $mainThemeColor;
+        }
+    }
+    .supportMode {
+        .allTasks {
+            background-color: $buttonMainBackgroundColor;
+            color: #fff;
+            border-radius: 0px !important;
+            width: 200px;
+        }
+        .supportedTasks {
+            width: 200px;
+            background-color: $tabBackGround;
+            color: #100f0f;
+            border-radius: 0px !important;
+        }
+    }
+    .table {
+        .theader {
+            background-color: $tabBackGround;
+            color: #100f0f;
+        }
+        .trow {
+            border-top: 2px solid $mainThemeColor;
+            .ctrBtns {
+                .edit {
+                    color: $mainThemeColor;
+                    opacity: 0;
+                }
+                .delete {
+                    color: #a19ea0;
+                    opacity: 0;
+                }
+            }
+            &:hover {
+                box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+                background-color: #fff;
+                .ctrBtns {
+                    .edit {
+                        opacity: 1;
+                    }
+                    .delete {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.commentsSection {
+    .newCommentBtn {
+        @extend .newTaskBtn;
+    }
+    .bdge {
+        height: 21px;
+        background-color: orange;
+        color: #fff;
+        font-size: 11px;
+        padding: 8px;
+        border-radius: 4px;
+        line-height: 3px
+    }
+    .comments {
+        text-decoration: underline;
+        text-underline-position: under;
+        cursor: pointer
+    }
+    .dot {
+        height: 7px;
+        width: 7px;
+        margin-top: 3px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block
+    }
+    .hit-voting:hover {
+        color: blue
+    }
+    .hit-voting {
+        cursor: pointer
+    }
+    .commented-section {
+        .delIcon {
+            opacity: 0;
+            color: #a19ea0;
+        }
+        &:hover {
+            box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+            background-color: #fff;
+            .delIcon {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+.front-side {
+    width: 440px;
+    height: 220px;
+    display: grid;
+    grid-template-columns: 2% 96% 2%;
+    grid-template-rows: 4% 92% 4%;
+    position: relative;
+    margin: 20px auto;
+    overflow: hidden;
+    box-shadow: 2px 5px 15px 0px $mainThemeColor;
+    background-color: $mainThemeColor;
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 150px);
+    grid-template-rows: repeat(8, 50px);
+    grid-gap: 8px;
+    width: 150px;
+    height: 400px;
+    transform: rotate(-45deg);
+}
+
+.black {
+    background-color: #fff;
+    grid-column: 2 / span 2;
+    grid-row: 1 / span 3;
+}
+
+.red1 {
+    background-color: $buttonMainBackgroundColor;
+    grid-row: 2 / span 5;
+}
+
+.red2 {
+    background-color: $mainThemeColor;
+    grid-column: 2 / span 2;
+    grid-row: 4/7;
+}
+
+.green {
+    background-color: $buttonMainBackgroundColor;
+    grid-column: 2/4;
+    grid-row: 7/9;
+}
+
+.info-grid {
+    grid-column: 2/3;
+    grid-row: 2/3;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.056);
+    box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.432);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    /*12px;*/
+    display: grid;
+    grid-template-columns: 15px repeat(3, 1fr) 15px;
+    grid-template-rows: repeat(3, 1fr);
+    line-height: 1px;
+}
+
+.info-grid .name {
+    h2 {
+        color: $mainThemeColor;
+        font-weight: 800;
+        font-family: $mainFontFamily;
+        margin-left: 20px;
+    }
+    grid-column: 2 / span 2;
+    grid-row: 1 / span 1;
+    margin-top: 8px;
+}
+
+.info-grid .name h5 {
+    font-weight: unset;
+}
+
+.info-grid .addr {
+    p {
+        color: #fff;
+        font-weight: 400;
+        font-family: $mainFontFamily;
+    }
+    grid-column: 2 / span 2;
+    grid-row: 3;
+}
+
+.info-grid .phoneNo {
+    p {
+        color: #fff;
+        font-weight: 400;
+        font-family: $mainFontFamily;
+    }
+    grid-column: 3 / span 2;
+    grid-row: 2;
+    text-align: end;
+}
+
+.info-grid .emailId {
+    p {
+        color: #fff;
+        font-weight: 400;
+        font-family: #fff;
+    }
+    grid-column: 3 / span 2;
+    grid-row: 3;
+    text-align: end;
+    font-size: 1.1em;
+}
+
+.name-tag h1,
+h3 {
+    margin: 2px;
+    font-weight: unset;
+}
+
+.credits {
+    margin-top: 40px;
+    text-align: center;
+    color: #343536;
+}
+
+.activity_tap{
+
+    .search {
+        input {
+            border: $subSubThemeColor solid 1px;
+            // border-radius: 0;
+            color: $subSubThemeColor;
+            font-size: 12px;
+         
+    
+            &::placeholder {
+                color: $subSubThemeColor;
+                }
+    
+        }
+        i  {
+            color: $mainThemeColor;
+       
+        }
+    
+    }
+//    ::ng-deep .p-dropdown.p-dropdown-clearable .p-dropdown-label {
+//         padding-right: 1.75rem !important;
+//     }
+}
+
+
+    // ::ng-deep .p-dropdown {
+    //     border-color: $subSubThemeColor; 
+    //     height: 40px;
+    
+    // }
+    ::ng-deep .p-tabview .p-tabview-nav {
+    
+        li.p-highlight .p-tabview-nav-link {
+            background: #ffffff;
+            border-color: $mainThemeColor !important;
+            color: $mainThemeColor !important;
+            font-weight: bold;
+        }
+        .p-tabview-ink-bar{
+            background:$mainThemeColor!important;
+        
+        }
+        li .p-tabview-nav-link{
+           color: $subThemeColor !important;
+           font-weight: normal ;
+       }
+    }
+
+.projectDetails{
+    background-color: $softThemeColor;
+    .project_title{
+        color: $mainThemeColor;
+        font-weight: bold; 
+        text-transform: capitalize;
+    }
+    .subTitel{
+        color: $subThemeColor;
+        font-weight: bold;
+        font-size: 12px;
+    }
+    .subSubTitel{
+        font-weight: bold;
+        font-size: 12px;
+    }
+    .dropdown-toggle{
+        color: $mainThemeColor;
+        cursor: pointer;
+    }
+    .dropdown-toggle::after{
+        display: none;
+    }
+    .dropdown-menu-dark .dropdown-item{
+        color: black;
+        cursor: pointer;
+        &:hover{
+            color: $mainThemeColor;
+        }
+    }
+}
+.bg-soft-success{
+    background-color:#E3FCEF!important;
+    color: #36B37E !important;
+}
+::ng-deep .p-progressbar .p-progressbar-value {
+
+// background: linear-gradient(180deg, #F7BE47 40%, #AE63D4 60%) !important;
+background: rgb(247,190,71);
+background: linear-gradient(90deg, rgba(247,190,71,1) 0%, rgba(174,99,212,1) 100%);
+
+
+
+}
+::ng-deep .p-progressbar-determinate .p-progressbar-label
+,::ng-deep.p-multiselect-header	{
+display: none !important;
+}
+ .p-inputtext {
+ 
+    min-height: 40px;
+    // padding: 0.5rem 0.5rem !important;
+}
+.newProjectBtn {
+    // background-image: linear-gradient(to right, #ff2fcb, #05cac0);
+    // width: 40px;
+    // height: 40px;
+    // width: fit-content;
+    padding: 4px;;
+    border-radius: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    margin-left: auto;
+    color: white;
+    // margin-right: 4px;
+}
+::ng-deep .p-inputtext{
+    // padding: .2rem .75rem !important;
+}
+.avatar-group{
+    cursor: pointer;
+}
+::ng-deep .p-avatar-group ,.avatar-group {
+    width: min-content !important;
+}
+}
+
+::ng-deep .p-calendar{
+    width: 100% !important;
+}

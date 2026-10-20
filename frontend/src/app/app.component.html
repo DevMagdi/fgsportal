@@ -1,0 +1,13 @@
+
+<div *ngIf="loggedIn">
+    <fgs-loading></fgs-loading>
+    <app-navbar></app-navbar>
+</div>
+
+<!-- <app-signin *ngIf="!loggedIn"></app-signin> -->
+<div class="main" *ngIf="!loggedIn">
+    <fgs-loading></fgs-loading>
+    <router-outlet></router-outlet>
+</div>
+
+<!-- {{ message | async | json }} -->

@@ -1,0 +1,297 @@
+<div class="container" *ngIf="!!currenUser">
+    <div class="d-flex justify-content-end my-3" *ngIf="currenUser.department == DepartmentEnum.MANAGEMENT || currenUser.department == DepartmentEnum.ADMINSTRATION">
+        <div class="">
+            
+            <button class="m-2 btn btnOutLine" (click)="openResetPermissionPanel()">{{isResetPanelOpened ? 'close' : 'Edit Permission Balance'}}</button>
+        </div>
+    </div>
+    <div class="table-responsive">
+
+        <table class="table newTableCustom">
+    
+            <thead>
+                
+                <tr class="p-3">
+                    <td class="col-md-2">Employee Name</td>
+                    <td class="col-md-2">Leave Type</td>
+                    <td class="col-md-2">From</td>
+                    <td class="col-md-2">To</td>
+                    <td class="col-md-2">Attach</td>
+                    <td class="col-md-2">Approve/Reject</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="p-3 my-1 " *ngFor="let leave of leavesToApprove.slice().reverse()">
+                    <td class="col-md-2" style="cursor: pointer;" [routerLink]="['/user/',leave.empKey]">{{leave.empName}}</td>
+                    <td class="col-md-2">{{leave.leaveType_name}}</td>
+                    <td class="col-md-2" *ngIf="leave.leaveType ==  leaveTypeEnum.PERMISSION">{{leave.from}}</td>
+                    <td class="col-md-2" *ngIf="leave.leaveType !=  leaveTypeEnum.PERMISSION">{{leave.from | date:"dd/MM/yyyy"}}</td>
+                    <td class="col-md-2" *ngIf="leave.leaveType ==  leaveTypeEnum.PERMISSION">{{leave.to}}</td>
+                    <td class="col-md-2" *ngIf="leave.leaveType !=  leaveTypeEnum.PERMISSION">{{leave.to | date:"dd/MM/yyyy"}}</td>
+                    <td class="col-md-2">
+                        <a *ngIf="!!leave.attach" href="{{newServerApi}}{{leave.attach}}" target="_blank">Attach</a>
+                        <p *ngIf="!leave.attach">ـــــــــــــ</p>
+                    </td>
+                    <td class="col-md-1" *ngIf="!!currenUser && (currenUser.department == DepartmentEnum.MANAGEMENT || currenUser.accPosition == accPosistionEnum.MANAGER) ">
+                        <button class="btn btn-outline-info" (click)="open(mymodal , leave , true)">Approve</button>
+                    </td>
+                    <td class="col-md-1" *ngIf="!!currenUser && (currenUser.department == DepartmentEnum.MANAGEMENT || currenUser.accPosition == accPosistionEnum.MANAGER) ">
+                        <button class="btn btn-outline-danger" (click)="open(mymodal , leave , false)">Reject</button>
+                    </td>
+            
+                    <td class="col-md-2" *ngIf="!!currenUser && currenUser.department == DepartmentEnum.ADMINSTRATION ">
+                        <button class="btn btn-outline-success" (click)="openForAdmin(mymodal , leave)">Review</button>
+                    </td>
+                </tr>
+        
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<!-- Modal -->
+<ng-template #mymodal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Leave Request Review</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="leaveToReview">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Request BY :
+                        <br>
+                        <span class="modalInfo pl-2">
+                            {{leaveToReview.empName}}
+                        </span>
+                    </h3>
+                </div>
+                <div class="col-md-6">
+                    <h3>Leave Type :
+                        <br>
+                        <span class="modalInfo pl-2">
+                            {{leaveToReview.leaveType_name}}
+                            <!-- <mat-label>leaveType</mat-label> -->
+                            <!-- <select class="form-control" [(ngModel)]="leaveToReview.leaveType">
+                                <option *ngFor="let leave of leaveTypeEnum | keyvalue" [value]='leave.value'>{{leave.key}}</option>
+                            </select> -->
+                        </span>
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>From :
+                        <br>
+                        <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType ==  leaveTypeEnum.PERMISSION">
+                            {{leaveToReview.from}}
+                        </span>
+                        <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType !=  leaveTypeEnum.PERMISSION">
+                            {{leaveToReview.from | date:"dd/MM/yyyy"}}
+                        </span>
+                    </h3>
+                </div>
+                <div class="col-md-6">
+                    <h3>To :
+                        <br>
+                        <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType ==  leaveTypeEnum.PERMISSION">
+                            {{leaveToReview.to}}
+                        </span>
+                        <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType !=  leaveTypeEnum.PERMISSION">
+                            {{leaveToReview.to | date:"dd/MM/yyyy"}}
+                        </span>
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Reason :
+                        <br>
+                        <span class="modalInfo pl-2">
+                            {{leaveToReview.reason}}
+                        </span>
+                    </h3>
+                </div>
+                <div class="col-md-6" *ngIf="!!leaveToReview.attach">
+                    <h3>Attach : <br>
+                        <a href="{{newServerApi}}{{leaveToReview.attach}}" target="_blank">
+                            <img src="{{newServerApi}}{{leaveToReview.attach}}" alt="Request Attach" width="100px" height="100px">
+                        </a>
+                    </h3>
+                </div>
+            </div>
+
+            <div class="manager" *ngIf="!!currenUser && (currenUser.department == DepartmentEnum.MANAGEMENT || currenUser.accPosition == accPosistionEnum.MANAGER) ">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>{{leaveToReview.leaveType == leaveTypeEnum.PERMISSION ? 'Permission' : 'Leave'}} Duration :
+                            <br>
+                            <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType != leaveTypeEnum.PERMISSION">
+                                {{calculateLeaveDuration()}}
+                            </span>
+                            <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType == leaveTypeEnum.PERMISSION">
+                                {{math.floor(calculatePermissionDuration() / 60) | number : '2.0-0'}}:{{calculatePermissionDuration() - (math.floor(calculatePermissionDuration() / 60) * 60) | number : '2.0-0'}} hh:mm
+                            </span>
+                        </h3>
+                    </div>
+                </div>
+                <div class="row" *ngIf="dissision== true">
+                    <div class="col-md-12">
+                        <label for="">Assign To HR</label>
+                        <select name="adminKey" id="adminKey" [(ngModel)]="leaveToReview.hrToApproveKey" class="form-control">
+                            <option *ngFor="let admin of admins" [value]="admin.key" >{{admin.username}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="">Comment (Optional)</label>
+                        <br>
+                        <input type="text" class="form-control" [(ngModel)]="leaveToReview.managerDissisionComment">
+                    </div>
+                </div>
+
+
+                <div class="row" *ngIf="dissision== false">
+                    <div class="col-md-12">
+                        <label for="">Rejection Reason</label>
+                        <br>
+                        <input type="text" class="form-control" [(ngModel)]="leaveToReview.managerDissisionComment">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info" [disabled]="(!!dissision && !leaveToReview.hrToApproveKey) || (!dissision && !leaveToReview.managerDissisionComment )" (click)="managerDissition(leaveToReview);modal.close('Save click')">Submit</button>
+                </div>
+            </div>
+            <div class="admin" *ngIf="!!currenUser && currenUser.department == DepartmentEnum.ADMINSTRATION">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Manager Approved :
+                            <br>
+                            <span class="modalInfo pl-2">
+                                {{leaveToReview.managerDissisionName}}
+                            </span>
+                        </h3>
+                    </div>
+
+                    <div class="col-md-6" *ngIf="leaveToReview.managerDissisionComment">
+                        <h3>Manager comment :
+                            <br>
+                            <span class="modalInfo pl-2">
+                                {{leaveToReview.managerDissisionComment}}
+                            </span>
+                        </h3>
+                    </div>
+                </div>
+
+                <mat-divider></mat-divider>
+
+
+                <div class="row" *ngIf="leaveToReview.leaveType != leaveTypeEnum.PERMISSION">
+                    <div class="col-md-6">
+                        <h3>User Annual Balance :
+                            <br>
+                            <span class="modalInfo pl-2">
+                                {{userAnnualLeaveBalance}}
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>User Current Balance :
+                            <br>
+                            <span class="modalInfo pl-2">
+                                {{userLeaveBalance}}
+                            </span>
+                        </h3>
+                    </div>
+                </div>
+
+
+                <div class="row" *ngIf="leaveToReview.leaveType == leaveTypeEnum.PERMISSION">
+                    <div class="col-md-6">
+                        <h3>Annual permission Balance
+                            <br>
+                            <span class="modalInfo pl-2">
+                                {{userAnnualPermissionBalance}} Hours
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Current Permission Balance
+                            <br>
+                            <span class="modalInfo pl-2">
+                                {{math.floor(userPermissionBalance / 60)| number : '2.0-0'}}:{{userPermissionBalance - (math.floor(userPermissionBalance / 60) * 60) | number : '2.0-0'}} hh:mm
+                            </span>
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>{{leaveToReview.leaveType == leaveTypeEnum.PERMISSION? 'Permission' : 'Leave'}} Duration :
+                            <br>
+                            <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType != leaveTypeEnum.PERMISSION">
+                                {{calculateLeaveDuration()}}
+                            </span>
+                            <span class="modalInfo pl-2" *ngIf="leaveToReview.leaveType == leaveTypeEnum.PERMISSION">
+                                {{math.floor(calculatePermissionDuration() / 60) | number : '2.0-0'}}:{{calculatePermissionDuration() - (math.floor(calculatePermissionDuration() / 60) * 60) | number : '2.0-0'}} hh:mm
+                            </span>
+                        </h3>
+                    </div>
+                </div>
+                <mat-divider></mat-divider>
+
+                <div class="col-md-6">
+
+                    <label for="">Rejection Reason (optional On Approval Only)</label>
+                    <br>
+                    <input type="text" class="form-control" [(ngModel)]="leaveToReview.hrDissisionComment">
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info" (click)="hrAction(leaveToReview , true);modal.close('Save click')">Approve</button>
+                    <button type="submit" matTooltip="Please Add A rejection Reason" class="btn btn-outline-danger" [disabled]="!leaveToReview.hrDissisionComment" (click)="hrAction(leaveToReview,false);modal.close('Save click')">Reject</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</ng-template>
+
+<p-sidebar styleClass="p-sidebar-sm" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="isResetPanelOpened" position="right" 
+[transitionOptions]="'350ms'">
+
+
+    <label>Please Enter New Permission Balance</label>
+    <div>
+        <label>Permission</label>
+        <input class="form-control" type="number" #perNum id="perNum" placeholder="Ex.3" [(ngModel)]="newPerBalance">
+    </div>
+    <div>
+        <label>Bereavement</label>
+        <input class="form-control" type="number" #perNum id="perNum" placeholder="Ex.3" [(ngModel)]="bereavement">
+    </div>
+    <div>
+        <label>Marriage</label>
+        <input class="form-control" type="number" #perNum id="perNum" placeholder="Ex.3" [(ngModel)]="marriage">
+    </div>
+
+    <div>
+        <label>Birth For Males</label>
+        <input class="form-control" type="number" #perNum id="perNum" placeholder="Ex.3" [(ngModel)]="birth">
+    </div>
+    <div>
+        <label>Birth For Femails</label>
+        <input class="form-control" type="number" #perNum id="perNum" placeholder="Ex.3" [(ngModel)]="birth_f">
+    </div>
+
+    <button class="my-3 btn btnStyle w-100" [disabled]="newPerBalance == 0" (click)="resetUserspermissons()" type="submit" 
+   >Submit</button>
+</p-sidebar>

@@ -1,0 +1,334 @@
+<div *ngIf="loadingSpinnerMode" class="spinner">
+    <mat-spinner></mat-spinner>
+</div>
+<div class="container-fluid" *ngIf="!loadingSpinnerMode">
+    <div class="row tabheader">
+
+        <div class="col-md-3">
+            <div *ngIf="!!projectDetails" class="projectDetailsCard mt-2">
+                <label for="">Status : {{projectDetails.status_name}}</label>
+                <br>
+                <label for="">Number Of Processes : {{projectProcesses.length}}</label>
+                <br>
+                <label for="">Project Progress : {{projectDetails.progress | number : '1.2-2'}} %</label>
+                <br>
+                <mat-progress-bar mode="buffer" [bufferValue]="0" [value]="projectDetails.progress"></mat-progress-bar>
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- <h3 style="color: brown;">
+                <span class="material-icons">
+                    warning
+                </span> Thanks for your patience, please note , this report is still under development</h3> -->
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="example-form mt-1">
+                            <mat-form-field class="example-full-width" appearance="fill">
+                                <mat-label>Choose A project</mat-label>
+                                <input type="text" matInput [formControl]="myControl" [matAutocomplete]="auto">
+                                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getProjcetProcesses($event)">
+                                    <mat-optgroup label="Project">
+                                        <ng-container *ngFor="let project of filteredOptions | async">
+                                            <mat-option *ngIf="project.type == '2'" [value]="project">
+                                                {{project.title}}
+                                            </mat-option>
+                                        </ng-container>
+
+                                    </mat-optgroup>
+
+
+                                    <mat-optgroup label="POC">
+                                        <ng-container *ngFor="let project of filteredOptions | async">
+                                            <mat-option *ngIf="project.type == '1'" [value]="project">
+                                                {{project.title}}
+                                            </mat-option>
+                                        </ng-container>
+
+                                    </mat-optgroup>
+
+                                </mat-autocomplete>
+                            </mat-form-field>
+                        </form>
+                    </div>
+                    <!-- <div class="col-md-6">
+                        <form class="example-form mt-1">
+                            <mat-form-field class="example-full-width" appearance="fill">
+                                <mat-label>Choose A Process</mat-label>
+                                <mat-select (selectionChange)="getProcessReport($event)">
+                                    <mat-option *ngFor="let process of projectProcesses" [value]="process">
+                                        {{process.title}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </form>
+                    </div> -->
+                </div>
+            </div>
+
+
+        </div>
+        <div class="col-md-3"></div>
+
+    </div>
+    <div class="row" *ngIf="!!finalProjectReport">
+
+        <div class="col-md-12">
+            <div class="tasksTable">
+                <div class="days">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-2 day">
+                                <h3 style="font-family:'Cairo',sans-serif; cursor: pointer;" [routerLink]="['/manager/projects',finalProjectReport.projectKey]">{{finalProjectReport.projectName}}</h3>
+                            </div>
+                            <div class="col-md-7 tasks">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-md-12 " class="report" *ngIf="finalProjectReport.projectReports.length <= 0">
+                                            <div class="task m-2 p-2">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="working">There is No Reports For This Project</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <ng-container *ngIf="finalProjectReport.projectReports.length > 0">
+                                            <div class="col-md-3 " class="report" *ngFor="let report of finalProjectReport.projectReports">
+                                                <div class="task m-2 p-2">
+                                                    <div class="container-fluid">
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="working">Developer Name : {{report.devName}}</div>
+                                                                <div class="working">Total Working Hours: {{report.totalWorkingHours}}</div>
+                                                                <div class="working">Progress : {{report.progress}} %</div>
+                                                                <div class="working">idle Hours : {{report.idelHours}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="totalHours">
+                                                <div class="working">Progress <br>{{finalProjectReport.progress | number : '1.2-2' }} %</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="totalHours">
+                                                <div class="working">Remaining <br>{{finalProjectReport.remainingTime}} hours</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-1">
+                                        <div class="col-12">
+                                            <div class="totalHours">
+                                                <div class="working">idle Hours <br>{{finalProjectReport.totalIdelHours}} hours</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4"></div>
+                            <div class="col-4">
+                                <form class="example-form mt-1">
+                                    <mat-form-field class="example-full-width" appearance="fill">
+                                        <mat-label>Choose A Process To Get Tasks</mat-label>
+                                        <mat-select (selectionChange)="getProcessReport($event)">
+                                            <mat-option *ngFor="let process of projectProcesses" [value]="process">
+                                                {{process.title}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </form>
+                            </div>
+                            <div class="col-4"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="container-fluid">
+                                    <div class="row processDetails" *ngIf="!!processDetails">
+                                        <div class="col-md-3">
+                                            <h4 style="font-family: 'Cairo',sans-serif">Status : {{processDetails.status_name}}</h4>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <h4 style="font-family: 'Cairo',sans-serif">Start Date : {{processDetails.start_date}}</h4>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <h4 style="font-family: 'Cairo',sans-serif">Duration : {{processDetails.ex_duration}} Day</h4>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <h4 style="font-family: 'Cairo',sans-serif">End Date : {{processDetails.end_date | date:'M/dd/yyyy'}}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="row" *ngIf="!!finalProcessReport">
+                                        <div class="col-md-2 day">
+                                            <h3 style="font-family: 'Cairo',sans-serif; cursor: pointer;" [routerLink]="['/manager/projects',finalProjectReport.projectKey,finalProcessReport.projectKey]">{{finalProcessReport.projectName}}</h3>
+                                        </div>
+                                        <div class="col-md-7 tasks">
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    <div class="col-md-12 " class="report" *ngIf="finalProcessReport.projectReports.length <= 0">
+                                                        <div class="task m-2 p-2">
+                                                            <div class="container-fluid">
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="working">There is No Reports For This Process</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <ng-container *ngIf="finalProcessReport.projectReports.length > 0">
+                                                        <div class="col-md-3 " class="report" *ngFor="let report of finalProcessReport.projectReports">
+                                                            <div class="task m-2 p-2">
+                                                                <div class="container-fluid">
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <div class="working">Developer Name : {{report.devName}}</div>
+                                                                            <div class="working">Total Working Hours: {{report.totalWorkingHours}}</div>
+                                                                            <div class="working">Progress : {{report.progress}} %</div>
+                                                                            <div class="working">idle Hours : {{report.idelHours}}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="totalHours">
+                                                            <div class="working">Progress <br>{{finalProcessReport.progress | number : '1.2-2' }} %</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="totalHours">
+                                                            <div class="working">Remaining <br>{{finalProcessReport.remainingTime}} hours</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <div class="row" *ngIf="!!filterdTasks && filterdTasks.length > 0">
+        <div class="col-12">
+            <section class="tasks">
+                <div class="search d-flex justify-content-center my-3">
+                    <input class="form-control w-50" type="text" [(ngModel)]="searchKey" (keyup)="searchTasks()" placeholder="Search By Task Title Or Dev Name Or Process Name">
+                    <span class="material-icons p-2">
+                        search
+                    </span>
+                </div>
+                <table *ngIf="!!projectTasks" mat-table [dataSource]="projectTasks" multiTemplateDataRows class="mat-elevation-z8 my-2 p-1">
+
+                    <ng-container matColumnDef="#">
+                        <th mat-header-cell *matHeaderCellDef> # </th>
+                        <td mat-cell *matCellDef="let task;let i = dataIndex"> {{i + 1}}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="title">
+                        <th mat-header-cell *matHeaderCellDef> Title </th>
+                        <td mat-cell *matCellDef="let task"> {{task['title']}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="Process Name">
+                        <th mat-header-cell *matHeaderCellDef> Process Name </th>
+                        <td mat-cell *matCellDef="let task"> {{task['process_title']}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="Start Date">
+                        <th mat-header-cell *matHeaderCellDef> Start Date </th>
+                        <td mat-cell *matCellDef="let task"> {{task['start_date']}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="Duration">
+                        <th mat-header-cell *matHeaderCellDef> Duration </th>
+                        <td mat-cell *matCellDef="let task"> {{task['ex_duration']}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="End Date">
+                        <th mat-header-cell *matHeaderCellDef> End Date </th>
+                        <td mat-cell *matCellDef="let task"> {{task['end_date'] | date:'M/d/yyyy'}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="Assigned To">
+                        <th mat-header-cell *matHeaderCellDef> Assigned To </th>
+                        <td mat-cell *matCellDef="let task"> {{task['empName']}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="Task Status">
+                        <th mat-header-cell *matHeaderCellDef> Task Status </th>
+                        <td mat-cell *matCellDef="let task"> {{task.status_name}} </td>
+                    </ng-container>
+
+
+                    <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+                    <ng-container matColumnDef="expandedDetail">
+                        <td mat-cell *matCellDef="let task" [attr.colspan]="columnsToDisplay.length">
+                            <div class="example-element-detail" [@detailExpand]="task == expandedElement ? 'expanded' : 'collapsed'">
+                                <div class="example-element-description">
+                                    Task Desctiption:
+                                    <span class="example-element-description-attribution">{{task.desc}}</span>
+                                </div>
+
+                                <div class="example-element-description" *ngIf="!!task.supportName">
+                                    Real Duration:
+                                    <span class="example-element-description-attribution">{{task.real_duration}} Hours</span>
+                                </div>
+
+                                <div class="example-element-description">
+                                    Remaining:
+                                    <span class="example-element-description-attribution">{{ramainingTaskCalc(task)}} Hours</span>
+                                </div>
+
+                                <div class="example-element-description" *ngIf="!!task.supportName">
+                                    Support:
+                                    <span class="example-element-description-attribution">{{task.supportName}}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+                    <tr mat-row *matRowDef="let element; columns: columnsToDisplay;" class="example-element-row" [class.example-expanded-row]="expandedElement === element" (click)="expandedElement = expandedElement === element ? null : element">
+                    </tr>
+                    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+                </table>
+
+
+            </section>
+        </div>
+    </div>
+</div>

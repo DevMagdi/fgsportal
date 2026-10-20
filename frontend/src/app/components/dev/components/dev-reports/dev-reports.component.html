@@ -1,0 +1,23 @@
+<div class="dev-reports">
+    <p-tabView>
+        <p-tabPanel header="Pending Reports {{ !!myNavParams &&
+            myNavParams.devPendingReports && myNavParams.devPendingReports > 0 ? myNavParams.devPendingReports:''}}">
+            <ng-template pTemplate="content"> 
+            <app-pending-reports></app-pending-reports>
+            </ng-template>
+        </p-tabPanel>
+        <p-tabPanel header="Rejected Reports {{!!myNavParams && myNavParams.rejectedReport
+         && myNavParams.rejectedReport> 0 ? myNavParams.rejectedReport:''}}">
+            <ng-template pTemplate="content"> 
+
+            <app-rejected-reports></app-rejected-reports>
+            </ng-template>
+        </p-tabPanel>
+        <p-tabPanel header="History">
+            <ng-template pTemplate="content"> 
+
+            <app-history></app-history>
+            </ng-template>
+        </p-tabPanel>
+    </p-tabView>
+</div>

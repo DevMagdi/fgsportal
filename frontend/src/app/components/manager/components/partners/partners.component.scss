@@ -1,0 +1,145 @@
+@import '../../../../colors';
+a,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    font-family: $mainFontFamily;
+    color: #fff;
+}
+
+.formHeader {
+    color: $mainThemeColor;
+    border-left: solid 4px $buttonMainBackgroundColor;
+    padding: 2px;
+}
+
+.modal-title {
+    color: $mainThemeColor;
+}
+
+.globalFont {
+    font-family: $mainFontFamily;
+    font-weight: bold;
+    font-size: large;
+}
+
+.inputLabel,
+.customInput {
+    color: $mainThemeColor !important;
+}
+
+.customInput {
+    border: solid 1px $mainThemeColor;
+    border-radius: 5px;
+}
+
+.card {
+    width: 220px;
+    height: 220px;
+    box-shadow: 3px 5px 10px 0 rgba(0, 0, 0, 0.16);
+    background-color: #fff;
+    position: relative;
+    border-radius: 0px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+     ::after {
+        content: "";
+        position: absolute;
+        bottom: 0px;
+        left: 10px;
+        width: 220px;
+        height: 220px;
+        margin-bottom: 10px;
+        border: 2px solid $mainThemeColor;
+        z-index: -1;
+    }
+     ::before {
+        content: "";
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 220px;
+        height: 220px;
+        margin-bottom: 10px;
+        border: 2px solid $mainThemeColor;
+        z-index: -1;
+    }
+    .pCard_header {
+        padding: 15px;
+        margin: 10px;
+        color: $mainThemeColor;
+    }
+    .pCard_Logo {
+        background-size: 100% 100%;
+        width: 100%;
+        height: 100%;
+    }
+    .btn {
+        color: #fff;
+    }
+}
+
+span {
+    margin-right: 50px;
+}
+
+.btn {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+}
+
+.category_header {
+    width: fit-content;
+    color: $mainThemeColor;
+    margin-bottom: 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.hrLine {
+    height: 1px;
+    width: 100%;
+    background-color: $mainThemeColor;
+    margin: 5px;
+    margin-bottom: 30px;
+}
+
+.newProjectBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.newProjectModal {
+    max-width: 80%;
+}
+
+.formLabelHeader {
+    font-size: larger;
+    font-weight: bold;
+}
+
+.search {
+    input {
+        border-radius: 0;
+    }
+    .material-icons {
+        color: #fff;
+        background-color: $mainThemeColor;
+    }
+}
+
+@media (max-width: 768px) {
+    .mainPage {
+        width: 100%;
+    }
+}

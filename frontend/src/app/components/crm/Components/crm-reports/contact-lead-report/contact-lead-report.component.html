@@ -1,0 +1,201 @@
+<div class="card report-card mt-3">
+    <div class="card-body">
+        <form class="row g-3 mb-4" (ngSubmit)="applyFilters()">
+            <div class="col-md-4">
+                <label class="form-label">User Creator </label>
+                <p-dropdown styleClass="w-100" [options]="allUsers" optionLabel="username" optionValue="key"
+                    name="cl-user-creator-id" [(ngModel)]="filter.user_creator_id" [filter]="true" [showClear]="true"
+                    placeholder="Select User">
+                </p-dropdown>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Product </label>
+                <p-dropdown styleClass="w-100" [options]="allProducts" optionLabel="product_name" optionValue="id"
+                    name="cl-product-id" [(ngModel)]="filter.product_id" [filter]="true" [showClear]="true"
+                    placeholder="Select Product">
+                </p-dropdown>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Lead Sub Status </label>
+                <p-dropdown styleClass="w-100" [options]="leadSubStatusOptions" optionLabel="label" optionValue="value"
+                    name="cl-lead-sub-status-id" [(ngModel)]="filter.lead_sub_status_id" [showClear]="true"
+                    placeholder="Select Lead Sub Status">
+                </p-dropdown>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Country</label>
+                <p-dropdown styleClass="w-100" [options]="countryOptions" optionLabel="label" optionValue="value" appendTo="body"
+                    name="cl-country" [(ngModel)]="filter.country" [filter]="true" [showClear]="true"
+                    placeholder="Select Country">
+                </p-dropdown>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" name="cl-start-date" [(ngModel)]="filter.start_date" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" name="cl-end-date" [(ngModel)]="filter.end_date" />
+            </div>
+
+            <div class="col-12" *ngIf="dateRangeError">
+                <small class="text-danger">{{dateRangeError}}</small>
+            </div>
+
+            <div class="col-12 d-flex gap-2 justify-content-end">
+                <button type="submit" class="btn btnStyle" [disabled]="loading">
+                    {{loading ? 'Loading...' : 'Apply Filters'}}
+                </button>
+                <button type="button" class="btn btn-outline-success" (click)="exportAllData()"
+                    [disabled]="loading || !reports.length">
+                    Export All Data
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="resetFilters()">Reset</button>
+            </div>
+        </form>
+
+        <p-table [value]="reports" [loading]="loading" responsiveLayout="scroll" [rows]="10" [paginator]="true"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" class="prim-table mt-5"
+            [rowsPerPageOptions]="[10, 25, 50]">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Title</th>
+                    <th>Creator</th>
+                    <th>Product</th>
+                    <th>Lead Sub Status</th>
+                    <th>Country</th>
+                    <th>Partner</th>
+                    <th>Contact Name</th>
+                    <th>Email</th>
+                    <th>Cost</th>
+                    <th>Lead Type</th>
+                    <th>Next Action</th>
+
+                    <th>Sales</th>
+                    <th>Status</th>
+                    <th>Seen</th>
+                    <th>Transfer</th>
+                    <th>Campagin Name</th>
+                    <th>Expected Close Date</th>
+                    <th>Actual Closing Date</th>
+                    <th></th>
+
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-row>
+                <tr>
+
+                    <td>{{row?.title}}</td>
+                    <td>{{row?.user_creator_name}}</td>
+                    <td>{{row?.product_name}}</td>
+                    <td>{{row?.lead_sub_status_name}}</td>
+                    <td>{{row?.country || '--'}}</td>
+                    <td >
+                        <a [routerLink]="['/CRM','accounts',row.partner_id]">
+                            {{row?.partner_name}}
+
+                        </a>
+                    </td>
+                    <td>{{row?.contact_name}}</td>
+                    <td>{{row?.email}}</td>
+                    <td>{{row?.cost}} {{row?.currency}}</td>
+                    <td>{{row?.lead_type_name}}</td>
+                    <td>
+                        <p>
+
+                            {{row?.next_action || '--'}}
+                        </p>
+                        <p class="text-muted text-nowrap" *ngIf="row?.next_action_date">
+                            on {{row?.next_action_date | date: 'medium'}}
+                        </p>
+
+                    </td>
+
+                    <td>{{row?.sales_name}}</td>
+                    <td>{{row?.status_name}}</td>
+                    <td>{{row?.seen? 'Yes' :'No'}}</td>
+                    <td>{{row?.transfer ? 'Yes':'No'}}</td>
+                    <td>{{row?.campagin_name}}</td>
+                    <td>{{row?.expected_close_date}}</td>
+                    <td>{{row?.actual_closing_date || '--'}}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-primary btn-sm" (click)="openViewSidebar(row)">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="19" class="text-center">No data found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <p-sidebar [(visible)]="viewSidebarVisible" position="right" [autoZIndex]="false" [baseZIndex]="999"
+            styleClass="p-sidebar-md" *ngIf="selectedReport">
+            <h4 class="mb-3">Lead Details</h4>
+
+            <app-contact-lead-details-view [report]="selectedReport"></app-contact-lead-details-view>
+        </p-sidebar>
+
+        <div style="display: none;">
+            <table id="contactLeadReportExport">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Creator</th>
+                        <th>Product</th>
+                        <th>Lead Sub Status</th>
+                        <th>Country</th>
+                        <th>Partner</th>
+                        <th>Contact Name</th>
+                        <th>Email</th>
+                        <th>Cost</th>
+                        <th>Lead Type</th>
+                        <th>Next Action</th>
+                        <th>Next Action Date</th>
+                        <th>Sales</th>
+                        <th>Status</th>
+                        <th>Seen</th>
+                        <th>Transfer</th>
+                        <th>Campagin Name</th>
+                        <th>Expected Close Date</th>
+                        <th>Actual Closing Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of reports">
+                        <td>{{row?.title}}</td>
+                        <td>{{row?.user_creator_name}}</td>
+                        <td>{{row?.product_name}}</td>
+                        <td>{{row?.lead_sub_status_name}}</td>
+                        <td>{{row?.country || '--'}}</td>
+                        <td>{{row?.partner_name}}</td>
+                        <td>{{row?.contact_name}}</td>
+                        <td>{{row?.email}}</td>
+                        <td>{{row?.cost}} {{row?.currency}}</td>
+                        <td>{{row?.lead_type_name}}</td>
+                        <td>{{row?.next_action || '--'}}</td>
+                        <td>{{row?.next_action_date || '--'}}</td>
+                        <td>{{row?.sales_name}}</td>
+                        <td>{{row?.status_name}}</td>
+                        <td>{{row?.seen? 'Yes' :'No'}}</td>
+                        <td>{{row?.transfer ? 'Yes':'No'}}</td>
+                        <td>{{row?.campagin_name}}</td>
+                        <td>{{row?.expected_close_date}}</td>
+                        <td>{{row?.actual_closing_date || '--'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

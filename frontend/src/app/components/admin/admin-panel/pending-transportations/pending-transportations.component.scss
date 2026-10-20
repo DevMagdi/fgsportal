@@ -1,0 +1,67 @@
+@import '../../../../colors';
+table {
+    width: 100%;
+}
+
+.tHeader {
+    th {
+        font-size: 14px !important;
+        font-weight: 400;
+    }
+}
+
+.tbody {
+    th {
+        font-size: 12px;
+        font-weight: 300;
+    }
+}
+
+.rejectBTN {
+    color: $buttonMainBackgroundColor;
+    background-color: transparent;
+    border: solid 1px $buttonMainBackgroundColor;
+    font-family: $mainFontFamily;
+}
+
+.approveBTN,
+.reviewBTN {
+    color: white;
+    background-color: $mainThemeColor;
+    font-family: $mainFontFamily;
+}
+
+.myCardStyle {
+    color: $mainThemeColor;
+    font-family: $mainFontFamily;
+    .cardImg {
+        border: solid 2px $buttonMainBackgroundColor;
+    }
+    .empName {
+        font-weight: 600;
+    }
+    .myLable {
+        font-weight: 600;
+    }
+    .optionColor {
+        color: $buttonMainBackgroundColor;
+    }
+}
+// .header {
+//     font-weight: bold;
+//     font-size: large;
+//     border: solid 1px #a19ea0;
+//     text-align: left;
+// }
+// .body {
+//     border: solid 1px #a19ea0;
+//     text-align: left;
+// }
+// .modal-body {
+//     h3 {
+//         font-weight: 700;
+//         span {
+//             font-weight: 400;
+//         }
+//     }
+// }

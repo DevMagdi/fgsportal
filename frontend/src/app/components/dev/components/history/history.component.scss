@@ -1,0 +1,38 @@
+@import '../../../../colors';
+.btn {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+}
+
+.tasksTable {
+    .days {
+        // border: solid 1px $mainThemeColor;
+        border-radius: 10px;
+        box-shadow: 0 0 5px rgba($mainThemeColor, 0.5);
+        color: $mainThemeColor;
+    }
+}
+
+.task {
+    // border: solid 1px $mainThemeColor;
+    border-radius: 6px;
+    // box-shadow: 0 0 5px $mainThemeColor;
+    // background-color: white; //rgba($color: $mainThemeColor, $alpha: 0.5); // rgba(165, 55, 155, 0.5) ;
+    color: $mainThemeColor;
+    box-shadow: 0 0 5px rgba($mainThemeColor, 0.5);
+    .working {
+        font-family: $mainFontFamily;
+    }
+    // font-family: 'Lato', sans-serif !important;
+    .icon {
+        text-align: right;
+        .delete {
+            color: #dcdcdc !important;
+            cursor: pointer;
+        }
+        .edit {
+            color: $buttonMainBackgroundColor !important;
+            cursor: pointer;
+        }
+    }
+}

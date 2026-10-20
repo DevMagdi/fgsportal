@@ -1,0 +1,589 @@
+<div class="col-md-3 mb-3">
+    <!-- <div class="card">
+        <div class="card-body">
+            <div class="d-flex flex-column align-items-center text-center">
+                <div *ngIf="!imgOnEditMode">
+                    <img *ngIf="!currentUser.photoURL && !currentUser.gender || !currentUser.photoURL && currentUser.gender == 'male'" src="../../../assets/img/avatarman.png" alt="User" class="rounded-circle userAvatar p-2" width="150">
+                    <img *ngIf="!currentUser.photoURL && currentUser.gender == 'female'" src="../../../assets/img/girlmyavatar.png" alt="User" class="rounded-circle userAvatar p-2" width="150">
+                    <img *ngIf="!!currentUser.photoURL" src="{{newServerApi}}{{currentUser.photoURL}}" alt="User" class="rounded-circle userAvatar p-2" width="150">
+                </div>
+                <div *ngIf="!imgOnEditMode && loggedInUser.key == currentUser.key || (loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10))) )">
+                    <button type="button" mat-raised-button (click)="editProfileIMG()">Edit Avatar</button>
+                </div>
+                <div *ngIf="imgOnEditMode">
+                    <img [src]="url" alt="User" class="rounded-circle" width="150">
+                    <br>
+                    <button type="button" mat-raised-button (click)="fileInput.click()">Choose File</button>
+                    <input hidden (change)="imageupload($event , true)" #fileInput type="file" id="file" accept="image/*">
+
+                    <button class="btn btn-info mx-2" (click)="saveEditIMg()">Save</button>
+                    <button class="btn btn-light mx-2" (click)="cancelEditIMg()">Cancel</button>
+                </div>
+                <div class="mt-3">
+                    <h4>{{currentUser.username}}</h4>
+                    <p-rating [disabled]="true" [readonly]="true" [(ngModel)]="currentUser.my_total_rate" [cancel]="false" [stars]="5"></p-rating>
+
+                    <div *ngIf="!roleOnEditMOde">
+                        <p class="text-secondary mb-1">{{currentUser.department_name}}/ {{currentUser.accRole_name}}</p>
+                        <p class="text-secondary mb-1">{{currentUser.accPosition_name}}</p>
+                        <p class="text-muted font-size-sm">{{currentUser.email}}</p>
+                    </div>
+                    <div *ngIf="roleOnEditMOde && loggedInUser.department == DepartmentEnum.MANAGEMENT">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Department</mat-label>
+                            <mat-select (selectionChange)="getSubDepartment()" [(ngModel)]="currentUser.department">
+                                <mat-option *ngFor="let dept of allDepartments" [value]='dept.id'>{{dept.department_name}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables" *ngIf="!subdeptLoading">Role</mat-label>
+                            <mat-label class="formLables">
+                                <div class="loading-dots" *ngIf="subdeptLoading">
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                    <div class="loading-dots--dot"></div>
+                                </div>
+                            </mat-label>
+                            <mat-select [(ngModel)]="currentUser.accRole">
+                                <mat-option *ngFor="let role of allSubdepartments" [value]='role.id'>{{role.sub_department_name}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Position</mat-label>
+                            <mat-select [(ngModel)]="currentUser.accPosition">
+                                <mat-option *ngFor="let pos of allPositions" [value]='pos.id'>{{pos.work_degree_name}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                    </div>
+
+                    <div *ngIf="loggedInUser.department == DepartmentEnum.MANAGEMENT">
+                        <button *ngIf="!roleOnEditMOde" class="btn btn-outline-info" (click)="getUserRoles()">edit</button>
+                        <button *ngIf="!!roleOnEditMOde" class="btn btn-outline-success mx-1" (click)="saveRolesEditUser()">Save</button>
+                        <button *ngIf="!!roleOnEditMOde" class="btn btn-outline-dark mx-1" (click)="cancelEditUser()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <div class="card mt-3">
+        <ul class="list-group list-group-flush pagesList" *ngIf="!!currentUser && !!loggedInUser">
+            <!-- mouseenter -->
+            <li id="info" (click)="openPage('info')" class="list-group-item d-flex justify-content-between align-items-center flex-wrap activePage">
+                <h4 class="mb-0 ">Employee Information</h4>
+            </li>
+            <li *ngIf="currentUser.key == loggedInUser.key ||  loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))" (click)="openPage('tasks')" class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                <h4 class="mb-0">User Tasks</h4>
+            </li>
+
+            <li *ngIf="currentUser.key == loggedInUser.key ||  loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))" id="overtasks" (click)="openPage('overtasks')"
+                class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                <h4 class="mb-0">User Overdue Tasks</h4>
+            </li>
+
+            <li *ngIf="currentUser.key == loggedInUser.key ||  loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))" id="vacations" (click)="openPage('vacations')"
+                class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                <h4 class="mb-0">Vacations</h4>
+            </li>
+            <li *ngIf="currentUser.key == loggedInUser.key ||  loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))" id="family" (click)="openPage('family')" class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                <h4 class="mb-0">Family Inforamtion</h4>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="col-md-9" *ngIf="!!currentUser && !!loggedInUser">
+    <div class="card" *ngIf="pageToOpen != 'info' &&  pageToOpen != ''">
+        <div class="card-body">
+            <app-my-projects-and-tasks *ngIf="pageToOpen =='tasks' && !!currentUser && !!loggedInUser" [currentUser]="currentUser" [loggedInUser]="loggedInUser"></app-my-projects-and-tasks>
+            <app-over-due-tasks *ngIf="pageToOpen =='overtasks' && !!currentUser && !!loggedInUser" [currentUser]="currentUser" [loggedInUser]="loggedInUser"></app-over-due-tasks>
+            <app-user-annual-leave *ngIf="pageToOpen =='vacations' && !!currentUser && !!loggedInUser" [currentUser]="currentUser" [loggedInUser]="loggedInUser"></app-user-annual-leave>
+            <app-relatives *ngIf="pageToOpen =='family' && !!currentUser && !!loggedInUser" [currentUser]="currentUser" [loggedInUser]="loggedInUser"></app-relatives>
+        </div>
+    </div>
+
+    <div *ngIf="pageToOpen == 'info' && !userOnEditMode" class="card mb-3">
+        <div class="card-body">
+            <h2>Employee Information</h2>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Full Name</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{currentUser.firstname}} {{currentUser.lastname}}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Email</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{currentUser.email}}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Phone:</h6>
+                </div>
+            </div>
+            <div class="row" *ngIf="!!currentUser.mobileNumber && currentUser.mobileNumber.length > 0">
+                <div class="col-sm-6 my-1" *ngFor="let mobile of currentUser.mobileNumber ; let i = index">
+                    <div>
+                        <span class="text-main mr-1">
+                            {{mobile.phone}}
+                        </span>
+                        <span class="text-secondary">
+                            {{mobile.phone_type}}
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Address</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{currentUser.address}}
+                </div>
+
+            </div>
+
+
+            <div class="privateInfo" *ngIf="currentUser.key == loggedInUser.key || loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10))) ">
+                <hr>
+                <h2>Job Information</h2>
+                <hr>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">Job Title</h6>
+                    </div>
+                    <!-- <div class="col-sm-6 text-secondary">
+                        {{currentUser.accType == 'dev' ? 'Developer' : currentUser.accType == 'pm' ? 'Project Manager' : currentUser.accType == 'b_analysis' ? 'Business Analysis' : currentUser.accType == 'manager' ? 'Manager' : currentUser.accType}}
+                    </div> -->
+
+
+
+
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">Birth Date</h6>
+                    </div>
+                    <div class="col-sm-3 text-secondary">
+                        {{currentUser.birthDate}}
+                    </div>
+
+
+                    <div class="col-sm-3 b-Left">
+                        <h6 class="mb-0">Supervisor</h6>
+                    </div>
+                    <div class="col-sm-3 text-secondary">
+                        {{currentUser.supervisorName}}
+                    </div>
+
+                </div>
+
+                <hr>
+
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">Hiring Date</h6>
+                    </div>
+                    <div class="col-sm-3 text-secondary">
+                        {{currentUser.hiringDate}}
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">Contract Start Date</h6>
+                    </div>
+                    <div class="col-sm-3 text-secondary">
+                        {{currentUser.contractStartDate}}
+                    </div>
+
+                    <div class="col-sm-3 b-Left">
+                        <h6 class="mb-0">Contract End Date</h6>
+                    </div>
+                    <div class="col-sm-3 text-secondary">
+                        {{currentUser.contractEndDate}}
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row" *ngIf="currentUser.key == loggedInUser.key || loggedInUser.key == '36'">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">Salary</h6>
+                    </div>
+                    <div class="col-sm-3 text-secondary d-flex justify-content-between">
+                        <span *ngIf="!showSalary">
+                            *****
+                        </span>
+                        <span *ngIf="showSalary">
+                            {{currentUser.salary}} EGP
+                        </span>
+                    </div>
+
+                    <div class="col-sm-3 b-Left">
+                        <h6 class="mb-0">Last Salary</h6>
+                    </div>
+                    <div class="col-sm-3 text-secondary d-flex justify-content-between">
+                        <span *ngIf="!showSalary">
+                            *****
+                        </span>
+                        <div *ngIf="showSalary">
+                            <span *ngIf="!!myCurrentSalary && !!currentUser.salary && myCurrentSalary <= currentUser.salary">
+                                {{myCurrentSalary  | number:'1.2-2'}} EGP
+                            </span>
+                            <span *ngIf="!!myCurrentSalary && !!currentUser.salary && myCurrentSalary > currentUser.salary">
+                                {{currentUser.salary}} EGP
+                            </span>
+                            <span *ngIf="!myCurrentSalary">
+                                0 EGP
+                            </span>
+                        </div>
+                        <span>
+                            <mat-icon class="eyeIcon" (click)="salaryToggle()">remove_red_eye</mat-icon>
+                        </span>
+                    </div>
+                </div>
+                <hr>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">Social Security Number</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        {{currentUser.socialSecureityNumber}}
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        <h6 class="mb-0">Attached ID</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                        <!-- <img *ngIf="currentUser.IDImgUrl" [src]="currentUser.IDImgUrl" alt="User" width="150"> -->
+                        <a *ngIf="currentUser.IDImgUrl" [href]="currentUser.IDImgUrl" target="_blank">ID</a>
+                    </div>
+                </div>
+
+                <hr>
+                <h2>Emergancy Contact Information</h2>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <h6 class="mb-0">Phone Number:</h6>
+                    </div>
+                    <div class="col-sm-2 text-secondary">
+                        {{currentUser.emergancyPhoneNumber}}
+                    </div>
+
+                    <div class="col-sm-2 b-Left">
+                        <h6 class="mb-0">Name:</h6>
+                    </div>
+                    <div class="col-sm-2 text-secondary">
+                        {{currentUser.emergancyPhoneNumberName}}
+                    </div>
+
+                    <div class="col-sm-2 b-Left">
+                        <h6 class="mb-0">Relationship:</h6>
+                    </div>
+                    <div class="col-sm-2 text-secondary">
+                        {{currentUser.emergancyPhoneNumberRelation}}
+                    </div>
+                </div>
+
+            </div>
+
+
+            <hr *ngIf="!!loggedInUser && (currentUser.key == loggedInUser.key ||  loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10))))">
+            <div class="row" *ngIf="!!loggedInUser && (currentUser.key == loggedInUser.key ||  loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))) ">
+                <div class="col-sm-12">
+                    <button class="btn btn-info" (click)="editUser()">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div *ngIf="pageToOpen == 'info' && userOnEditMode" class="card mb-3">
+        <div class="card-body">
+            <h2>Public Info</h2>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Full Name</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    <mat-form-field class="example-full-width w-45 mx-1">
+                        <mat-label>firstname</mat-label>
+                        <input matInput type="text" [(ngModel)]="currentUser.firstname">
+                    </mat-form-field>
+                    <mat-form-field class="example-full-width w-45 mx-1">
+                        <mat-label>lastname</mat-label>
+                        <input matInput type="text" [(ngModel)]="currentUser.lastname">
+                    </mat-form-field>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Email</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{currentUser.email}}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Phone:</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Home Phone</h6>
+                </div>
+                <div class="row">
+                    <div class="mb-3">
+                        <label class="form-label" for="basic-default-phone">Phone No</label>
+                        <ng-container *ngIf="!!currentUser.mobileNumber && currentUser.mobileNumber.length >= 0">
+
+                            <div class="container p-0 m-0" *ngFor="let phone of currentUser.mobileNumber;let i=index">
+                                <div class="row p-0 m-0">
+                                    <div class="col-7 p-0 m-0">
+                                        <input type="text" id="basic-default-phone" class="form-control phone-mask" [(ngModel)]="phone.phone" placeholder="658 799 8941" [ngModelOptions]="{standalone: true}" />
+                                    </div>
+                                    <div class="col-4 p-0 m-0">
+                                        <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example" [(ngModel)]="phone.phone_type" [ngModelOptions]="{standalone: true}">
+                                        <option value="Work">Work</option>
+                                        <option value="Home">Home</option>
+                                        <option value="Mobile">Mobile</option>
+                                        <option value="Whatsapp">Whatsapp</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    </div>
+                                    <div class="col-1 p-0 m-0">
+                                        <i class="menu-icon tf-icons bx bx-trash trashIcon" (click)="deletePhone(i)"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <div class="form-text addPhone" *ngIf="!currentUser.mobileNumber || (!!currentUser.mobileNumber && currentUser.mobileNumber.length < 5)">
+                            <a href="javascript: void(0)" (click)="addPhone()">+ Add</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <hr>
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Address</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    <mat-form-field class="example-full-width w-45 mx-1">
+                        <mat-label>Adress</mat-label>
+                        <input matInput type="text" [(ngModel)]="currentUser.address">
+                    </mat-form-field>
+                </div>
+            </div>
+            <hr>
+            <h2>Job Information</h2>
+            <hr>
+
+
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Birth Date</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    <mat-form-field class="example-full-width w-45 mx-1">
+                        <mat-label>Birth Date</mat-label>
+                        <input matInput type="date" [(ngModel)]="currentUser.birthDate">
+                    </mat-form-field>
+                </div>
+            </div>
+            <hr>
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">gender</h6>
+                </div>
+                <div class="col-sm-3 text-secondary">
+                    <mat-form-field>
+                        <mat-label>Gender</mat-label>
+                        <mat-select [(ngModel)]="currentUser.gender">
+                            <mat-option value="male">Male</mat-option>
+                            <mat-option value="female">Female</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Marital Status</h6>
+                </div>
+                <div class="col-sm-3 text-secondary">
+                    <mat-form-field>
+                        <mat-label>Marital Status</mat-label>
+                        <mat-select [(ngModel)]="currentUser.maritalStatus">
+                            <mat-option *ngFor="let maritalStatus of MaritalStatusEnum | keyvalue" [value]="maritalStatus.value">{{maritalStatus.key}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <hr>
+
+
+
+            <div class="row" *ngIf="!!loggedInUser && ( loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10))))">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Hiring Date</h6>
+                </div>
+                <div class="col-sm-3 text-secondary">
+                    <mat-form-field class="example-full-width mx-1">
+                        <mat-label>Hiring Date</mat-label>
+                        <input matInput type="date" [(ngModel)]="currentUser.hiringDate">
+                    </mat-form-field>
+                </div>
+
+                <!-- <div class="col-sm-3">
+                    <h6 class="mb-0">Salary</h6>
+                </div>
+                <div class="col-sm-3 text-secondary">
+                    <mat-form-field class="example-full-width mx-1">
+                        <mat-label>Salary</mat-label>
+                        <input matInput type="number" [(ngModel)]="currentUser.salary">
+                    </mat-form-field>
+                </div> -->
+            </div>
+
+            <hr *ngIf="!!loggedInUser && loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))">
+
+            <div class="row" *ngIf="!!loggedInUser && loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10))) ">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Contract Start Date</h6>
+                </div>
+                <div class="col-sm-3 text-secondary">
+                    <mat-form-field class="example-full-width mx-1">
+                        <mat-label>Contract Start Date</mat-label>
+                        <input matInput type="date" [(ngModel)]="currentUser.contractStartDate">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-sm-3 b-Left">
+                    <h6 class="mb-0">Contract End Date</h6>
+                </div>
+                <div class="col-sm-3 text-secondary">
+                    <mat-form-field class="example-full-width mx-1">
+                        <mat-label>Contract End Date</mat-label>
+                        <input matInput type="date" [(ngModel)]="currentUser.contractEndDate">
+                    </mat-form-field>
+                </div>
+            </div>
+            <hr *ngIf="!!loggedInUser && loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))">
+
+
+            <div class="row" *ngIf="!!loggedInUser && loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10))) ">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Social Security Number</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    <mat-form-field class="example-full-width mx-1">
+                        <mat-label>Social Security Number</mat-label>
+                        <input matInput type="text" [(ngModel)]="currentUser.socialSecureityNumber">
+                    </mat-form-field>
+                </div>
+
+
+            </div>
+
+            <hr *ngIf="!!loggedInUser && loggedInUser.department == DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10))) ">
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <button type="button" mat-raised-button (click)="fileInput.click()">Attach ID</button>
+                    <input hidden (change)="imageupload($event , false)" #fileInput type="file" id="file">
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    <div>
+                        <img [src]="IDAttach" alt="ID" width="150">
+                        <br>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <h2>Emergancy Contact Information</h2>
+            <hr>
+            <div class="row">
+                <div class="col-sm-2">
+                    <h6 class="mb-0">Phone Number:</h6>
+                </div>
+                <div class="col-sm-2 text-secondary">
+                    <mat-form-field class="example-full-width">
+                        <mat-label>Phone Number</mat-label>
+                        <input matInput type="number" [(ngModel)]="currentUser.emergancyPhoneNumber">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-sm-2 b-Left">
+                    <h6 class="mb-0">Name:</h6>
+                </div>
+                <div class="col-sm-2 text-secondary">
+                    <mat-form-field class="example-full-width">
+                        <mat-label>Name</mat-label>
+                        <input matInput type="text" [(ngModel)]="currentUser.emergancyPhoneNumberName">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-sm-2 b-Left">
+                    <h6 class="mb-0">Relationship:</h6>
+                </div>
+                <div class="col-sm-2 text-secondary">
+                    <mat-form-field class="example-full-width">
+                        <mat-label>Relationship</mat-label>
+                        <input matInput type="text" [(ngModel)]="currentUser.emergancyPhoneNumberRelation">
+                    </mat-form-field>
+                </div>
+            </div>
+
+
+
+
+            <hr *ngIf="!!loggedInUser && (loggedInUser.key == currentUser.key || DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))) ">
+            <div class="row" *ngIf="!!loggedInUser && (loggedInUser.key == currentUser.key || DepartmentEnum.MANAGEMENT || (loggedInUser.department == DepartmentEnum.ADMINSTRATION && (!!userPerms && !!checkIfHasPerm(10)))) ">
+                <div class="col-sm-12">
+                    <button class="btn btn-info mx-2" (click)="saveEditUser()">Save</button>
+                    <button class="btn btn-light mx-2" (click)="cancelEditUser()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>

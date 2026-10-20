@@ -1,0 +1,24 @@
+@import '../../../../colors';
+.dev-reports{
+
+
+    
+    ::ng-deep .p-tabview .p-tabview-nav {
+    
+        li.p-highlight .p-tabview-nav-link {
+            background: #ffffff;
+            border-color: $mainThemeColor !important;
+            color: $mainThemeColor !important;
+            font-weight: bold;
+        }
+        .p-tabview-ink-bar{
+            background:$mainThemeColor!important;
+            z-index: 0;
+        
+        }
+        li .p-tabview-nav-link{
+           color: $subThemeColor !important;
+           font-weight: normal ;
+       }
+    }
+}

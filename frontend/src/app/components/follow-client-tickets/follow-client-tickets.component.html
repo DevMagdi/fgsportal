@@ -1,0 +1,129 @@
+<!-- <div class="container-fluid">
+    <div class="row my-2">
+        <div class="col-md-6">
+            <div class="search">
+                <mat-label>Search</mat-label>
+                <input class="form-control w-100" type="text" [(ngModel)]="searchKey" (keyup)="searchTicket()" placeholder="Search By Project Title">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <mat-label>Filters By Issue Status</mat-label>
+            <mat-select class="form-control" (selectionChange)="filterTickets()" multiple [(ngModel)]="filtersList" [ngModelOptions]="{standalone: true}">
+                <mat-option *ngFor="let status of ticketStatusEnum | keyvalue" value="{{status.value}}">{{status.key}}</mat-option>
+            </mat-select>
+        </div>
+    </div>
+</div> -->
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="isLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="container-fluid" *ngIf="!isLoading">
+
+    <div class="row" *ngIf="!!recentClientTickets">
+        <div class="col-12 text-end">
+            <a style="cursor: pointer" (click)="exportTicketsDataReport()" class="downloadFile">
+                <mat-icon style="color: #f5831fd3" matTooltip="Export">cloud_download</mat-icon>
+            </a>
+        </div>
+        <div class="col-lg-3 d-grid align-items-center">
+            <div class="">
+                <div class="statistics card mb-2">
+                    <div class="">
+                        <h2>
+                            {{ closedTickets }}
+                        </h2>
+                        <p class="titles fw-bold">Closed Tickets</p>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <div class="statistics card mb-2">
+                    <div class="">
+                        <h2>
+                            {{ openedTickets }}
+                        </h2>
+                        <p class="titles fw-bold">Opened Tickets</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="flex justify-content-center">
+                <p-chart type="pie" [data]="data" [options]="options"></p-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-hover newTableCustom" matSort (matSortChange)="sortData($event)"
+                id="ticketsDataReport">
+                <thead class="tHeader">
+                    <tr>
+                        <th mat-sort-header="key">Ticket Number</th>
+                        <th mat-sort-header="title">Subject</th>
+                        <!-- <th mat-sort-header="pendingOn">Pending On</th> -->
+                        <th mat-sort-header="status">Status</th>
+                        <th mat-sort-header="clientName">Client Name</th>
+                        <th mat-sort-header="startDate">Start Date</th>
+                        <th mat-sort-header="closureDate">Priority</th>
+                    </tr>
+                </thead>
+                <tbody class="tbody" *ngIf="!!recentClientTickets">
+                    <tr *ngFor="let ticket of recentClientTickets">
+                        <td class="key" [routerLink]="['/tickets', ticket.key]">
+                            <a [routerLink]="['/tickets', ticket.key]">
+                                #{{ ticket.ticket_number }}
+                            </a>
+                        </td>
+                        <td class="subject">
+                            <a class="title" [routerLink]="['/tickets', ticket.key]">
+                                {{ ticket.title }}
+                            </a>
+                            <!-- <p class="createdAt d-flex flex-row align-items-center text-center">
+                                <span class="material-icons">
+                                    access_time
+                                </span>
+                                <span>
+                                    {{ticket.createdAt | date:'medium'}}
+                                </span>
+                            </p> -->
+                        </td>
+                        <!-- <td class="pendingon">{{ticket.pendingOn}}</td> -->
+                        <td class="status">
+                            <p [ngStyle]="{
+                  'background-color': getStatusBg(ticket.status),
+                  color: getStatusCl(ticket.status)
+                }">
+                                {{ ticket.status_name }}
+                            </p>
+                        </td>
+                        <td class="projectName">{{ ticket.clientName }}</td>
+                        <td class="startDate">
+                            {{
+                            getTime(ticket.createdAt) == "Invalid date"
+                            ? ticket.createdAt
+                            : getTime(ticket.createdAt)
+                            }}
+                        </td>
+                        <td class="priority">
+                            <p class="" [ngStyle]="{ 'background-color': getPriority(ticket.priority) }">
+                                {{ ticket.priority_name }}
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <button type="button" class="btn loadBtn" (click)="loadMore()">load More</button>
+                        </td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

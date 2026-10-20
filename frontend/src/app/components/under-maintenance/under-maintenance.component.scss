@@ -1,0 +1,48 @@
+@import '../../colors';
+// body {
+//     text-align: center;
+//     padding: 150px;
+// }
+// h1 {
+//     font-size: 40px;
+// }
+// body {
+//     font: 20px Helvetica, sans-serif;
+//     color: #333;
+// }
+#article {
+    // display: block;
+    // text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    // width: 650px;
+    // margin: 0 auto;
+    height: 700px !important;
+    h1 {
+        width: 50%;
+        font-size: 40px;
+        color: $mainThemeColor;
+        line-height: 1.5;
+    }
+    div {
+        p {
+            font-family: $mainFontFamily;
+            font-size: 20px;
+        }
+        width: 50%;
+        color: $mainThemeColor;
+    }
+    // background-color: #09c;
+}
+
+a {
+    color: $buttonMainBackgroundColor;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #333;
+    text-decoration: none;
+}

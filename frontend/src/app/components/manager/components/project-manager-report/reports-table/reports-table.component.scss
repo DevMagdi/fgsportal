@@ -1,0 +1,30 @@
+@import '../../../../../colors';
+
+.deleteIcon {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.views {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.editIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+.open{
+
+    background-color: rgb(253, 255, 216);
+    padding: 4px;
+    border-radius: 8px;
+    color: goldenrod;
+}
+.closed{
+    
+    background-color: rgb(216, 244, 191);
+    padding: 4px;
+    border-radius: 8px;
+    color: green;
+}

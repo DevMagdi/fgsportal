@@ -1,0 +1,32 @@
+@import '../../../../../colors';
+
+.jop-profile-select , .jop-skills-select{
+    .p-multiselect{
+
+        width: 100%;
+        .p-multiselect-label {
+            padding: 0.575rem 0.75rem;
+        }
+    }
+}
+
+.email-error-message{
+    background-color: #ffe6e6;
+    color: #dc3545;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.candidate-file{
+    // background-color: lightgray;
+    padding: 8px;
+    border-radius: 8px;
+    color: black;
+    margin: 8px 0;
+}
+.add-skill-icon{
+    background: $softThemeColor;
+    padding: 6px;
+    border-radius: 50%;
+    color: $mainThemeColor;
+}

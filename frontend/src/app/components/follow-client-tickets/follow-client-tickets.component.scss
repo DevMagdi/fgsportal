@@ -1,0 +1,86 @@
+@import '../../colors';
+.pageTitle {
+    font-size: 28px;
+    font-weight: bold;
+    font-family: $mainFontFamily;
+    color: $mainThemeColor;
+}
+
+.addIssue {
+    background-color: $mainThemeColor;
+    color: $whiteColor;
+    height: fit-content;
+    margin-top: 15px;
+}
+
+.tHeader {
+    color: $buttonMainBackgroundColor;
+}
+
+.tbody {
+    .key {
+        a {
+            color: $mainThemeColor !important;
+        }
+    }
+    .subject {
+        .title {
+            // font-weight: 24px;
+            // font-weight: bold;
+            color: $mainThemeColor;
+            line-height: 0px;
+        }
+        .createdAt {
+            font-weight: 18px;
+            color: $mainThemeColor;
+            line-height: 0px;
+        }
+    }
+    .pendingon,
+    .projectName,
+    .lastReply {
+        font-weight: 18px;
+        color: $mainThemeColor;
+    }
+    .status {
+        font-weight: 18px;
+        color: white;
+        p {
+            border-radius: 5px;
+            width: fit-content;
+            padding: 3px 5px;
+        }
+    }
+    .loadBtn {
+        background-color: $buttonMainBackgroundColor;
+        color: $whiteColor;
+    }
+    .priority {
+        font-weight: 18px;
+        color: $whiteColor;
+        p {
+            border-radius: 5px;
+            width: fit-content;
+            padding: 3px 5px;
+        color: $whiteColor;
+
+        }
+    }
+}
+.statistics{
+    border-color: $borderColor;
+    border-radius: 16px;
+    padding: .9rem;
+    // min-height: 153px !important;
+
+    h2{
+        font-size: 16px;
+        font-weight: bold;
+    }
+    p{
+        font-size: 14px; 
+        color: $subThemeColor;
+        font-weight: 500;
+    }
+
+}

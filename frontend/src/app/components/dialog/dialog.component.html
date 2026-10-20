@@ -1,0 +1,20 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<div mat-dialog-content>
+    <p>{{data.message}}</p>
+    <p id="warning">{{data.warning}}</p>
+
+    <mat-form-field id="form-field" *ngIf="data.isTitleMode">
+        <input matInput #inputTitleTag placeholder="{{data.title}}" [formControl]="titleFormControl" (keydown)="onKeydown($event)">
+        <!-- [errorStateMatcher]="matcher" -->
+        <!-- <mat-error *ngIf="matcher.isFormFieldBlank(titleFormControl)">
+            This Field is <strong>required</strong>
+        </mat-error> -->
+
+    </mat-form-field>
+</div>
+<div mat-dialog-actions id="btn-actions">
+    <button mat-button id="btnCancel" class="button" [mat-dialog-close]="false">Cancel</button>
+    <button *ngIf="!data.isTitleMode" mat-button id="btnOk" class="button" [mat-dialog-close]="true" cdkFocusInitial tabindex="1">Yes</button>
+    <button *ngIf="data.isTitleMode" mat-button id="btnOk" class="button" [mat-dialog-close]="titleFormControl.value" tabindex="2">Add</button>
+</div>
+<!-- [disabled]="matcher.isFormFieldBlank(titleFormControl) && !data.canTitleBeBlank" -->

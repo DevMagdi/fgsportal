@@ -1,0 +1,206 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="noteLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="container-fluid my-3">
+    <div class="row">
+        <div class="col-12">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4">
+            <div *ngFor="let note of myNotes" class="note my-2 card" [ngStyle]="{'background-color':note.noteBackgroundColor , 'color': note.noteBackgroundColor == '#5E5E5E'? '#fff':'#000'}" (click)="submitUpdateNote();this.selectedNote = note;triggerSelectedNote()">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="">
+                            <div class="announceBody ql-editor p-2 fw-bold" [innerHTML]="note.note"></div>
+                        </div>
+                        <div class="">
+                            <p class="note_date" [ngStyle]="{'color': note.noteBackgroundColor == '#5E5E5E'? '#fff':'#000'}">
+                                {{note.updated_at | date :'dd/MM/yyyy HH:mm:ss'}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card selectedNote my-2" [ngStyle]="{'background-color':selectedNote.noteBackgroundColor, 'color': selectedNote.noteBackgroundColor == '#5E5E5E'? '#fff':'#000'}" *ngIf="!!selectedNote">
+                <div class="container-fluid">
+                    <div class="row py-2">
+                        <div class="col-8">
+                        </div>
+                        <div class="col-4 d-flex justify-content-between">
+                            <div class="note_date" [ngStyle]="{ 'color': selectedNote.noteBackgroundColor == '#5E5E5E'? '#fff':'#000'}">
+                                {{selectedNote.user_creator_name}}
+                            </div>
+                            <div class="note_date" [ngStyle]="{ 'color': selectedNote.noteBackgroundColor == '#5E5E5E'? '#fff':'#000'}">
+                                {{selectedNote.updated_at | date :'dd/MM/yyyy HH:mm:ss'}}
+                            </div>
+                            <div *ngIf="currentUser.key == selectedNote.user_creator">
+                                <img src="../../../../../assets/img/menu.svg" [matMenuTriggerFor]="menu" style=" cursor: pointer;" class="Component-22-1">
+
+                                <mat-menu #menu="matMenu">
+                                    <button mat-menu-item [matMenuTriggerFor]="colorMenu">
+                                        <i class="pi pi-palette"></i>
+                                        Color
+                                    </button>
+
+                                    <button mat-menu-item (click)="copyText(selectedNote.note)">
+                                        <i class="pi pi-copy"></i>
+                                        Copy To Clipboard
+                                    </button>
+                                    <button mat-menu-item (click)="deleteNote(selectedNote.id || '')">
+                                        <i class="pi pi-trash"></i>
+                                        Delete
+                                    </button>
+
+                                </mat-menu>
+                                <mat-menu #colorMenu="matMenu" class="px-4">
+                                    <button mat-menu-item *ngFor="let color of noteColorEnum |keyvalue" class="m_item" (click)="changeNoteColor(color.key)">
+                                        <div class="notebgcolor" [ngStyle]="{'background-color' :color.value}">
+                                        </div>
+                                        <div class="ml-1">
+                                            {{color.key}}
+                                        </div>
+                                    </button>
+                                </mat-menu>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p-editor (input)="onNoteInputChange($event)" [readonly]="currentUser.key != selectedNote.user_creator && !checkIFCanWrite()" [(ngModel)]="selectedNote.note" [style]="{ height: '320px' }"></p-editor>
+                        </div>
+                    </div>
+                    <div class="row mt-1" *ngIf="currentUser.key == selectedNote.user_creator || checkIFCanWrite()">
+                        <ng-container *ngIf="currentUser.key == selectedNote.user_creator">
+                            <div class="col-lg-6" data-bs-toggle="modal" data-bs-target="#largeModal" (click)="openEditCollaboratorForm()">
+                                <div *ngIf="!!selectedNote.user_id && selectedNote.user_id.length > 0">
+                                    <span *ngFor="let user of selectedNote.user_id;let i = index" [matTooltip]="user.username || 'Collaborator'">
+                                        <span *ngIf="i < 4" >
+                                            <img *ngIf="!user.avatar" src="../../../assets/img/avatarman.png" alt="User" class="rounded-circle userAvatar" width="35" height="35">
+                                            <img *ngIf="!!user.avatar" src="{{newServerApi}}{{user.avatar}}" alt="User" class="rounded-circle userAvatar" width="35" height="35">
+                                        </span>
+                                    <span *ngIf="i == 4">
+                                                ...+
+                                        </span>
+                                    </span>
+                                </div>
+
+                                <p *ngIf="!selectedNote.user_id || selectedNote.user_id.length == 0" style="cursor: pointer;">+ Collaborators</p>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngIf="currentUser.key != selectedNote.user_creator">
+                            <div class="col-lg-6">
+                                <div *ngIf="!!selectedNote.user_id && selectedNote.user_id.length > 0">
+                                    <span *ngFor="let user of selectedNote.user_id;let i = index" [matTooltip]="user.username || 'Collaborator'">
+                                        <span *ngIf="i < 4" >
+                                            <img *ngIf="!user.avatar" src="../../../assets/img/avatarman.png" alt="User" class="rounded-circle userAvatar" width="35" height="35">
+                                            <img *ngIf="!!user.avatar" src="{{newServerApi}}{{user.avatar}}" alt="User" class="rounded-circle userAvatar" width="35" height="35">
+                                        </span>
+                                    <span *ngIf="i == 4">
+                                                ...+
+                                        </span>
+                                    </span>
+                                </div>
+                                <p *ngIf="!selectedNote.user_id || selectedNote.user_id.length == 0" style="cursor: pointer;">+ Collaborators</p>
+                            </div>
+                        </ng-container>
+                        <!-- <button class="btn btn-outline-success" >Collaborators</button> -->
+
+                        <!-- <div class="col-lg-6 d-flex justify-content-end">
+                            <button class="btn btn-outline-dark" *ngIf="selectedNote.noteBackgroundColor != '#5E5E5E'" (click)="submitUpdateNote()">Done</button>
+                            <button class="btn btn-outline-light" *ngIf="selectedNote.noteBackgroundColor == '#5E5E5E'" (click)="submitUpdateNote()">Done</button>
+                        </div> -->
+                    </div>
+                    <div class="row mt-1" *ngIf="currentUser.key != selectedNote.user_creator && !checkIFCanWrite()">
+                        <div class="col-lg-6">
+                            <!-- <button class="btn btn-outline-success" >Collaborators</button> -->
+                            <div *ngIf="!!selectedNote.user_id && selectedNote.user_id.length > 0">
+                                <span *ngFor="let user of selectedNote.user_id;let i = index" [matTooltip]="user.username || 'Collaborator'">
+                                    <span *ngIf="i < 4" >
+                                        <img *ngIf="!user.avatar" src="../../../assets/img/avatarman.png" alt="User" class="rounded-circle userAvatar" width="35" height="35">
+                                        <img *ngIf="!!user.avatar" src="{{newServerApi}}{{user.avatar}}" alt="User" class="rounded-circle userAvatar" width="35" height="35">
+                                    </span>
+                                <span *ngIf="i == 4">
+                                            ...+
+                                    </span>
+                                </span>
+                            </div>
+                            <p *ngIf="!selectedNote.user_id || selectedNote.user_id.length == 0" style="cursor: pointer;">+ Collaborators</p>
+                        </div>
+
+                        <div class="col-lg-6 d-flex justify-content-end" *ngIf="currentUser.key != selectedNote.user_creator && checkIFCanWrite()">
+                            <button class="btn btn-outline-dark" *ngIf="selectedNote.noteBackgroundColor != '#5E5E5E'" (click)="submitUpdateNote()">Done</button>
+                            <button class="btn btn-outline-light" *ngIf="selectedNote.noteBackgroundColor == '#5E5E5E'" (click)="submitUpdateNote()">Done</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn add_note text-end px-4" (click)="createNote()">Add Note</button>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-top fade" id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">Collaborators</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeForm()"></button>
+            </div>
+
+            <div class="mb-3">
+                <form [formGroup]="editeNoteForm" (ngSubmit)="submitUpdateNote()" class="example-form">
+                    <div class="container">
+                        <div class="row">
+
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <mat-form-field class="example-full-width w-100">
+                                        <mat-label>Collaborators</mat-label>
+                                        <mat-select formControlName="users" multiple="true" (selectionChange)="onSelectUsers()">
+                                            <mat-option *ngFor="let user of allUsers" [value]='user'>
+                                                {{user.username}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div *ngIf="!!editeNoteForm.get('users')?.value">
+                                <table>
+                                    <thead>
+                                        <th style="width:70%">User</th>
+                                        <th style="width:25%">Read Write</th>
+                                        <td style="width:25%"></td>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of usersOnNote">
+                                            <td>{{user.username}}</td>
+                                            <td>
+                                                <mat-slide-toggle [(ngModel)]="user.can_write" [ngModelOptions]="{standalone: true}" [checked]="user.can_write"></mat-slide-toggle>
+                                            </td>
+                                            <td>
+                                                <i class="pi pi-times closeIcon mx-1" (click)="deleteUserFromCollaporators(user)"></i>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-end">
+                                <button class="btn btn-success" data-bs-dismiss="modal" aria-label="Close">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

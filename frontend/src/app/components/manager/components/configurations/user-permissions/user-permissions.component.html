@@ -1,0 +1,281 @@
+<mat-tab-group mat-align-tabs="start" class="">
+    <mat-tab label="Managers">
+        <!-- <p-accordion [multiple]="false" (onOpen)="resetArr()"> -->
+        <div class="table-responsive">
+            <table class="table newTableCustom">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>user name</td>
+                        <td>Email</td>
+                        <td>Department</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let user of AllUsers">
+                        <tr *ngIf="user.department == DepartmentEnum.MANAGEMENT">
+                            <td></td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.department_name }}</td>
+                            <td>
+                                <i class="pi pi-eye cursor" (click)="
+                    getUserPermissions(user.key, user.username);
+                    sidebarDisplay = true
+                  ">
+                                </i>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+        <!-- <ng-container *ngFor="let user of AllUsers">
+                <p-accordionTab *ngIf="user.department == DepartmentEnum.MANAGEMENT" (selectedChange)="getUserPermissions(user.key,user.username)">
+                    <ng-template pTemplate="header">{{user.username}}</ng-template>
+                    <ng-template pTemplate="content">
+                        <div class="row" *ngFor="let perm of myPermissions">
+                            <label for="" class="mx-2 col-md-4">{{perm.permission_name}}</label>
+                            <mat-slide-toggle class="col-md-2" [(ngModel)]="perm.status"></mat-slide-toggle>
+                        </div>
+                        
+
+                        <button class="btn btnStyle mt-2" (click)="editPerms()">Submit</button>
+                    </ng-template>
+                </p-accordionTab>
+
+            </ng-container> -->
+        <!-- </p-accordion> -->
+        <!-- <p-sidebar styleClass="p-sidebar-sm" class="side" [baseZIndex]="999" [autoZIndex]="false"
+                [(visible)]="sidebarDisplay" position="right" [transitionOptions]="'350ms'"
+                (onHide)="resetArr()">
+                <div class="row my-2" *ngFor="let perm of myPermissions">
+                    <label for="" class="col-md-9">{{perm.permission_name}}</label>
+                    <mat-slide-toggle class="col-md-2" [(ngModel)]="perm.status"></mat-slide-toggle>
+                </div>
+                <button class="btn btnStyle mt-2" (click)="editPerms()">Submit</button>
+        </p-sidebar> -->
+    </mat-tab>
+    <mat-tab label="Admins">
+        <!-- <p-accordion [multiple]="false" (onOpen)="resetArr()">
+            <ng-container *ngFor="let user of AllUsers">
+                <p-accordionTab *ngIf="user.department == DepartmentEnum.ADMINSTRATION" (selectedChange)="getUserPermissions(user.key,user.username)">
+                    <ng-template pTemplate="header">{{user.username}}</ng-template>
+                    <ng-template pTemplate="content">
+                        <div *ngFor="let perm of myPermissions">
+                            <label for="" class="mx-2">{{perm.permission_name}}</label>
+                            <mat-slide-toggle [(ngModel)]="perm.status"></mat-slide-toggle>
+                        </div>
+
+                        
+
+                        <button class="btn btnStyle mt-2" (click)="editPerms()">Submit</button>
+                    </ng-template>
+                </p-accordionTab>
+            </ng-container>
+        </p-accordion> -->
+        <div class="table-responsive">
+            <table class="table newTableCustom">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>user name</td>
+                        <td>Email</td>
+                        <td>Department</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let user of AllUsers">
+                        <tr *ngIf="user.department == DepartmentEnum.ADMINSTRATION">
+                            <td></td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.department_name }}</td>
+                            <td>
+                                <i class="pi pi-eye cursor" (click)="
+                    getUserPermissions(user.key, user.username);
+                    sidebarDisplay = true
+                  ">
+                                </i>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </mat-tab>
+    <mat-tab label="Clients">
+        <!-- <p-accordion [multiple]="false" (onOpen)="resetArr()">
+            <ng-container *ngFor="let user of AllUsers">
+                <p-accordionTab *ngIf="user.accType == accTypeEnum.Client" (selectedChange)="getUserPermissions(user.key,user.username)">
+                    <ng-template pTemplate="header">{{user.username}}</ng-template>
+                    <ng-template pTemplate="content">
+                        <div *ngFor="let perm of myPermissions">
+                            <label for="" class="mx-2">{{perm.permission_name}}</label>
+                            <mat-slide-toggle [(ngModel)]="perm.status"></mat-slide-toggle>
+                        </div>
+
+                        <button class="btn btnStyle mt-2" (click)="editPerms()">Submit</button>
+                    </ng-template>
+                </p-accordionTab>
+            </ng-container>
+        </p-accordion> -->
+        <div class="table-responsive">
+            <table class="table newTableCustom">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>user name</td>
+                        <td>Email</td>
+                        <td>Department</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let user of AllUsers">
+                        <tr *ngIf="user.accType == accTypeEnum.Client">
+                            <td></td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.department_name }}</td>
+                            <td>
+                                <i class="pi pi-eye cursor" (click)="
+                    getUserPermissions(user.key, user.username);
+                    sidebarDisplay = true
+                  ">
+                                </i>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </mat-tab>
+    <mat-tab label="Technical Team">
+        <!-- <p-accordion [multiple]="false" (onOpen)="resetArr()">
+            <ng-container *ngFor="let user of AllUsers">
+                <p-accordionTab *ngIf="user.department == DepartmentEnum.TECHNICAL_TEAM" (selectedChange)="getUserPermissions(user.key,user.username)">
+                    <ng-template pTemplate="header">{{user.username}}</ng-template>
+                    <ng-template pTemplate="content">
+                        <div *ngFor="let perm of myPermissions">
+                            <label for="" class="mx-2">{{perm.permission_name}}</label>
+                            <mat-slide-toggle [(ngModel)]="perm.status"></mat-slide-toggle>
+                        </div>
+
+                       
+
+                        <button class="btn btnStyle mt-2" (click)="editPerms()">Submit</button>
+                    </ng-template>
+                </p-accordionTab>
+            </ng-container>
+        </p-accordion> -->
+        <div class="table-responsive">
+            <table class="table newTableCustom">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>user name</td>
+                        <td>Email</td>
+                        <td>Department</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let user of AllUsers">
+                        <tr *ngIf="user.department == DepartmentEnum.TECHNICAL_TEAM">
+                            <td></td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.department_name }}</td>
+                            <td>
+                                <i class="pi pi-eye cursor" (click)="
+                    getUserPermissions(user.key, user.username);
+                    sidebarDisplay = true
+                  ">
+                                </i>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </mat-tab>
+    <mat-tab label="Business Development">
+        <!-- <p-accordion [multiple]="false" (onOpen)="resetArr()">
+            <ng-container *ngFor="let user of AllUsers">
+                <p-accordionTab *ngIf="user.department == DepartmentEnum.Business_Development" (selectedChange)="getUserPermissions(user.key,user.username)">
+                    <ng-template pTemplate="header">{{user.username}}</ng-template>
+                    <ng-template pTemplate="content">
+                        <div *ngFor="let perm of myPermissions">
+                            <label for="" class="mx-2">{{perm.permission_name}}</label>
+                            <mat-slide-toggle [(ngModel)]="perm.status"></mat-slide-toggle>
+                        </div>
+                        <button class="btn btnStyle mt-2" (click)="editPerms()">Submit</button>
+                    </ng-template>
+                </p-accordionTab>
+            </ng-container>
+        </p-accordion> -->
+        <div class="table-responsive">
+            <table class="table newTableCustom">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>user name</td>
+                        <td>Email</td>
+                        <td>Department</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let user of AllUsers">
+                        <tr *ngIf="user.department == DepartmentEnum.Business_Development">
+                            <td></td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.department_name }}</td>
+                            <td>
+                                <i class="pi pi-eye cursor" (click)="
+                    getUserPermissions(user.key, user.username);
+                    sidebarDisplay = true
+                  ">
+                                </i>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </mat-tab>
+    <mat-tab label="Ramadan Config">
+        <app-ramadan-config></app-ramadan-config>
+    </mat-tab>
+</mat-tab-group>
+
+<p-sidebar styleClass="p-sidebar-sm zindex-5 permissions-sidebar" class="side" [baseZIndex]="999" [autoZIndex]="false"
+    [(visible)]="sidebarDisplay" position="right" [transitionOptions]="'350ms'" (onHide)="resetArr()">
+    <!-- <div class="row my-2" *ngFor="let perm of myPermissions">
+    <label for="" class="col-md-9">{{perm.permission_name}}</label>
+    <mat-slide-toggle class="col-md-2" [(ngModel)]="perm.status"></mat-slide-toggle>
+</div> -->
+    <div class="mt-4">
+        <p-accordion [multiple]="true">
+            <p-accordionTab *ngFor="let item of formattedPermissions" [selected]="true">
+                <ng-template pTemplate="header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p>{{ item.group_name }}</p>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="content">
+                    <div class="row my-2" *ngFor="let perm of item.permissions">
+                        <label for="" class="col-md-9">{{ perm.permission_name }}</label>
+                        <mat-slide-toggle class="col-md-2" [(ngModel)]="perm.status"></mat-slide-toggle>
+                    </div>
+                </ng-template>
+            </p-accordionTab>
+        </p-accordion>
+    </div>
+    <div></div>
+    <button class="btn btnStyle mt-2 w-100" (click)="editPerms()">Submit</button>
+</p-sidebar>

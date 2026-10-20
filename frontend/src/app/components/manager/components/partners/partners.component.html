@@ -1,0 +1,255 @@
+<div class="container-fluid">
+    <!-- <div class="row">
+        <div class="col-12">
+            <div class="container-fluid mt-3 mx-5">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="search">
+                            <mat-label class="inputLabel">Search</mat-label>
+                            <input class="form-control customInput w-100" type="text" [(ngModel)]="searchKey" (keyup)="searchProject()" placeholder="Search By Project Title">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <mat-label class="inputLabel">Filters By Project Status</mat-label>
+                        <mat-select class="form-control customInput" (selectionChange)="filterProjects()" multiple [(ngModel)]="filtersList" [ngModelOptions]="{standalone: true}">
+                            <ng-container *ngFor="let status of StatusEnum | keyvalue">
+                                <mat-option *ngIf="status.value!='closed'" value="{{status.value}}">{{status.key}}</mat-option>
+                            </ng-container>
+                        </mat-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <div class="mx-2 mt-3 mb-5 ">
+        <div class="d-flex justify-content-between align-items-end mb-2">
+            <h1 class="category_header">Clients</h1>
+            <button class="btn btnStyle" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" (click)="open(mymodal);openCreatePartner()">
+                <!-- <mat-icon>add</mat-icon> -->Add Client
+            </button>
+
+        </div>
+        <div class="hrLine"></div>
+        <div class="row">
+            <!-- <ng-container *ngFor="let partner of allPartners">
+                <div class="col-md-3">
+                    <div class="card mb-5">
+                        <div class="pCard_header globalFont">{{ partner.partner_name }}</div>
+                        <p class="pCard_header globalFont" *ngIf="!!partner.partner_industry_name">{{ partner.partner_industry_name}}</p>
+                        <div *ngIf="!!partner.partner_photoURL && partner.partner_photoURL.length > 0" class="pCard_Logo" [style.background-image]="'url('+ newServerApi+ partner.partner_photoURL + ')'">
+                        </div>
+                        <a class="btn btn-sm">
+                            <div class="globalFont" [routerLink]="['/manager/partners',partner.id]">Details</div>
+                        </a>
+                    </div>
+                </div>
+            </ng-container> -->
+            <table class="table newTableCustom">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Industry</th>
+                        <th>Organization type</th>
+                        <th>Country</th>
+                    
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    <tr *ngFor="let partner of allPartners" [routerLink]="['/manager/partners',partner.id]">
+                        <td  style="cursor: pointer;">
+                           {{partner.partner_name}}></td>
+                        <td style="cursor: pointer;">
+                            {{partner.partner_industry_name}}
+                        </td>
+                        <td style="cursor: pointer;">
+                            {{partner.organize_type_name}}
+                        </td>
+
+                        <td style="cursor: pointer;">
+                            {{partner.country}}
+                        </td>
+                     
+                    </tr>
+
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- <div class="addBtn container">
+        <div class="row">
+            <div class="col-11"></div>
+            <div class="col-1">
+                *ngIf="!!currentUser && currentUser.department == DepartmentEnum.MANAGEMENT"
+                <button class="btn newProjectBtn" mat-fab (click)="open(mymodal);openCreatePartner()">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div> -->
+</div>
+
+<ng-template class="myModal" #mymodal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title text-center" id="modal-basic-title">New Client</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form [formGroup]="newPartnerForm" (ngSubmit)="addPartner()" class="example-form">
+        <div class="modal-body">
+            <div class="container">
+                <h4 class="formHeader">
+                    Company Info :
+                </h4>
+                <!-- <mat-divider></mat-divider> -->
+
+                <div class="row">
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Company Name</mat-label>
+                            <input matInput type="text" id="partner_name" formControlName="partner_name">
+                            <mat-error class="alert help-block" *ngIf="!newPartnerForm.get('partner_name')?.valid && newPartnerForm.get('partner_name')?.touched">
+                                Partner Name Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Industry</mat-label>
+                            <mat-select formControlName="industry">
+                                <mat-option *ngFor="let ind of partnerIndustry" [value]="ind.id">{{ind.partner_industry_name}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Type</mat-label>
+                            <mat-select formControlName="organize_type_id" class="form-control">
+                                <mat-option *ngFor="let type of organizationTypes" [value]="type.id">{{type.organize_type}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Country</mat-label>
+                            <mat-select formControlName="country" class="form-control">
+                                <mat-option *ngFor="let country of CurrencyList" [value]="country.countryCode">
+                                    <div class="country-item d-flex align-items-center justify-content-start">
+                                        <img src="../../../../../assets/img/flags/{{country.countryCode}}.png" width="17px" height="20px" [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                        <div>{{country.countryName}}</div>
+                                    </div>
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <label class="form-label" for="email">Email</label>
+                        <div class="input-group input-group-merge">
+                            <input class="form-control" type="text" placeholder="Ex@Examble.com" formControlName="partner_email" />
+                        </div>
+                    </div>
+                    <div class="col-lg-6 my-3">
+                        <label class="form-label" for="phone">Phone</label>
+                        <div class="input-group input-group-merge">
+                            <input class="form-control" type="text" placeholder="0123456789" formControlName="partner_phone" />
+                        </div>
+
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Address</mat-label>
+                            <input matInput type="text" id="partner_address" formControlName="partner_address">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Description</mat-label>
+                            <input matInput type="text" id="partner_description" formControlName="partner_description">
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <label class="form-label" for="Website">Website</label>
+                        <div class="input-group input-group-merge">
+                            <input class="form-control" type="url" placeholder="Website" formControlName="website" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 my-3">
+                    <mat-label class="formLables">Add Primary Contact With Partner</mat-label>
+                    <br>
+                    <p-inputSwitch formControlName="addPrimaryContactWithPartner"></p-inputSwitch>
+                </div>
+                <div *ngIf="newPartnerForm.get('addPrimaryContactWithPartner')?.value == true">
+                    <h4 class="formHeader">
+                        Primary Contact Info :
+                    </h4>
+                    <mat-divider></mat-divider>
+
+                    <div class="row">
+                        <div class="col-lg-6 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Primary Contact Email</mat-label>
+                                <input matInput type="email" id="email" formControlName="email">
+                                <mat-error class="alert help-block" *ngIf="!newPartnerForm.get('email')?.valid && newPartnerForm.get('email')?.touched">
+                                    Primary Contact Email Is Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Password</mat-label>
+                                <input matInput type="password" id="password" formControlName="password">
+                                <mat-error class="alert help-block" *ngIf="!newPartnerForm.get('password')?.valid && newPartnerForm.get('password')?.touched">
+                                    Password Is Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Primary Contact Name</mat-label>
+                                <input matInput type="text" id="fullname" formControlName="fullname">
+                                <mat-error class="alert help-block" *ngIf="!newPartnerForm.get('fullname')?.valid && newPartnerForm.get('fullname')?.touched">
+                                    Primary Contact Name Is Required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Phone Number</mat-label>
+                                <input matInput type="text" id="phone" formControlName="phone">
+                            </mat-form-field>
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Is Active</mat-label>
+                            <br>
+                            <p-inputSwitch formControlName="isActive"></p-inputSwitch>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn submitFormBtn" [disabled]="newPartnerForm.invalid">Submit</button>
+        </div>
+    </form>
+
+</ng-template>

@@ -1,0 +1,185 @@
+<div>
+    <div *ngIf="loading" class="spinner text-center">
+        <mat-spinner></mat-spinner>
+    </div>
+
+    <div *ngIf="!loading && !!contractSupportCostData">
+        <div class="row overView">
+            <div class="col-lg-4 mb-2">
+                <div class="container m-0 p-0">
+                    <div class="row">
+
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+
+                                <div class="">
+                                    <h2>
+                                        {{contractSupportCostData.total_number_ticket || 0}}
+                                    </h2>
+                                    <p class="titles fw-bold">
+                                        Total Tickets
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+                                <div class="">
+
+                                    <h2>
+                                        {{contractSupportCostData!.contract_total_cost | number:'1.2-2'}} EGP
+                                    </h2>
+                                    <p>
+                                        Total Cost
+                                    </p>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+
+                                <div class="">
+                                    <div class="titles fw-bold">
+                                        <div [ngbTooltip]="allProjectManagers" placement="bottom" class="avatar-group">
+                                            <p-avatarGroup styleClass="mb-3">
+                                                <ng-container *ngFor="let item of contractSupportCostData.project_managers?.slice(0,5)">
+                                                    <p-avatar *ngIf="item.project_manager_image" [image]="newServerApi+item.project_manager_image || '../../../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                                    <p-avatar *ngIf="!item.project_manager_image" [image]="'../../../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                                </ng-container>
+
+
+                                                <p-avatar *ngIf="contractSupportCostData.project_managers!.length>5" label="+{{contractSupportCostData.project_managers!.length-5}}" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                                            </p-avatarGroup>
+                                        </div>
+                                        <ng-template #allProjectManagers>
+
+                                            <div class="" *ngFor="let dev of contractSupportCostData.project_managers">
+                                                <p *ngIf="dev.isDeleted == 1" class="mb-0 text-white " style="text-decoration:line-through">
+                                                    {{ dev.project_manager_username }}
+                                                </p>
+                                                <p *ngIf="dev.isDeleted != 1" class="mb-0 text-white">
+                                                    {{ dev.project_manager_username }}
+                                                </p>
+                                            </div>
+
+                                        </ng-template>
+                                    </div>
+                                    <p>
+                                        Project Managers
+                                    </p>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="statistics card mb-2">
+
+                                <div class="">
+                                    <div class="titles fw-bold">
+                                        <div [ngbTooltip]="allDevelopers" placement="bottom" class="avatar-group">
+                                            <p-avatarGroup styleClass="mb-3">
+                                                <ng-container *ngFor="let item of contractSupportCostData.developers?.slice(0,5)">
+                                                    <p-avatar *ngIf="item.developer_image" [image]="newServerApi+item.developer_image" size="small" shape="circle"></p-avatar>
+                                                    <p-avatar *ngIf="!item.developer_image" [image]="'../../../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
+                                                </ng-container>
+
+
+                                                <p-avatar *ngIf="contractSupportCostData.developers!.length>5" label="+{{contractSupportCostData.developers!.length-5}}" shape="circle" size="small" [style]="{'background-color':'#513982', 'color': '#ffffff'}"></p-avatar>
+                                            </p-avatarGroup>
+                                        </div>
+                                        <ng-template #allDevelopers>
+
+                                            <div class="" *ngFor="let dev of contractSupportCostData.developers">
+                                                <p *ngIf="dev.isDeleted == 1" class="mb-0 text-white " style="text-decoration:line-through">
+                                                    {{ dev.developer_name }}
+                                                </p>
+                                                <p *ngIf="dev.isDeleted != 1" class="mb-0 text-white">
+                                                    {{ dev.developer_name }}
+                                                </p>
+                                            </div>
+
+                                        </ng-template>
+                                    </div>
+                                    <p>
+                                        Developers
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-4 mb-2">
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5>Employee Cost Timeline</h5>
+                        <p-chart type="bar" [data]="projectCostWithEmpOverTime" [options]="basicOptions"></p-chart>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-2">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5>Employee Cost Per Ticket</h5>
+                        <p-chart type="bar" [data]="chartData" [options]="basicOptions"></p-chart>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <br>
+
+        <h1 class="main-color"> Reports</h1>
+        <div class="table-responsive">
+
+            <table class="table table-hover newTableCustom" id="developmentCost">
+                <thead>
+                    <tr>
+                        <td>Ticket</td>
+                        <td>Developer</td>
+                        <td>Cost Amount</td>
+                        <td>Notes</td>
+                        <td> Date</td>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let contractCost of contractSupportCostData.contract_cost">
+                        <td class="dateStyle">{{contractCost.ticket_title}}</td>
+                        <td>{{contractCost.empName}}</td>
+                        <td>{{contractCost.costAmount }}</td>
+                        <td>{{contractCost.notes | maxLength:20}}</td>
+                        <td>{{contractCost.costDate | date:'dd/MM/yyyy'}}</td>
+
+                        <!-- <td>{{cost.Total | number : '1.2-2'}}</td> -->
+                    </tr>
+                    <!-- <tr>
+                        <td class="dateStyle">Total</td>
+                        <td>{{calcualteTotalCost('salaries') | number : '1.2-2'}}</td>
+                        <td>{{calcualteTotalCost('Incentive') | number : '1.2-2'}}</td>
+                        <td>{{calcualteTotalCost('Idle_Hours') | number : '1.2-2'}}</td>
+                        <td>{{calcualteTotalCost('Transportation') | number : '1.2-2'}}</td>
+                        <td>{{calcualteTotalCost('Mobile') | number : '1.2-2'}}</td>
+                        <td>{{calcualteTotalCost('Internet') | number : '1.2-2'}}</td>
+                        <td>{{calcualteTotalCost('PublicRequest') | number : '1.2-2'}}</td>
+                        <td>{{calcualteTotalCost('Other') | number : '1.2-2'}}</td>
+                        <td class="finalTotal">{{calcualteTotalCost('total') | number : '1.2-2'}}</td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

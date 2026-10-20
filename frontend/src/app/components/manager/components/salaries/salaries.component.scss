@@ -1,0 +1,28 @@
+@import '../../../../colors';
+::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
+    background-color: $buttonMainBackgroundColor !important;
+}
+
+::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
+    background-color: rgba($color: $buttonMainBackgroundColor, $alpha: 0.5) !important; //rgba(55, 155, 165, 0.49);
+}
+
+
+/* active tab */
+
+// ::ng-deep .mat-tab-list .mat-tab-labels .mat-tab-label {
+//     color: #100f0f;
+//     background-color: #fff;
+// }
+
+// ::ng-deep .mat-tab-list .mat-tab-labels .mat-tab-label-active {
+//     color: #fff;
+//     background-color: $buttonMainBackgroundColor !important;
+// }
+
+
+/* ink bar */
+
+//  ::ng-deep .mat-ink-bar {
+//     background-color: $buttonMainBackgroundColor !important; // var(--primary-color, $buttonMainBackgroundColor) !important;
+// }

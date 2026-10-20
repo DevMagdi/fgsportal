@@ -1,0 +1,59 @@
+@import '../../../../../colors';
+.backIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.delete {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.cancel {
+    color: #a19ea0;
+    cursor: pointer;
+}
+
+.edit {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.fieldTitle {
+    color: $mainThemeColor;
+    font-weight: bold;
+}
+
+.fieldData {
+    color: $mainThemeColor;
+}
+
+.ci {
+    .form-control {
+        width: 100000px !important;
+    }
+}
+
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-header {
+            background: rgba($color: $mainThemeColor, $alpha: 0.1);
+        }
+    }
+}
+
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-thead {
+            // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+            background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+        }
+        .p-datatable .p-datatable-thead>tr>th {
+            color: $mainThemeColor;
+            background: inherit;
+            text-align: left;
+            font-size: 14px;
+        }
+    }
+}

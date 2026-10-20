@@ -1,0 +1,202 @@
+<div *ngIf="getDataLoader" class="spinner">
+    <mat-spinner class="m-auto"></mat-spinner>
+</div>
+<div class="container-fluid" *ngIf="project">
+    <div>
+        <h2 class="title">Clone : {{project.title}} Project </h2>
+        <hr class="mainColor mb-2">
+
+    </div>
+    <div class="mt-4">
+
+        <input type="text" class="form-control" [(ngModel)]="newProject.project_title">
+        <small class="project" [ngClass]="{'text-danger': isSubmitted && newProject.project_title==project.title}"
+            id="project-title">note : new project title should be different from the original project title</small>
+    </div>
+    <div class="mt-4">
+        <h2 class="title">Project Teams</h2>
+        <div class=" d-flex justify-content-start p-2 flex-wrap">
+            <div class="col-sm-3 " >
+                <p>- Project Manager</p>
+                <div class="team border">
+                    <ng-container *ngFor="let team of project.teams">
+                        
+                        <div class="form-check" *ngIf="team.project_structure_id==projectStructure.Project_Manager">
+        
+                            <input type="checkbox" class="form-check-input" [id]="team.team_id" [checked]="true"
+                                (change)="toggleTeam($event,team)">
+                            <label class="form-check-label" [for]="team.team_id">{{team.user_team_name}}</label>
+                        </div>
+                        
+                    </ng-container>
+
+                </div>
+            </div>
+            <div class="col-sm-3" >
+                <p>- Tech Lead</p>
+                <div class="team border">
+                    <ng-container *ngFor="let team of project.teams">
+                        
+                        <div class=" form-check" *ngIf="team.project_structure_id==projectStructure.Tech_Lead">
+        
+                            <input type="checkbox" class="form-check-input" [id]="team.team_id" [checked]="true"
+                                (change)="toggleTeam($event,team)">
+                            <label class="form-check-label" [for]="team.team_id">{{team.user_team_name}}</label>
+                        </div>
+                        
+                    </ng-container>
+
+                </div>
+            </div>
+            
+            <div class="col-sm-3" >
+                <p>- Developers</p>
+                <div class="team border">
+                    <ng-container *ngFor="let team of project.teams">
+                        
+                        <div class=" form-check" *ngIf="team.project_structure_id==projectStructure.Developer">
+        
+                            <input type="checkbox" class="form-check-input" [id]="team.team_id" [checked]="true"
+                                (change)="toggleTeam($event,team)">
+                            <label class="form-check-label" [for]="team.team_id">{{team.user_team_name}}</label>
+                        </div>
+                        
+                    </ng-container>
+
+                </div>
+            </div>
+
+            <div class="col-sm-3" >
+                <p>- Analysis</p>
+                <div class="team border">
+                    <ng-container *ngFor="let team of project.teams">
+                        
+                        <div class=" form-check" *ngIf="team.project_structure_id==projectStructure.Analysis">
+        
+                            <input type="checkbox" class="form-check-input" [id]="team.team_id" [checked]="true"
+                                (change)="toggleTeam($event,team)">
+                            <label class="form-check-label" [for]="team.team_id">{{team.user_team_name}}</label>
+                        </div>
+                        
+                    </ng-container>
+
+                </div>
+            </div>
+            <div class="col-sm-3" >
+                <p>- Support</p>
+                <div class="team border">
+                    <ng-container *ngFor="let team of project.teams">
+                        
+                        <div class=" form-check" *ngIf="team.project_structure_id==projectStructure.SUPPORT">
+        
+                            <input type="checkbox" class="form-check-input" [id]="team.team_id" [checked]="true"
+                                (change)="toggleTeam($event,team)">
+                            <label class="form-check-label" [for]="team.team_id">{{team.user_team_name}}</label>
+                        </div>
+                        
+                    </ng-container>
+
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+        <h2 class="title"> Processes</h2>
+
+        <p-table [value]="project.processes || []" dataKey="name" responsiveLayout="scroll" #dt1 id="dt1">
+            <ng-template pTemplate="header">
+                <tr>
+
+                    <th> </th>
+
+                    <th>title </th>
+                    <th>Details </th>
+
+                    <th>Duration </th>
+
+                    <th>Activity Status </th>
+                    <th> </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-process let-expanded="expanded">
+                <tr [id]="process.key">
+                    <td>
+                        <button type="button" pButton pRipple [pRowToggler]="process"
+                            class="p-button-text p-button-rounded p-button-plain"
+                            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                    </td>
+
+
+                    <td>{{ process.title }}</td>
+                    <td>{{ process.desc }}</td>
+                    <td>{{ process.ex_duration }} Days</td>
+                    <td>{{process.status_name}}</td>
+                    <td>
+                        <div class="form-check">
+
+                            <input type="checkbox" (change)="toggleProcess($event, process)" class="form-check-input"
+                                [checked]="true">
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="rowexpansion" let-process>
+                <tr>
+                    <td colspan="6">
+                        <div class="p-3">
+                            <p-table [value]="process.process_tasks" dataKey="id">
+                                <ng-template pTemplate="header">
+                <tr>
+
+                    <th>Task Type</th>
+                    <th>title</th>
+
+                    <th>Duration</th>
+
+                    <th>Creator</th>
+                    <th>Task Status</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-task>
+                <tr [id]="task.key">
+
+
+                    <td>{{ task.type_name}}</td>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.ex_duration }} Hours</td>
+                    <td>{{ task.user_creator_name}}</td>
+                    <td>{{task.status_name}}</td>
+                    <td>
+                        <div class="form-check">
+                            <input type="checkbox" name="" id="" class="form-check-input" [checked]="checkTask(process)"
+                                (change)="toggleTask($event, process , task)">
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6">There are no order for this product yet.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+    </td>
+    </tr>
+    </ng-template>
+    </p-table>
+    </div>
+
+    <div *ngIf="errors.length>0" class="mt-4">
+        <p class="text-danger" *ngFor="let error of errors">{{error}}</p>
+    </div>
+
+    <div>
+        <button class="btn btnStyle mt-5 float-right" (click)="onSubmit()">Clone Project</button>
+    </div>
+</div>

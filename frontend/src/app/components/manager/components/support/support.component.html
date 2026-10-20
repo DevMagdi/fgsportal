@@ -1,0 +1,291 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="contractSupportLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="container mainPage">
+    <h1 class="main-color py-2 my-2 fw-bold"> Contracts</h1>
+
+    <div class="row my-2 mt-4">
+        <div class="col-md-4">
+            <div class="p-input-icon-right search w-100">
+                <i class="pi pi-search"></i>
+                <!-- <mat-label class="inputLabel">Search</mat-label> -->
+                <input class="form-control customInput w-100" type="text" [(ngModel)]="searchKey" 
+                (keyup)="searchProject()" placeholder="Search">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <!-- <mat-label class="inputLabel">Filters By Project Status</mat-label> -->
+            <mat-select class="form-control customInput" (selectionChange)="filterProjects()" multiple 
+            [(ngModel)]="filtersList" [ngModelOptions]="{standalone: true}" placeholder="status"  floatlLabel="never" >
+                <ng-container *ngFor="let status of StatusEnum | keyvalue">
+                    <mat-option value="{{status.value}}">{{status.key}}</mat-option>
+                </ng-container>
+            </mat-select>
+        </div>
+
+        <div class="col-md-4 mr-auto text-end">
+            <button class="btn btnStyle" *ngIf="!!currentUser && (currentUser.department == DepartmentEnum.MANAGEMENT)"
+            (click)="sidebarDisplay=true;getAllClient();getAllClient();getAllProducts()">
+                Add Contract
+            </button>
+        </div>
+    </div>
+    <hr>
+    <div class="row my-2">
+        <div class="col-12">
+            <div class="mt-3 mb-5">
+                <!-- <div class="hrLine"></div> -->
+                <div class="row">
+                    <ng-container *ngFor="let project of mySupport">
+                        <div class="col-md-3">
+                            <div class="card mb-5 p-2">
+                                <!-- <img src="{{project.customerImgUrl}}" alt="" width="200" height="100"> -->
+                                <div class="pCard_header globalFont">
+                                    <!-- <h1 class="contractName"> -->
+                                        {{ project.customerName }}
+                                    <!-- </h1> -->
+                                    <!-- <p *ngIf="!project.customerImgUrl" class="clientName">
+                                        {{ project.customerName }}
+                                    </p> -->
+                                </div>
+
+                                <a class="badge {{project.status_name |lowercase}} p-2" style="width: fit-content;">{{project.status_name |uppercase}}</a>
+
+                                <div>
+                                    <p class="main-color fw-bold mb-0">Duration</p>
+                                    <p class="fw-bold">12 month</p>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <p class="main-color fw-bold mb-0">start date </p>
+                                        <p>{{project.startDate|date}}</p>
+                                    </div>
+                                    <div>
+                                        <p class="main-color fw-bold mb-0">start date </p>
+                                        <p>{{project.endDate|date}}</p>
+                                    </div>
+
+                                </div>
+                                <div *ngIf="!!project.customerImgUrl && project.customerImgUrl.length > 0" class="pCard_Logo" [style.background-image]="'url(' +newServerApi+ project.customerImgUrl + ')'">
+                                </div>
+
+                                <a class="btn btn-sm detailBtn m-2">
+                                    <div class="globalFont" [routerLink]="['/manager/client-support',project.key]">Details</div>
+                                </a>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+                <div class="w-100"></div>
+            </div>
+
+
+            <!-- <div class="addBtn container"
+             *ngIf="!!currentUser && (currentUser.department == DepartmentEnum.MANAGEMENT)">
+                <div class="row">
+                    <div class="col-11"></div>
+                    <div class="col-1">
+                        <button class="btn newProjectBtn" mat-fab 
+                        (click)="open(mymodal);getAllClient();getAllClient();getAllProducts()">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+
+</div>
+
+<p-sidebar styleClass="p-sidebar-md" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="sidebarDisplay" position="right" 
+[transitionOptions]="'350ms'" (onHide)="newProjectSupportForm.reset()">
+<!-- <ng-template #mymodal let-c="close" let-d="dismiss"> -->
+    <!-- <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">New Support Contract</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div> -->
+    <div class="modal-body">
+        <form [formGroup]="newProjectSupportForm" (ngSubmit)="validateNewSupport()" class="example-form">
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <!-- <div class="col-12">
+                            <mat-checkbox class="example-margin" formControlName="isnew">Not Existing Project ?!</mat-checkbox>
+                        </div> -->
+
+                        <!-- <div class="col-lg-6 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Contract Name</mat-label>
+                                <input matInput placeholder="Contract Name" value="Sushi" formControlName="contractName">
+                            </mat-form-field>
+                        </div> -->
+
+
+                        <div class="col-lg-6 my-3">
+                            <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class="formLables">Client</label>
+                                <mat-select formControlName="client_Key" class="form-control">
+                                    <mat-option *ngFor="let client of allClients" [value]='client.id'>{{client.partner_name}}</mat-option>
+                                </mat-select>
+                            <!-- </mat-form-field> -->
+                        </div>
+
+                        <div class="col-lg-6 my-3">
+                            <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <label class="formLables">Product</label>
+                                <mat-select formControlName="product_Key" class="form-control"
+                                [ngClass]="{'is-invalid':!newProjectSupportForm.get('product_Key')?.valid &&
+                                newProjectSupportForm.get('product_Key')?.touched}">
+                                    <mat-option *ngFor="let product of allProducts" [value]='product.id'>{{product.product_name}}</mat-option>
+                                </mat-select>
+                                <div class="invalid-feedback" 
+                            *ngIf="!newProjectSupportForm.get('product_Key')?.valid && newProjectSupportForm.get('product_Key')?.touched">
+                            Product Is Required
+                            </div>
+                            <!-- </mat-form-field> -->
+                        </div>
+
+
+                        <!-- <div class="col-lg-6 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Project</mat-label>
+                                <mat-select formControlName="project_Key" (selectionChange)="getProjectProcess()">
+                                    <mat-option *ngFor="let project of myProjects" value="{{project.key}}">{{project.title}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Process</mat-label>
+                            <br>
+                            <p-multiSelect [style]="{width:'100%'}" [options]="mySubTasks" formControlName="proceses" defaultLabel="Select Process" optionLabel="title" display="chip"></p-multiSelect>
+                        </div> -->
+
+                        <!-- <div class="col-lg-6 my-3">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Process</mat-label>
+                                <mat-select display="chip" multiple formControlName="proceses">
+                                    <mat-option display="chip" *ngFor="let process of mySubTasks" [value]='process.key'>{{process.title}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div> -->
+
+
+
+
+                        <!-- <div class="col-12">
+                            <mat-checkbox class="example-margin" formControlName="isnew">Not Existing Client ?!</mat-checkbox>
+                        </div> -->
+                        <!-- <div class="col-lg-6 my-3" *ngIf="newProjectSupportForm.get('isnew')?.value == false">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Project</mat-label>
+                                <mat-select class="form-control" (selectionChange)="getProjectProcess()" formControlName="project_Key">
+                                    <mat-option *ngFor="let project of myProjects" value="{{project.key}}">{{project.title}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 my-3" *ngIf="newProjectSupportForm.get('isnew')?.value == true">
+                            <mat-form-field class="example-full-width w-100">
+                                <mat-label class="formLables">Project Name</mat-label>
+                                <input matInput placeholder="Contract Name" value="Sushi" formControlName="project_title">
+                            </mat-form-field>
+                        </div> -->
+                        <!-- 
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Process</mat-label>
+                            <br>
+                            <p-multiSelect [style]="{width:'100%'}" [options]="mySubTasks" formControlName="proceses" defaultLabel="Select Process" optionLabel="title" display="chip"></p-multiSelect>
+                        </div> -->
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Contract Type</mat-label>
+                            <br>
+                            <mat-select class="form-control" formControlName="periority"
+                            [ngClass]="{'is-invalid':!newProjectSupportForm.get('periority')?.valid &&
+                            newProjectSupportForm.get('periority')?.touched}">
+                                <mat-option *ngFor="let per of supportPeriorityEnum | keyvalue" value="{{per.value}}">
+                                    <span style="border-left: solid 7px rgb(231, 216, 3); padding-left: 3px;" *ngIf="per.key == 'GOLD'">
+                                        {{per.key}}
+                                    </span>
+                                    <span style="border-left: solid 7px #E2E5E6; padding-left: 3px;" *ngIf="per.key == 'SILVER'">
+                                        {{per.key}}
+                                    </span>
+                                </mat-option>
+                            </mat-select>
+                            
+                            <div class="invalid-feedback" 
+                            *ngIf="!newProjectSupportForm.get('periority')?.valid && newProjectSupportForm.get('periority')?.touched">
+                            Priority Is Required
+                            </div>
+                            <!-- <mat-error class="alert help-block" 
+                                *ngIf="!newProjectSupportForm.get('periority')?.valid && newProjectSupportForm.get('periority')?.touched">
+                                Priority is Required
+                            </mat-error> -->
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <!-- <mat-form-field class="example-full-width w-100"> -->
+                                <mat-label class="formLables">Project Manager</mat-label>
+                                <mat-select formControlName="pmID" class="form-control">
+                                    <mat-option></mat-option>
+                                    <mat-option *ngFor="let manager of managers" [value]='manager.key'>{{manager.username}}</mat-option>
+                                </mat-select>
+                            <!-- </mat-form-field> -->
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Contract Start Date</mat-label>
+                            <p-calendar formControlName="start_date" [showIcon]="true" inputId="icon"
+                            [ngClass]="{'is-invalid':!newProjectSupportForm.get('start_date')?.valid &&
+                            newProjectSupportForm.get('start_date')?.touched}"></p-calendar>
+                            <div class="invalid-feedback" *ngIf="!newProjectSupportForm.get('start_date')?.valid && newProjectSupportForm.get('start_date')?.touched">
+                                Start Date is Required
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Contract End Date</mat-label>
+                            <p-calendar formControlName="end_date" [showIcon]="true" inputId="icon"
+                            [ngClass]="{'is-invalid':!newProjectSupportForm.get('end_date')?.valid &&
+                            newProjectSupportForm.get('end_date')?.touched}"></p-calendar>
+                            <div class="invalid-feedback" *ngIf="!newProjectSupportForm.get('end_date')?.valid && newProjectSupportForm.get('end_date')?.touched">
+                                End Date is Required
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="col-lg-12 my-3">
+                            <mat-label class="formLables">Notes</mat-label>
+                            <br>
+                            <p-editor formControlName="notes" [modules]="quillOPT" [style]="{'height':'210px'}">
+                                <ng-template pTemplate="header">
+                                    <span class="ql-format-group">
+                                    </span>
+                                </ng-template>
+                            </p-editor>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btnStyle" 
+                [disabled]="newProjectSupportForm.invalid">Submit</button>
+            </div>
+        </form>
+    </div>
+
+<!-- </ng-template> -->
+</p-sidebar>

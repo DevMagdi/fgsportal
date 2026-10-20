@@ -1,0 +1,16 @@
+@import '../../../../colors';
+
+.task-card {
+    border:1px $subSubThemeColor solid;
+    .card-title {
+        color: $mainThemeColor;
+        font-weight: 500;
+    }
+}
+.team{
+    background-color: $softThemeColor;
+    padding: 10px;
+    color: $mainThemeColor;
+    // border:1px solid $subSubThemeColor;
+    // width: fit-content;
+}

@@ -1,0 +1,109 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="closedLeadsLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">CRM /</span> Closed</h4>
+
+        <div class="">
+            <p-table responsiveLayout="scroll" id="dt1" styleClass="p-datatable-sm" #dt1 [value]="myContacts" dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [globalFilterFields]="['title','partner_name','next_action_type_name','label_name','user_creator_name']">
+                <ng-template pTemplate="caption">
+                    <div class="d-flex justify-content-end">
+                        <div>
+                            <span class="p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" placeholder="Search keyword" />
+                            </span>
+                            <button pButton label="Clear" class="btnOutLine p-button-sm mx-1" icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                        </div>
+
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Name
+                                <p-columnFilter type="text" field="name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Organization
+                                <p-columnFilter type="text" field="partner_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Status
+                                <p-columnFilter type="text" field="lead_sub_status_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Product
+                                <p-columnFilter type="text" field="product_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Lead Creator
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Lead Created
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Total Deal
+                            </div>
+                        </th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-contact>
+                    <tr>
+                        <td style="cursor: pointer;" [routerLink]="['/CRM/leads',contact.id]" routerLinkActive="router-link-active"><i class="fab fa-angular fa-lg text-danger"></i> <strong>{{contact.title}}</strong></td>
+                        <td><i class="fab fa-angular fa-lg text-danger"></i> {{contact.partner_name}}</td>
+                        <td>
+                            {{contact.lead_sub_status_name}}
+                        </td>
+                        <td>
+                            {{contact.product_name}}
+                        </td>
+
+                        <td>
+                            {{contact.user_creator_name}}
+                        </td>
+                        <td>
+                            {{contact.created_at | date:'medium'}}
+                        </td>
+                        <td>
+                            {{contact.cost | currency:contact.currency?contact.currency:''}}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="reopen(contact)"><i class="bx bx-edit-alt me-1"></i> Re-open</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="7">No Data found.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>

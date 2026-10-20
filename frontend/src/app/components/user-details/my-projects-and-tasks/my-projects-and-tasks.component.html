@@ -1,0 +1,116 @@
+<div class="">
+    <div class="container-fluid">
+        <div class="d-md-flex justify-content-between align-items-center">
+            <div class="">
+                <div class="search my-3">
+                    <!-- <input class="form-control" type="text" [(ngModel)]="searchKey" (keyup)="searchTasks()" placeholder="Search By Project Title"> -->
+                    <span class="p-input-icon-left search">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" [(ngModel)]="searchKey" (keyup)="searchTasks()"
+                            placeholder="Search By Project Title" />
+                    </span>
+                </div>
+            </div>
+            <div class="">
+                <div class="search">
+                    <!-- <input class="form-control" type="text" [(ngModel)]="searchKey" (keyup)="searchTasks()" placeholder="Search By Project Title"> -->
+                    <!-- <mat-label>Filters By Project Status</mat-label> -->
+                    <mat-select class="form-control" placeholder="Filters By task Status" (selectionChange)="filterProjects()" multiple [(ngModel)]="filtersList" [ngModelOptions]="{standalone: true}">
+                        <mat-option *ngFor="let status of StatusEnum | keyvalue" value="{{status.value}}">{{status.key}}</mat-option>
+                    </mat-select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    <ng-container matColumnDef="Task title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Task title </th>
+        <td mat-cell *matCellDef="let task"> {{task.title}} </td>
+    </ng-container>
+    <ng-container matColumnDef="Project title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Project title </th>
+        <td mat-cell *matCellDef="let task"> {{task.project_title}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Process title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Process title </th>
+        <td mat-cell *matCellDef="let task"> {{task.process_title}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Expected Duration">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Expected Duration </th>
+        <td mat-cell *matCellDef="let task"> {{task.ex_duration}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Real Duration">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Real Duration </th>
+        <td mat-cell *matCellDef="let task"> {{task.real_duration}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Start Date">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Start Date </th>
+        <td mat-cell *matCellDef="let task"> {{task.start_date}} </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="End Date">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>End Date </th>
+        <td mat-cell *matCellDef="let task"> {{task.end_date}} </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="Status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status </th>
+        <td mat-cell *matCellDef="let task"> {{task.status}} </td>
+    </ng-container>
+
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+<mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"></mat-paginator> -->
+
+
+<table class="table table-hover newTableCustom" matSort (matSortChange)="sortData($event)">
+    <thead>
+        <tr>
+            <th mat-sort-header="order">NO.</th>
+            <th mat-sort-header="taskTitle">Task title</th>
+            <th *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM" mat-sort-header="projectTitle">Project title</th>
+            <th mat-sort-header="processTitle" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">Process title</th>
+            <th mat-sort-header="expectedDuration" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">Expected Duration</th>
+            <th mat-sort-header="realDuration" *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">Real Duration</th>
+            <th mat-sort-header="startDate">Start Date</th>
+            <th mat-sort-header="endDate">End Date</th>
+            <th mat-sort-header="status">Status</th>
+        </tr>
+    </thead>
+    <tbody *ngIf="currentUser.department == DepartmentEnum.TECHNICAL_TEAM">
+        <tr *ngFor="let task of myTasks ; let i=index">
+            <td>{{i + 1}}</td>
+            <td *ngIf="loggedInUser.department == DepartmentEnum.MANAGEMENT || loggedInUser.department == DepartmentEnum.ADMINSTRATION || loggedInUser.accPosition == accPositionEnum.MANAGER" [routerLink]="['/manager/projects',task.project_key,task.process_key]" style="cursor: pointer;">{{task.title}}</td>
+            <td *ngIf="loggedInUser.department == DepartmentEnum.TECHNICAL_TEAM" [routerLink]="['/dev/myprojects',task.project_key,task.process_key]" style="cursor: pointer;">{{task.title}}</td>
+            <td>{{task.project_title}}</td>
+            <td>{{task.process_title}}</td>
+            <td>{{task.ex_duration}}</td>
+            <td>{{task.real_duration}}</td>
+            <td>{{task.start_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.end_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.status_name}}</td>
+        </tr>
+    </tbody>
+    <tbody *ngIf="currentUser.department != DepartmentEnum.TECHNICAL_TEAM">
+        <tr *ngFor="let task of myTasksAsAdmin ; let i=index">
+            <td>{{i + 1}}</td>
+            <td style="cursor: pointer;">{{task.task_title}}</td>
+            <td>{{task.task_start_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.task_end_date | date:'dd/MM/yyyy'}}</td>
+            <td>{{task.task_status_name}}</td>
+        </tr>
+    </tbody>
+</table>
+<!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page"></mat-paginator> -->

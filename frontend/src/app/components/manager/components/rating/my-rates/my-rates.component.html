@@ -1,0 +1,32 @@
+<div class="container" *ngIf="!!myPrevRates && myPrevRates.length > 0">
+    <div class="row">
+        <div class="col-12" *ngFor="let rate of myPrevRates">
+            <div class="card p-3">
+                <div class="card-title">
+                    {{rate.user_to_rate_name}} - {{rate.status =='1' ? 'Done': rate.status =='2' ? 'Rejected' :'Pending'}}
+                    <span *ngIf="!!rate.task_name">
+                        ({{rate.task_name}})
+                    </span>
+
+                    <span *ngIf="!!rate.ticket_name">
+                        ({{rate.ticket_name}})
+                    </span>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr *ngFor="let q of rate.questions">
+                            <td>{{q.question}}</td>
+                            <td>
+                                <p-rating *ngIf="q.question_type_id == '1'" [disabled]="true" [readonly]="true" [(ngModel)]="q.rate" [cancel]="false" [stars]="5"></p-rating>
+                                <div *ngIf="q.question_type_id == '2'">
+                                    <p *ngFor="let a of q.answer">{{a}}</p>
+                                </div>
+                            </td>
+                            <td>{{q.comment}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

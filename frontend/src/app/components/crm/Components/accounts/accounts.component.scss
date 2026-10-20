@@ -1,0 +1,463 @@
+@import '../../../../colors';
+.addLeadBTN {
+    color: $buttonMainBackgroundColor;
+    border-color: $buttonMainBackgroundColor;
+}
+
+:host ::ng-deep {
+    #dt1,
+    #dt2 {
+        .p-datatable-header {
+            // background: rgba($color: $mainThemeColor, $alpha: 0.1);
+            // background-color: white;
+            border: 0;
+        }
+    }
+}
+
+:host ::ng-deep {
+    #dt1
+     {
+        .p-datatable-thead {
+            // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+            // background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+            background-color: $softThemeColor;
+            border-bottom: 1px solid $mainThemeColor;
+        }
+        .p-datatable .p-datatable-thead>tr>th 
+         {
+            color: $mainThemeColor;
+            background: inherit;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid $mainThemeColor;
+            padding: .5rem .5rem !important;
+        }
+        .p-datatable .p-datatable-tbody>tr>td{
+            color: $mainThemeColor;
+
+            a{
+            color: $mainThemeColor;
+
+            }
+        }
+    }
+}
+.search {
+    height: 42px;
+
+    input {
+        // border: $mainThemeColor solid 1px;
+        // border-radius: 0;
+        // background-color: $softThemeColor;
+        color: $subSubThemeColor;
+        font-size: 12px;
+        height: 42px;
+        &::placeholder {
+            color: $subSubThemeColor;
+            }
+
+    }
+    .p-inputtext{
+        border-right: 1px solid !important;
+        border-color: $subSubThemeColor;
+    }
+    i , span {
+        color: $subSubThemeColor;
+        // background-color: $softThemeColor;
+        // margin-right: 0;
+    }
+    
+}
+
+td {
+    text-align: left !important;
+    font-size: 12px;
+}
+
+.isnew {
+    color: #4ffa54;
+    border-color: #4ffa54;
+    background-color: #fff;
+}
+
+// .myTable {
+//     min-height: 250px;
+// }
+.noActivity {
+    color: rgb(255, 171, 0);
+}
+
+// .side {
+//     max-height: 85vh;
+//     width: 75em !important;
+//     // scale: 0.9;
+//     .sidebarActivity,
+//     .sidebarContactInfo {
+//         padding: 0 0 0 5px;
+//         height: 81vh;
+//         overflow: auto;
+//     }
+//     .sidebarContactInfo {
+//         .header {
+//             .edit,
+//             .delete {
+//                 opacity: 0;
+//             }
+//             .delete {
+//                 color: $buttonMainBackgroundColor;
+//                 cursor: pointer;
+//             }
+//             .edit,
+//             .save {
+//                 color: $mainThemeColor;
+//                 cursor: pointer;
+//             }
+//             .cancel {
+//                 color: #c6c6c6;
+//                 cursor: pointer;
+//             }
+//             &:hover {
+//                 .edit,
+//                 .delete {
+//                     opacity: 1;
+//                 }
+//             }
+//         }
+//         .titles {
+//             font-weight: bold;
+//         }
+//         .addLabel {
+//             display: none;
+//         }
+//         .emptyLabel {
+//             a {
+//                 font-weight: bold;
+//             }
+//             &:hover {
+//                 .addLabel {
+//                     display: inline-block;
+//                 }
+//                 .hideLabelWord {
+//                     display: none;
+//                 }
+//             }
+//         }
+//     }
+//     .sidebarActivity {
+//         padding: 5px 0;
+//         margin: 0;
+//         .ActivityFormFooter {
+//             width: 100%;
+//             // background-color: #09c;
+//             display: flex;
+//             justify-content: end;
+//             background-color: $grayBackGroundColor;
+//             padding: 5px;
+//             .saveBTN {
+//                 color: #fff;
+//                 background-color: rgba(0, 120, 54, 0.8);
+//                 border: solid 1px rgba(0, 120, 54, 0.8);
+//                 padding: 5px 15px;
+//                 border-radius: 5px;
+//                 &:hover {
+//                     background-color: rgba(0, 120, 54, 1);
+//                     border: solid 1px rgba(0, 120, 54, 1);
+//                 }
+//             }
+//             .cancelBTN {
+//                 color: #000;
+//                 border: solid 1px #fff;
+//                 padding: 5px 15px;
+//                 border-radius: 5px;
+//                 background-color: #fff;
+//                 &:hover {
+//                     background-color: rgba($grayBackGroundColor, 1);
+//                 }
+//             }
+//         }
+//         .openNotesForm,
+//         .openActivityForm {
+//             height: 50px;
+//             span {
+//                 font-size: 14px;
+//                 font-weight: 450;
+//                 line-height: 20px;
+//                 color: rgba(42, 54, 71, 0.48);
+//                 font-family: $mainFontFamily;
+//             }
+//             &:hover {
+//                 background-color: $grayBackGroundColor;
+//                 cursor: pointer;
+//             }
+//         }
+//         .selectBTN {
+//             font-size: 13px !important;
+//         }
+//         .doneIcon {
+//             color: #fff;
+//             background-color: #319034;
+//             border-radius: 50%;
+//             display: inline;
+//         }
+//         .secTitle {
+//             display: flex;
+//             justify-content: center;
+//             p {
+//                 width: fit-content;
+//                 padding: 5px;
+//                 border-radius: 5px;
+//                 color: rgb(25, 36, 53);
+//                 background-color: $grayBackGroundColor;
+//                 font-family: $mainFontFamily;
+//                 font-size: 10px;
+//                 line-height: 16px;
+//                 font-weight: 600;
+//             }
+//         }
+//         .planned {
+//             .markAsDoneIcon {
+//                 font-size: 2rem;
+//                 &:hover {
+//                     color: #257b28;
+//                 }
+//             }
+//         }
+//         .quickPlan {
+//             display: flex;
+//             justify-content: center;
+//             align-items: center;
+//             padding: 5px;
+//             border-radius: 5px;
+//             .quickPlanForm {
+//                 width: 70%;
+//                 background-color: $grayBackGroundColor;
+//                 padding: 5px;
+//                 border-radius: 5px;
+//                 .myTag {
+//                     // background-color: #fff !important;
+//                     // color: #000;
+//                     &:hover {
+//                         cursor: pointer;
+//                     }
+//                 }
+//             }
+//         }
+//         .activityComment {
+//             font-size: 15px;
+//             font-weight: 450;
+//             line-height: 19.95px;
+//             display: inline;
+//         }
+//         .activityDate {
+//             font-size: 12px;
+//             font-weight: 450;
+//             line-height: 16px;
+//             color: rgb(101, 110, 122);
+//         }
+//         .custom-marker {
+//             display: flex;
+//             width: 2rem;
+//             height: 2rem;
+//             align-items: center;
+//             justify-content: center;
+//             border-radius: 50%;
+//             z-index: 1;
+//         }
+//          ::ng-deep {
+//             .p-timeline-event-content,
+//             .p-timeline-event-opposite {
+//                 line-height: 1;
+//             }
+//         }
+//          ::ng-deep {
+//             .customized-timeline {
+//                 padding: 0;
+//                 margin: 0;
+//                 .p-timeline-event:nth-child(even) {
+//                     flex-direction: row !important;
+//                     .p-timeline-event-content {
+//                         text-align: left !important;
+//                     }
+//                 }
+//                 .p-timeline-event-opposite {
+//                     flex: 0;
+//                 }
+//                 .p-card {
+//                     margin-top: 1rem;
+//                 }
+//             }
+//         }
+//     }
+//     .contactDetailsFooterSection {
+//         background-color: rgba($grayBackGroundColor, 1);
+//         width: 100%;
+//         display: flex;
+//         justify-content: end;
+//         .saveBTN {
+//             color: #fff;
+//             background-color: rgba(0, 120, 54, 0.8);
+//             border: solid 1px rgba(0, 120, 54, 0.8);
+//             // padding: 5px 15px;
+//             width: fit-content;
+//             border-radius: 5px;
+//             &:hover {
+//                 background-color: rgba(0, 120, 54, 1);
+//                 border: solid 1px rgba(0, 120, 54, 1);
+//             }
+//         }
+//     }
+// }
+.coloredIcon {
+    color: $mainThemeColor;
+}
+
+.coloredIconSec {
+    color: $buttonMainBackgroundColor;
+}
+
+.steps {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    .first {
+        background-color: rgba($color: $mainThemeColor, $alpha: 0.7);
+        height: 30px;
+        width: 75px;
+        clip-path: polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%);
+    }
+    .middle {
+        background-color: rgba($color: $mainThemeColor, $alpha: 0.7);
+        height: 30px;
+        width: 75px;
+        clip-path: polygon(75% 0%, 100% 50%, 75% 100%, 0% 100%, 25% 50%, 0% 0%);
+        margin-left: -10px;
+    }
+    .last {
+        background-color: rgba($color: $mainThemeColor, $alpha: 0.7);
+        height: 30px;
+        width: 75px;
+        clip-path: polygon(100% 0, 100% 50%, 100% 100%, 0% 100%, 25% 50%, 0% 0%);
+        margin-left: -10px;
+    }
+    * {
+        &.active {
+            background-color: rgba($color: $mainThemeColor, $alpha: 1);
+        }
+        cursor: pointer;
+        &:hover {
+            background-color: rgba($color: $mainThemeColor, $alpha: 1);
+        }
+    }
+}
+
+.views {
+    display: flex;
+    justify-content: left;
+    .viewIcon {
+        color: $mainThemeColor;
+        border: solid 1px $mainThemeColor;
+        padding: 10px;
+        border-radius: 5px;
+        height: 35px;
+        cursor: pointer;
+        &:hover {
+            background-color: $mainThemeColor;
+            color: #fff;
+        }
+    }
+    .viewActive {
+        background-color: rgba($color: $mainThemeColor, $alpha: 0.4);
+        color: #fff;
+    }
+    .createContact {
+        color: #fff;
+        background-color: rgba(0, 120, 54, 0.8);
+        border: solid 1px rgba(0, 120, 54, 0.8);
+        padding: 5px 15px;
+        border-radius: 5px;
+        height: 35px;
+        &:hover {
+            background-color: rgba(0, 120, 54, 1);
+            border: solid 1px rgba(0, 120, 54, 1);
+        }
+    }
+}
+
+.labelOption {
+    color: #fff;
+    border-radius: 5px;
+    padding: 0px 5px;
+}
+
+.addPhone,
+.trashIcon {
+    cursor: pointer;
+}
+
+.trashIcon {
+    color: #bebebe;
+}
+
+
+/* Chrome, Safari, Edge, Opera */
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    appearance: none;
+}
+
+@keyframes dot-keyframes {
+    0% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2, 1.2);
+    }
+    100% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+}
+
+.loading-dots {
+    text-align: center;
+    width: 100%;
+    &--dot {
+        animation: dot-keyframes 1.5s infinite ease-in-out;
+        background-color: $mainThemeColor;
+        border-radius: 10px;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+        &:nth-child(2) {
+            animation-delay: .5s;
+        }
+        &:nth-child(3) {
+            animation-delay: 1s;
+        }
+    }
+}
+
+::ng-deep {
+    .p-selectbutton .p-button.p-highlight {
+        background: rgba($color: $mainThemeColor, $alpha: 0.3);
+    }
+    .p-selectbutton .p-button.p-highlight:hover {
+        background: rgba($color: $mainThemeColor, $alpha: 0.5);
+    }
+}
+
+@media (max-width:992px) {
+    .quickPlan {
+        .quickPlanForm {
+            width: 850% !important;
+        }
+    }
+}
+.part-form label{
+font-weight: bold;
+color: black;
+}

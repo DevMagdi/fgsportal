@@ -1,0 +1,97 @@
+<!-- <p-blockUI style="width: 100vw; height: 100vh" [blocked]="isLoading">
+  <p-progressSpinner></p-progressSpinner>
+</p-blockUI> -->
+<div class="container-fluid mt-3" >
+  <div class="row">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h1 class="main-color p-2 mb-2 fw-bold">Candidates</h1>
+      <div>
+       
+        <button *ngIf="resetFilter" class="btn btnOutLine mx-2" (click)="onResetFilter()">Reset</button>
+        <button *ngIf="checkIfHasPerm(35)" class="btn btnOutLine mx-2"(click)="showSearchDialog=true">Search</button>
+        <button *ngIf="checkIfHasPerm(32)" class="btn btnStyle mx-2"(click)="openCandidateManagement(0)">Add new Candidate</button>
+
+      </div>
+    </div>
+    <div class="col-1"></div>
+  </div>
+  <div class="hrLine"></div>
+  <div class="teble-responsive">
+    <table class="table newTableCustom">
+      <thead>
+        <tr>
+          <th>candidate name</th>
+          <th>candidate email</th>
+          <th>candidate phone</th>
+          <th>job Title</th>
+          <th>CV</th>
+          <th>uploaded by</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="!!candidates && candidates!.length > 0">
+          <tr *ngFor="let candidate of candidates">
+            <td>{{( candidate.first_name + " " + candidate.last_name | maxLength:25)}}</td>
+            <td>{{ candidate.email }}</td>
+            <td>{{ candidate.phone_number }}</td>
+            <td> 
+              
+            <span *ngFor="let item of candidate?.Job_title?.slice(0,2);let isLast=last">
+
+              {{item.hr_job_title +(isLast ?' ' : ' , ') }}  
+            </span>
+            </td>
+            <td class="text-decoration-underline cursor">
+              <a
+                href="{{ newServerApi }}{{ candidate.file_path }}"
+                target="_blank"
+              >
+                {{ candidate.file_name |maxLength:20}}
+              </a>
+            </td>
+            <td>{{ candidate.uploaded_by_name }}</td>
+            <td>
+              <i (click)="openCandidateDetails(candidate)" class="cursor pi pi-eye text-secondary mx-1"></i>
+                <i *ngIf="checkIfHasPerm(32)" (click)="openCandidateManagement(candidate)" class="cursor pi pi-pencil text-info mx-1"></i>
+                <i *ngIf="checkIfHasPerm(33)" (click)="deleteCandidate(candidate)" class="cursor pi pi-trash text-danger mx-1"></i>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-container *ngIf="candidates?.length == 0">
+          <td [colSpan]="7" class="text-center">No Candidates Founded</td>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p-sidebar styleClass="p-sidebar-md" class="side" 
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="showCandidateManagement" position="right" 
+[transitionOptions]="'350ms'">
+
+<ng-template pTemplate="content">
+    <app-candidate-management [candidate]="selectedCandidate" (updateCandidateList)="updateCandidateList($event)"
+    ></app-candidate-management>
+</ng-template>
+
+</p-sidebar>
+
+<p-sidebar styleClass="p-sidebar-md" class="side" 
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="showCandidateDetails" position="right" 
+[transitionOptions]="'350ms'">
+
+<ng-template pTemplate="content">
+    <app-candidate-details [candidate]="selectedCandidate"></app-candidate-details>
+</ng-template>
+
+</p-sidebar>
+
+<p-dialog header="Search" [(visible)]="showSearchDialog" [style]="{width: '50vw'}" 
+[breakpoints]="{'960px': '50vw', '640px': '100vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+<ng-template pTemplate="content">
+
+  <app-candidate-search (onFilterCandidates)="onFilterCandidates($event)" [filterObj]="filterObj"></app-candidate-search>
+</ng-template>
+
+</p-dialog>

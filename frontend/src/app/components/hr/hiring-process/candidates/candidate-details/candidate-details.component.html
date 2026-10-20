@@ -1,0 +1,98 @@
+<div >
+
+    <div class="candidate-details  py-4">
+    
+        <div class="row m-0">
+    
+            <div class="col-lg-12">
+                <div>
+                    <p>
+                        <span class="main-color fs-4">
+                            {{ candidate.first_name + " " + candidate.last_name }}
+                        </span>
+                        (
+                        <span *ngFor="let item of candidate?.Job_title; let isLast = last"
+                            class="text-dark">
+                            {{ item.hr_job_title + (isLast ? " " : " , ") }}
+                        </span>
+                        )
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="candidate-file bg-light">
+                    <a href="{{ newServerApi }}{{ candidate.file_path }}"
+                        class="text-dark"
+                        target="_blank">
+                        <i class="pi pi-file-pdf"></i>
+                        {{ candidate.file_name }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="row align-items-center m-0">
+            <div class="col-lg-6">
+                <p>
+                    <span>Email:</span>
+                    <a href="mailto:{{candidate.email}}">{{candidate.email}}</a>
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <p>
+                    <span>Phone Number:</span>
+    
+                    <a href="tel:+{{candidate.phone_number}}">
+                        {{candidate.phone_number}}
+                    </a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+    <div class="container-fluid candidate-general-details mt-4">
+
+        <div class="row m-0">
+
+            <div class="col-lg-12 d-flex justify-content-between border-bottom my-1 py-1">
+                <p class="main-color fw-bold"> Years of Experience:</p>
+                <p>{{candidate.experience  || '--'}}</p>
+            </div>
+           
+            <div class="col-lg-12 d-flex justify-content-between border-bottom my-1 py-1">
+                <p class="main-color fw-bold">Graduation Year:</p>
+                <p>{{candidate.graduated_year}}</p>
+            </div>
+
+
+            <div class="col-lg-12 d-flex justify-content-between border-bottom my-1 py-1">
+                <p class="main-color fw-bold">Job Skills:</p>
+                <p>
+                    <span *ngFor="let item of candidate?.job_skills_id; let isLast = last"
+                    class="text-dark">
+                    {{ item.hr_job_title + (isLast ? " " : " , ") }}
+                </span>
+                
+                </p>
+            </div>
+
+          
+
+            <div class="col-lg-12 d-flex justify-content-between border-bottom my-1 py-1">
+                <p class="main-color fw-bold">Address:</p>
+                <p>{{candidate.address || '--'}}</p>
+            </div>
+
+            <div class="col-lg-12 d-flex justify-content-between border-bottom my-1 py-1">
+                <p class="main-color fw-bold">Uploaded By:</p>
+                <p>{{candidate.uploaded_by_name  || '--'}}</p>
+            </div>
+
+            <div class="col-lg-12 my-1 py-1">
+                <p class="main-color fw-bold">Notes:</p>
+                <p>{{candidate.note  || '--'}}</p>
+            </div>
+           
+        </div>
+    </div>
+</div>

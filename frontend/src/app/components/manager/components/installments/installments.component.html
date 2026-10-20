@@ -1,0 +1,266 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="installmentLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-fluid">
+        <h4 class="fw-bold py-3 mb-4">
+            Pending {{pageType == 't'? 'Installment' : 'Investment and expenses'}}
+            <span><a routerLink="/manager/installments/{{pageType}}/all">See All</a></span>
+        </h4>
+        <!-- <h4 class="mt-3 ml-3">
+            <span>
+                <i class="pi pi-arrow-left backIcon mr-1" routerLink="/manager/finance"></i>
+            </span> Pending Installements
+        </h4> -->
+        <!-- Basic Bootstrap Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="container m-0 p-0">
+                    <div class="row overView">
+                        <div class="col-lg-3">
+                            <div class="overViewCard card1">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Total Amount
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p>
+                                        {{!!CurrencyList[0].exchangeRate ? ((CurrencyList[0].exchangeRate * investmentDashboard.total_amount) | number :'1.2-2'):0}} EGP
+                                    </p>
+                                    <p *ngIf="!!CurrencyList[0].exchangeRate" style="font-size: small;" [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                                        {{investmentDashboard.total_amount | number:'1.2-2'}} USD
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="overViewCard card5">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Extra Amount
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p>
+                                        {{!!CurrencyList[0].exchangeRate ? ((CurrencyList[0].exchangeRate * investmentDashboard.insterest_amount) | number :'1.2-2'):0}} EGP
+                                    </p>
+                                    <p *ngIf="!!CurrencyList[0].exchangeRate" style="font-size: small;" [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                                        {{investmentDashboard.insterest_amount | number:'1.2-2'}} USD
+                                    </p>
+                                    <!-- <p *ngIf="!!CurrencyList[0].exchangeRate">
+                                        {{(CurrencyList[0].exchangeRate * investmentDashboard.insterest_amount) | number :'1.2-2'}} EGP
+                                    </p>
+                                    <p style="font-size: small;" [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                                        {{investmentDashboard.insterest_amount | number:'1.2-2'}} USD
+                                    </p> -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="overViewCard card4">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Paid Amount
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p>
+                                        {{!!CurrencyList[0].exchangeRate ? ((CurrencyList[0].exchangeRate * investmentDashboard.paid_amount) | number :'1.2-2'):0}} EGP
+                                    </p>
+                                    <p *ngIf="!!CurrencyList[0].exchangeRate" style="font-size: small;" [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                                        {{investmentDashboard.paid_amount | number:'1.2-2'}} USD
+                                    </p>
+                                    <!-- <p *ngIf="!!CurrencyList[0].exchangeRate">
+                                        {{(CurrencyList[0].exchangeRate * investmentDashboard.paid_amount) | number :'1.2-2'}} EGP
+                                    </p>
+                                    <p style="font-size: small;" [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                                        {{investmentDashboard.paid_amount | number:'1.2-2'}} USD
+                                    </p> -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="overViewCard card2">
+                                <div class="cardTitle">
+                                    <h3>
+                                        Balance
+                                    </h3>
+                                </div>
+                                <div class="cardBody">
+                                    <p>
+                                        {{!!CurrencyList[0].exchangeRate ? ((CurrencyList[0].exchangeRate * investmentDashboard.pending_amount) | number :'1.2-2'):0}} EGP
+                                    </p>
+                                    <p *ngIf="!!CurrencyList[0].exchangeRate" style="font-size: small;" [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                                        {{investmentDashboard.pending_amount | number:'1.2-2'}} USD
+                                    </p>
+                                    <!-- <p *ngIf="!!CurrencyList[0].exchangeRate">
+                                        {{(CurrencyList[0].exchangeRate * investmentDashboard.pending_amount) | number :'1.2-2'}} EGP
+                                    </p>
+                                    <p style="font-size: small;" [matTooltip]="'Current Exchane Rate 1 USD = '+CurrencyList[0].exchangeRate+' EGP'">
+                                        {{investmentDashboard.pending_amount | number:'1.2-2'}} USD
+                                    </p> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 px-0">
+                <div class="card px-0">
+                    <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="pendingInstallments" dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                        [globalFilterFields]="['title','installment_type_name','payment_bank','main_description']">
+                        <ng-template pTemplate="caption">
+                            <div class="d-flex justify-content-between">
+                                <button routerLink="/manager/installments/{{pageType}}/new" [state]="currentUser" type="button" class="btn btn-outline-success">
+                                    <i class="menu-icon tf-icons bx bx-plus"></i>
+                                    New
+                                </button>
+
+                                <div>
+                                    <!-- <a style="cursor: pointer" (click)="exportUsersDataReport()" class="downloadFile">
+                                        <mat-icon style="color: #f5831fd3;" matTooltip="Export">cloud_download</mat-icon>
+                                    </a> -->
+                                    <span class="p-input-icon-left">
+                                        <i class="pi pi-search"></i>
+                                        <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" placeholder="Search keyword" />
+                                    </span>
+                                    <button pButton label="Clear" class="p-button-outlined p-button-sm mx-1" icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                                </div>
+
+                            </div>
+                        </ng-template>
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Title
+                                        <p-columnFilter type="text" field="title" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Amount
+                                        <p-columnFilter type="numeric" field="total_amount" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        {{pageType == 't' ? 'Maintenance':'Extra'}} Amount
+                                        <p-columnFilter type="numeric" field="interest_amount" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                                <th *ngIf="pageType == 't'">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Down Payment
+                                        <p-columnFilter type="numeric" field="down_payment_amount" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Balance
+                                        <p-columnFilter type="numeric" field="remaining" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <!-- <div class="d-flex justify-content-start align-items-center">
+                                        installment_type_name
+                                        <p-columnFilter type="text" field="installment_type_name" display="menu"></p-columnFilter>
+                                    </div> -->
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Type
+                                        <p-columnFilter field="status" matchMode="equals" display="menu">
+                                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                                <p-dropdown [ngModel]="value" (onChange)="filter($event.value)" placeholder="Any">
+                                                    <!-- [options]="installmentTypesEnum"  -->
+                                                    <ng-template let-option pTemplate="item">
+                                                        <p-tag value="Normal"></p-tag>
+                                                        <p-tag value="Investment"></p-tag>
+                                                        <!-- [severity]="getSeverity(option.label)" -->
+                                                    </ng-template>
+                                                </p-dropdown>
+                                            </ng-template>
+                                        </p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Bank
+                                        <p-columnFilter type="text" field="payment_bank" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Currency
+                                        <p-columnFilter field="currency" matchMode="equals" display="menu">
+                                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                                <p-dropdown [ngModel]="value" [options]="CurrencyList" (onChange)="filter($event.value.currencyCode)" placeholder="Any">
+                                                    <ng-template let-option pTemplate="item">
+                                                        <p>{{option.currencyCode}}</p>
+                                                    </ng-template>
+                                                </p-dropdown>
+                                            </ng-template>
+                                        </p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Next Payment Date
+                                        <p-columnFilter type="date" field="installment_period[0].incoming_date" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        Next Payment Amount
+                                        <p-columnFilter type="text" field="installment_period[0].installment_amount" display="menu"></p-columnFilter>
+                                    </div>
+                                </th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-interest>
+                            <tr>
+                                <td>
+                                    <a [routerLink]="['/manager/installments',pageType,interest.id]">{{interest.title}}</a>
+                                </td>
+                                <td>
+                                    {{interest.total_amount | number}}
+                                </td>
+                                <td>
+                                    {{interest.interest_amount ? (interest.interest_amount | number) : 0}}
+                                </td>
+                                <td *ngIf="pageType == 't'">
+                                    {{interest.down_payment_amount ? (interest.down_payment_amount | number) : 0}}
+                                </td>
+                                <td>
+                                    {{interest.remaining | number}}
+                                </td>
+                                <td>
+                                    {{interest.installment_type_name}}
+                                </td>
+                                <td>
+                                    {{interest.payment_bank ? interest.payment_bank : '-' }}
+                                </td>
+                                <td>
+                                    {{interest.currency ? interest.currency : '-' }}
+                                </td>
+                                <td>
+                                    {{interest.installment_period_array[0].incoming_date}}
+                                </td>
+                                <td>
+                                    {{interest.installment_period_array[0].installment_amount | number}}
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="7">No data found.</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

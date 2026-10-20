@@ -1,0 +1,490 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="ticketDetailsLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="tDetailsPage" id="tDetailsPage">
+
+    <div class="container-fluid" *ngIf="!!currentClientTicket">
+        <div class="row">
+            <!-- <div class="col-6 text-left">
+                <h1 class="mt-5 projectDetails">
+                    <span>
+                    <i class="pi pi-arrow-left backIcon mr-1" routerLink="/tickets"></i>
+                </span>
+                    <span *ngIf="currentClientTicket.title">
+                    #{{currentClientTicket.ticket_number}} - {{currentClientTicket.title}}
+                </span>
+                </h1>
+            </div> -->
+
+            <!-- <div class="col-6 text-right" *ngIf="!!currentuser">
+                <div class="m-5 d-flex justify-content-end w-75">
+                    <span class="material-icons issueEditIcon m-1" *ngIf="currentClientTicket.assignedToPMKey == currentuser.key || currentuser.accRole == accRoleENum.SUPER_USER || currentuser.accRole == accRoleENum.CEO || currentuser.accRole == accRoleENum.CTO || (!!userPerms && !!userPerms.FollowTickets)"
+                        matTooltip="Edit" (click)="editClientTicket()">
+                    edit
+                </span>
+
+                    <span class="material-icons issueDelIcon m-1" *ngIf="currentuser.accRole == accRoleENum.SUPER_USER || currentuser.department == DepartmentEnum.MANAGEMENT" matTooltip="Delete" (click)="deleteTicket(currentClientTicket)">
+                    delete
+                </span>
+                </div>
+
+
+            </div> -->
+        </div>
+        <!-- <div class="row">
+            <div class="col-6"></div>
+            <div class="col-6 text-right">
+                <h4 class="createdAt ml-3 d-flex flex-row align-items-center text-center">
+                    <span class="priority mr-2" [ngStyle]="{'background-color': getPriority(currentClientTicket.priority)}">
+                    {{currentClientTicket.priority == '0' ? 'Critical' : currentClientTicket.priority == '1' ? 'High' : currentClientTicket.priority == '2' ? 'Normal' : ''}}
+                </span>
+                    <span class="material-icons mr-1">
+                    access_time
+                </span>
+                    <span>
+                    {{getTime(currentClientTicket.startDate)}}
+                </span>
+                </h4>
+            </div>
+        </div> -->
+    </div>
+
+    <div class="issueDetailsPage" *ngIf="!!currentClientTicket">
+        <div class="container-fluid ticket-details">
+            <div class="row">
+                <div class="col-lg-4 mt-2">
+                    <div class=" p-4">
+
+                        <p class="ticket-number fs-3">
+
+                            #{{currentClientTicket.ticket_number}}
+                        </p>
+
+                        <p class="title fw-bold fs-4">
+
+                            {{currentClientTicket.title}}
+                        </p>
+
+                        <div [innerHTML]="currentClientTicket.desc" *ngIf="!editMode" class="fs-5"></div>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-2">
+                    <div class="container-fluid p-4">
+
+
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-start gap-4">
+
+                                <p>
+
+                                    Client :
+                                </p>
+                                <h4 class="fw-bold">
+                                    {{currentClientTicket.clientName}}
+                                </h4>
+                                <!-- {{currentClientTicket.productName }} -->
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-start gap-4">
+
+                                <p>
+
+                                    Start Date :
+                                </p>
+                                <h4 class="fw-bold">
+                                    {{currentClientTicket.startDate|date}}
+                                </h4>
+
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-start gap-4">
+
+                                <p>
+
+                                    Type :
+                                </p>
+                                <h4 class="fw-bold">
+                                    {{currentClientTicket.ticketType_name}}
+                                </h4>
+
+
+                            </div>
+                        </div>
+
+
+
+                        <div class="row" *ngIf="currentClientTicket.closureDate &&
+                         currentClientTicket.status == '2'">
+                            <div class="col-12 d-flex justify-content-start gap-4">
+                                <h4 class="text-center">
+                                    <span>
+                                        {{currentClientTicket.closureDate | date:'medium'}}
+                                    </span>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="row p-4">
+                        <div class="col-12 d-flex justify-content-between">
+                            <h4 class="priority mt-2 rounded-3" [ngStyle]="{'background-color': getPriority(currentClientTicket.priority)}">
+                                {{currentClientTicket.priority_name }}
+                            </h4>
+                            <div>
+                                <div class="material-icons issueEditIcon m-1" *ngIf="currentClientTicket.assignedToPMKey == 
+                                    currentuser.key || currentuser.accRole == accRoleENum.SUPER_USER || 
+                                    currentuser.department== DepartmentEnum.MANAGEMENT || 
+                                    (!!userPerms && !!hasPermTOFollowTicket)" (click)="editClientTicket()">
+                                        edit
+                                </div>
+                                <br>
+                                <div class="material-icons issueDelIcon m-1" *ngIf="currentuser.accRole == accRoleENum.SUPER_USER || 
+                                    currentuser.department== DepartmentEnum.MANAGEMENT" (click)="deleteTicket(currentClientTicket)">
+                                        delete
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-start">
+                            <h4 class="status mt-2 rounded-3" [ngStyle]="{'border-color': getStatusColor(currentClientTicket.status),
+                                'color':getStatusColor(currentClientTicket.status),
+                                'background-color':getStatusBG(currentClientTicket.status)}">
+                                {{currentClientTicket.status_name}}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="row">
+                <div class="col-6">
+                    <h4 class="secTitle pl-1 mt-2" *ngIf="!!currentClientTicket.projectName">
+                        <span>
+                        {{currentClientTicket.projectName}}
+                    </span>
+                        <span *ngIf="!!currentClientTicket.processName">
+                        / {{currentClientTicket.processName}}
+                    </span>
+                    </h4>
+
+                </div>
+                <div class="col-6">
+                    <div class="d-flex flex-row-reverse">
+                        <h4 class="status mt-2" [ngStyle]="{'background-color': getStatusColor(currentClientTicket.status)}">
+                            {{currentClientTicket.status == '0' ? 'STARTED' : 'CLOSED'}}
+                        </h4>
+                    </div>
+                </div>
+                <div class="col-6" *ngIf="currentClientTicket.closureDate && currentClientTicket.status == '3'"></div>
+                <div class="col-6" *ngIf="currentClientTicket.closureDate && currentClientTicket.status == '3'">
+                    <div class="d-flex flex-row-reverse">
+                        <h4 class="text-center">
+                            <span>At</span>
+                            <br>
+                            <span>
+                            {{currentClientTicket.closureDate}}
+                        </span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-lg-6">
+                    <h4 class="secTitle pl-1">Description</h4>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div [innerHTML]="currentClientTicket.desc" *ngIf="!editMode" class="px-5"></div>
+                </div>
+            </div> -->
+            <div class="row mt-2" *ngIf="!!currentClientTicket.imagesURls">
+                <div class="col-12">
+                    <h4 class="secTitle pl-1">Media</h4>
+                </div>
+            </div>
+            <table class="table table-hover" *ngIf="!!currentClientTicket.imagesURls && currentClientTicket.imagesURls.length > 0">
+                <thead>
+                    <th>#</th>
+                    <th>File Name</th>
+                    <th>Created At</th>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let file of currentClientTicket.imagesURls;let i = index">
+                        <td>{{i+1}}</td>
+                        <td>
+                            <a href="{{newServerApi}}{{file.attach_link}}" target="_blank">
+                                {{file.attach_name}}
+                            </a>
+                        </td>
+                        <td>
+                            {{file.created_at | date:'medium'}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- <div class="row" *ngIf="!!currentClientTicket.imagesURls">
+                <div class="col-lg-2 mt-1" *ngFor="let imgUrl of currentClientTicket.imagesURls">
+                    <p-image (onShow)="zoomout()" (onHide)="zoomin()" src="{{imgUrl}}" alt="" width="200px" height="200px" class="rounded thumbnail-image" [preview]="true"></p-image>
+                </div>
+            </div> -->
+            <!-- <div class="row" *ngIf="!!currentClientTicket.imagesURls">
+                <div class="col-lg-2 mt-1" *ngFor="let imgUrl of currentClientTicket.imagesURls">
+                    <p-image (onShow)="zoomout()" (onHide)="zoomin()" src="{{newServerApi}}{{imgUrl}}" alt="" width="200px" height="200px" class="rounded thumbnail-image" [preview]="true"></p-image>
+                </div>
+            </div> -->
+
+        </div>
+
+
+
+        <mat-divider class="mt-3"></mat-divider>
+
+        <div class="container mt-5">
+            <div class="row  my-4 py-2 justify-content-center">
+
+                <div class="col-lg-6 tickets-container">
+                    <div class="mb-2 tickets">
+
+                        <div class="text-start p-4 ticket-content border-bottom " *ngFor="let timeline of ticketTimeLine">
+                            <h2 class="mb-3 fw-bold">{{timeline.action}}</h2>
+                            <p class="fw-bold">{{timeline.ticketTitle}}</p>
+                            <div class="ticket-date d-flex justify-content-start gap-4">
+                                <p style="font-weight: bold;">
+                                    BY : {{timeline.actionByName}}
+                                </p>
+                                <p>
+
+                                    {{timeline.createdAt | date:'medium'}}
+                                </p>
+                            </div>
+                            <p class="fw-semibold">{{timeline.actionComment}}</p>
+                            <p class="show-client">
+                                <span class="show-client">
+                                    Show For Client :
+                                </span>
+                                <span class="fw-bold show-client">
+                                    {{timeline.showForClient}}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <!-- <p-timeline [value]="ticketTimeLine" align="alternate" styleClass="customized-timeline">
+                        <ng-template pTemplate="marker" let-timeline>
+                            <span class="custom-marker shadow-2">
+                            <i class="pi pi-check-circle checkIconColor"></i>
+                        </span>
+                        </ng-template>
+                        <ng-template pTemplate="content" let-timeline>
+                            <p-card>
+                                <ng-template pTemplate="title">
+                                    <p class="timelineTitle">
+                                        {{timeline.action}}
+                                    </p>
+                                </ng-template>
+                                <ng-template pTemplate="subtitle">
+                                    <p class="timelineSubTitle">
+                                        {{timeline.createdAt | date:'medium'}}
+                                    </p>
+                                </ng-template>
+                                <p class="timelineTitle">
+                                    <span style="font-weight: bold;">
+                                        BY :
+                                    </span>
+                                    <span>
+                                        {{timeline.actionByName}}
+                                    </span>
+                                </p>
+                                <p class="timelineTitle" *ngIf="timeline.actionComment">
+                                    <span style="font-weight: bold;">
+                                        Action Details :
+                                    </span>
+                                    <span>
+                                        {{timeline.actionComment}}
+                                    </span>
+                                </p>
+                                <p class="timelineTitle">
+                                    <span style="font-weight: bold;">
+                                        Show For Client :
+                                    </span>
+                                    <span>
+                                        {{timeline.showForClient}}
+                                    </span>
+                                </p>
+                            </p-card>
+                        </ng-template>
+                    </p-timeline> -->
+                    <form [formGroup]="newTimeLineForm" (ngSubmit)="submitNewTimeLine()" class="example-form mt-4">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <!-- <mat-label>Title</mat-label> -->
+                        <div class="my-4">
+
+                            <input class="form-control" placeholder="Write title" type="text" id="title" formControlName="title">
+                            <mat-error class="alert help-block" *ngIf="!newTimeLineForm.get('title')?.valid && newTimeLineForm.get('title')?.touched">
+                                Title Is Required
+                            </mat-error>
+                        </div>
+                        <!-- </mat-form-field> -->
+
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <!-- <mat-label>Description</mat-label> -->
+                        <div class="my-4">
+
+                            <textarea class="form-control" rows="5" id="comment" formControlName="comment"></textarea>
+                            <mat-error class="alert help-block" *ngIf="!newTimeLineForm.get('comment')?.valid && newTimeLineForm.get('comment')?.touched">
+                                Description Is Required
+                            </mat-error>
+                        </div>
+                        <!-- </mat-form-field> -->
+
+                        <div class="form-group form-check">
+
+                            <input class="example-margin form-check-input" formControlName="forClient" type="checkbox" id="forClient">
+
+                            <label class="form-check-label" for="forClient">Show Comment To Client ?!</label>
+                        </div>
+
+
+                        <!-- <mat-form-field class="example-full-width w-100" *ngIf="currentuser.department != DepartmentEnum.CLIENT">
+                        </mat-form-field> -->
+
+                        <div class=" mt-2 d-flex flex-row-reverse">
+                            <button class="btn newCommentBtn" type="submit" [disabled]="newTimeLineForm.invalid">Comment</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+            <!-- <div class="row">
+                <div class="col-12">
+                    <p-timeline [value]="ticketTimeLine" align="alternate" styleClass="customized-timeline">
+                        <ng-template pTemplate="marker" let-timeline>
+                            <span class="custom-marker shadow-2">
+                            <i class="pi pi-check-circle checkIconColor"></i>
+                        </span>
+                        </ng-template>
+                        <ng-template pTemplate="content" let-timeline>
+                            <p-card>
+                                <ng-template pTemplate="title">
+                                    <p class="timelineTitle">
+                                        {{timeline.action}}
+                                    </p>
+                                </ng-template>
+                                <ng-template pTemplate="subtitle">
+                                    <p class="timelineSubTitle">
+                                        {{timeline.createdAt}}
+                                    </p>
+                                </ng-template>
+                                <p class="timelineTitle">
+                                    <span style="font-weight: bold;">
+                                        BY :
+                                    </span>
+                                    <span>
+                                        {{timeline.actionByName}}
+                                    </span>
+                                </p>
+                                <p class="timelineTitle" *ngIf="timeline.actionComment">
+                                    <span style="font-weight: bold;">
+                                        Action Details :
+                                    </span>
+                                    <span>
+                                        {{timeline.actionComment}}
+                                    </span>
+                                </p>
+                            </p-card>
+                        </ng-template>
+                    </p-timeline>
+                </div>
+            </div> -->
+        </div>
+
+    </div>
+
+
+</div>
+
+<p-sidebar [(visible)]="displayRateForm" position="right" [autoZIndex]="false" [baseZIndex]="9999" styleClass="p-sidebar-md">
+    <ng-template pTemplate="content">
+        <app-standard-rate-form [question]='questions' (questionOutput)="submitRate($event)"></app-standard-rate-form>
+    </ng-template>
+</p-sidebar>
+
+
+<p-dialog *ngIf="!!currentuser" class="mt-2" header="" [(visible)]="display" [style]="{width: '50vw'}" [breakpoints]="{'960px': '50vw', '640px': '100vw'}" [modal]="true" [draggable]="false" [resizable]="false">
+    <form [formGroup]="editTicketForm" (ngSubmit)="checkIfNeedRate()" class="example-form">
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+
+                    <!-- <div class="col-lg-6 my-3" *ngIf="currentuser.department == DepartmentEnum.MANAGEMENT || currentuser.accPosition == accPositionEnum.MANAGER">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Project (Optional)</mat-label>
+                            <mat-select (selectionChange)="getProjectProcesses()" formControlName="projectKey">
+                                <mat-option *ngFor="let project of clientProjects" [value]='project.key'>{{project.projectTitle}}</mat-option>
+                                <mat-divider></mat-divider>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="(currentuser.department == DepartmentEnum.MANAGEMENT || currentuser.accPosition == accPositionEnum.MANAGER) && (!!clientProcess && clientProcess.length > 0)">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Process (Optional)</mat-label>
+                            <mat-select formControlName="processKey">
+                                <mat-option *ngFor="let process of clientProcess" [value]='process.key'>{{process.processTitle}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div> -->
+
+
+                    <div class="col-lg-6 my-3" *ngIf="currentuser.department == DepartmentEnum.MANAGEMENT || (!!userPerms && !!hasPermTOFollowTicket)">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Assign To Project Manager</mat-label>
+                            <mat-select formControlName="pmKey">
+                                <mat-option *ngFor="let pm of projectManagres" [value]='pm.key'>{{pm.username}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="currentuser.department == DepartmentEnum.MANAGEMENT || currentuser.accPosition == accPositionEnum.MANAGER || (!!userPerms && !!hasPermTOFollowTicket)">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Assign To Dev</mat-label>
+                            <mat-select formControlName="devKey">
+                                <mat-option *ngFor="let dev of devs" [value]='dev.key'>{{dev.username}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="currentuser.department == DepartmentEnum.MANAGEMENT || currentuser.accPosition == accPositionEnum.MANAGER || (!!this.userPerms && !!checkIfHasPerm(21))">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Change Status</mat-label>
+                            <mat-select formControlName="status">
+                                <mat-option *ngFor="let status of clientTicketStatusEnum | keyvalue" [value]='status.value'>{{status.key}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3" *ngIf="currentuser.department == DepartmentEnum.MANAGEMENT || currentuser.accPosition == accPositionEnum.MANAGER">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label>Change Priority</mat-label>
+                            <mat-select formControlName="periority">
+                                <mat-option *ngFor="let per of clientTicketperiorityENUM | keyvalue" [value]='per.value'>{{per.key}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-dark" [disabled]="editTicketForm.invalid">Submit</button>
+        </div>
+    </form>
+</p-dialog>

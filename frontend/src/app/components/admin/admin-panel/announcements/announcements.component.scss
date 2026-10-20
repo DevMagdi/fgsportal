@@ -1,0 +1,80 @@
+@import '../../../../colors';
+.submitBTN {
+    background-color: $mainThemeColor;
+    color: white;
+}
+
+.ql-editor {
+    * {
+        font-size: 15px !important;
+    }
+}
+
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: $mainThemeColor;
+        line-height: 50px;
+        font-family: $mainFontFamily;
+        font-weight: 800;
+        text-align: center;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+            text-align: center;
+            font-family: $mainFontFamily;
+            color: $mainThemeColor;
+            font-weight: 500;
+            .dateStyle,
+            .finalTotal {
+                font-family: $mainFontFamily;
+                font-weight: 800;
+                color: $mainThemeColor;
+            }
+        }
+    }
+}
+
+.deleteIcon {
+    color: $buttonMainBackgroundColor;
+    cursor: pointer;
+}
+
+.views {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.editIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+}
+
+.closeIcon {
+    color: #9d9d9d;
+    cursor: pointer;
+}
+
+.addBtn {
+    background-color: $mainThemeColor;
+    color: #fff;
+    margin: auto;
+}
+.announce-actions{
+    .dropdown-toggle{
+        color: $mainThemeColor;
+        cursor: pointer;
+    }
+    .dropdown-toggle::after{
+        display: none;
+    }
+    .dropdown-menu-dark .dropdown-item{
+        color: black;
+        cursor: pointer;
+        &:hover{
+            color: $mainThemeColor;
+        }
+    }
+}

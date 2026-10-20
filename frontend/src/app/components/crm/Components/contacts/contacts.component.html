@@ -1,0 +1,327 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="contactsLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">CRM /</span> Contacts</h4>
+
+        <!-- Basic Bootstrap Table -->
+        <div class="">
+            <p-table responsiveLayout="scroll" id="dt1" #dt1 [value]="myContacts" dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [globalFilterFields]="['name','partner_name','email','address']">
+                <ng-template pTemplate="caption">
+                    <div class="d-flex justify-content-between">
+
+                        <button (click)="openAddContactForm()" type="button" class="btn btnStyle" 
+                        (click)="sidebarDisplay=true;editMode=false">
+                            <i class="menu-icon tf-icons bx bx-plus"></i>
+                            Contact
+                        </button>
+                        <div>
+                            <!-- <p-button label="Clear" class="p-button-outlined" label="Small" icon="pi pi-filter-slash" styleClass="p-button-sm" (click)="clear(dt1)"></p-button> -->
+
+                            <span class="p-input-icon-left">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" placeholder="Search keyword" />
+                            </span>
+                            <button pButton label="Clear" class="btnOutLine p-button-sm mx-1" icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                        </div>
+
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Name
+                                <p-columnFilter type="text" field="name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Organization
+                                <p-columnFilter type="text" field="partner_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Email
+                                <p-columnFilter type="text" field="email" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Phone
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Address
+                                <p-columnFilter type="text" field="address" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-contact>
+                    <tr>
+                        <td>
+                            {{contact.name}}
+                        </td>
+                        <td>
+                            {{contact.partner_name}}
+                        </td>
+                        <td style="cursor: pointer;" matTooltip="to choose the defualt email app 1) Open the Start menu and search for 'Default apps' 2)Click on the 'Default app settings' option in the search results 3)Click on the current default email program and select a new one from the list of available options">
+                            <a href="mailto:{{contact.email}}?subject=welcome from FGS &body=Hello,{{contact.name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}" target="_blank" rel="noopener noreferrer">
+                                {{contact.email}}
+                            </a>
+                        </td>
+                        <td style="cursor: pointer;">
+                            <ng-container *ngIf="!!contact.phone && contact.phone.length > 0">
+                                <ng-container *ngFor="let p of contact.phone;let i=index">
+                                    <a href="tel:{{p.country_code}}{{p.phone}}" *ngIf="p.phone_type != 'Whatsapp'" [matTooltip]="'Call Phone ('+p.phone+' )'">
+                                        {{p.country_code?p.country_code :'+2'}}-{{p.phone}}
+                                    </a>
+
+                                    <a href="https://api.whatsapp.com/send?phone={{p.phone}}" target="_blank" *ngIf="p.phone_type == 'Whatsapp'" [matTooltip]="'Message ( '+p.phone+' ) On Whatsapp'">
+                                        {{p.country_code?p.country_code :'+2'}}-{{p.phone}} 
+                                    </a>
+                                    <span *ngIf="!!p.extend">
+                                        Extend:{{p.extend}}
+                                    </span>
+                                    <span *ngIf="i < contact.phone.length - 1">
+                                        /
+                                    </span>
+                                </ng-container>
+
+                            </ng-container>
+                        </td>
+                        <td style="cursor: pointer;">
+                            {{contact.address}}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="sidebarDisplay=true;editContact(contact)" ><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="deleteContact(contact)"><i class="bx bx-trash me-1"></i> Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="7">No customers found.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <!-- <div class="card">
+            <div class="card-header">
+                <button (click)="openAddContactForm()" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#largeModal">
+                    <i class="menu-icon tf-icons bx bx-plus"></i>
+                    Contact
+                </button>
+            </div>
+            <div class="table-responsive text-nowrap">
+                <table class="table myTable table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Organization</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        <tr *ngFor="let contact of myContacts">
+                            <td style="cursor: pointer;"><i class="fab fa-angular fa-lg text-danger me-3"></i> {{contact.name}}</td>
+
+                            <td style="cursor: pointer;">
+                                {{contact.partner_name}}
+                            </td>
+
+                            <td style="cursor: pointer;" matTooltip="to choose the defualt email app 1) Open the Start menu and search for 'Default apps' 2)Click on the 'Default app settings' option in the search results 3)Click on the current default email program and select a new one from the list of available options">
+                                <a href="mailto:{{contact.email}}?subject=welcome from FGS &body=Hello,{{contact.name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}" target="_blank" rel="noopener noreferrer">
+                                    {{contact.email}}
+                                </a>
+                            </td>
+                            <td style="cursor: pointer;">
+                                <ng-container *ngIf="!!contact.phone && contact.phone.length > 0">
+                                    <ng-container *ngFor="let p of contact.phone;let i=index">
+                                        <a href="tel:{{p.phone}}" *ngIf="p.phone_type != 'Whatsapp'" [matTooltip]="'Call Phone ('+p.phone+' )'">
+                                            {{p.phone}}  
+                                        </a>
+
+                                        <a href="https://api.whatsapp.com/send?phone=2{{p.phone}}" target="_blank" *ngIf="p.phone_type == 'Whatsapp'" [matTooltip]="'Message ( '+p.phone+' ) On Whatsapp'">
+                                            {{p.phone}}  
+                                        </a>
+                                        <span *ngIf="i < contact.phone.length - 1">
+                                            -
+                                        </span>
+                                    </ng-container>
+
+                                </ng-container>
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{contact.address}}
+                            </td>
+
+
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="editContact(contact)" data-bs-toggle="modal" data-bs-target="#largeModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                        <a class="dropdown-item" href="javascript:void(0);" (click)="deleteContact(contact)"><i class="bx bx-trash me-1"></i> Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> -->
+
+    </div>
+
+</div>
+
+<p-sidebar styleClass="p-sidebar-md" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="sidebarDisplay" position="right" 
+[transitionOptions]="'350ms'" (onHide)="editMode=false;">
+<!-- <div class="modal modal-top fade" id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content"> -->
+            <!-- <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeForm()"></button>
+            </div> -->
+
+            <div class="mb-3">
+                <form [formGroup]="newContactForm" (ngSubmit)="submitContactForm()" class="example-form">
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="Title">Name</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. Ahmed" formControlName="name" />
+                                        </div>
+                                        <mat-error class="alert help-block" *ngIf="!newContactForm.get('name')?.valid && newContactForm.get('name')?.touched">
+                                            Name Is Required
+                                        </mat-error>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <mat-form-field class="example-full-width w-100">
+                                            <mat-label class="formLables">Organization</mat-label>
+                                            <mat-select formControlName="partner_id" class="form-control">
+                                                <mat-option *ngFor="let part of allPartners" [value]="part.id">{{part.partner_name}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                        <mat-error class="alert help-block" *ngIf="!newContactForm.get('partner_id')?.valid && newContactForm.get('partner_id')?.touched">
+                                            Organization Is Required
+                                        </mat-error>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="email">Email</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex@Examble.com" formControlName="email" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="phone">Phone</label>
+                                        <ng-container formArrayName="phones">
+                                            <div *ngFor="let h of phones.controls; index as i">
+                                                <ng-container [formGroupName]="i">
+                                                    <div class="d-flex my-1">
+                                                        <div class="ci">
+                                                            <ngx-intl-tel-input [cssClass]="'form-control'" [preferredCountries]="preferredCountries" [enableAutoCountrySelect]="true" [enablePlaceholder]="true" [searchCountryFlag]="true" [searchCountryField]="[
+                                                            SearchCountryField.Iso2,
+                                                            SearchCountryField.Name
+                                                            ]" [selectFirstCountry]="false" [selectedCountryISO]="CountryISO.Egypt" [maxLength]="15" [phoneValidation]="true" [separateDialCode]="separateDialCode" [numberFormat]="PhoneNumberFormat.National"
+                                                                name="phone" formControlName="phone">
+                                                            </ngx-intl-tel-input>
+                                                        </div>
+
+                                                        <select class="form-select w-25" id="exampleFormControlSelect1" aria-label="Default select example" formControlName="phone_type">
+                                                            <option value="Work">Work</option>
+                                                            <option value="Home">Home</option>
+                                                            <option value="Mobile">Mobile</option>
+                                                            <option value="Whatsapp">Whatsapp</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+                                                        <span *ngIf="i>0" (click)="delPhone(i)" class="material-icons delete m-auto text-danger">
+                                                            delete
+                                                        </span>
+                                                       <span  class="material-icons add m-auto bg-success rounded-circle text-white" 
+                                                       *ngIf="i==0 && newContactForm.get('phones')?.value.length < 5" type="button" (click)="addPhone()">add</span>
+
+                                                    </div>
+                                                    <div *ngIf="h['controls'].phone_type?.value == 'Work'">
+                                                        <input class="form-control" type="text" formControlName="extend" placeholder="extend">
+                                                    </div>
+                                                    <div *ngIf="h.touched && h.invalid" class="alert alert-danger">
+                                                        <div *ngIf="h['controls'].phone.errors?.required">Please enter Phone number</div>
+                                                        <div *ngIf="h['controls'].phone.invalid">Phone Not Valid</div>
+                                                        <div *ngIf="h['controls'].phone_type.errors?.required">Please enter Phone type</div>
+                                                    </div>
+                                                </ng-container>
+
+                                            </div>
+                                        </ng-container>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="address">Address</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="Ex. 6 October" formControlName="address" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="title">Title</label>
+                                        <div class="input-group input-group-merge">
+                                            <input class="form-control" type="text" placeholder="CEO" formControlName="title" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" 
+                        (click)="sidebarDisplay=false" (click)="closeForm()">
+                        Close
+                    </button>
+                        <button type="submit" class="btn btnStyle" [disabled]="newContactForm.invalid" data-bs-dismiss="modal" aria-label="Close">Save</button>
+                    </div>
+                </form>
+            </div>
+</p-sidebar>
+        <!-- </div>
+    </div>
+</div> -->

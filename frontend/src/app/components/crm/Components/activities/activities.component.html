@@ -1,0 +1,325 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="activityLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">CRM /</span> Activities</h4>
+
+        <!-- Basic Bootstrap Table -->
+        <div class="">
+            <p-table id="dt1" responsiveLayout="scroll" #dt1 [value]="activities" dataKey="id" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]" [paginator]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [globalFilterFields]="['activity_type_name','contact_lead_name','email','partner_name']">
+                <ng-template pTemplate="caption">
+                    <div class="d-flex justify-content-between">
+                        <button (click)="openAddActivityForm()" type="button" class="btn btnStyle">
+                            <i class="menu-icon tf-icons bx bx-plus"></i>
+                            Activity
+                        </button>
+                        <div>
+                            <span class="p-input-icon-left search">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="dt1.filterGlobal($any($event.target).value, 'contains')" placeholder="Search keyword" />
+                            </span>
+                            <button pButton label="Clear" class="btnOutLine p-button-sm mx-1"
+                             icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                        </div>
+
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Done
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Action
+                                <p-columnFilter field="activity_type_id" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
+                                    <ng-template pTemplate="header">
+                                        <div class="px-3 pt-3 pb-0">
+                                            <span class="font-bold">Industry Picker</span>
+                                        </div>
+                                    </ng-template>
+                                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                        <p-multiSelect [ngModel]="value" [options]="ActivityTypesEnum | keyvalue" optionValue="value" placeholder="Any" (onChange)="filter($event.value)" optionLabel="key">
+                                            <ng-template let-option pTemplate="item">
+                                                <div class="p-multiselect-representative-option">
+                                                    <span class="ml-1">{{option.key}}</span>
+                                                </div>
+                                            </ng-template>
+                                        </p-multiSelect>
+                                    </ng-template>
+                                </p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Due Date
+                                <p-columnFilter type="date" field="to_date" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Lead Name
+                                <p-columnFilter type="text" field="contact_lead_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Contact Name
+                                <p-columnFilter type="text" field="contact_lead_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Email
+                                <p-columnFilter type="text" field="email" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Phone
+                                <p-columnFilter type="text" field="phone" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-start align-items-center">
+                                Organization
+                                <p-columnFilter type="text" field="partner_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                        <th *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department == DepartmentEnum.Business_Development && currentUser.accPosition == AccountPositionEnum.MANAGER">
+                            <div class="d-flex justify-content-start align-items-center">
+                                Created By
+                                <p-columnFilter type="text" field="createdBy_name" display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-acc>
+                    <tr>
+                        <td style="cursor: pointer;">
+                            <input style="cursor: pointer;" type="radio" (click)="markAsDone(acc)">
+                        </td>
+                        <td style="cursor: pointer;" [routerLink]="['/CRM/leads' , acc.contact_lead_id]">
+                            <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Call" class="pi pi-phone coloredIcon"></i>
+                            <i *ngIf="acc.activity_type_id == ActivityTypesEnum.SendEmail" class="pi pi-envelope coloredIcon"></i>
+                            <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Meeting" class="pi pi-users coloredIcon"></i>
+                            <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Task" class="pi pi-clock coloredIcon"></i>
+                            <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Deadline" class="pi pi-flag coloredIcon"></i>
+                            <span *ngIf="acc.activity_type_id == ActivityTypesEnum.Lunch" class="material-symbols-outlined coloredIcon">
+                                restaurant
+                            </span>
+                            <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Other" class="pi pi-check coloredIcon"></i>
+                            <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Notes" class="pi pi-book coloredIcon"></i>
+                            <span>
+                                {{acc.comment}}
+                            </span>
+                        </td>
+
+                        <td style="cursor: pointer;" [ngStyle]="{color: getTimeColor(acc.to_date)}" [routerLink]="['/CRM/leads' , acc.contact_lead_id]">
+                            {{acc.to_date | date: 'medium'}}
+                        </td>
+
+                        <td style="cursor: pointer;" [routerLink]="['/CRM/leads' , acc.contact_lead_id]">
+                            {{acc.contact_lead_name}}
+                        </td>
+
+                        <td style="cursor: pointer;" [routerLink]="['/CRM/leads' , acc.contact_lead_id]">
+                            {{acc.person_contact_name}}
+                        </td>
+                        <td>
+                            <!-- {{!!acc.email ? acc.email : '-'}} -->
+                            <a href="mailto:{{acc.email}}?subject=welcome from FGS &body=Hello,{{acc.name}} %0D%0A Best regards,%0D%0A{{currentUser.username}}" target="_blank" rel="noopener noreferrer">
+                                {{acc.email}}
+                            </a>
+                        </td>
+                        <td>
+                            <!-- {{!!acc.phone && !!acc.phone[0] ? acc.phone[0].phone : '-'}} -->
+                            <ng-container *ngFor="let p of acc.phone;let i=index">
+                                <a href="tel:{{p.country_code?p.country_code :'+2'}}{{p.phone}}" *ngIf="p.phone_type != 'Whatsapp'" [matTooltip]="'Call Phone ('+p.phone+' )'">
+                                    {{p.country_code?p.country_code :'+2'}}-{{p.phone}}  
+                                </a>
+
+                                <a href="https://api.whatsapp.com/send?phone={{p.phone}}" target="_blank" *ngIf="p.phone_type == 'Whatsapp'" [matTooltip]="'Message ( '+p.phone+' ) On Whatsapp'">
+                                    {{p.country_code?p.country_code :'+2'}}-{{p.phone}}  
+                                </a>
+                                <span *ngIf="i < acc.phone.length - 1">
+                                    -
+                                </span>
+                            </ng-container>
+                        </td>
+
+                        <td>
+                            {{acc.partner_name}}
+                        </td>
+
+                        <td *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || currentUser.department == DepartmentEnum.Business_Development && currentUser.accPosition == AccountPositionEnum.MANAGER">
+                            {{acc.createdBy_name}}
+                        </td>
+
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="7">No customers found.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <!-- <div class="card">
+            <div class="card-header">
+                <button (click)="openAddActivityForm()" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#largeModal">
+                    <i class="menu-icon tf-icons bx bx-plus"></i>
+                    Activity
+                </button>
+            </div>
+            <div class="table-responsive text-nowrap">
+                <table class="table myTable table-hover">
+                    <thead>
+                        <tr>
+                            <th>Done</th>
+                            <th>Action</th>
+                            <th>Due Date</th>
+                            <th>Contact Person</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Organization</th>
+                            <th *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">Created By</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        <tr *ngFor="let acc of activities">
+                            <td style="cursor: pointer;">
+                                <input style="cursor: pointer;" type="radio" (click)="markAsDone(acc)">
+                            </td>
+                            <td style="cursor: pointer;" [routerLink]="['/CRM/leads' , acc.contact_lead_id]">
+                                <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Call" class="pi pi-phone coloredIcon"></i>
+                                <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Meeting" class="pi pi-users coloredIcon"></i>
+                                <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Task" class="pi pi-clock coloredIcon"></i>
+                                <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Deadline" class="pi pi-flag coloredIcon"></i>
+                                <span *ngIf="acc.activity_type_id == ActivityTypesEnum.Lunch" class="material-symbols-outlined coloredIcon">
+                                    restaurant
+                                </span>
+                                <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Other" class="pi pi-check coloredIcon"></i>
+                                <i *ngIf="acc.activity_type_id == ActivityTypesEnum.Notes" class="pi pi-book coloredIcon"></i>
+                                <span>
+                                    {{acc.comment}}
+                                </span>
+                            </td>
+
+                            <td style="cursor: pointer;" [ngStyle]="{color: getTimeColor(acc.to_date)}">
+                                {{acc.to_date}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                {{acc.contact_lead_name}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{!!acc.email ? acc.email : '-'}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{!!acc.phone && !!acc.phone[0] ? acc.phone[0].phone : '-'}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                {{acc.partner_name}}
+                            </td>
+
+                            <td *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" style="cursor: pointer;">
+                                {{acc.createdBy_name}}
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> -->
+
+    </div>
+
+</div>
+<p-sidebar styleClass="p-sidebar-md" class="side"
+ [baseZIndex]="999" [autoZIndex]="false"  [(visible)]="sidebarDisplay" position="right" 
+[transitionOptions]="'350ms'">
+<!-- <div id="largeModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content"> -->
+             <!-- <div class="modal-header"> -->
+                <h3 class="modal-title fw-bold" id="exampleModalLabel3">New Organization</h3>
+                <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+            <!-- </div> -->
+
+            <div class="mb-3">
+                <form [formGroup]="newActivityForm" (ngSubmit)="addActivity()">
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row my-2">
+                                <div class="col-12 my-2">
+                                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                                        <label class="formLables">Lead</label>
+                                        <mat-select formControlName="lead_id" class="form-control"
+                                        [ngClass]="{'is-invalid':!newActivityForm.get('lead_id')?.valid &&
+                                        newActivityForm.get('lead_id')?.touched}">
+                                            <mat-option *ngFor="let lead of myContactLeads" [value]="lead.id">{{lead.title}}</mat-option>
+                                        </mat-select>
+                                    <!-- </mat-form-field> -->
+                                    <mat-error class="invalid-feedback" *ngIf="!newActivityForm.get('lead_id')?.valid && newActivityForm.get('lead_id')?.touched">
+                                        Lead Is Required
+                                    </mat-error>
+                                </div>
+                                <div class="col-12 my-2">
+                                    <input type="text" class="form-control" formControlName="comment" [placeholder]="getSelectedActivity(newActivityForm.get(['type_id'])?.value)">
+                                </div>
+                                <div class="col-12 my-2">
+                                    <p-selectButton [options]="ActivityTypesEnum | keyvalue" optionLabel="key" optionValue="value" formControlName="type_id" (onChange)="activityTypeChanged($event)">
+                                        <ng-template let-type>
+                                            <div [matTooltip]="type.key">
+                                                <i *ngIf="type.value == ActivityTypesEnum.Call" class="pi pi-phone selectBTN coloredIcon"></i>
+                                                <i *ngIf="type.value == ActivityTypesEnum.SendEmail" class="pi pi-envelope selectBTN coloredIcon"></i>
+                                                <i *ngIf="type.value == ActivityTypesEnum.Meeting" class="pi pi-users selectBTN coloredIcon"></i>
+                                                <i *ngIf="type.value == ActivityTypesEnum.Task" class="pi pi-clock selectBTN coloredIcon"></i>
+                                                <i *ngIf="type.value == ActivityTypesEnum.Deadline" class="pi pi-flag selectBTN coloredIcon"></i>
+                                                <span *ngIf="type.value == ActivityTypesEnum.Lunch" class="material-symbols-outlined selectBTN coloredIcon">
+                                                    restaurant
+                                                </span>
+                                                <i *ngIf="type.value == ActivityTypesEnum.Other" class="pi pi-check selectBTN coloredIcon"></i>
+                                                <i *ngIf="type.value == ActivityTypesEnum.Notes" class="pi pi-book selectBTN coloredIcon"></i>
+                                            </div>
+                                        </ng-template>
+                                    </p-selectButton>
+                                </div>
+                            </div>
+                            <div class="row my-2">
+                                <div class="col-1 my-2">
+                                    <i class="pi pi-clock clock coloredIcon"></i>
+                                </div>
+                                <div class="col-4 my-2">
+                                    <input matInput type="datetime-local" class="form-control" id="fromDate" formControlName="start_date">
+                                </div>
+                                <div class="col-4 my-2">
+                                    <input matInput type="datetime-local" class="form-control" id="toDate" formControlName="end_date">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" (click)="sidebarDisplay=false">
+                            Close
+                        </button>
+                            <button type="submit" class="btn btnStyle" [disabled]="newActivityForm.invalid" data-bs-dismiss="modal" aria-label="Close">Save</button>
+                        </div>
+                    
+                </form>
+            </div>
+        <!-- </div>
+    </div>
+</div> -->
+</p-sidebar>

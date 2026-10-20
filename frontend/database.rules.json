@@ -1,0 +1,33 @@
+{
+    "rules": {
+        "notification": {
+            ".read": "true",
+            ".write": "true",
+            ".indexOn": ["receverKey"]
+        },
+
+        "fcmTokens": {
+            ".read": "true",
+            ".write": "true"
+        },
+        "UserNavParams": {
+            ".read": "true",
+            ".write": "true",
+            ".indexOn": ["user_id"]
+        },
+        "clientnotification": {
+            ".read": "true",
+            ".write": "true",
+            ".indexOn": ["receverKey"]
+        },
+        "clientfcmTokens": {
+            ".read": "true",
+            ".write": "true"
+        },
+        "ClientNavParams": {
+            ".read": "true",
+            ".write": "true",
+            ".indexOn": ["user_id"]
+        }
+    }
+}

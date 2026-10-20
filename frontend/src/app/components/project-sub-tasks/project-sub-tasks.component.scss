@@ -1,0 +1,408 @@
+@import '../../colors';
+.newTaskBtn {
+    // background-color: $buttonMainBackgroundColor;
+    color: #fff;
+    // width: fit-content;
+    padding: 8px 16px; 
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    margin-left: auto;
+}
+
+.submitBTN {
+    color: $buttonMainBackgroundColor;
+    border-color: $buttonMainBackgroundColor;
+}
+
+.backIcon {
+    color: $mainThemeColor;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.projectDetailsRow {
+    box-shadow: -10px -10px 0px $mainThemeColor, 10px 10px 0px $mainThemeColor, 3px 7px 10px 0 rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+    // position: relative;
+    min-height: 200px;
+    //  ::after {
+    //     content: "";
+    //     position: absolute;
+    //     bottom: -20px;
+    //     left: 10px;
+    //     width: inherit;
+    //     height: 200px;
+    //     z-index: -1;
+    //     background-color: $mainThemeColor;
+    // }
+    //  ::before {
+    //     content: "";
+    //     position: absolute;
+    //     top: -5px;
+    //     right: 10px;
+    //     width: inherit;
+    //     height: 200px;
+    //     z-index: -1;
+    //     background-color: $mainThemeColor;
+    // }
+    .pData {
+        h2 {
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        span {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+    }
+    .ctrBtns {
+        .edit {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete {
+            color: #a19ea0;
+        }
+        .save {
+            background-color: $buttonMainBackgroundColor;
+            color: #fff;
+            width: 80px;
+        }
+    }
+}
+
+.devsDetailsRow {
+    box-shadow: -10px -10px 0px $mainThemeColor, 10px 10px 0px $mainThemeColor, 3px 7px 10px 0 rgba(0, 0, 0, 0.3);
+    background-color: #fff;
+    position: relative;
+    min-height: 150px;
+    //  ::after {
+    //     content: "";
+    //     position: absolute;
+    //     bottom: 0px;
+    //     left: 10px;
+    //     width: inherit;
+    //     height: 150px;
+    //     z-index: -2;
+    //     background-color: $mainThemeColor;
+    // }
+    //  ::before {
+    //     content: "";
+    //     position: absolute;
+    //     top: 0px;
+    //     right: 10px;
+    //     width: inherit;
+    //     height: 150px;
+    //     z-index: -2;
+    //     background-color: $mainThemeColor;
+    // }
+    .dData {
+        h2 {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        span,
+        ul {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        li {
+            list-style-type: square;
+        }
+    }
+    .ctrBtns {
+        .edit,
+        .save {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete,
+        .cancel {
+            color: #a19ea0;
+        }
+    }
+}
+
+.spinner ::ng-deep .mat-progress-spinner circle,
+.mat-spinner circle {
+    stroke: $buttonMainBackgroundColor;
+}
+
+.material-icons,
+.Backward-arrow,
+.Group-131,
+.edit-alt {
+    cursor: pointer;
+}
+
+.hrLine {
+    height: 2px;
+    background-color: $mainThemeColor;
+}
+
+.clr {
+    clear: both;
+}
+
+.pdd,
+.testing {
+    box-shadow: 3px 9px 11px 0 rgba(0, 0, 0, 0.25);
+    background-color: #fff;
+    min-height: 250px;
+    .tasksCol {
+        height: 247px;
+        border: solid 1px #a19ea0;
+        h2 {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 20px;
+            font-weight: bold;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+        .taskData {
+            font-family: $mainFontFamily;
+            // font-family: 'Lato', sans-serif !important;
+            font-size: 18px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            letter-spacing: normal;
+        }
+    }
+    .ctrBtns {
+        .edit {
+            color: $buttonMainBackgroundColor;
+        }
+        .delete {
+            color: #a19ea0;
+        }
+    }
+}
+
+.tasks {
+    // .search {
+    //     input {
+    //         border: $mainThemeColor solid 1px;
+    //         border-radius: 0;
+    //     }
+    //     .material-icons {
+    //         color: #fff;
+    //         background-color: $mainThemeColor;
+    //     }
+    // }
+    // position: relative;
+    // z-index: -1;
+    .search {
+        input {
+            border: $subSubThemeColor solid 1px;
+            // border-radius: 0;
+            color: $subSubThemeColor;
+            font-size: 12px;
+         
+    
+            &::placeholder {
+                color: $subSubThemeColor;
+                }
+    
+        }
+        i  {
+            color: $mainThemeColor;
+       
+        }
+    
+    }
+    .supportMode {
+        .allTasks {
+            background-color: $buttonMainBackgroundColor;
+            color: #fff;
+            border-radius: 0px !important;
+            width: 200px;
+        }
+        .supportedTasks {
+            width: 200px;
+            background-color: $tabBackGround;
+            color: #100f0f;
+            border-radius: 0px !important;
+        }
+    }
+    .table {
+        .theader {
+            background-color: $tabBackGround;
+            color: #100f0f;
+        }
+        .trow {
+            border-top: 2px solid $mainThemeColor;
+            .ctrBtns {
+                .edit {
+                    color: $mainThemeColor;
+                    opacity: 0;
+                }
+                .delete {
+                    color: #a19ea0;
+                    opacity: 0;
+                }
+            }
+            &:hover {
+                box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+                background-color: #fff;
+                .ctrBtns {
+                    .edit {
+                        opacity: 1;
+                    }
+                    .delete {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+ 
+}
+::ng-deep .p-calendar{
+    width: 100%;
+}
+
+.commentsSection {
+    .newCommentBtn {
+        @extend .newTaskBtn;
+    }
+    .bdge {
+        height: 21px;
+        background-color: orange;
+        color: #fff;
+        font-size: 11px;
+        padding: 8px;
+        border-radius: 4px;
+        line-height: 3px
+    }
+    .comments {
+        text-decoration: underline;
+        text-underline-position: under;
+        cursor: pointer
+    }
+    .dot {
+        height: 7px;
+        width: 7px;
+        margin-top: 3px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block
+    }
+    .hit-voting:hover {
+        color: blue
+    }
+    .hit-voting {
+        cursor: pointer
+    }
+    .commented-section {
+        .delIcon {
+            opacity: 0;
+            color: #a19ea0;
+        }
+        &:hover {
+            box-shadow: 0px 0px 20px 0 rgba(0, 0, 0, 0.3);
+            background-color: #fff;
+            .delIcon {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+@keyframes dot-keyframes {
+    0% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2, 1.2);
+    }
+    100% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+}
+
+.loading-dots {
+    text-align: center;
+    width: 100%;
+    &--dot {
+        animation: dot-keyframes 1.5s infinite ease-in-out;
+        background-color: $mainThemeColor;
+        border-radius: 10px;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+        &:nth-child(2) {
+            animation-delay: .5s;
+        }
+        &:nth-child(3) {
+            animation-delay: 1s;
+        }
+    }
+}
+
+.checkIcon {
+    color: $mainThemeColor;
+}
+
+.checkDevAvBTN {
+    border-color: $mainThemeColor;
+    color: $mainThemeColor;
+}
+
+
+
+.projectDetails{
+    background-color: $softThemeColor;
+    .project_title{
+        color: $mainThemeColor;
+        font-weight: bold; 
+        text-transform: capitalize;
+    }
+    .subTitel{
+        color: $subThemeColor;
+        font-weight: bold;
+        font-size: 12px;
+    }
+    .subSubTitel{
+        font-weight: bold;
+        font-size: 12px;
+    }
+    
+}
+.bg-soft-success{
+    background-color:#E3FCEF!important;
+    color: #36B37E !important;
+}
+.avatar-group{
+    cursor: pointer;
+}
+::ng-deep .p-avatar-group ,.avatar-group {
+    width: min-content !important;
+}
+

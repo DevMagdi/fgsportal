@@ -1,0 +1,35 @@
+<div class="mb-4 ms-5 mt-5">
+    <h1 class="title fw-bold">Available to work</h1>
+</div>
+<hr>
+<div class="table-responsive">
+
+    <table class="table table-hover newTableCustom">
+        <thead>
+            <tr>
+    
+                <th>#</th>
+                <th>Avatar</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>From</th>
+                <th>To</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let dev of users ; let i=index">
+                <td>{{i+1}}</td>
+                <td>
+                    <img *ngIf="!!dev.photoURL" src="{{newServerApi}}{{dev.photoURL}}" class="rounded-circle" width="40px" height="40px" alt="">
+                    <img *ngIf="!dev.photoURL && (!dev.gender || dev.gender == 'male')" class="rounded-circle" src="../../../../../assets/img/avatarman.png" width="40px" height="40px" alt="img">
+                    <img *ngIf="!dev.photoURL && dev.gender == 'female'" class="rounded-circle" src="../../../../../assets/img/girlmyavatar.png" width="40px" height="40px" alt="">
+                </td>
+                <td>{{dev.username}}</td>
+                <td>{{dev.email}}</td>
+                <td>{{dev.from_date_time | date:'medium'}}</td>
+                <td>{{dev.to_date_time | date:'medium'}}</td>
+            </tr>
+        </tbody>
+    
+    </table>
+</div>

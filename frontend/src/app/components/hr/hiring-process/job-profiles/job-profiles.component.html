@@ -1,0 +1,58 @@
+
+<div class="container-fluid mt-3">
+  <div class="row">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h1 class="main-color p-2 mb-2 fw-bold">Job Profiles</h1>
+      <button *ngIf="checkIfHasPerm(26)" type="submit" class="btn btnStyle" (click)="openJobProfileManagement(0)">
+        Add new Job Profile
+      </button>
+    </div>
+    <div class="col-1"></div>
+  </div>
+  <div class="hrLine"></div>
+  <div class="teble-responsive">
+    <table class="table newTableCustom">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Job Title</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="!!jobProfiles && jobProfiles!.length > 0">
+          <tr *ngFor="let jobProfile of jobProfiles; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ jobProfile.hr_job_title }}</td>
+            <td>
+              <div [innerHTML]="jobProfile.description || '' | maxLength : 30"></div>
+            </td>
+            <td>
+              <span [class]="jobProfile.job_status ? 'active' : 'not-active'" class="px-2 rounded-3">
+                {{ jobProfile.job_status ? "Active" : "Not Active" }}
+              </span>
+            </td>
+
+            <td>
+              <i *ngIf="checkIfHasPerm(26)" (click)="openJobProfileManagement(jobProfile)" class="cursor pi pi-pencil text-info mx-1"></i>
+              <i *ngIf="checkIfHasPerm(27)" (click)="deleteJobProfile(jobProfile)" class="cursor pi pi-trash text-danger mx-1"></i>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-container *ngIf="jobProfiles?.length == 0">
+          <td [colSpan]="3" class="text-center">No Job Profiles Founded</td>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false"
+  [(visible)]="showJobProfileManagement" position="right" [transitionOptions]="'350ms'">
+  <ng-template pTemplate="content">
+    <app-job-profile-management [jobProfile]="selectedJobProfile"
+      (updateJobProfileList)="updateJobProfileList($event)"></app-job-profile-management>
+  </ng-template>
+</p-sidebar>

@@ -1,0 +1,134 @@
+@import '../../../../colors';
+// .tableRow {
+//     .tableCustom {
+//         white-space: nowrap;
+//         thead {
+//             background-color: $tabBackGround;
+//             color: #100f0f;
+//             line-height: 50px;
+//         }
+//         tbody {
+//             tr {
+//                 border-top: solid 2px $mainThemeColor;
+//                 line-height: 50px;
+//             }
+//             .details {
+//                 white-space: normal;
+//             }
+//         }
+//     }
+// }
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: $mainThemeColor;
+        line-height: 50px;
+        font-family: $mainFontFamily;
+        font-weight: 800;
+        text-align: center;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+            text-align: center;
+            font-family: $mainFontFamily;
+            color: $mainThemeColor;
+            font-weight: 500;
+            .dateStyle,
+            .finalTotal {
+                font-family: $mainFontFamily;
+                font-weight: 800;
+                color: $mainThemeColor;
+            }
+        }
+    }
+}
+
+.approvalBtn {
+    background-color: $mainThemeColor;
+    color: #fff;
+    // width: 40%;
+    // margin: auto;
+}
+
+.rejectBtn {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+    // width: 40%;
+    // margin: auto;
+}
+
+.myReports {
+    background-color: $subThemeColor;
+    color: #fff;
+    border-radius: 0px !important;
+    width: 200px;
+}
+
+.allReports {
+    width: 200px;
+    background-color: $tabBackGround;
+    color: #100f0f;
+    border-radius: 0px !important;
+}
+
+.cardHeader {
+    color: $mainThemeColor;
+    font-size: larger;
+    font-weight: 600;
+    font-family: $mainFontFamily;
+}
+
+.myCardStyle {
+    color: $mainThemeColor;
+    font-family: $mainFontFamily;
+    .cardImg {
+        border: solid 2px $buttonMainBackgroundColor;
+    }
+    .empName {
+        font-weight: 600;
+    }
+    .myLable {
+        font-weight: 600;
+    }
+    .optionColor {
+        color: $buttonMainBackgroundColor;
+    }
+}
+
+.reports-approval{
+
+
+    
+    ::ng-deep .p-tabview .p-tabview-nav {
+    
+        li.p-highlight .p-tabview-nav-link {
+            background: #ffffff;
+            border-color: $mainThemeColor !important;
+            color: $mainThemeColor !important;
+            font-weight: bold;
+        }
+        .p-tabview-ink-bar{
+            background:$mainThemeColor!important;
+        
+        }
+        li .p-tabview-nav-link{
+           color: $subThemeColor !important;
+           font-weight: normal ;
+       }
+    }
+}
+.user-details{
+    background-color: $softThemeColor;
+    padding: 4px;
+}
+::ng-deep .p-button-text{
+    padding: 5px;
+}
+.btnStyle{
+    ::ng-deep .p-button.p-button-text{
+
+        color: #fff !important;
+    }
+}

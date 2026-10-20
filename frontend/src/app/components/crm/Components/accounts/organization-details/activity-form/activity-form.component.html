@@ -1,0 +1,76 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="activityLoader">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<form [formGroup]="newActivityForm" (ngSubmit)="addActivity()">
+    <div class="modal-body">
+        <div class="container-fluid">
+            <div class="row my-2">
+                <div class="col-12 my-2">
+                    <!-- <mat-form-field class="example-full-width w-100"> -->
+                    <label class="formLables">Lead</label>
+                    <mat-select formControlName="lead_id" class="form-control" [ngClass]="{'is-invalid':!newActivityForm.get('lead_id')?.valid &&
+                                        newActivityForm.get('lead_id')?.touched}">
+                        <mat-option *ngFor="let lead of leads" [value]="lead.id">{{lead.title}}</mat-option>
+                    </mat-select>
+                    <!-- </mat-form-field> -->
+                    <mat-error class="invalid-feedback"
+                        *ngIf="!newActivityForm.get('lead_id')?.valid && newActivityForm.get('lead_id')?.touched">
+                        Lead Is Required
+                    </mat-error>
+                </div>
+                <div class="col-12 my-2">
+                    <input type="text" class="form-control" formControlName="comment"
+                        [placeholder]="getSelectedActivity(newActivityForm.get(['type_id'])?.value)">
+                </div>
+                <div class="col-12 my-2">
+                    <p-selectButton [options]="ActivityTypesEnum | keyvalue" optionLabel="key" optionValue="value"
+                        formControlName="type_id">
+                        <ng-template let-type>
+                            <div [matTooltip]="type.key">
+                                <i *ngIf="type.value == ActivityTypesEnum.Call"
+                                    class="pi pi-phone selectBTN coloredIcon"></i>
+                                <i *ngIf="type.value == ActivityTypesEnum.SendEmail"
+                                    class="pi pi-envelope selectBTN coloredIcon"></i>
+                                <i *ngIf="type.value == ActivityTypesEnum.Meeting"
+                                    class="pi pi-users selectBTN coloredIcon"></i>
+                                <i *ngIf="type.value == ActivityTypesEnum.Task"
+                                    class="pi pi-clock selectBTN coloredIcon"></i>
+                                <i *ngIf="type.value == ActivityTypesEnum.Deadline"
+                                    class="pi pi-flag selectBTN coloredIcon"></i>
+                                <span *ngIf="type.value == ActivityTypesEnum.Lunch"
+                                    class="material-symbols-outlined selectBTN coloredIcon">
+                                    restaurant
+                                </span>
+                                <i *ngIf="type.value == ActivityTypesEnum.Other"
+                                    class="pi pi-check selectBTN coloredIcon"></i>
+                                <i *ngIf="type.value == ActivityTypesEnum.Notes"
+                                    class="pi pi-book selectBTN coloredIcon"></i>
+                            </div>
+                        </ng-template>
+                    </p-selectButton>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-1 my-2">
+                    <i class="pi pi-clock clock coloredIcon"></i>
+                </div>
+                <div class="col-4 my-2">
+                    <input matInput type="datetime-local" class="form-control" id="fromDate"
+                        formControlName="start_date">
+                </div>
+                <div class="col-4 my-2">
+                    <input matInput type="datetime-local" class="form-control" id="toDate" formControlName="end_date">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="closeForm.emit(true)">
+            Close
+        </button>
+        <button type="submit" class="btn btnStyle" [disabled]="newActivityForm.invalid" data-bs-dismiss="modal"
+            aria-label="Close">Save</button>
+    </div>
+
+</form>

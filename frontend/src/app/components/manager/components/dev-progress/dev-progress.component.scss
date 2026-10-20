@@ -1,0 +1,154 @@
+@import '../../../../colors';
+.overView {
+    // background-color: rgba($color: $mainThemeColor, $alpha: 0.5);
+    padding: 10px;
+    margin: 10px;
+}
+
+.overViewCard {
+    // background-color: #fff;
+    // box-shadow: 0 0 10px rgba($color: $mainThemeColor, $alpha: 0.8);
+    // background-color: rgba($color: $mainThemeColor, $alpha: 0.2);
+    // width: 200px;
+    height: 150px;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    .cardTitle {
+        text-align: center;
+        height: 40%;
+        h3 {
+            color: #fff;
+            font-size: 20px;
+            font-family: $mainFontFamily;
+            font-weight: 600;
+        }
+    }
+    .cardBody {
+        height: 60%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        p {
+            color: #fff; //$buttonMainBackgroundColor;
+            font-size: 20px;
+            font-family: $mainFontFamily;
+        }
+    }
+}
+
+.card1 {
+    background-image: linear-gradient(50deg, #09c, $mainThemeColor)!important;
+}
+
+.card2 {
+    background-image: linear-gradient(50deg, #8EF9FE, #263238)!important;
+}
+
+.card3 {
+    background-image: linear-gradient(50deg, #FF9E80, #D50000)!important;
+}
+
+.card4 {
+    background-image: linear-gradient(50deg, #C5D429, #2E7D32)!important;
+}
+
+.card5 {
+    background-image: linear-gradient(50deg, #ffd86f, #FF7043)!important;
+}
+.get_progress{
+    color: #fff;
+    margin: auto;
+    padding: 8px 16px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+}
+.modal-title,.title{
+    font-weight: bold !important;
+    color: $mainThemeColor !important;
+}
+
+::ng-deep canvas {
+    max-width: 300px !important;
+    max-height: 200px !important;
+}
+.statistics{
+    border-color: $borderColor;
+    border-radius: 16px;
+    height: 130px;
+
+    p{
+        color: $mainThemeColor;
+    }
+
+}
+.statistics_placeholder{
+    border-color: $borderColor;
+    border-radius: 16px;
+    p{
+        color: $mainThemeColor;
+    }
+}
+.sub_title{
+    color: $mainThemeColor;
+
+}
+.chartCard ,.dev{
+    border-color: $borderColor;
+    border-radius: 16px;
+
+}
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-header {
+            // background: rgba($color: $mainThemeColor, $alpha: 0.1);
+            background-color: white;
+            border: 0;
+        }
+    }
+}
+
+:host ::ng-deep {
+    #dt1 {
+        .p-datatable-thead {
+            // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+            // background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+            background-color: $softThemeColor;
+            border-bottom: 1px solid $mainThemeColor;
+        }
+        .p-datatable .p-datatable-thead>tr>th {
+            color: $mainThemeColor;
+            background: inherit;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid $mainThemeColor;
+            padding: .5rem .5rem !important;
+            font-weight: normal !important;
+
+        }
+        .p-datatable .p-datatable-tbody > tr > td {
+            padding: .3rem !important;
+            color: $mainThemeColor;
+            background-color: $bgLight !important;
+            a{
+            color: $mainThemeColor;
+
+            }
+
+        }
+        .p-datatable .p-datatable-tfoot > tr > td{
+            color: $mainThemeColor;
+
+            background-color: $bgLight !important;
+
+        }
+        .p-button.p-button-icon-only{
+            width: 2rem !important;
+            color: $mainThemeColor;
+            border-color: $mainThemeColor !important;
+            .pi {
+                font-size: .8rem;
+            }
+        }
+
+    }
+}

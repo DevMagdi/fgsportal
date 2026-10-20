@@ -1,0 +1,36 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="officialVacationLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="row  m-auto justify-content-center">
+    <div class="card col-md-6 border-0 mt-4 p-4">
+        <div class=""> 
+            <div class="my-2">
+                <mat-form-field class="w-100">
+                    <input matInput readonly autocomplete="off" [matDatepicker]="dp" placeholder="From" (click)="openDatePicker(dp)" [(ngModel)]="from">
+                    <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+                    <mat-datepicker #dp (viewChanged)="closeDatePicker($event,  'from',dp)"></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div class="my-2">
+                <mat-form-field class="w-100">
+                    <input matInput readonly autocomplete="off" [matDatepicker]="dp2" placeholder="To" (click)="openDatePicker(dp2)" [(ngModel)]="to">
+                    <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+                    <mat-datepicker #dp2 (viewChanged)="closeDatePicker($event,  'to' , dp2 )"></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div class="my-2">
+                <!-- <mat-form-field class="w-100"> -->
+                    <input class="form-control" placeholder="Details: Ex. 6 October Vacation" [(ngModel)]="details">
+                <!-- </mat-form-field> -->
+            </div>
+            <!-- <div class="">
+                <mat-form-field class="w-100">
+                    <input placeholder="Details: Ex. 6 October Vacation" matInput [(ngModel)]="details">
+                </mat-form-field>
+            </div> -->
+            <div class="">
+                <button class="btn btnStyle w-100 mt-2" (click)="validateDates()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>

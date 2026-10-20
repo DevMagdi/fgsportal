@@ -1,0 +1,17 @@
+@import '../../../../colors';
+
+table {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .entry-card {
+        width: 100%;
+    }
+}
+
+.add_request{
+    border-radius: 4px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    color: white;
+}

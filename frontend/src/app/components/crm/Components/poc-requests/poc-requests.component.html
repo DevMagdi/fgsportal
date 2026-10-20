@@ -1,0 +1,98 @@
+<div class="container-fluid">
+    <p-tabView [(activeIndex)]="activeIndex">
+        <p-tabPanel header="POC Requests">
+            <div class="table-responsive text-nowrap">
+                <table class="table newTableCustom">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Title</th>
+                            <th>Product</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th *ngIf="currentUser.department == departmentEnum.MANAGEMENT">Owner</th>
+                            <!-- <th></th> -->
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        <tr *ngFor="let req of myRequests">
+                            <td [routerLink]="['/CRM/leads',req.contact_lead_id]" [queryParams]="{active: '1'}" style="cursor: pointer;"><i class="fab fa-angular fa-lg text-danger "></i> <strong>{{req.contact_lead_name}}</strong></td>
+                            <td style="cursor: pointer;">
+                                {{req.request_poc_title}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{req.product_name}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                {{req.request_poc_status_name}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{req.request_poc_priority_name}}
+                            </td>
+
+                            <td style="cursor: pointer;" *ngIf="currentUser.department == departmentEnum.MANAGEMENT">
+                                {{req.user_creator_name}}
+                            </td>
+                        </tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header=" RFP Requests">
+            <div class="table-responsive">
+                <table class="table newTableCustom">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Title</th>
+                            <th>Product</th>
+                            <th>Status</th>
+                            <th *ngIf="currentUser.department == departmentEnum.MANAGEMENT">Owner</th>
+                            <!-- <th></th> -->
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        <tr *ngFor="let req of myRFPRequests">
+                            <td [routerLink]="['/CRM/leads',req.contact_lead_id]" [queryParams]="{active: '2'}" style="cursor: pointer;"><i class="fab fa-angular fa-lg text-danger "></i> <strong>{{req.contact_lead_name}}</strong></td>
+                            <td style="cursor: pointer;">
+                                {{req.request_rfp_title}}
+                            </td>
+                            <td style="cursor: pointer;">
+                                {{req.product_name}}
+                            </td>
+
+                            <td style="cursor: pointer;">
+                                {{req.request_rfp_status_name}}
+                            </td>
+
+                            <td style="cursor: pointer;" *ngIf="currentUser.department == departmentEnum.MANAGEMENT">
+                                {{req.user_creator_name}}
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </p-tabPanel>
+    </p-tabView>
+    
+    <!-- <div class="row">
+        <div class="col-12 my-2">
+            <div class="card">
+                <div class="cart-title">
+                    POC Requests
+                </div>
+                
+            </div>
+            <div class="card my-2">
+                <div class="cart-title">
+                    RFP Requests
+                </div>
+                
+            </div>
+        </div>
+    </div> -->
+</div>

@@ -1,0 +1,46 @@
+<p-card header="">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-5">
+                <mat-form-field class="w-100">
+                    <input matInput readonly autocomplete="off" [matDatepicker]="dp" placeholder="From" (click)="openDatePicker(dp)" [(ngModel)]="from">
+                    <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+                    <mat-datepicker #dp (viewChanged)="closeDatePicker($event,  'from',dp)"></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div class="col-md-5">
+                <mat-form-field class="w-100">
+                    <input matInput readonly autocomplete="off" [matDatepicker]="dp2" placeholder="To" (click)="openDatePicker(dp2)" [(ngModel)]="to">
+                    <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+                    <mat-datepicker #dp2 (viewChanged)="closeDatePicker($event,  'to' , dp2 )"></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btnStyle" (click)="validateDates()">Submit</button>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-hover newTableCustom">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Created by</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let ram of allRamadanConfig">
+                            <td>{{ram.title}}</td>
+                            <td>{{ram.start_date}}</td>
+                            <td>{{ram.end_date}}</td>
+                            <td>{{ram.user_creator_name}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</p-card>

@@ -1,0 +1,165 @@
+@import '../../../../colors';
+a,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    font-family: $mainFontFamily;
+    // font-family: 'Lato', sans-serif !important;
+    color: #fff;
+}
+
+.globalFont {
+    font-family: $mainFontFamily;
+    // font-family: 'Lato', sans-serif !important;
+    font-weight: bold;
+    font-size: large;
+}
+.dev-projects{
+
+
+
+.card {
+    // width: 220px;
+    // height: 220px;
+    width: 270px;
+    height: 299px;
+    // box-shadow: 3px 5px 10px 0 rgba(0, 0, 0, 0.16);
+    background-color: #fff;
+    position: relative;
+    border-radius: 16px;
+    border: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: auto;
+    //  ::after {
+    //     content: "";
+    //     position: absolute;
+    //     bottom: 0px;
+    //     left: 10px;
+    //     width: 220px;
+    //     height: 220px;
+    //     margin-bottom: 10px;
+    //     border: 2px solid $mainThemeColor;
+    //     z-index: -1;
+    // }
+    //  ::before {
+    //     content: "";
+    //     position: absolute;
+    //     top: 10px;
+    //     right: 10px;
+    //     width: 220px;
+    //     height: 220px;
+    //     margin-bottom: 10px;
+    //     border: 2px solid $mainThemeColor;
+    //     z-index: -1;
+    // }
+    .pCard_header {
+        // padding: 15px;
+        margin: 10px;
+        // color: $mainThemeColor;
+    }
+    .btn {
+        color: #fff;
+    }
+    .detailBtn{
+        background-color: $softThemeColor !important;
+        color: $mainThemeColor !important;
+        border-radius: 8px;
+        &:hover{
+            color: $softThemeColor !important;
+            background-color: $mainThemeColor !important;  
+        }
+    }
+
+    .subTitel{
+        color: $subThemeColor;
+        font-weight: bold;
+    }
+    .status-input{
+        min-width: 109px;
+    }
+    .bg-soft-success{
+        background-color:#E3FCEF!important;
+        color: #36B37E !important;
+    }
+    ::ng-deep .p-progressbar .p-progressbar-value {
+    
+    // background: linear-gradient(180deg, #F7BE47 40%, #AE63D4 60%) !important;
+    background: rgb(247,190,71);
+    background: linear-gradient(90deg, rgba(247,190,71,1) 0%, rgba(174,99,212,1) 100%);
+    
+    
+    
+    }
+    ::ng-deep .p-progressbar-determinate .p-progressbar-label
+    ,::ng-deep.p-multiselect-header	{
+    display: none !important;
+    }
+    ::ng-deep p-dropdown.ng-dirty.ng-invalid > .p-dropdown {
+        border-color: #ced4da;
+        // min-width: 100%;
+    }
+    ::ng-deep .p-dropdown , ::ng-deep .p-calendar ,::ng-deep .p-multiselect {
+        min-width: 100% !important;
+    
+    }
+    ::ng-deep .p-inputtext{
+    border-right: 0;
+    &:hover{
+        border-color: #ced4da !important;
+        }
+    }
+    ::ng-deep .p-calendar-w-btn .p-datepicker-trigger{
+        background-color: white; 
+        border-left: 0 !important;
+        border-color: #ced4da;
+        color:$mainThemeColor;
+    
+        &:hover{
+        background-color: white; 
+        color:$mainThemeColor;
+        border-color: #ced4da;
+    
+        }
+        .pi-calendar{
+            color:$mainThemeColor;
+        }
+    }
+}
+
+span {
+    margin-right: 50px;
+}
+
+.btn {
+    background-color: $buttonMainBackgroundColor;
+    color: #fff;
+}
+
+.category_header {
+    width: fit-content;
+    color: #100f0f;
+    margin-bottom: 10px;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.hrLine {
+    height: 2px;
+    width: 100%;
+    background-color: $mainThemeColor;
+    margin: 5px;
+    margin-bottom: 30px;
+}
+}
+@media (max-width: 768px) {
+    .mainPage {
+        width: 100%;
+    }
+}

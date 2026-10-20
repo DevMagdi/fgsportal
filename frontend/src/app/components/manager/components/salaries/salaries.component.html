@@ -1,0 +1,36 @@
+<div class="container-fluid" *ngIf="!!currentUser">
+    <div class="row">
+        <div class="col-md-12 mt-3">
+            <mat-tab-group mat-align-tabs="left" class="mx-3 px-3">
+                <mat-tab label="Monthly Salaries" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || showForHr == true">
+                    <app-monthly-salaries></app-monthly-salaries>
+                </mat-tab>
+                <mat-tab label="Approved Salaries" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || showForFinance == true">
+                    <app-approved-salaries></app-approved-salaries>
+                </mat-tab>
+                <mat-tab label="Salaries" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || showForHr == true">
+                    <app-edit-salaries></app-edit-salaries>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>
+
+<button id="showsalarysessionmodal" data-bs-toggle="modal" data-bs-target="#sessionModal" style="display:none;"></button>
+<div class="modal modal-top fade" id="sessionModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-top modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="exampleModalLabel3">Session Will Expire In {{sessionCounter}}</h2>
+                <button id="closeForm" style="display:none;" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-footer">
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-outline-success mx-1" (click)="extendSession()">Continue</button>
+                    <button class="btn btn-outline-danger mx-1" (click)="endSession()">End</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

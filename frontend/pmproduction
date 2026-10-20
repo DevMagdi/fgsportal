@@ -1,0 +1,102 @@
+warning: LF will be replaced by CRLF in .firebase/hosting.ZGlzdFxmZ3NQTQ.cache.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in firebase.json.
+The file will have its original line endings in your working directory
+[1mdiff --git a/.firebase/hosting.ZGlzdFxmZ3NQTQ.cache b/.firebase/hosting.ZGlzdFxmZ3NQTQ.cache[m
+[1mindex 1861a8f..12d317e 100644[m
+[1m--- a/.firebase/hosting.ZGlzdFxmZ3NQTQ.cache[m
+[1m+++ b/.firebase/hosting.ZGlzdFxmZ3NQTQ.cache[m
+[36m@@ -6,11 +6,18 @@[m [massets/img/menu-24px.svg,1617966101097,617652551fb31111ca0335ba193d0d21becf10e23[m
+ assets/img/plus.svg,1617966101097,657b17df3f2adad599010140d71b76af8b6985248f6e17d8971925d929d7274a[m
+ assets/img/unnamed.png,1617966101097,0391658ce3728fc475ea6eba38a9e565f5c7a6bfb2f132be171a014870f6ad2b[m
+ assets/js/smtp.js,1619440717281,c2c5d7954ca03829ce49ee399362d9fcb88ee0dfaf50757ace598af037e7dee3[m
+[31m-3rdpartylicenses.txt,1619603377980,139085bc70f9bb54ed44c83638b01b74c9ff60d59fac28fbddaab10c4ea114e9[m
+[31m-4.3c814d3d9deff17f4f0a.js,1619603377980,f2a0b4e111bfb73f9e721b49f22afe340ef8a096422f95499a15b0fe38b0db11[m
+[31m-index.html,1619603378259,437f6f164cbdb27230f6505df844d3d1d22e8ff742cb6891ee5d10485f81dfcd[m
+[31m-runtime.47790d87d5f738d63870.js,1619603377974,9a5ff1eda18456d8ba67301d83e52feddcb4e2f0bece9570b62ac5eb064cf4eb[m
+[31m-styles.4cc38eaa74506435c179.css,1619603377974,99da46d49496ecd74ed63d4afbd47cd432b69287463d35598dd3a9228cee6421[m
+[31m-polyfills.9786e999e1fb8b2b4650.js,1619603377974,364279a3ce762f08edd2833952e1d796cd15adcfa70aae53446003a467677a50[m
+[31m-5.8a8da79634369e6feea5.js,1619603377980,12834b51dae94db91c4bfe43a5e1ce3a0e887bb645a5749adbc1569d1f0c591c[m
+[31m-main.39dcfacf4ffe97968b63.js,1619603377974,7fcc155e762183f8a736e75791edd2f2432ad5eecc22599c732137b8a4492e06[m
+[32m+[m[32mcomponents-dev-dev-dev-module.js.map,1619692301753,20b21bffd8fa7ecf937cf1c5bd3058e110aa96f26da79e7d96099f8346cf6a1c[m
+[32m+[m[32mcomponents-dev-dev-dev-module.js,1619692301753,ced9b212cc8772485193322e93a248feaf612996613e00a4aa8bab7f0b27c30a[m
+[32m+[m[32mindex.html,1619692302074,f0c61a0d824aad9bceae98868477046bb1b0bcd278088d227d6bc041649288a8[m
+[32m+[m[32mruntime.js,1619692301753,5fb2126ee91f60362e93e1680f98f69c297ee5d72df6095aed60e7e85f5a080c[m
+[32m+[m[32mruntime.js.map,1619692301760,3dd579086449d7ff4d7ac621c03aa62f378dce717b2ad7d0e137bdf5791d18eb[m
+[32m+[m[32mpolyfills.js.map,1619692301760,fe6925375d43d134506635425769f77be75f3486e8fd0573cfabc02404fbf66e[m
+[32m+[m[32mpolyfills.js,1619692301753,bcf7b4b2eba8e6f41e569b643f884df87c6c8c140b7dd27acf27813ae46adcf9[m
+[32m+[m[32mfirebase-auth.js,1619692301753,1394d0d6fab7766cf7fdc62cd274ec1ed6b88c0c2a440e45757306a81184ebdd[m
+[32m+[m[32mfirebase-auth.js.map,1619692301753,052df7674033e8a97e8caf8f74f6104db25a7c516cf587f2d0c5ff9fd799a782[m
+[32m+[m[32mstyles.css,1619692301753,2e95cb19f1a5a6f54aeaf59aa403aa58044a4ca56ca809c6906a44b2d5c849cf[m
+[32m+[m[32mmain.js,1619692301753,47d2f09581e7b2fd0afae894404e84f08e197a2dca7a9d10dc2546915a78d722[m
+[32m+[m[32mmain.js.map,1619692301753,ea71672a9948d44ec8031414e4be67391f2470994b5f015b69bade3355ba551f[m
+[32m+[m[32mstyles.css.map,1619692301761,fbaca75274622a4251cd29c8e6c02bf7b97a2a8c59839402559ec9386af90afe[m
+[32m+[m[32mvendor.js,1619692301763,49765d73c67194fee460fe3efa31dfefec7ae1f83e5d6d9be6fdffcc00d2fe0e[m
+[32m+[m[32mvendor.js.map,1619692301763,6c1a20f2594cc161d914dbc68400b30fef9890e16d3a72dd7ffe129622bf763b[m
+[1mdiff --git a/firebase.json b/firebase.json[m
+[1mindex bec54d7..bb708f7 100644[m
+[1m--- a/firebase.json[m
+[1m+++ b/firebase.json[m
+[36m@@ -3,7 +3,7 @@[m
+     "rules": "database.rules.json"[m
+   },[m
+   "hosting": {[m
+[31m-    "public": "dist\\fgsPM",[m
+[32m+[m[32m    "public": "dist/fgsPM",[m
+     "ignore": [[m
+       "firebase.json",[m
+       "**/.*",[m
+[1mdiff --git a/package.json b/package.json[m
+[1mindex a918e8e..613353f 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -8,7 +8,9 @@[m
+         "test": "ng test",[m
+         "lint": "ng lint",[m
+         "e2e": "ng e2e",[m
+[31m-        "deploy-prod": "ng build --prod && firebase deploy --only hosting"[m
+[32m+[m[32m        "deploy-prod": "ng build --prod && firebase use fgspmproduction && firebase deploy --only hosting && firebase use fgspm-8bbdc",[m
+[32m+[m[32m        "deploy-test": "ng build && firebase use fgspm-8bbdc && firebase deploy --only hosting && firebase use fgspm-8bbdc"[m
+[32m+[m
+     },[m
+     "private": true,[m
+     "dependencies": {[m
+[1mdiff --git a/src/app/components/project-details/project-details.component.html b/src/app/components/project-details/project-details.component.html[m
+[1mindex 751d777..525942d 100644[m
+[1m--- a/src/app/components/project-details/project-details.component.html[m
+[1m+++ b/src/app/components/project-details/project-details.component.html[m
+[36m@@ -533,7 +533,7 @@[m
+         <div class="modal-content">[m
+             <div class="modal-header">[m
+                 <h5 class="modal-title" id="addNewTask">Add New Task</h5>[m
+[31m-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">[m
+[32m+[m[32m                <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cancelEditTask()" style="color: #fff;">[m
+           <span aria-hidden="true">&times;</span>[m
+         </button>[m
+             </div>[m
+[1mdiff --git a/src/app/components/project-details/project-details.component.ts b/src/app/components/project-details/project-details.component.ts[m
+[1mindex 9d2c293..600d040 100644[m
+[1m--- a/src/app/components/project-details/project-details.component.ts[m
+[1m+++ b/src/app/components/project-details/project-details.component.ts[m
+[36m@@ -723,19 +723,8 @@[m [mgetProjectTasks(){[m
+       (data)=>{[m
+         // console.log(data);[m
+         this.devTasksList = data[m
+[31m-        // let filteredTasks:Task[]=[][m
+[31m-        // for (let i in this.devTasksList){[m
+[31m-        //   if(new Date(this.devTasksList[i].start_date).toLocaleString() >= new Date(this.newTask.start_date).toLocaleString()){[m
+[31m-        //     filteredTasks.push(this.devTasksList[i])[m
+[31m-        //   }else if(new Date(this.devTasksList[i].start_date).toLocaleString() >= new Date(this.newTask.start_date).toLocaleString() &&  new Date(this.devTasksList[i].end_date).toLocaleString() <= this.newTask.end_date.toLocaleString()){[m
+[31m-        //     filteredTasks.push(this.devTasksList[i])[m
+[31m-        //   }[m
+[31m-        // }[m
+[31m-        // this.devTasksList = filteredTasks [m
+[31m-        this.devTasksList = this.devTasksList.filter(task => new Date(task.end_date).toLocaleString() >= new Date(this.newTask.start_date).toLocaleString())[m
+[31m-[m
+[31m-        this.devTasksList = this.devTasksList.filter(task => new Date(task.start_date).toLocaleString() <= new Date(this.newTask.end_date).toLocaleString())[m
+[31m-        [m
+[32m+[m[32m        this.devTasksList = this.devTasksList.filter(task => new Date(task.end_date).toLocaleString() >= new Date(this.newTask.start_date).toLocaleString() && new Date(task.start_date).toLocaleString() <= new Date(this.newTask.end_date).toLocaleString() && task.status != Status.CLOSED)[m[41m[m
+[32m+[m[32m        // this.devTasksList = this.devTasksList.filter(task => new Date(task.start_date).toLocaleString() <= new Date(this.newTask.end_date).toLocaleString())[m[41m[m
+         // this.devTasksList = this.devTasksList.filter(task => task.status != Status.CLOSED)[m
+         const empname = this.projectDetails.Devs_mempers?.[this.newTask.empID][m
+         if(!!empname){[m

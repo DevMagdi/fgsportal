@@ -1,0 +1,337 @@
+<div class="all">
+    <div class="container">
+        <div class="row" *ngIf="!!licenseDetails">
+            <div class="col-12">
+                <div class="pageHeader d-flex justify-content-between">
+                    <div class="title d-flex justify-content-start">
+                        <i class="material-icons arrowIcon p-1" [routerLink]="['/manager/license']">arrow_back</i>
+                        <h1>License Details</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="!!licenseDetails">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class=" p-3">
+                            <div class="projectDetailsData d-flex align-items-center">
+                                <div class="container-fluid projectDetailsRow p-3">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="normalMode">
+                                                <div class="pData">
+                                                    <h2>Account Name: <span style="cursor: pointer;">{{licenseDetails.accountName}}</span></h2>
+                                                </div>
+                                                <div class="pData">
+                                                    <h2>Client: <span>{{licenseDetails.clientName}}</span></h2>
+                                                </div>
+
+
+                                                <div class="pData">
+                                                    <h2>Start Date: <span>{{licenseDetails.startDate | date:'d/M/yyyy'}}</span></h2>
+                                                </div>
+
+                                                <div class="pData">
+                                                    <h2>End Date: <span>{{licenseDetails.endDate | date:'d/M/yyyy'}}</span></h2>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-5">
+                                            <div class="normalMode">
+
+                                                <div class="pData">
+                                                    <h2>License Type: <span>{{licenseDetails.type_name}}</span></h2>
+                                                </div>
+
+                                                <div class="pData">
+                                                    <h2>Product : <span>{{licenseDetails.product_name}}</span></h2>
+                                                </div>
+
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-2" 
+                                        *ngIf="currentUser.accRole == AccountRolesEnum.SUPER_USER ||
+                                        currentUser.department == DepartmentEnum.MANAGEMENT">
+                                            <div class="ctrBtns text-center">
+                                                <span class="material-icons edit" matTooltip="Edit Project"
+                                                 (click)="editLicense();open(mymodal)">
+                                                    edit
+                                                </span>
+                                                <span class="material-icons delete" matTooltip="Delete Project" 
+                                                
+                                                 (click)="deleteLicense()">
+                                                    delete
+                                               </span>
+                                            </div>
+                                            <div class="ctrBtns text-center pt-1 mt-1">
+                                                <button (click)="renewLicense()" class="btn renewBTN">Renew</button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row mb-4" *ngIf="!!licenseDetails.comment">
+                    <div class="col-12">
+                        <div class="p-3">
+                            <div class="devDetailsData d-flex align-items-center">
+                                <div class="container-fluid p-3">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="pData">
+                                                <h2>Comment :</h2>
+                                                <div [innerHTML]="licenseDetails.comment" class="px-5 ql-editor"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4" *ngIf="!!licenseDetails.fileURL">
+                    <div class="col-12">
+                        <div class="p-3">
+                            <div class="devDetailsData d-flex align-items-center">
+                                <div class="container-fluid p-3">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="pData">
+                                                <h2>Attach :</h2>
+                                                <a href="{{newServerApi}}{{licenseDetails.fileURL}}" target="_blank">{{licenseDetails.fileName}}</a>
+                                                <!-- <p-image src="{{newServerApi}}{{licenseDetails.fileURL}}" alt="{{licenseDetails.fileName}}" width="250px" height="250px" class="rounded thumbnail-image" [preview]="true"></p-image> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="row category_header my-3">
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75"></div>
+                <div class="hrLine"></div>
+            </div>
+            <div class="col-4">
+                <h1 class="text-center headerTxt mb-1">License History</h1>
+            </div>
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75 float-right"></div>
+                <div class="clr"></div>
+                <div class="hrLine w-100"></div>
+            </div>
+        </div>
+
+
+        <div class="row my-2">
+            <div class="col-12">
+                <section class="tasks">
+                    <table class="table table-hover">
+                        <thead class="theader">
+                            <tr>
+                                <td>Start Date</td>
+                                <td>End Date</td>
+                                <td>status</td>
+                                <!-- <td></td> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let liUpdate of licenseUpdates" class="trow">
+                                <td>{{liUpdate.startDate | date:'d/M/yyyy'}}</td>
+                                <td>{{liUpdate.endDate | date:'d/M/yyyy'}}</td>
+                                <td>{{liUpdate.status_name}}</td>
+                                <!-- <td>
+                                    <span class="material-icons edit" matTooltip="Edit Project" *ngIf="liUpdate.status == '1'" (click)="editLicenseHistory(liUpdate);open(historyModal)">
+                                        edit
+                                    </span>
+                                </td> -->
+                            </tr>
+                        </tbody>
+
+
+                    </table>
+
+
+                </section>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+<!-- Edit License Modal-->
+<ng-template class="myModal" #mymodal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Edit License</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form [formGroup]="editLicenseForm" (ngSubmit)="submitEditLicense()" class="example-form">
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <!-- <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Account Name</mat-label>
+                            <input matInput type="text" id="title" formControlName="accountName">
+                            <mat-error class="alert help-block" *ngIf="!editLicenseForm.get('accountName')?.valid && editLicenseForm.get('accountName')?.touched">
+                                Account Name Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div> -->
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Client</mat-label>
+                            <mat-select formControlName="client">
+                                <mat-option *ngFor="let client of allClients" [value]='client.id'>{{client.partner_name}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">License Type</mat-label>
+                            <mat-select formControlName="type">
+                                <mat-option *ngFor="let type of licenseTypes" [value]='type.id'>{{type.license_type}}</mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!editLicenseForm.get('type')?.valid && editLicenseForm.touched">
+                                License Type Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">License Product</mat-label>
+                            <mat-select formControlName="product">
+                                <ng-container *ngFor="let product of products">
+                                    <mat-option *ngIf="product.id != '1'" [value]='product.id'>{{product.product_name}}</mat-option>
+                                </ng-container>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!editLicenseForm.get('product')?.valid && editLicenseForm.touched">
+                                License Product Is Required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Contract Start Date</mat-label>
+                        <p-calendar (ngModelChange)="getDateAfterYear()" formControlName="start" [showIcon]="true" inputId="icon"></p-calendar>
+                        <mat-error class="alert help-block" *ngIf="!editLicenseForm.get('start')?.valid && editLicenseForm.get('start')?.touched">
+                            Start Date is Required
+                        </mat-error>
+                    </div>
+
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Contract End Date</mat-label>
+                        <p-calendar formControlName="end" [showIcon]="true" inputId="icon"></p-calendar>
+                        <mat-error class="alert help-block" *ngIf="!editLicenseForm.get('end')?.valid && editLicenseForm.get('end')?.touched">
+                            End Date is Required
+                        </mat-error>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+                        <label class="formLables">Comment:</label>
+                        <p-editor formControlName="comment" [modules]="quillOPT" [style]="{'height':'210px'}">
+                            <ng-template pTemplate="header">
+                                <span class="ql-format-group">
+                                </span>
+                            </ng-template>
+                        </p-editor>
+                        <mat-error class="alert help-block" *ngIf="!editLicenseForm.get('comment')?.valid && editLicenseForm.touched">
+                            Description Is Required
+                        </mat-error>
+                    </div>
+
+                    <div class="col-lg-12 my-3">
+
+                        <div class="container-fluid">
+                            <div class="row">
+                                <img *ngIf="!!editLicenseForm.get('imgURL')?.value" [src]="editLicenseForm.get('imgURL')?.value" alt="ticketImages" width="100">
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn submitFormBtn" mat-raised-button (click)="fileInput.click()">Attach File</button>
+                        <input hidden (change)="imagesupload($event)" #fileInput type="file" id="file" accept="image/*">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button *ngIf="!uploading" type="submit" class="btn submitFormBtn" [disabled]="editLicenseForm.invalid">Submit</button>
+            <button *ngIf="uploading" type="submit" class="btn submitFormBtn" disabled>Loading...</button>
+        </div>
+    </form>
+
+</ng-template>
+
+
+
+
+<!-- Edit License History Modal-->
+<!-- <ng-template class="myModal" #historyModal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Edit License</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form [formGroup]="editLicenseHistoryForm" (ngSubmit)="submitEditHistory()" class="example-form">
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Contract Start Date</mat-label>
+                        <p-calendar formControlName="start" [showIcon]="true" inputId="icon"></p-calendar>
+                        <mat-error class="alert help-block" *ngIf="!editLicenseHistoryForm.get('start')?.valid && editLicenseHistoryForm.get('start')?.touched">
+                            Start Date is Required
+                        </mat-error>
+                    </div>
+
+                    <div class="col-lg-6 my-3">
+                        <mat-label class="formLables">Contract End Date</mat-label>
+                        <p-calendar formControlName="end" [showIcon]="true" inputId="icon"></p-calendar>
+                        <mat-error class="alert help-block" *ngIf="!editLicenseHistoryForm.get('end')?.valid && editLicenseHistoryForm.get('end')?.touched">
+                            End Date is Required
+                        </mat-error>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn submitFormBtn" [disabled]="editLicenseHistoryForm.invalid">Submit</button>
+        </div>
+    </form>
+
+</ng-template> -->

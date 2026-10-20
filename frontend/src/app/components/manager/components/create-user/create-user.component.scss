@@ -1,0 +1,130 @@
+@import '../../../../colors';
+.search {
+    height: 42px;
+
+    input {
+        // border: $mainThemeColor solid 1px;
+        // border-radius: 0;
+        // background-color: $softThemeColor;
+        color: $subSubThemeColor;
+        font-size: 12px;
+        height: 42px;
+        &::placeholder {
+            color: $subSubThemeColor;
+            }
+
+    }
+    .p-inputtext{
+        border-right: 1px solid !important;
+        border-color: $subSubThemeColor;
+    }
+    i , span {
+        color: $subSubThemeColor;
+        // background-color: $softThemeColor;
+        // margin-right: 0;
+    }
+    
+}
+
+@keyframes dot-keyframes {
+    0% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2, 1.2);
+    }
+    100% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+}
+
+.loading-dots {
+    text-align: center;
+    width: 100%;
+    &--dot {
+        animation: dot-keyframes 1.5s infinite ease-in-out;
+        background-color: #000;
+        border-radius: 10px;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+        &:nth-child(2) {
+            animation-delay: .5s;
+        }
+        &:nth-child(3) {
+            animation-delay: 1s;
+        }
+    }
+}
+
+.btns {
+    .deleted {
+        background-color: $tabBackGround;
+    }
+}
+
+.tableCustom {
+    thead {
+        background-color: $tabBackGround;
+        color: #100f0f;
+        line-height: 50px;
+    }
+    tbody {
+        tr {
+            border-top: solid 2px $mainThemeColor;
+            line-height: 50px;
+        }
+    }
+}
+
+.newUserBtn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background-color: $buttonMainBackgroundColor !important;
+    color: #fff !important;
+}
+
+.routing {
+    cursor: pointer;
+}
+
+@keyframes dot-keyframes {
+    0% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2, 1.2);
+    }
+    100% {
+        opacity: .4;
+        transform: scale(1, 1);
+    }
+}
+
+.loading-dots {
+    text-align: center;
+    width: 100%;
+    &--dot {
+        animation: dot-keyframes 1.5s infinite ease-in-out;
+        background-color: $mainThemeColor;
+        border-radius: 10px;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+        &:nth-child(2) {
+            animation-delay: .5s;
+        }
+        &:nth-child(3) {
+            animation-delay: 1s;
+        }
+    }
+}

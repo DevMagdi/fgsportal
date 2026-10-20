@@ -1,0 +1,94 @@
+<div>
+    <div>
+        <form [formGroup]="reportForm">
+
+            <app-form-input label="Title" [control]="reportForm.get('team_request_title')"
+                placeholder="Write Title"></app-form-input>
+
+            <app-form-input label="Description" [control]="reportForm.get('team_request_description')"
+                placeholder="Write Description"></app-form-input>
+<!-- 
+                <mat-form-field class="example-full-width w-100">
+                    <mat-label>From</mat-label>
+                    <input matInput type="date" id="fromDate" formControlName="for_date">
+                </mat-form-field> -->
+
+            <app-form-input label="Date" type="date" [control]="reportForm.get('for_date')"
+                placeholder="pick date"></app-form-input>
+            <div>
+
+                <h4>Assign To :
+                    <br>
+                    <mat-select class="form-control" formControlName="manager_approve_id" [ngClass]="{'is-invalid':!reportForm.get('manager_approve_id')?.valid &&
+                                 reportForm.get('manager_approve_id')?.touched}" placeholder="Select Manager"
+                        floatlLabel="never">
+                        <mat-option *ngFor="let man of managers" [value]='man.key'>{{man.username}}</mat-option>
+                    </mat-select>
+                    <div *ngIf="!reportForm.get('manager_approve_id')?.valid && reportForm.get('manager_approve_id')?.touched"
+                        class="invalid-feedback">
+
+                        <small>Manager is Required</small>
+                    </div>
+                </h4>
+            </div>
+
+            <div>
+                <label for="dev">Developers list</label>
+
+                <mat-select formControlName="developer_team" multiple class="form-control my-2"
+                    placeholder="Select Developers" floatlLabel="never"
+                    [ngClass]="{'is-invalid':!reportForm.get('developer_team')?.valid &&
+                                 reportForm.get('developer_team')?.touched}" placeholder="Select Manager"
+                        >
+                    <mat-option *ngFor="let dev of allDevs" [value]='dev.key'>{{dev.username}}</mat-option>
+                </mat-select>
+                <div *ngIf="!reportForm.get('developer_team')?.valid && reportForm.get('developer_team')?.touched"
+                        class="invalid-feedback">
+
+                        <small>Manager is Required</small>
+                    </div>
+            </div>
+
+            <div formArrayName="projects">
+                <div class="d-flex justify-content-between align-items-center my-2">
+                    <h4 class="m-0">Projects :</h4>
+                    <a   class="main-color text-decoration-underline cursor" (click)="addProject()">
+                        Add other project
+                    </a>
+                </div>
+
+
+                <div class="inner mb-3" *ngFor="let data1 of projectsData().controls; let i=index;" [formGroupName]="i">
+                    <div *ngIf="i>0" class="d-flex justify-content-between">
+                        <p>project {{i+1}}</p>
+                        <a class="text-danger text-decoration-underline cursor" (click)="deleteProject(i)"> delete</a>
+                    </div>
+                    <div class="">
+
+                        <mat-select formControlName="project_id" class="form-control my-2" placeholder="Select Project"
+                            floatlLabel="never" (selectionChange)="getProjectID(data1)">
+                            <mat-option *ngFor="let man of projects" [value]='man.key'>{{man.title}}</mat-option>
+                        </mat-select>
+
+                        <mat-select *ngIf="data1.value.project_id" formControlName="process_details" multiple
+                            class="form-control my-2" placeholder="Select processes" floatlLabel="never">
+                            <mat-option *ngFor="let process of data1.value.list"
+                                [value]='process.key'>{{process.title}}</mat-option>
+                        </mat-select>
+
+                    </div>
+
+                </div>
+            </div>
+            <button *ngIf="!report" type="button" class="btn btnStyle text-white" (click)="createReport()" [disabled]="reportForm.invalid">
+                Create Report
+            </button>
+            <button *ngIf="report" type="button" class="btn btnStyle text-white" (click)="updateReport()" [disabled]="reportForm.invalid">
+                Update Report
+            </button>
+        </form>
+
+
+    </div>
+
+</div>

@@ -1,0 +1,769 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="contractDetailsLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="all">
+    <div class="container-fluid">
+        <div class="row" *ngIf="!!projectDetails">
+            <div class="col-12">
+                <div class="pageHeader d-flex justify-content-between">
+                    <div class="title d-flex justify-content-start">
+                        <!-- <img src="../../../assets/img/Backward arrow.svg" matTooltip="back" class="Backward-arrow" [routerLink]="['/client-support']"> -->
+                        <i class="material-icons arrowIcon p-1" [routerLink]="['/manager/client-support']">arrow_back</i>
+                        <h1>Support Details</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" *ngIf="!!projectDetails">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="">
+                            <div class="projectDetailsData d-flex align-items-center">
+                                <div class="container-fluid projectDetailsRow p-3">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="normalMode">
+                                                <div class="pData d-flex justify-content-between">
+                                                    <h2 class="main-color">{{projectDetails.customerName}}</h2>
+                                                    <div class="dropdown">
+                                                        <a class="dropdown-toggle" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M14.75 19C14.75 20.52 13.52 21.75 12 21.75C10.48 21.75 9.25 20.52 9.25 19C9.25 17.48 10.48 16.25 12 16.25C13.52 16.25 14.75 17.48 14.75 19ZM10.75 19C10.75 19.69 11.31 20.25 12 20.25C12.69 20.25 13.25 19.69 13.25 19C13.25 18.31 12.69 17.75 12 17.75C11.31 17.75 10.75 18.31 10.75 19Z" fill="#292D32"/>
+                                                            <path d="M14.75 5C14.75 6.52 13.52 7.75 12 7.75C10.48 7.75 9.25 6.52 9.25 5C9.25 3.48 10.48 2.25 12 2.25C13.52 2.25 14.75 3.48 14.75 5ZM10.75 5C10.75 5.69 11.31 6.25 12 6.25C12.69 6.25 13.25 5.69 13.25 5C13.25 4.31 12.69 3.75 12 3.75C11.31 3.75 10.75 4.31 10.75 5Z" fill="#292D32"/>
+                                                            <path d="M14.75 12C14.75 13.52 13.52 14.75 12 14.75C10.48 14.75 9.25 13.52 9.25 12C9.25 10.48 10.48 9.25 12 9.25C13.52 9.25 14.75 10.48 14.75 12ZM10.75 12C10.75 12.69 11.31 13.25 12 13.25C12.69 13.25 13.25 12.69 13.25 12C13.25 11.31 12.69 10.75 12 10.75C11.31 10.75 10.75 11.31 10.75 12Z" fill="#292D32"/>
+                                                            </svg>
+
+                                                        </a>
+                                                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                                                            <li><a class="dropdown-item" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" (click)="editSupport();editSupportMode=true">Update </a></li>
+                                                            <li><a class="dropdown-item" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" (click)="deleteSupport()">Delete</a></li>
+                                                            <li><a class="dropdown-item" (click)="renewContract()">Renew</a></li>
+                                                            <li><a class="dropdown-item" [routerLink]="['/manager/partners',projectDetails.customerKey]">View Customer Details</a></li>
+
+
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <p class="badge m-auto p-2 {{projectDetails.status_name |lowercase}}" [ngClass]="{'bg-soft-success': (projectDetails.status_name |lowercase) =='running'}">
+                                                        {{projectDetails.status_name}}</p>
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-3">
+                                            <div class="normalMode">
+
+                                                <div class="pData">
+                                                    <p>Product: <span>{{projectDetails.product_name}}</span></p>
+                                                </div>
+                                                <div class="pData">
+                                                    <p>End Date: <span>{{projectDetails.endDate}}</span></p>
+                                                </div>
+
+                                                <div class="pData">
+                                                    <p>Start Date: <span>{{projectDetails.startDate}}</span></p>
+                                                </div>
+                                                <div class="pData d-flex">
+                                                    <p>Notes: </p>
+                                                    <span [innerHTML]="projectDetails.notes"></span>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="normalMode">
+
+                                                <div class="pData">
+                                                    <p>Manager: <span>{{projectDetails.managerName}}</span></p>
+                                                </div>
+
+                                                <div class="pData">
+                                                    <p>Project Manager: <span>{{projectDetails.PMName}}</span></p>
+                                                </div>
+                                                <div class="pData">
+                                                    <p>Perirty:
+                                                        <span *ngIf="projectDetails.periority == '1'">GOLD</span>
+                                                        <span *ngIf="projectDetails.periority == '2'">Silver</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-md-3">
+
+                                            <div class="pDats">
+                                                <p class="name"> Customer Name :
+                                                    <span style="cursor: pointer;" [routerLink]="['/manager/partners',projectDetails.customerKey]">{{projectDetails.customerName}}</span>
+                                                </p>
+                                            </div>
+                                            <div class="pData">
+                                                <p>Customer Address: <span>{{projectDetails.customerAddress || '--'}}</span></p>
+                                            </div>
+                                            <div class="pDats">
+                                                <p *ngIf="!!projectDetails.primary_contact_phone && projectDetails.primary_contact_phone.length > 0">
+                                                    Customer Phone: <span *ngFor="let mobile of projectDetails.primary_contact_phone">
+                                                        {{mobile.phone}} -
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="pData">
+                                                <p> Customer Email :
+                                                    <span>
+                                                        {{projectDetails.primary_contact_email || '--'}}
+                                                    </span>
+                                                </p>
+                                            </div>
+
+
+                                            <!-- <div class="ctrBtns text-center">
+                                                <span class="material-icons edit" matTooltip="Edit Project" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" (click)="editSupport();open(supportModal)">
+                                                    edit
+                                                </span>
+                                                <span class="material-icons delete" matTooltip="Delete Project" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT" (click)="deleteSupport()">
+                                                    delete
+                                               </span>
+                                            </div>
+                                            <div class="ctrBtns text-center pt-1 mt-1">
+                                                <button (click)="renewContract()" class="btn renewBTN">Renew</button>
+                                            </div> -->
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="p-3">
+                            <div class="devDetailsData d-flex align-items-center">
+                                <div class="container-fluid devsDetailsRow p-3">
+                                    <div class="row">
+                                        <div class="col-md-4 dData">
+
+                                            <div class="DevOnNormalMode" *ngIf="!DevOnEditMode">
+                                                <p>Business Analysis :</p>
+                                                <ul *ngIf="projectDetails">
+                                                    <li class="ml-5" *ngFor="let ba of projectDetails.BAsTeam | keyvalue">
+                                                        {{ ba.value }}
+                                                    </li>
+                                                </ul>
+
+                                                <h2 *ngIf="projectDetails">Tech Lead : <span>{{projectDetails.Tech_leadName}}</span></h2>
+                                            </div>
+                                            <div class="DevOnEditMode" *ngIf="DevOnEditMode">
+                                                <h2 *ngIf="projectDetails">Business Analysis :
+                                                    <span>
+                                                        <mat-select class="form-control" multiple name="" id="" [(ngModel)]="project_business_analysis">
+                                                            <mat-option *ngFor="let ba of BAs" value="{{ba.key}}">{{ba.username}}</mat-option>
+                                                            <mat-option *ngFor="let dev of devs" value="{{dev.key}}">{{dev.username}}</mat-option>
+                                                        </mat-select>
+                                                    </span>
+                                                </h2>
+                                                <hr>
+                                                <h2 *ngIf="projectDetails">Tech Lead : <span>
+                                        <select class="form-control" name="" id="" [(ngModel)]="tech_leads">
+                                            <option *ngFor="let tech of TLeads" value="{{tech.key}}">{{tech.username}}</option>
+                                        </select>
+                                    </span></h2>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7 dData">
+                                            <div class="DevOnNormalMode " *ngIf="!DevOnEditMode">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-md-9">
+                                                            <h2>Developers : </h2>
+                                                            <ul *ngIf="projectDetails">
+                                                                <li class="ml-5" *ngFor="let dev of projectDetails.Devs_mempers | keyvalue">
+                                                                    {{ dev.value }}
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="DevOnEditMode" *ngIf="DevOnEditMode">
+                                                <h2>Developers : </h2>
+                                                <mat-select class="form-control" multiple [(ngModel)]="project_team_mempers">
+                                                    <mat-option *ngFor="let dev of devs" value="{{dev.key}}">{{dev.username}}</mat-option>
+                                                    <mat-option *ngFor="let ba of BAs" value="{{ba.key}}">{{ba.username}}</mat-option>
+                                                </mat-select>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="ctrBtns" *ngIf="!DevOnEditMode">
+                                                <img src="../../../assets/img/edit-alt.svg" class="edit-alt" matTooltip="Edit Developers" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="editDevs()">
+                                            </div>
+                                            <div class="ctrBtns" *ngIf="DevOnEditMode">
+                                                <span class="material-icons save" matTooltip="Save Changes" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="saveEditDevs()">
+                                                    save
+                                                </span>
+                                                <span class="material-icons cancel" matTooltip="Cancel" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="cancelEdit()">
+                                                    cancel
+                                                </span>
+                                            </div>
+                                        </div> 
+
+                                         <div class="col-lg-6">
+                                            <div>
+                                                <div class="pData">
+                                                    <h2>Priority:
+                                                        <span *ngIf="projectDetails.periority == '1'">GOLD</span>
+                                                        <span *ngIf="projectDetails.periority == '2'">Silver</span>
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6" *ngIf="!!projectDetails.notes">
+                                            <div>
+                                                <h2>Notes :</h2>
+                                                <div [innerHTML]="projectDetails.notes" class="px-5 ql-editor"></div>
+                                            </div>
+                                        </div> 
+
+
+                                     </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+
+                <!-- <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="p-3">
+                            <div class="projectDetailsData d-flex align-items-center">
+                                <div class="container-fluid projectDetailsRow customerInfo p-3">
+                                    <div class="row">
+                                        <div class="container-fluid customerInfoNormalMode">
+                                            <div class="row">
+                                                <div class="col-2"></div>
+                                                <div class="col-8">
+                                                    <div class="front-side" *ngIf="!!projectDetails">
+                                                        <div class="color-grid">
+                                                            <div class="black"></div>
+                                                            <div class="red1"></div>
+                                                            <div class="red2"></div>
+                                                            <div class="green"></div>
+                                                        </div>
+                                                        <div class="info-grid">
+                                                            <div class="name">
+                                                                <h2 style="cursor: pointer;" [routerLink]="['/manager/partners',projectDetails.customerKey]">{{projectDetails.customerName}}</h2>
+                                                            </div>
+                                                            <div class="addr">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="30px" height="30px">
+                                                                    <g>
+                                                                        <g>
+                                                                            <path d="M455.139,498.052l-99.132-99.132c-1.532-1.532-3.61-2.392-5.777-2.392h-18.927c-4.512,0-8.17,3.657-8.17,8.17    s3.658,8.17,8.17,8.17h15.542l82.792,82.791H82.362l82.791-82.791h15.542c4.512,0,8.17-3.657,8.17-8.17s-3.658-8.17-8.17-8.17    H161.77c-2.167,0-4.245,0.861-5.777,2.392l-99.132,99.132c-2.337,2.338-3.036,5.851-1.771,8.904    c1.265,3.053,4.244,5.044,7.548,5.044h386.723c3.304,0,6.283-1.99,7.548-5.044C458.175,503.903,457.475,500.39,455.139,498.052z"
+                                                                                fill="#FFFFFF" />
+                                                                        </g>
+                                                                    </g>
+                                                                    <g>
+                                                                        <g>
+                                                                            <path d="M256,0C161.393,0,84.426,76.968,84.426,171.574c0,35.596,10.808,69.742,31.263,98.756l133.641,188.964    c1.532,2.165,4.019,3.452,6.671,3.452c2.653,0,5.14-1.288,6.671-3.452L396.32,270.32c20.448-29.004,31.256-63.15,31.256-98.746    C427.574,76.968,350.607,0,256,0z M382.971,260.895L256,440.427L129.037,260.905c-18.495-26.234-28.271-57.125-28.271-89.331    C100.766,85.978,170.403,16.34,256,16.34s155.234,69.637,155.234,155.234C411.234,203.78,401.458,234.671,382.971,260.895z"
+                                                                                fill="#FFFFFF" />
+                                                                        </g>
+                                                                    </g>
+                                                                    <g>
+                                                                        <g>
+                                                                            <path d="M256,92.596c-43.549,0-78.979,35.429-78.979,78.979c0,14.657,4.073,28.988,11.779,41.442    c2.375,3.836,7.41,5.022,11.247,2.649c3.837-2.375,5.023-7.41,2.649-11.247c-6.107-9.87-9.335-21.225-9.335-32.843    c0-34.539,28.099-62.638,62.638-62.638s62.638,28.099,62.638,62.638S290.539,234.213,256,234.213    c-11.617,0-22.974-3.228-32.843-9.335c-3.839-2.376-8.873-1.187-11.247,2.649s-1.189,8.873,2.649,11.247    c12.454,7.706,26.784,11.779,41.44,11.779c43.549,0,78.979-35.429,78.979-78.979C334.979,128.025,299.549,92.596,256,92.596z"
+                                                                                fill="#FFFFFF" />
+                                                                        </g>
+                                                                    </g>
+                                                                </svg>
+                                                                <p class="mt-2">
+                                                                    <strong>
+                                                                        {{projectDetails.customerAddress}}
+                                                                    </strong>
+                                                                </p>
+                                                            </div>
+                                                            <div class="phoneNo">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 472.811 472.811" enable-background="new 0 0 472.811 472.811" width="30px" height="30px">
+                                                                    <g>
+                                                                        <path d="M358.75,0H114.061C97.555,0,84.128,13.428,84.128,29.934v412.944c0,16.505,13.428,29.934,29.934,29.934H358.75   c16.506,0,29.934-13.428,29.934-29.934V29.934C388.683,13.428,375.256,0,358.75,0z M99.128,75.236h274.556v312.687H99.128V75.236z    M114.061,15H358.75c8.234,0,14.934,6.699,14.934,14.934v35.302H99.128V29.934C99.128,21.699,105.827,15,114.061,15z    M358.75,457.811H114.061c-8.234,0-14.934-6.699-14.934-14.934v-44.955h274.556v44.955   C373.683,451.112,366.984,457.811,358.75,457.811z"
+                                                                            fill="#FFFFFF" />
+                                                                        <path d="m236.406,404.552c-13.545,0-24.564,11.02-24.564,24.565s11.02,24.564 24.564,24.564 24.564-11.02 24.564-24.564-11.019-24.565-24.564-24.565zm0,39.129c-8.031,0-14.564-6.534-14.564-14.564 0-8.031 6.533-14.565 14.564-14.565s14.564,6.534 14.564,14.565c0,8.03-6.533,14.564-14.564,14.564z"
+                                                                            fill="#FFFFFF" />
+                                                                        <path d="m202.406,47.645h68c2.762,0 5-2.239 5-5s-2.238-5-5-5h-68c-2.762,0-5,2.239-5,5s2.238,5 5,5z" fill="#FFFFFF" />
+                                                                        <path d="m184.409,47.645c1.31,0 2.6-0.53 3.53-1.46 0.93-0.94 1.47-2.22 1.47-3.54s-0.54-2.6-1.47-3.54c-0.931-0.93-2.221-1.46-3.53-1.46-1.32,0-2.601,0.53-3.54,1.46-0.93,0.93-1.46,2.22-1.46,3.54s0.53,2.6 1.46,3.54c0.93,0.93 2.22,1.46 3.54,1.46z"
+                                                                            fill="#FFFFFF" />
+                                                                    </g>
+                                                                </svg>
+                                                                <p class="mt-2" *ngIf="!!projectDetails.primary_contact_phone && projectDetails.primary_contact_phone.length > 0">
+                                                                    <strong *ngFor="let mobile of projectDetails.primary_contact_phone">
+                                                                        {{mobile.phone}} -
+                                                                    </strong>
+                                                                </p>
+                                                            </div>
+                                                            <div class="emailId">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 467.211 467.211" enable-background="new 0 0 467.211 467.211" width="30px" height="30px">
+                                                                    <g>
+                                                                        <path d="m413.917,96.775h-360.622c-6.369,0-11.551,5.181-11.551,11.55v213.182c0,6.369 5.182,11.55 11.551,11.55h360.622c6.368,0 11.55-5.181 11.55-11.55v-213.181c-5.68434e-14-6.369-5.182-11.551-11.55-11.551zm1.55,224.732c0,0.855-0.695,1.55-1.55,1.55h-360.622c-0.855,0-1.551-0.696-1.551-1.55v-213.181c0-0.855 0.695-1.55 1.551-1.55h360.622c0.854,0 1.55,0.696 1.55,1.55v213.181z"
+                                                                            fill="#FFFFFF" />
+                                                                        <path d="m459.711,340.558h-11.744v-237.715c0-15.752-12.815-28.568-28.568-28.568h-371.586c-15.753,0-28.568,12.815-28.568,28.568v237.714h-11.745c-4.143,0-7.5,3.358-7.5,7.5v20.605c0,13.384 10.889,24.272 24.272,24.272h418.666c13.384,0 24.272-10.889 24.272-24.272v-20.605c0.001-4.141-3.356-7.499-7.499-7.499zm-425.467-237.715c-2.84217e-14-7.481 6.087-13.568 13.568-13.568h371.586c7.481,0 13.568,6.086 13.568,13.568v237.714h-398.722v-237.714zm177.361,252.715h44v3.922c0,1.755-1.428,3.184-3.184,3.184h-37.633c-1.756,0-3.184-1.428-3.184-3.184v-3.922zm240.607,13.105c0,5.113-4.159,9.272-9.272,9.272h-418.667c-5.113,0-9.272-4.16-9.272-9.272v-13.105h11.744 174.861v3.922c0,7.27 5.914,13.184 13.184,13.184h37.633c7.27,0 13.184-5.914 13.184-13.184v-3.922h174.861 11.744v13.105z"
+                                                                            fill="#FFFFFF" />
+                                                                    </g>
+                                                                </svg>
+                                                                <p class="mt-2">
+                                                                    <strong>
+                                                                        {{projectDetails.primary_contact_email}}
+                                                                    </strong>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 text-right">
+                                                    <div class="ctrBtns">
+                                                         <span class="material-icons edit" matTooltip="Edit Customer Data" *ngIf="isManager == true || (isProjectManager == true && currentUser.key == projectDetails.PMID)" (click)="editCustomerInfo()">
+                                                            edit
+                                                        </span> 
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+
+
+        <div class="row category_header my-3">
+            <!-- <div class="col-4">
+                <div class="hrLine mb-2 w-75"></div>
+                <div class="hrLine"></div>
+            </div>
+            <div class="col-4">
+                <h1 class="text-center mb-1">Client Tickets</h1>
+            </div>
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75 float-right"></div>
+                <div class="clr"></div>
+                <div class="hrLine w-100"></div>
+            </div> -->
+            <p-tabView [(activeIndex)]="activeIndex">
+                <p-tabPanel header="Client Tickets">
+                    <div class="text-end">
+
+                        <a class="btn btnStyle  my-2 text-white ms-auto" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department ==
+                        DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPositionEmun.MANAGER ) ||
+                         (!!userPerms && !!checkIfHasPerm(20))" (click)="newTicketFormDisplay=true;checkIfNoClient()">
+                            Add Ticket
+                        </a>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-12">
+                            <section class="tasks">
+                                <table class="table table-hover newTableCustom">
+                                    <thead class="theader">
+                                        <tr>
+                                            <td>Key</td>
+                                            <td>title</td>
+                                            <td>Status</td>
+                                            <td>Start Date</td>
+                                            <td>Priority</td>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let ticket of projectTickets;let i=index" class="trow">
+                                            <td class="routingLink" [routerLink]="['/tickets',ticket.key]">{{i+1}}</td>
+                                            <td class="routingLink" [routerLink]="['/tickets',ticket.key]">{{ ticket.title}}</td>
+                                            <td>{{ ticket.status_name }}</td>
+                                            <td>{{ ticket.startDate}}</td>
+                                            <td>{{ticket.priority_name}}</td>
+                                        </tr>
+                                        <!-- <tr class="trow" 
+                                        *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT || (currentUser.department ==
+                                         DepartmentEnum.TECHNICAL_TEAM && currentUser.accPosition == accPositionEmun.MANAGER ) ||
+                                          (!!userPerms && !!checkIfHasPerm(20))">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>
+                                                <span matTooltip="Add" (click)="open(addTicketMOdal);checkIfNoClient()" class="material-icons addIcon hover">
+                                                    add_circle
+                                                </span>
+                                            </td>
+                                        </tr> -->
+                                    </tbody>
+
+
+                                </table>
+
+
+                            </section>
+                        </div>
+
+                    </div>
+
+                </p-tabPanel>
+                <p-tabPanel header="History">
+                    <ng-template pTemplate="content">
+                        <div class="row my-2">
+                            <div class="col-12">
+                                <section class="tasks">
+                                    <table class="table table-hover newTableCustom">
+                                        <thead class="theader">
+                                            <tr>
+                                                <td>Start Date</td>
+                                                <td>End Date</td>
+                                                <td>status</td>
+                                                <!-- <td></td> -->
+                                            </tr>
+                                        </thead>
+                                        <tbody *ngIf="!!projectDetails && !!projectDetails.history">
+                                            <tr *ngFor="let liUpdate of projectDetails.history" class="trow">
+                                                <td>{{liUpdate.contract_start_date | date:'d/M/yyyy'}}</td>
+                                                <td>{{liUpdate.contract_end_date | date:'d/M/yyyy'}}</td>
+                                                <td>{{liUpdate.contract_status_name}}</td>
+                                                <!-- <td>
+                                                <span class="material-icons edit" matTooltip="Edit Project" *ngIf="liUpdate.status == '1'" (click)="editLicenseHistory(liUpdate);open(historyModal)">
+                                                    edit
+                                                </span>
+                                            </td> -->
+                                            </tr>
+                                        </tbody>
+
+
+                                    </table>
+
+
+                                </section>
+                            </div>
+
+                        </div>
+                    </ng-template>
+                </p-tabPanel>
+                <p-tabPanel header="Contract Cost" *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT">
+                    <ng-template pTemplate="content">
+
+                        <app-contract-support-cost [SupportID]="supportID"></app-contract-support-cost>
+                    </ng-template>
+
+
+                </p-tabPanel>
+            </p-tabView>
+        </div>
+
+
+
+
+        <!-- <div class="row category_header my-3">
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75"></div>
+                <div class="hrLine"></div>
+            </div>
+            <div class="col-4">
+                <h1 class="text-center headerTxt mb-1">Support History</h1>
+            </div>
+            <div class="col-4">
+                <div class="hrLine mb-2 w-75 float-right"></div>
+                <div class="clr"></div>
+                <div class="hrLine w-100"></div>
+            </div>
+        </div> -->
+
+
+
+    </div>
+</div>
+
+
+
+
+
+
+<!-- Edit support Modal-->
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="editSupportMode" position="right" [transitionOptions]="'350ms'" (onHide)="editSupportForm.reset()">
+    <!-- <ng-template #supportModal let-c="close" let-d="dismiss"> -->
+    <!-- <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title"></h4>
+        <button type="button" class="close" aria-label="Close" (click)="d()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div> -->
+    <div class="">
+        <form [formGroup]="editSupportForm" (ngSubmit)="validateNewSupport()" class="example-form">
+
+            <div class="">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6 my-3">
+                            <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="formLables">Client</mat-label>
+                            <mat-select formControlName="client" class="form-control">
+                                <mat-option *ngFor="let client of allClients" [value]='client.id'>{{client.partner_name}}</mat-option>
+                            </mat-select>
+                            <!-- </mat-form-field> -->
+                        </div>
+
+                        <div class="col-lg-6 my-3">
+                            <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="formLables">Product</mat-label>
+                            <mat-select formControlName="product_Key" class="form-control">
+                                <mat-option *ngFor="let product of allProducts" [value]='product.id'>{{product.product_name}}</mat-option>
+                            </mat-select>
+                            <!-- </mat-form-field> -->
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Contract Type</mat-label>
+                            <br>
+                            <mat-select class="form-control" formControlName="priority">
+                                <mat-option *ngFor="let per of supportPeriorityEnum | keyvalue" value="{{per.value}}">
+                                    <span style="border-left: solid 7px rgb(231, 216, 3); padding-left: 3px;" *ngIf="per.key == 'GOLD'">
+                                        {{per.key}}
+                                    </span>
+                                    <span style="border-left: solid 7px #E2E5E6; padding-left: 3px;" *ngIf="per.key == 'SILVER'">
+                                        {{per.key}}
+                                    </span>
+                                </mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!newTicketForm.get('periority')?.valid && newTicketForm.get('periority')?.touched">
+                                Priority is Required
+                            </mat-error>
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <!-- <mat-form-field class="example-full-width w-100"> -->
+                            <mat-label class="formLables">Project Manager</mat-label>
+                            <mat-select formControlName="pmID" class="form-control">
+                                <mat-option></mat-option>
+                                <mat-option *ngFor="let manager of managers" [value]='manager.key'>{{manager.username}}</mat-option>
+                            </mat-select>
+                            <!-- </mat-form-field> -->
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Contract Start Date</mat-label>
+                            <p-calendar formControlName="start_date" [showIcon]="true" inputId="icon"></p-calendar>
+                            <mat-error class="alert help-block" *ngIf="!newTicketForm.get('start_date')?.valid && newTicketForm.get('start_date')?.touched">
+                                Start Date is Required
+                            </mat-error>
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Contract End Date</mat-label>
+                            <p-calendar formControlName="end_date" [showIcon]="true" inputId="icon"></p-calendar>
+                            <mat-error class="alert help-block" *ngIf="!newTicketForm.get('end_date')?.valid && newTicketForm.get('end_date')?.touched">
+                                End Date is Required
+                            </mat-error>
+                        </div>
+
+
+
+
+                        <div class="col-lg-12 my-3">
+                            <mat-label class="formLables">Notes</mat-label>
+                            <br>
+                            <p-editor formControlName="notes" [modules]="quillOPT" [style]="{'height':'210px'}">
+                                <ng-template pTemplate="header">
+                                    <span class="ql-format-group">
+                                    </span>
+                                </ng-template>
+                            </p-editor>
+                        </div>
+
+
+                    </div>
+                </div>
+                <!-- <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6 my-3">
+                            <mat-label class="formLables">Contract Type</mat-label>
+                            <br>
+                            <mat-select class="form-control" formControlName="priority">
+                                <mat-option *ngFor="let per of supportPeriorityEnum | keyvalue" value="{{per.value}}">
+                                    {{per.key}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error class="alert help-block" *ngIf="!editSupportForm.get('priority')?.valid && editSupportForm.get('priority')?.touched">
+                                Priority is Required
+                            </mat-error>
+                        </div>
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label>Start Date</mat-label>
+                            <p-calendar formControlName="start_date" [showIcon]="true" inputId="icon"></p-calendar>
+                            <mat-error class="alert help-block" *ngIf="!editSupportForm.get('start_date')?.valid && editSupportForm.get('start_date')?.touched">
+                                Start Date is Required
+                            </mat-error>
+                        </div>
+
+
+                        <div class="col-lg-6 my-3">
+                            <mat-label>End Date</mat-label>
+                            <p-calendar formControlName="end_date" [showIcon]="true" inputId="icon"></p-calendar>
+                            <mat-error class="alert help-block" *ngIf="!editSupportForm.get('end_date')?.valid && editSupportForm.get('end_date')?.touched">
+                                End Date is Required
+                            </mat-error>
+                        </div>
+
+                        <div class="col-lg-12 my-3 test">
+                            <mat-label>Client</mat-label>
+                            <br>
+                            <p-dropdown [style]="{width:'100%'}" [options]="allClients" formControlName="client" defaultLabel="Client" optionLabel="partner_name"></p-dropdown>
+                            <mat-error class="alert help-block" *ngIf="!editSupportForm.get('proceses')?.valid && editSupportForm.get('proceses')?.touched">
+                                Client is Required
+                            </mat-error>
+                        </div>
+
+                    </div>
+                </div> -->
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btnStyle" [disabled]="editSupportForm.invalid">Submit</button>
+            </div>
+        </form>
+    </div>
+
+</p-sidebar>
+<!-- </ng-template> -->
+
+
+<p-sidebar styleClass="p-sidebar-md" class="side" [baseZIndex]="999" [autoZIndex]="false" [(visible)]="newTicketFormDisplay" position="right" [transitionOptions]="'350ms'" (onHide)="newTicketForm.reset()">
+    <!-- <ng-template class="myModal" #addTicketMOdal let-c="close" let-d="dismiss"> -->
+    <!-- <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div> -->
+    <h4 class="modal-title" id="modal-basic-title">New Ticket</h4>
+    <form [formGroup]="newTicketForm" (ngSubmit)="validateNewTicket()" class="example-form">
+        <div class="modal-body">
+            <div class="container">
+                <div class="row">
+                    <!-- <div class="col-12" *ngIf="!projectDetails.customerKey">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Choose Client</mat-label>
+                            <mat-select formControlName="clientKey">
+                                <mat-option *ngFor="let client of allClients" [value]='client.key'>{{client.username}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div> -->
+
+
+                    <div class="col-lg-6">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <!-- <label class="">Ticket Title</label>
+                            <input type="text" id="title" formControlName="title" class="form-control">
+                            <mat-error class="alert help-block" *ngIf="!newTicketForm.get('title')?.valid && newTicketForm.get('title')?.touched">
+                                Title Is Required
+                            </mat-error> -->
+                        <app-form-input label="Title" [control]="newTicketForm.get('title')" placeholder="Write title"></app-form-input>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+                    <div class="col-lg-6 my-2">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <label class="formLables">Ticket Type</label>
+                        <mat-select formControlName="IssueType" class="form-control" [ngClass]="{'is-invalid':!newTicketForm.get('IssueType')?.valid &&
+                            newTicketForm.get('IssueType')?.touched}">
+                            <mat-option value='1'>General Issue</mat-option>
+                            <mat-option value='2'>System Issue</mat-option>
+                            <mat-option value='3'>Process Issue</mat-option>
+                        </mat-select>
+
+                        <div class="invalid-feedback" *ngIf="!newTicketForm.get('IssueType')?.valid && newTicketForm.get('IssueType')?.touched">
+                            Ticket Type Is Required
+                        </div>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+
+                    <!-- <div class="col-lg-6 my-2" *ngIf="!!processSupport && processSupport.length > 0">
+                        <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Process (Optional)</mat-label>
+                            <mat-select formControlName="processKey">
+                                <mat-option value='System Issue'>System Issue</mat-option>
+                                <mat-option *ngFor="let process of processSupport" [value]='process.key'>{{process.processTitle}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div> -->
+
+
+                    <div class="col-lg-6 my-2">
+                        <!-- <mat-form-field class="example-full-width w-100"> -->
+                        <label class="formLables">Priority</label>
+                        <mat-select formControlName="priority" class="form-control" [ngClass]="{'is-invalid':!newTicketForm.get('priority')?.valid &&
+                            newTicketForm.get('priority')?.touched}">
+                            <mat-option *ngFor="let per of clientTicketperiorityENUM | keyvalue" [value]='per.value'>{{per.key}}</mat-option>
+                        </mat-select>
+                        <div class="invalid-feedback" *ngIf="!newTicketForm.get('priority')?.valid && newTicketForm.get('priority')?.touched">
+                            Priority Is Required
+                        </div>
+                        <!-- </mat-form-field> -->
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Primary Contact Name</mat-label>
+                            <input matInput type="text" id="title" formControlName="primaryContactName">
+                        </mat-form-field> -->
+                        <app-form-input label="Primary Contact Name" [control]="newTicketForm.get('primaryContactName')" placeholder="Write Primary Contact Name"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <!-- <mat-form-field class="example-full-width w-100">
+                            <mat-label class="formLables">Primary Contact Phone</mat-label>
+                            <input matInput type="text" id="title" formControlName="primaryContactPhone">
+                        </mat-form-field> -->
+                        <app-form-input label="Primary Contact Phone" [control]="newTicketForm.get('primaryContactPhone')" placeholder="Write Primary Contact Phone"></app-form-input>
+                    </div>
+
+                    <div class="col-lg-12 my-2">
+                        <label class="formLables">Description:</label>
+                        <p-editor formControlName="desc" [modules]="quillOPT" [style]="{'height':'210px'}">
+                            <ng-template pTemplate="header">
+                                <span class="ql-format-group">
+                                </span>
+                            </ng-template>
+                        </p-editor>
+                        <mat-error class="alert help-block" *ngIf="!newTicketForm.get('desc')?.valid && newTicketForm.touched">
+                            Description Is Required
+                        </mat-error>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btnStyle" [disabled]="newTicketForm.invalid">Submit</button>
+        </div>
+    </form>
+
+    <!-- </ng-template> -->
+</p-sidebar>

@@ -1,0 +1,39 @@
+<div class="container-fluid mx-0 mt-5">
+    <!-- <p-accordion>  
+        <p-accordionTab header="User Permissions">
+            <app-user-permissions></app-user-permissions>
+        </p-accordionTab>
+        <p-accordionTab header="Ramadan Config">
+            <app-ramadan-config></app-ramadan-config>
+        </p-accordionTab>
+    </p-accordion> -->
+
+    <!-- <mat-tab-group mat-align-tabs="start" class="">
+        <mat-tab label="User Permissions">
+            <app-user-permissions></app-user-permissions>
+        </mat-tab>
+        <mat-tab label="Ramadan Config">
+            <app-ramadan-config></app-ramadan-config>
+        </mat-tab>
+    </mat-tab-group> -->
+    <app-user-permissions></app-user-permissions>
+
+</div>
+
+<!-- <div class="container-fluid" *ngIf="!!currentUser">
+    <div class="row">
+        <div class="col-12 mt-3">
+            <mat-tab-group mat-align-tabs="left" class="mx-3 px-3">
+                <mat-tab label="Security" *ngIf="currentUser.accType == 'manager'">
+                    <app-security></app-security>
+                </mat-tab>
+                <mat-tab label="User Permissions" *ngIf="currentUser.accType == 'manager'">
+                    <app-user-permissions></app-user-permissions>
+                </mat-tab>
+                <mat-tab label="Ramadan" *ngIf="currentUser.accType == 'manager'">
+                    <app-ramadan-config></app-ramadan-config>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div> -->

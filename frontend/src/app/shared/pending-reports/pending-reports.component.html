@@ -1,0 +1,45 @@
+<div class="table-responsive">
+
+    <table class="my-3 table table-hover newTableCustom">
+        <thead>
+            <tr>
+                <td>#</td>
+                <td>Date</td>
+                <td>Duration</td>
+                <td>Time Activity</td>
+                <td>Project Name</td>
+                <td>Process Name</td>
+                <td>Task Name</td>
+                <td>Progress</td>
+                <td>Details</td>
+                <td>Assigned To</td>
+            </tr>
+        </thead>
+        <tbody *ngIf="!!myPendingReports && myPendingReports.length > 0">
+            <ng-container *ngFor="let report of myPendingReports ; let i = index">
+                <tr>
+                    <td>{{i + 1}}</td>
+                    <td>{{report.reportDate}}</td>
+                    <td>{{report.durationByHours}}</td>
+                    <td>{{report.time_activity_name}}</td>
+                    <td *ngIf="report.projectName">{{report.projectName |maxLength:10}}</td>
+                    <td *ngIf="!report.projectName">-</td>
+    
+                    <td *ngIf="report.processName">{{report.processName |maxLength:10}}</td>
+                    <td *ngIf="!report.processName">-</td>
+    
+                    <td *ngIf="report.taskTitle">{{report.taskTitle |maxLength:10}}</td>
+                    <td *ngIf="!report.taskTitle">-</td>
+    
+    
+    
+                    <td *ngIf="report.progress">{{report.progress}}</td>
+                    <td *ngIf="!report.progress">-</td>
+                    <td>{{(report.details || '')|maxLength:10}}</td>
+                    <td>{{report.seniorToApproveName && !report.managerApprovalname ? report.seniorToApproveName : report.managerApprovalname}}</td>
+                </tr>
+            </ng-container>
+    
+        </tbody>
+    </table>
+</div>

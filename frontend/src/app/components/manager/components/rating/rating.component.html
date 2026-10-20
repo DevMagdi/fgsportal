@@ -1,0 +1,60 @@
+<p-blockUI style="width: 100vw; height: 100vh;" [blocked]="reatingLoading">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<div class="rateDetails mt-5">
+    <p-tabView [(activeIndex)]="activeIndex">
+
+        <p-tabPanel header="Rate">
+            <ng-template pTemplate="content">
+                <app-rate-my-emps></app-rate-my-emps>
+            </ng-template>
+        </p-tabPanel>
+        <p-tabPanel header="Rate Request">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <table class="table table-hover">
+                            <thead>
+                                <th>#</th>
+                                <th>Question Group</th>
+                                <th>User To Rate</th>
+                                <th>Created By</th>
+                                <th>Created At</th>
+                                <th></th>
+                            </thead>
+                            <tbody>
+                                <ng-container *ngIf="myAskForRate.length > 0">
+                                    <tr *ngFor="let rate of myAskForRate;let i=index">
+                                        <td>{{i+1}}</td>
+                                        <td>{{rate.question_group_title}}</td>
+                                        <td>{{rate.user_to_rate_name}}</td>
+                                        <td>{{rate.user_creator_name}}</td>
+                                        <td>{{rate.created_at|date:'medium'}}</td>
+                                        <td>
+                                            <!-- [routerLink]="['/manager/rating',rate.id]" -->
+                                            <button class="btn btn-success" (click)="rateUser(rate)">Start Rating</button>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <tr *ngIf="myAskForRate.length == 0">
+                                    No Users To Rate
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Previous Rates">
+            <ng-template pTemplate="content">
+                <app-my-rates></app-my-rates>
+            </ng-template>
+        </p-tabPanel>
+        <p-tabPanel header="Configuration" *ngIf="currentUser.department == departmentEnum.MANAGEMENT">
+            <ng-template pTemplate="content">
+                <app-rating-config></app-rating-config>
+            </ng-template>
+        </p-tabPanel>
+    </p-tabView>
+</div>
+<!-- <a routerLink="/manager/rating/config" *ngIf="currentUser.department == departmentEnum.MANAGEMENT">Configuration</a> -->

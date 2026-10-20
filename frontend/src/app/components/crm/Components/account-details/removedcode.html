@@ -1,0 +1,243 @@
+<div class="row my-2">
+    <div class="col-12">
+        <div class="card mainInfo">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-6 d-flex justify-content-start">
+                        <div class="leadName">
+                            <p (click)="openEditCurrentLeadDetails('title')">
+                                {{currentLeadDetails.title}}
+                            </p>
+                            <div class="myDialog card" *ngIf="!!editLeadName" data-aos="fade-in">
+                                <div class="dHeader my-2">
+                                    Rename this deal:
+                                </div>
+                                <div class="dContent my-2">
+                                    <input type="text" class="form-control" [(ngModel)]="newValue">
+                                </div>
+                                <div class="card-footer dFooter">
+                                    <button class="btn cancelBTN mx-1" (click)="editLeadName = !editLeadName;cancelEdit()">cancel</button>
+                                    <button class="btn btnStyle mx-1" (click)="saveEditLead('title')">Save</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="labelSec mx-2">
+                            <ul (click)="openEditCurrentLeadDetails('labels')" class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
+                                <li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top" class="avatar avatar-xs pull-up" *ngFor="let label of currentLeadDetails.label">
+                                    <span class="labelOption" [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                        {{label.label_name}}
+                                    </span>
+                                </li>
+                            </ul>
+
+                            <div class="myDialog card" *ngIf="!!editLabels" data-aos="fade-in">
+                                <div class="dHeader my-2">
+                                    Change Labels:
+                                </div>
+                                <div class="dContent my-2">
+                                    <mat-select [compareWith]="comparer" class="form-control " multiple="true" [(ngModel)]="currentLeadDetails.label">
+                                        <mat-option *ngFor="let label of lables" [value]="label">
+                                            <span class="labelOption" [ngStyle]="{'background-color': label.label_color , 'border-color' : label.label_color}">
+                                                {{label.label_name}}
+                                            </span>
+                                        </mat-option>
+                                    </mat-select>
+                                </div>
+                                <div class="card-footer dFooter">
+                                    <button class="btn cancelBTN mx-1" (click)="editLabels = !editLabels;cancelEdit()">cancel</button>
+                                    <button class="btn btnStyle mx-1" (click)="saveEditLead('label')">Save</button>
+                                </div>
+                            </div>
+                         </div>
+
+                    </div>
+                    <div class="col-6 d-flex justify-content-end">
+                        <div class="closeLead ">
+                            <div class="owner mx-1">
+                                <span class="material-icons mx-1 ">
+                                        account_circle
+                                    </span>
+                                <div class="OwnerData mx-1 ">
+                                    <p class="salesName">
+                                        {{currentLeadDetails.sales_name ? currentLeadDetails.sales_name : currentLeadDetails.user_creator_name}}
+                                        <i class="pi pi-angle-down" *ngIf="currentUser.accRole != AccountRoleEnum.SALES || (currentUser.department == departmentEnum.Business_Development && currentUser.accPosition == AccountPositionsEnum.MANAGER)" (click)="openEditCurrentLeadDetails('sales_id')"></i>
+                                    </p>
+                                    <p class="ownerTXT ">
+                                        Owner
+                                    </p>
+
+                                    <div class="myDialog card" *ngIf="!!editOwner" data-aos="fade-in">
+                                        <div class="dHeader my-2">
+                                            Transfer ownership:
+                                        </div>
+                                        <div class="dContent my-2">
+                                            <mat-select class="form-control" [(ngModel)]="newValue">
+                                                <mat-option *ngFor="let sales of salesTeam" [value]='sales.key'>{{sales.username}}</mat-option>
+                                            </mat-select>
+                                        </div>
+                                        <div class="dFooter my-2">
+                                            <button class="btn cancelBTN m-1" (click)="editOwner = !editOwner;cancelEdit()">cancel</button>
+                                            <button class="btn btnStyle m-1" (click)="saveEditLead('sales_id')">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="winAndLose mx-1">
+                                <button class="btn requestPocBTN mx-1" id="openPocReqBTN" style="display: none;" data-bs-toggle="modal" data-bs-target="#modalCenter" (click)="openRequestForPOCModal()">Requert POC</button>
+                                <button class="btn requestPocBTN mx-1" id="openRFPReqBTN" style="display: none;" data-bs-toggle="modal" data-bs-target="#RFPModal" (click)="getMyRFPConfigList()">Requert RFP</button>
+                                <div *ngIf="currentLeadDetails.status_id == '3'">
+                                    <button class="btn wonBTN mx-1" (click)="won()">Won</button>
+                                    <button class="btn lostBTN mx-1" (click)="lost()">Lost</button>
+                                </div>
+                                <div *ngIf="currentLeadDetails.status_id == '4'">
+                                    <button class="btn wonBTN mx-1" disabled *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.WON">Won</button>
+                                    <button class="btn lostBTN mx-1" disabled *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.LOST">Lost</button>
+                                    <button class="btn btn-outline-secondary mx-1" disabled *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.Archive">Archived</button>
+                                    <button class="btn btn-outline-secondary mx-1" disabled *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.Not_Interested">Not Interested</button>
+                                    <button class="btn btn-outline-secondary mx-1" disabled *ngIf="currentLeadDetails.lead_sub_status_id == CloseLeadSubStatusEnum.Disqualified">Disqualified</button>
+                                    <button *ngIf="currentLeadDetails.status_id == '4'" class="btn btn-outline-dark mx-1" (click)="reopen()">RE-Open</button>
+                                </div>
+
+                            </div>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="convertToLead()" *ngIf="currentLeadDetails.lead_sub_status_id != '4'"><i class="bx bx-arrow-from-right me-1"></i> Convert To Lead</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="reopen()" *ngIf="currentLeadDetails.lead_sub_status_id == '4'"><i class="bx bx-arrow-from-right me-1"></i> RE-Open</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="closeContact('11')"><i class="bx bx-archive-in me-1"></i> Archive</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="closeContact('12')"><i class="bx bx-edit-alt me-1"></i> Not Interested</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="closeContact('14')"><i class="bx bx-dislike me-1"></i> Disqualified</a>
+                                    <a class="dropdown-item" href="javascript:void(0);" (click)="deleteContact()"><i class="bx bx-trash me-1"></i> Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="moreInfo">
+                            <div class="cost">
+                                <p (click)="openEditCurrentLeadDetails('cost')" *ngIf="!currentLeadDetails.cost">EGP 0</p>
+                                <p (click)="openEditCurrentLeadDetails('cost')" *ngIf="!!currentLeadDetails.cost">{{currentLeadDetails.cost | currency:currentLeadDetails.currency?currentLeadDetails.currency:''}}</p>
+                                <div class="myDialog card" *ngIf="!!editCost && !costDetailsFormOpened" data-aos="fade-in">
+                                    <div class="dHeader my-2">
+                                        Change the value:
+                                    </div>
+                                    <div class="dContent my-2">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-8 p-0 m-0">
+                                                    <input type="number" class="form-control" [(ngModel)]="newValue">
+                                                </div>
+                                                <div class="col-4 p-0 m-0">
+                                                    <mat-select class="form-control" [(ngModel)]="currentLeadDetails.currency">
+                                                        <mat-option *ngFor="let country of CurrencyList" [value]="country.currencyCode">
+                                                            <div class="country-item d-flex align-items-center justify-content-start">
+                                                                <img src="../../../../../assets/img/flags/{{country.countryCode}}.png" width="17px" height="20px" [class]="'flag flag-' + country.currencyName.toLowerCase()" />
+                                                                <div>{{country.currencyName}}</div>
+                                                            </div>
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </div>
+                                            </div>
+                                            <!-- <div class="row">
+                                                <div class="col-12">
+                                                    <a href="javascript:void(0)" (click)="costDetailsFormOpened = true">Details</a>
+                                                </div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                    <div class="card-footer dFooter">
+                                        <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                                        <button class="btn btnStyle mx-1" (click)="saveEditLead('cost')">Save</button>
+                                    </div>
+                                </div>
+                                <div class="myDialog card" *ngIf="!!editCost && !!costDetailsFormOpened" data-aos="fade-in">
+                                    <div class="dHeader my-2">
+                                        Change the value:
+                                    </div>
+                                    <div class="dContent my-2">
+                                        <app-lead-cost-details-form (dataEvent)="costDetailsFormOpened = false;receiveData($event)" [leadData]="currentLeadDetails"></app-lead-cost-details-form>
+                                    </div>
+                                    <div class="card-footer dFooter">
+                                        <button class="btn cancelBTN mx-1" (click)="costDetailsFormOpened = false">cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product">
+                                <a href="javascript:void(0);" *ngIf="!!currentLeadDetails.product_name" class="addProduct ml-2" (click)="openEditCurrentLeadDetails('product_id')">
+                                        {{currentLeadDetails.product_name}}
+                                    </a>
+                                <a href="javascript:void(0);" *ngIf="!currentLeadDetails.product_name" class="addProduct ml-2" (click)="openEditCurrentLeadDetails('product_id')">
+                                        + Add Product
+                                    </a>
+                                <div class="myDialog card" *ngIf="!!editProduct" data-aos="fade-in">
+                                    <div class="dHeader my-2">
+                                        Add products:
+                                    </div>
+                                    <div class="dContent my-2">
+                                        <mat-select class="form-control" [(ngModel)]="newValue">
+                                            <mat-option *ngFor="let product of products" [value]='product.id'>{{product.product_name}}</mat-option>
+                                        </mat-select>
+                                    </div>
+                                    <div class="card-footer dFooter">
+                                        <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                                        <button class="btn btnStyle mx-1" (click)="saveEditLead('product_id')">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" *ngIf="currentLeadDetails.lead_sub_status_id != '4'">
+                    <div class="col-12">
+                        <div class="SubstatusChange">
+                            <div class="steps" id="stepsContainer">
+                                <ng-container *ngFor="let status of contactSubStatus;let i=index">
+                                    <div class="first active" (click)="selectSteps(i);this.editLeadSubstatus(status.id)" routerLinkActive="active" *ngIf="i==0" [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+                                    <div class="middle" (click)="selectSteps(i);this.editLeadSubstatus(status.id)" *ngIf="i > 0 && i != contactSubStatus.length - 1" [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+
+                                    <div class="last" (click)="selectSteps(i);this.editLeadSubstatus(status.id)" *ngIf="i == contactSubStatus.length - 1" [matTooltip]="status.contact_sub_status_name">
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12 d-flex justify-content-end">
+                        <div class="closeDate">
+                            <p (click)="openEditCurrentLeadDetails('expected_close_date')">
+                                <i class="pi pi-flag coloredIcon"></i>
+                                <span *ngIf="!!currentLeadDetails.expected_close_date">
+                                    {{currentLeadDetails.expected_close_date | date:'longDate'}}
+                                </span>
+                                <span *ngIf="!currentLeadDetails.expected_close_date"> 
+                                    + Expected Close Date
+                                </span>
+                            </p>
+                            <div class="myDialog card" *ngIf="!!editDate" data-aos="fade-in">
+                                <div class="dHeader my-2">
+                                    Expected End Date:
+                                </div>
+                                <div class="dContent my-2">
+                                    <input type="date" class="form-control" [(ngModel)]="newValue">
+                                </div>
+                                <div class="card-footer dFooter">
+                                    <button class="btn cancelBTN mx-1" (click)="cancelEdit()">cancel</button>
+                                    <button class="btn btnStyle mx-1" (click)="saveEditLead('expected_close_date')">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

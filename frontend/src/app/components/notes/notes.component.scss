@@ -1,0 +1,58 @@
+@import '../../colors';
+
+.note {
+    // width: 350px;
+    max-height: 150px;
+    min-height: 100px;
+    background-color: #efefef;
+    cursor: pointer;
+    overflow-y: auto;
+    // overflow-x: hidden;
+}
+.announceBody{
+    min-height: 65px;
+}
+
+.note_date {
+    font-size: 12px;
+    font-weight: 400;
+    color: #605e5c;
+}
+
+.notebgcolor {
+    // display: inline-block;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+}
+
+.m_item {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selectedNote {
+    // width: 250px;
+    height: 450px;
+    background-color: #efefef;
+}
+.add_note{
+
+        // background-image: linear-gradient(to right, #ff2fcb, #05cac0);
+        // width: 40px;
+        // height: 40px;
+        // width: fit-content;
+        padding: 4px;;
+        border-radius: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 4px;
+        background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+        margin-left: auto;
+        color: white;
+        // margin-right: 4px;
+    
+}

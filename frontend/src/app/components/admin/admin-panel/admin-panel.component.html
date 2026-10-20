@@ -1,0 +1,47 @@
+<!-- <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #drawer class="sidenav mat-elevation-z12" fixedInViewport="true" [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="!(isHandset$ | async)">
+
+        <mat-toolbar class="toolbar">
+            <h2>Admin Panel</h2>
+        </mat-toolbar>
+
+        <mat-nav-list class="nav-list">
+            <mat-divider></mat-divider>
+            <a mat-list-item routerLink="/admin-panel/" [routerLinkActiveOptions]="{exact: true}" routerLinkActive="active">
+                Welcome
+                <mat-divider></mat-divider>
+            </a>
+            <a mat-list-item routerLink="dashboard" routerLinkActive="active">
+                Dash Board
+                <mat-divider></mat-divider>
+            </a>
+
+            <a mat-list-item class="my-2" routerLink="pendingvacations" routerLinkActive="active">
+                Pending Vacations Requests
+                <mat-divider></mat-divider>
+            </a>
+
+            <a mat-list-item class="my-2" routerLink="pendingtransportations" routerLinkActive="active">
+                Transportations Requests
+                <mat-divider></mat-divider>
+            </a>
+
+            <a mat-list-item class="my-2" routerLink="transportationsheet" routerLinkActive="active">
+                Transportation Sheet
+                <mat-divider></mat-divider>
+            </a>
+
+        </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+
+        <button class="btn" type="button" id="menu-button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+
+        <router-outlet></router-outlet>
+
+    </mat-sidenav-content>
+</mat-sidenav-container> -->
+
+<router-outlet></router-outlet>

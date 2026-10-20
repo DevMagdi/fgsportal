@@ -1,0 +1,350 @@
+// Custom Theming for Angular Material
+@use '@angular/material' as mat;
+// For more information: https://material.angular.io/guide/theming
+@import '@angular/material/theming';
+// Plus imports for other components in your app.
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$fgsPM-primary: mat.define-palette(mat.$indigo-palette);
+$fgsPM-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+// The warn palette is optional (defaults to red).
+$fgsPM-warn: mat.define-palette(mat.$red-palette);
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$fgsPM-theme: mat.define-light-theme((color: (primary: $fgsPM-primary, accent: $fgsPM-accent, warn: $fgsPM-warn, )));
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($fgsPM-theme);
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@import '@angular/material/theming';
+// Plus imports for other components in your app.
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$fgsPM-primary: mat.define-palette(mat.$indigo-palette);
+$fgsPM-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+// The warn palette is optional (defaults to red).
+$fgsPM-warn: mat.define-palette(mat.$red-palette);
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$fgsPM-theme: mat.define-light-theme((color: (primary: $fgsPM-primary, accent: $fgsPM-accent, warn: $fgsPM-warn, )));
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($fgsPM-theme);
+
+/* You can add global styles to this file, and also import other style files */
+
+@import './app/colors';
+
+html,
+body {
+    height: 100%;
+    // zoom: 0.9;
+    // scale: 1;
+}
+
+body {
+    margin: 0;
+    font-family: $mainFontFamily;
+}
+
+
+/* Importing Bootstrap SCSS file. */
+
+@import '~bootstrap/scss/bootstrap';
+
+// @import './app/colors';
+.cdk-overlay-container,
+.cdk-overlay-pane {
+    z-index: 9999 !important;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+
+/* Track */
+
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+
+/* Handle */
+
+::-webkit-scrollbar-thumb {
+    background: $mainThemeColor;
+    border-radius: 10px;
+}
+
+
+/* Handle on hover */
+
+::-webkit-scrollbar-thumb:hover {
+    background: $mainThemeColor;
+}
+
+.modal-backdrop {
+    z-index: -1;
+}
+
+.newTableCustom {
+
+    thead tr {
+        background-color: $softThemeColor !important;
+
+        th {
+
+            color: $mainThemeColor !important;
+        }
+
+        td {
+
+            color: $mainThemeColor !important;
+        }
+    }
+
+    tr {
+        background-color: $softGrayBackGroundColor !important;
+
+        td {
+
+            color: $mainThemeColor !important;
+        }
+    }
+
+}
+
+.newTableCustomDah {
+
+    thead tr {
+        background-color: $softThemeColor !important;
+
+        th {
+
+            color: $mainThemeColor !important;
+        }
+
+        td {
+
+            color: $mainThemeColor !important;
+        }
+    }
+
+    tr {
+        background-color: $softGrayBackGroundColor !important;
+
+    }
+
+}
+
+.btnStyle,
+.btnStyle:hover {
+    border-radius: 4px;
+    background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+    color: white;
+}
+
+.primeBtnStyle,
+.primeBtnStyle:hover {
+    .p-button {
+        border-radius: 4px;
+        background: linear-gradient(180deg, $buttonSubBackgroundColor 0%, $buttonSubSubBackgroundColor 100%);
+        color: white;
+        border-color: $buttonSubBackgroundColor;
+        padding: 8px 16px;
+        width: 100%;
+        text-align: center;
+
+        .p-button-label {
+            font-weight: 500;
+        }
+    }
+}
+
+.btnOutLine {
+    border-radius: 5px;
+    border: solid 2px $buttonSubBackgroundColor;
+    color: $buttonSubBackgroundColor;
+    background-color: #fff;
+
+    &:hover {
+        color: $buttonSubBackgroundColor !important;
+        background-color: #fff !important;
+        border: solid 2px $buttonSubBackgroundColor !important;
+
+    }
+
+}
+
+.running {
+    color: $mainThemeColor !important;
+    background-color: #F5EEFA;
+}
+
+.scheduled {
+    color: #0077B6 !important;
+    background-color: #ECFCFF;
+}
+
+.closed {
+    color: #36B37E !important;
+    background-color: #E3FCEF;
+}
+
+.hold {
+    color: #BC0000 !important;
+    background-color: #FFEBE6;
+}
+
+.pending {
+    color: #FF7B00 !important;
+    background-color: #FFF2E6;
+}
+
+.main-color {
+    color: $mainThemeColor !important;
+}
+
+.cursor {
+    cursor: pointer;
+}
+
+// :host ::ng-deep {
+#dt1 {
+    .p-datatable-thead {
+        // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+        // background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+        background-color: $softThemeColor;
+        border-bottom: 1px solid $mainThemeColor;
+        // color: $mainThemeColor;
+    }
+
+    .p-datatable .p-datatable-thead>tr>th {
+        color: $mainThemeColor !important;
+        background: inherit;
+        text-align: left;
+        font-size: 14px;
+        border-bottom: 1px solid $mainThemeColor;
+        padding: .5rem .5rem !important;
+    }
+
+    .p-datatable .p-datatable-tbody>tr>td {
+        color: $mainThemeColor;
+
+        a {
+            color: $mainThemeColor;
+
+        }
+    }
+}
+
+.p-tabview .p-tabview-nav {
+
+    li.p-highlight .p-tabview-nav-link {
+        background: #ffffff;
+        border-color: $mainThemeColor !important;
+        color: $mainThemeColor !important;
+        font-weight: bold;
+    }
+
+    .p-tabview-ink-bar {
+        background: $mainThemeColor !important;
+
+    }
+
+    li .p-tabview-nav-link {
+        color: $subThemeColor !important;
+        font-weight: normal;
+    }
+}
+
+
+.mat-tab-list .mat-tab-labels .mat-tab-label {
+    color: #100f0f;
+    background-color: unset;
+}
+
+.mat-tab-list .mat-tab-labels .mat-tab-label-active {
+    // color: #fff;
+    // background-color: $mainThemeColor !important;
+    background-color: $tabBackGround !important;
+    color: $mainThemeColor !important;
+}
+
+.mat-ink-bar {
+    background-color: $mainThemeColor !important; // var(--primary-color, $buttonMainBackgroundColor) !important;
+}
+
+.mat-table {
+    &.mat-elevation-z8 {
+        box-shadow: none;
+    }
+
+    .mat-header-row {
+
+        background: $softThemeColor;
+
+        .mat-header-cell {
+            color: $mainThemeColor;
+        }
+    }
+
+    .mat-cell {
+        color: $mainThemeColor;
+    }
+}
+
+
+
+.prim-table {
+    .p-datatable-thead {
+        // background-image: linear-gradient(to top left, rgba($color: $mainThemeColor, $alpha: 0.1), rgba($color: $buttonMainBackgroundColor, $alpha: 0.1));
+        // background: rgba($color: $buttonMainBackgroundColor, $alpha: 0.1);
+        background-color: $softThemeColor;
+        border-bottom: 1px solid $mainThemeColor;
+    }
+
+    .p-datatable .p-datatable-thead>tr>th {
+        color: $mainThemeColor;
+        background: inherit;
+        text-align: left;
+        font-size: 14px;
+        border-bottom: 1px solid $mainThemeColor;
+        padding: .5rem .5rem !important;
+    }
+
+    .p-datatable .p-datatable-tbody>tr>td {
+        color: $mainThemeColor;
+
+        a {
+            color: $mainThemeColor;
+
+            &:hover {
+                color: $mainThemeColor;
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+
+// }
+// /* Importing Bootstrap SCSS file. */
+// @import "~bootstrap/scss/bootstrap";
+// /* Importing Datepicker SCSS file. */
+// @import "~ngx-bootstrap/datepicker/bs-datepicker";

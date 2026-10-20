@@ -1,0 +1,5 @@
+<div style="display: block">
+    <canvas mdbChart [chartType]="monthDevProgressChartType" [datasets]="monthDevProgressChartDatasets" [labels]="monthDevProgressChartLabels" [colors]="monthDevProgressChartColors" [options]="monthDevProgressChartOptions" [legend]="true" (chartHover)="monthDevProgressChartHovered($event)"
+        (chartClick)="monthDevProgressChartClicked($event)">
+    </canvas>
+</div>
