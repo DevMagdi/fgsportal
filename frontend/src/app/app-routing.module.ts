@@ -22,6 +22,8 @@ import { AuthGuardService } from './services/auth-guard.service';
 import { CRMGuard } from './services/crm.guard';
 import { DevGuard } from './services/dev.guard';
 import { ManagerGuard } from './services/manager.guard';
+import { ModuleGuard } from './services/module.guard';
+import { ModuleDisabledComponent } from './components/module-disabled/module-disabled.component';
 import { TimeSheetComponent } from './components/dev/components/time-sheet/time-sheet.component';
 import { GlobalTimeSheetComponent } from './components/global-time-sheet/global-time-sheet.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
@@ -43,38 +45,45 @@ const routes: Routes = [
   {path: 'notes',component:NotesComponent , canActivate:[AuthGuardService]},
   {path: 'my_work',component:GlobalTimeSheetComponent , canActivate:[AuthGuardService]},
   {path: 'publicReqsApply',component:PublicRequestsApprovalComponent , canActivate:[AuthGuardService]},
-  {path: 'tickets',component:FollowClientTicketsComponent , canActivate:[AuthGuardService]},
-  {path: 'tickets/:id',component:FollowClientTicketDetailsComponent, canActivate:[AuthGuardService]},
-  {path: 'support-reports',component:SupportReportsComponent, canActivate:[AuthGuardService]},
+  {path: 'module-disabled', component: ModuleDisabledComponent, canActivate:[AuthGuardService]},
+  {path: 'tickets',component:FollowClientTicketsComponent , canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
+  {path: 'tickets/:id',component:FollowClientTicketDetailsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
+  {path: 'support-reports',component:SupportReportsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
   
   // {path: 'fgsGPT',component:ChatGPTComponent , canActivate:[AuthGuardService]},
 
   {
     path: 'manager',
     component: ManagerComponent,
-    canActivate:[ManagerGuard],
+    canActivate:[ManagerGuard, ModuleGuard],
+    data: { module: 'projects' },
     loadChildren: () => import('./components/manager/manager/manager.module').then(m => m.ManagerModule)
   },
   {
     path: 'dev',
     component: DevComponent,
-    canActivate:[DevGuard],
+    canActivate:[DevGuard, ModuleGuard],
+    data: { module: 'projects' },
     loadChildren: () => import('./components/dev/dev/dev.module').then(m => m.DevModule)
   },
   {
     path: 'admin-panel',
     component: AdminPanelComponent,
-    canActivate:[ManagerGuard],
+    canActivate:[ManagerGuard, ModuleGuard],
+    data: { module: 'admin' },
     loadChildren: () => import('./components/admin/admin/admin.module').then(m => m.AdminModule),
   },
   {
     path: 'CRM',
     component: CrmMainComponent,
-    canActivate:[CRMGuard],
+    canActivate:[CRMGuard, ModuleGuard],
+    data: { module: 'crm' },
     loadChildren: () => import('./components/crm/crm.module').then(m => m.CRMModule),
   },
   {
     path: 'hr',
+    canActivate: [ModuleGuard],
+    data: { module: 'hr' },
     loadChildren: () => import('./components/hr/hr.module').then(m => m.HrModule),
   },
   {path: '**', component: PageNotFoundComponent}

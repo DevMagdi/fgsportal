@@ -24,8 +24,9 @@ export const environment = {
   newServerApi: 'YOUR_BACKEND_API_BASE_URL',
   currecnyConvert: 'https://openexchangerates.org/api/latest.json?',
   currecnyConvertAppID: 'YOUR_OPEN_EXCHANGE_RATES_APP_ID',
-  //chatGPTApi:'https://api.openai.com/v1/engines/davinci-codex/completions',
-  //chatGPTApiKey:'YOUR_OPENAI_KEY_GOES_HERE'
+  // Optional ChatGPT integration (unused unless configured)
+  chatGPTApi: 'YOUR_CHATGPT_API_URL',
+  chatGPTApiKey: 'YOUR_OPENAI_KEY_GOES_HERE'
 };
 
 

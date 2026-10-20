@@ -299,13 +299,13 @@
         Time Sheet
         <!-- <mat-divider></mat-divider> -->
       </a>
-      <a mat-list-item routerLink="/admin-panel/dashboard" routerLinkActive="active">
+      <a *ngIf="isModuleEnabled('admin')" mat-list-item routerLink="/admin-panel/dashboard" routerLinkActive="active">
         <img src="../../../assets/img/home.png" width="24" hight="24" class="me-2" >
         <span>Dashboard</span>
       </a>
 
 
-      <a *ngIf="checkIfHasPerm(25) == true" mat-list-item routerLink="/support-reports" routerLinkActive="active">
+      <a *ngIf="checkIfHasPerm(25) == true && isModuleEnabled('ticketing')" mat-list-item routerLink="/support-reports" routerLinkActive="active">
         <!-- <img src="../../../assets/img/home.png" width="24" hight="24" class="me-2" alt=""> -->
         <span>Support Reports</span>
       </a>
@@ -318,8 +318,9 @@
 
 
       <a *ngIf="
-          currentUser.department == DepartmentEnum.MANAGEMENT ||
-          (!!userPerms && !!checkIfHasPerm(15))
+          isModuleEnabled('crm') &&
+          (currentUser.department == DepartmentEnum.MANAGEMENT ||
+          (!!userPerms && !!checkIfHasPerm(15)))
         " (dblclick)="crmOpened = !crmOpened" (click)="crmOpened = !crmOpened" mat-list-item class="nav-link"
         data-bs-toggle="collapse" href="#crmOpened" aria-expanded="true" aria-controls="lead">
         <div data-i18n="Analytics">
@@ -338,7 +339,7 @@
       </a>
 
 
-      <div class="collapse" id="crmOpened">
+      <div class="collapse" id="crmOpened" *ngIf="isModuleEnabled('crm')">
         <ul class="nav flex-column">
           <li class="nav-item">
             <a mat-list-item routerLink="/CRM/dashboard" routerLinkActive="active">
@@ -442,8 +443,9 @@
 
 
         <a *ngIf="
-            currentUser.department == DepartmentEnum.MANAGEMENT ||
-            (!!userPerms && !!checkIfHasPerm(5))
+            isModuleEnabled('projects') &&
+            (currentUser.department == DepartmentEnum.MANAGEMENT ||
+            (!!userPerms && !!checkIfHasPerm(5)))
           " [routerLinkActiveOptions]="{ exact: true }" (dblclick)="pmOpened = !pmOpened"
           (click)="pmOpened = !pmOpened" mat-list-item class="nav-link" routerLinkActive="active"
           data-bs-toggle="collapse" href="#reports" aria-expanded="true" aria-controls="lead">
@@ -459,7 +461,7 @@
         </a>
 
 
-        <div class="collapse" id="reports">
+        <div class="collapse" id="reports" *ngIf="isModuleEnabled('projects')">
           <ul class="nav flex-column">
             <li class="nav-item">
               <a *ngIf="
@@ -610,8 +612,9 @@
 
 
         <a *ngIf="
-            currentUser.department == DepartmentEnum.MANAGEMENT ||
-            (!!userPerms && !!checkIfHasPerm(14))
+            isModuleEnabled('ticketing') &&
+            (currentUser.department == DepartmentEnum.MANAGEMENT ||
+            (!!userPerms && !!checkIfHasPerm(14)))
           " (dblclick)="SupportOpened = !SupportOpened" (click)="SupportOpened = !SupportOpened" mat-list-item
           class="nav-link" data-bs-toggle="collapse" href="#support" aria-expanded="true" aria-controls="lead">
           <div data-i18n="Analytics">
@@ -623,7 +626,7 @@
         </a>
 
 
-        <div class="collapse" id="support">
+        <div class="collapse" id="support" *ngIf="isModuleEnabled('ticketing')">
           <ul class="nav flex-column">
             <li *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT ||(!!userPerms && !!checkIfHasPerm(6))" class="nav-item">
               <a mat-list-item routerLink="/manager/client-support" routerLinkActive="active">
@@ -678,7 +681,7 @@
         <mat-divider></mat-divider>
 
 
-        <a (dblclick)="hrOpened = !hrOpened" (click)="hrOpened = !hrOpened" mat-list-item class="nav-link"
+        <a *ngIf="isModuleEnabled('hr') || isModuleEnabled('admin')" (dblclick)="hrOpened = !hrOpened" (click)="hrOpened = !hrOpened" mat-list-item class="nav-link"
           data-bs-toggle="collapse" href="#hr" aria-expanded="true" aria-controls="hr">
           <div data-i18n="Analytics">
             <i class="menu-icon tf-icons bx bx-file"></i>
@@ -694,7 +697,7 @@
         </a>
 
 
-        <div class="collapse" id="hr">
+        <div class="collapse" id="hr" *ngIf="isModuleEnabled('hr') || isModuleEnabled('admin')">
           <ul class="nav flex-column">
             <li class="nav-item">
               <a *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT ||(!!userPerms && !!hasPermTOShowSalaries)"
@@ -797,7 +800,7 @@
         <!-- ===================================== Finance =============================================== -->
 
 
-        <a *ngIf="!!checkIfHasPerm(18)" (dblclick)="financeOpened = !financeOpened"
+        <a *ngIf="!!checkIfHasPerm(18) && isModuleEnabled('ticketing')" (dblclick)="financeOpened = !financeOpened"
           (click)="financeOpened = !financeOpened" mat-list-item class="nav-link" data-bs-toggle="collapse"
           href="#finance" aria-expanded="true" aria-controls="finance">
           <div data-i18n="Analytics">
@@ -809,7 +812,7 @@
         </a>
 
 
-        <div class="collapse" id="finance">
+        <div class="collapse" id="finance" *ngIf="isModuleEnabled('ticketing')">
           <ul class="nav flex-column">
             <li class="nav-item">
               <a *ngIf="!!checkIfHasPerm(18)" [routerLink]="['/manager/installments', 't']" mat-list-item
@@ -833,7 +836,7 @@
         <!-- ===================================== Requests =============================================== -->
 
 
-        <a (dblclick)="requestsOpened = !requestsOpened" (click)="requestsOpened = !requestsOpened" mat-list-item
+        <a *ngIf="isModuleEnabled('hr') || isModuleEnabled('admin')" (dblclick)="requestsOpened = !requestsOpened" (click)="requestsOpened = !requestsOpened" mat-list-item
           class="nav-link" data-bs-toggle="collapse" href="#requests" aria-expanded="true" aria-controls="requests">
           <div data-i18n="Analytics">
             <i class="menu-icon tf-icons bx bx-paper-plane"></i>
@@ -850,7 +853,7 @@
         </a>
 
 
-        <div class="collapse" id="requests">
+        <div class="collapse" id="requests" *ngIf="isModuleEnabled('hr') || isModuleEnabled('admin')">
           <ul class="nav flex-column">
             <li class="nav-item">
               <a *ngIf="
@@ -921,7 +924,7 @@
         <!-- ===================================== Adminstration =============================================== -->
 
 
-        <a (dblclick)="adminOpened = !adminOpened" (click)="adminOpened = !adminOpened" mat-list-item class="nav-link"
+        <a *ngIf="isModuleEnabled('admin')" (dblclick)="adminOpened = !adminOpened" (click)="adminOpened = !adminOpened" mat-list-item class="nav-link"
           data-bs-toggle="collapse" href="#admin" aria-expanded="true" aria-controls="lead">
           <div data-i18n="Analytics">
             <i class="menu-icon tf-icons bx bx-slider"></i>
@@ -937,7 +940,7 @@
         </a>
 
 
-        <div class="collapse" id="admin">
+        <div class="collapse" id="admin" *ngIf="isModuleEnabled('admin')">
           <ul class="nav flex-column">
             <li class="nav-item">
               <a mat-list-item routerLink="/manager/addusers" routerLinkActive="active">
@@ -993,6 +996,7 @@
 
 
       <div *ngIf="
+          isModuleEnabled('projects') &&
           currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
           currentUser.accPosition != AccountPositionEnum.MANAGER
         " class="devModule">
@@ -1033,7 +1037,7 @@
         </div>
 
 
-        <div *ngIf="isLoggedIn" class="commonModule">
+        <div *ngIf="isLoggedIn && isModuleEnabled('ticketing')" class="commonModule">
           <a mat-list-item routerLink="/tickets" routerLinkActive="active">
             Tickets
             <mat-divider></mat-divider>
