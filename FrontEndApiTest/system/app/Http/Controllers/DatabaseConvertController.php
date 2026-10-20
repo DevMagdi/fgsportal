@@ -56,10 +56,10 @@ class DatabaseConvertController extends Controller
     
 
     public function getUser(){
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/users/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL =   config('firebase.legacy_database_url').'/users/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
         
-        //  $URL = 'https://fgspm-8bbdc-default-rtdb.firebaseio.com/users/.json?auth=RNOxh3COrIRoqtWKcwj7Gp6VrMtPp8KKEtLN7NE6&key=AIzaSyDb0xTaRAoxyCgvaDF3kk5VYOsTwB_3o7Y';
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        //  $URL = config('firebase.legacy_database_url'); // legacy URL with embedded secrets removed; use FIREBASE_* env vars
+        $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,
@@ -407,10 +407,10 @@ class DatabaseConvertController extends Controller
 
 
     public function gettask(){
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/tasks/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
-      //  $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/devdailyreport/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL =   config('firebase.legacy_database_url').'/tasks/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
+      //  $URL =   config('firebase.legacy_database_url').'/devdailyreport/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
         
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,
@@ -685,9 +685,9 @@ class DatabaseConvertController extends Controller
     
     
     public function getprocess(){
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/Subtasks/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL =   config('firebase.legacy_database_url').'/Subtasks/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
         
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,
@@ -898,9 +898,9 @@ class DatabaseConvertController extends Controller
 }
 
     public function getProject(){
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/projects/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL =   config('firebase.legacy_database_url').'/projects/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,
@@ -1151,9 +1151,9 @@ public function projectstatus($status){
     
     public function getUserDeactivate(){
         
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/disable-users/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
-      //  $URL = 'https://fgspm-8bbdc-default-rtdb.firebaseio.com/disable-users/.json?auth=RNOxh3COrIRoqtWKcwj7Gp6VrMtPp8KKEtLN7NE6&key=AIzaSyDb0xTaRAoxyCgvaDF3kk5VYOsTwB_3o7Y';
-      $TOKEN = 'AIzaSyDJM5DSKhSXYRlHRrw0uPmDwx6fNIqXp9I';
+        $URL =   config('firebase.legacy_database_url').'/disable-users/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
+      //  $URL = config('firebase.legacy_database_url'); // legacy URL with embedded secrets removed; use FIREBASE_* env vars
+      $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,
@@ -1418,10 +1418,10 @@ public function projectstatus($status){
     public function annualrequest(){
         
         
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/annualLeave/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL =   config('firebase.legacy_database_url').'/annualLeave/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-        //    $URL = 'https://fgspm-8bbdc-default-rtdb.firebaseio.com/annualLeave/.json?auth=RNOxh3COrIRoqtWKcwj7Gp6VrMtPp8KKEtLN7NE6&key=AIzaSyDb0xTaRAoxyCgvaDF3kk5VYOsTwB_3o7Y';
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        //    $URL = config('firebase.legacy_database_url'); // legacy URL with embedded secrets removed; use FIREBASE_* env vars
+        $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,
@@ -1633,10 +1633,10 @@ public function projectstatus($status){
     public function pendingannualrequest(){
       
 
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/pendingAnnualLeave/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL =   config('firebase.legacy_database_url').'/pendingAnnualLeave/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    //    $URL = 'https://fgspm-8bbdc-default-rtdb.firebaseio.com/annualLeave/.json?auth=RNOxh3COrIRoqtWKcwj7Gp6VrMtPp8KKEtLN7NE6&key=AIzaSyDb0xTaRAoxyCgvaDF3kk5VYOsTwB_3o7Y';
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    //    $URL = config('firebase.legacy_database_url'); // legacy URL with embedded secrets removed; use FIREBASE_* env vars
+    $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,

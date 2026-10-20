@@ -77,9 +77,9 @@ class DatabaseConvertSecondController extends Controller
 {
     
     public function getSalary(){
-        $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/amounts/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL =   config('firebase.legacy_database_url').'/amounts/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $TOKEN = config('firebase.api_key');
         $headers = array
         (
             'Authorization: key='.$TOKEN,
@@ -284,9 +284,9 @@ foreach ($object_json as $key => $value) {
 }
 
 public function getpendingamountmonthly(){
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/monthlyAmounts/2022.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/monthlyAmounts/2022.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -468,9 +468,9 @@ public function getReportDev(){
    //devdailyreport
    //rejectedReports
    //pendingReports
-   $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/pendingReports/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+   $URL =   config('firebase.legacy_database_url').'/pendingReports/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -808,9 +808,9 @@ public function calDateRamadan($start_date , $end_date){
 
 
 public function getApprovedamountmonthly(){
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/approvedMonthlyAmounts/2022.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/approvedMonthlyAmounts/2022.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -995,9 +995,9 @@ public function projectstatus($status){
 
     
 public function getLog(){
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/systemlogs/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/systemlogs/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -1091,9 +1091,9 @@ public function getLog(){
 }
 
 public function getSingleUnit(){
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/singleProjectCost/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/singleProjectCost/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -1283,9 +1283,9 @@ public function getIncentive(){
     //approved incentive
     //pending   pendingIncentive
     //pending   pendingIncentive
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/incentive/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/incentive/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -1501,9 +1501,9 @@ public function getBudgetProject(){
     
     
 
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/ProjectTotalCost/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/ProjectTotalCost/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -1566,9 +1566,9 @@ public function getBudgetProject(){
 public function getTransportation(){
     //Transportaions
     //pendingtransportations
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/Transportaions/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/Transportaions/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -1950,9 +1950,9 @@ public function subdepartment($dep){
 }
 public function getPublicReqeust(){
     
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/approvedPublicRequests/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/approvedPublicRequests/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -2269,9 +2269,9 @@ public function getlicense(){
     
     
 
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/license/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/license/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -2408,9 +2408,9 @@ public function getlicensehistory(){
     
     
 
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/licenseUpdates/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/licenseUpdates/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -2588,9 +2588,9 @@ public function getclientticket(){
     
     
 
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/client_tickets/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/client_tickets/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -2773,9 +2773,9 @@ public function getclienttickettimeline(){
     
     
 
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/client_ticket_timeline/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/client_ticket_timeline/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,
@@ -2878,9 +2878,9 @@ public function getAnnounces(){
     
     
 
-    $URL =   'https://fgspmproduction-default-rtdb.firebaseio.com/announces/.json?auth=TJIGzwSVyk9DSUWohfTHMu8tcRUp2VaIaZMXKFBD&key=AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL =   config('firebase.legacy_database_url').'/announces/.json?auth='.config('firebase.legacy_db_auth_token').'&key='.config('firebase.api_key');
 
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
     $headers = array
     (
         'Authorization: key='.$TOKEN,

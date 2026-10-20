@@ -15,7 +15,7 @@ class MessageController extends Controller
     // }
 
     public function pushnotifcation($to_token,$title,$body){
-        $token = 'AAAAX7e0pwE:APA91bEvrXXY_tE099Tq0GDJP1WvylplRGfXohCJ9E0VKYzQuvzu62dGTMgATHCzPi5uYGFjHDf2ckO0ryaiL1kqpqeZYMx5m30H7Gl4xvkMSoiR9EEkeuRA2VQRXEfLlUEYiw-4oxpJ';
+        $token = config('firebase.server_key');
         $to_token=   str_replace('"', '', $to_token);
               $fields = array
                 (
@@ -44,16 +44,16 @@ class MessageController extends Controller
 
     
     public function getFcm($id,$title,$body){
-        $URL = 'https://fgs-connect-portal-default-rtdb.firebaseio.com';
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL = config('firebase.database_url');
+        $TOKEN = config('firebase.api_key');
         $PATH = '/fcmTokens';
         $firebase = new FirebaseLib($URL, $TOKEN);
         $val = $firebase->get($PATH. '/'.$id);   // stores data in Firebase
         $res=    MessageController::pushnotifcation($val,$title,$body);
     }
     public function getFcmClient($id,$title,$body){
-        $URL = 'https://fgs-connect-portal-default-rtdb.firebaseio.com';
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL = config('firebase.database_url');
+        $TOKEN = config('firebase.api_key');
         $PATH = '/clientfcmTokens';
         $firebase = new FirebaseLib($URL, $TOKEN);
         $val = $firebase->get($PATH. '/'.$id);   // stores data in Firebase
@@ -61,8 +61,8 @@ class MessageController extends Controller
     }
     
     public function notificationSend($msg){
-        $URL = 'https://fgs-connect-portal-default-rtdb.firebaseio.com';
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL = config('firebase.database_url');
+        $TOKEN = config('firebase.api_key');
         $PATH = '/notification';
         $firebase = new FirebaseLib($URL, $TOKEN);
        $firebase->push($PATH, $msg);    
@@ -72,17 +72,17 @@ class MessageController extends Controller
 //UserNavParams/user_id
 
 public function updatedatafirebase($id,$msg){
-    $URL = 'https://fgs-connect-portal-default-rtdb.firebaseio.com';
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $URL = config('firebase.database_url');
+    $TOKEN = config('firebase.api_key');
     $PATH = '/UserNavParams'.'/'.$id;
     $firebase = new FirebaseLib($URL, $TOKEN);
    $firebase->update($PATH, $msg);    
   // MessageController::getFcm($msg['receverKey'] ,$msg['title'],$msg['body']);
 }
 public function updatedatafirebaseNote($id,$msg){
-      $URL = 'https://fgs-connect-portal-default-rtdb.firebaseio.com';
+      $URL = config('firebase.database_url');
  
-    $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+    $TOKEN = config('firebase.api_key');
 
     $PATH = '/Notes'.'/'.$id;
     $firebase = new FirebaseLib($URL, $TOKEN);
@@ -102,8 +102,8 @@ public function updatedatafirebaseNote($id,$msg){
 // pendingPublicRequest?:number;
 
     public function notificationSendclient($msg){
-        $URL = 'https://fgs-connect-portal-default-rtdb.firebaseio.com';
-        $TOKEN = 'AIzaSyBC14ua20Sa6zS_ZcfYYnj8ih1hDRE1Wq8';
+        $URL = config('firebase.database_url');
+        $TOKEN = config('firebase.api_key');
         $PATH = '/clientnotification';
         $firebase = new FirebaseLib($URL, $TOKEN);
        $firebase->push($PATH, $msg);    
