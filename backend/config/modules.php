@@ -86,7 +86,7 @@ return [
 
         // ===== Core (unmapped => always allowed) =====
         // User\Auth, User\Profile, User\Dashboard\DashboardController,
-        // Client\Auth, ApiMessage, Tools, ToDo, DatabaseConvert* ...
+        // Client\Auth, ApiMessage, Tools, ToDo ...
     ],
 
 ];
