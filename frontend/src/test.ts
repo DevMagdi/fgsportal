@@ -22,7 +22,6 @@ getTestBed().initTestEnvironment(
 }
 );
 // Then we find all the tests.
-const context = require.context('./', true, /\.spec\.ts$/);
-// And load the modules.
+const context = require.context('./', true, /^(?!.*bms-catalog\.spec\.ts$).*\.spec\.ts$/);
 // Node-only source-inspection specs run through scripts/run-node-specs.js.
-context.keys().filter(key => !key.endsWith('/bms-catalog.spec.ts')).map(context);
+context.keys().map(context);
