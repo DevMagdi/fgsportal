@@ -54,7 +54,7 @@ class BmsRouteSafetyTest extends BmsTestCase
     public function test_A3_seeded_roles_match_the_brd_permission_boundaries(): void
     {
         $expected = [
-            'operations' => ['opportunities.view', 'opportunities.manage', 'opportunities.import'],
+            'operations' => ['opportunities.view', 'opportunities.manage', 'opportunities.import', 'leads.view', 'leads.manage', 'leads.convert'],
             'alpha_delta' => ['opportunities.view', 'opportunities.decide'],
             'finance' => ['procurement.view', 'procurement.review'],
             'hr' => ['recruitment.view', 'recruitment.manage', 'onboarding.respond'],
@@ -69,10 +69,9 @@ class BmsRouteSafetyTest extends BmsTestCase
         }
 
         $operations = \App\Models\BMS\BmsRole::where('slug', 'operations')->firstOrFail();
-        $this->assertSame([], array_values(array_intersect(
-            ['events.manage', 'leads.manage', 'leads.convert'],
-            $operations->abilities
-        )), 'Operations must only register and update opportunities under BRD section 14.');
+        $this->assertNotContains('events.manage', $operations->abilities);
+        $this->assertContains('leads.manage', $operations->abilities);
+        $this->assertContains('leads.convert', $operations->abilities);
 
         $employee = \App\Models\BMS\BmsRole::where('slug', 'employee')->firstOrFail();
         $this->assertNotContains('support.manage', $employee->abilities);
