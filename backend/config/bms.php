@@ -4,4 +4,5 @@ return [
     'opportunity_no_update_days' => env('BMS_OPPORTUNITY_STALE_DAYS', 7),
     'default_currency' => env('BMS_DEFAULT_CURRENCY', 'SAR'),
     'currencies' => ['SAR', 'USD', 'EUR', 'EGP', 'AED', 'KWD', 'OMR'],
+    'no_go_sets_declined' => env('BMS_NO_GO_SETS_DECLINED', true),
 ];

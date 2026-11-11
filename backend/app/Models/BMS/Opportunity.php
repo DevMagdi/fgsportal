@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Opportunity extends Model {
     use SoftDeletes;
     protected $table='bms_opportunities';
-    protected $attributes=['currency'=>'SAR'];
+    protected $attributes=['currency'=>'SAR','go_no_go'=>'pending'];
     protected $fillable=['reference','title','client_name','type','business_unit_id','contact_lead_id','product_id','owner_id','created_by','stage','value','currency','submission_date','expected_close_date','last_update_at','go_no_go','decision_reason','decided_by','decided_at'];
     protected $casts=['submission_date'=>'date','expected_close_date'=>'date','last_update_at'=>'datetime','decided_at'=>'datetime','value'=>'decimal:2'];
     public function unit(){ return $this->belongsTo(BusinessUnit::class,'business_unit_id'); }
