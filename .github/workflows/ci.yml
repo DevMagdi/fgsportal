@@ -39,18 +39,18 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan jwt:secret
-      - name: Lint BMS PHP
-        working-directory: backend
-        run: composer lint
-      - name: Analyse BMS PHP
-        working-directory: backend
-        run: composer analyse
       - name: Test SQLite with coverage
         working-directory: backend
         run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
       - name: Test MySQL 8
         working-directory: backend
         run: vendor/bin/phpunit -c phpunit.mysql.xml
+      - name: Lint BMS PHP
+        working-directory: backend
+        run: composer lint
+      - name: Analyse BMS PHP
+        working-directory: backend
+        run: composer analyse
 
   frontend:
     runs-on: ubuntu-latest
