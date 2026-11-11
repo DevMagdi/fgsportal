@@ -17,6 +17,8 @@ class Opportunity extends Model {
     public function creator(){ return $this->belongsTo(User::class,'created_by'); }
     public function decisionMaker(){ return $this->belongsTo(User::class,'decided_by'); }
     public function history(){ return $this->hasMany(OpportunityStageHistory::class,'bms_opportunity_id')->latest(); }
+    public function documents(){ return $this->hasMany(OpportunityDocument::class,'bms_opportunity_id')->latest(); }
+    public function minutes(){ return $this->hasMany(Minutes::class,'linked_id')->where('linked_type','opportunity')->with('meeting'); }
     public function scopeFilter($query,$filters){
         return $query->when($filters['business_unit_id']??null,fn($q,$v)=>$q->where('business_unit_id',$v))
             ->when($filters['product_id']??null,fn($q,$v)=>$q->where('product_id',$v))

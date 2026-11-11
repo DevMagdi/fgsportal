@@ -28,4 +28,10 @@ export class BmsApiService {
   delete<T>(path: string): Observable<T> {
     return this.http.delete<any>(`${this.root}/${path}`, { headers: this.headers() }).pipe(map(response => response.data));
   }
+  download(path: string, filename: string, onError: () => void = () => {}): void {
+    this.http.get(`${this.root}/${path}`, { headers: this.headers(), responseType: 'blob' }).subscribe({
+      next: blob => { const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = filename; link.click(); URL.revokeObjectURL(url); },
+      error: () => onError()
+    });
+  }
 }

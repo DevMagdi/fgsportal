@@ -11,6 +11,11 @@ import { BusinessUnitsComponent } from './units/business-units.component';
 import { WeeklyPlansComponent } from './plans/weekly-plans.component';
 import { OpportunitiesComponent } from './opportunities/opportunities.component';
 import { ProductTrackingComponent } from './products/product-tracking.component';
+import { BmsCollectionComponent } from './collection/bms-collection.component';
+import { MeetingsComponent } from './meetings/meetings.component';
+import { ReportsComponent } from './reports/reports.component';
+import { BMS_COLLECTIONS } from './bms-catalog';
+import { AccessComponent } from './access/access.component';
 
 const routes: Routes = [{path:'',component:BmsShellComponent,children:[
   {path:'',pathMatch:'full',redirectTo:'dashboard'},
@@ -19,10 +24,14 @@ const routes: Routes = [{path:'',component:BmsShellComponent,children:[
   {path:'plans',component:WeeklyPlansComponent},
   {path:'opportunities',component:OpportunitiesComponent},
   {path:'products',component:ProductTrackingComponent},
+  {path:'meetings',component:MeetingsComponent},
+  {path:'reports',component:ReportsComponent},
+  {path:'access',component:AccessComponent},
+  ...Object.keys(BMS_COLLECTIONS).map(key=>({path:key,component:BmsCollectionComponent,data:{config:BMS_COLLECTIONS[key]}})),
 ]}];
 
 @NgModule({
-  declarations:[BmsShellComponent,ExecutiveDashboardComponent,BusinessUnitsComponent,WeeklyPlansComponent,OpportunitiesComponent,ProductTrackingComponent],
+  declarations:[BmsShellComponent,ExecutiveDashboardComponent,BusinessUnitsComponent,WeeklyPlansComponent,OpportunitiesComponent,ProductTrackingComponent,BmsCollectionComponent,MeetingsComponent,ReportsComponent,AccessComponent],
   imports:[CommonModule,FormsModule,ReactiveFormsModule,RouterModule.forChild(routes)],
   providers:[BmsApiService,BmsLanguageService,BmsExportService],
 })

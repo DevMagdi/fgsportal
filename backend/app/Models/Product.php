@@ -24,6 +24,11 @@ class Product extends Model
         return $this->hasMany(\App\Models\BMS\ProductPhase::class)->orderBy('sequence');
     }
 
+    public function minutes()
+    {
+        return $this->hasMany(\App\Models\BMS\Minutes::class,'linked_id')->where('linked_type','product')->with('meeting');
+    }
+
     public function currentPhase()
     {
         return $this->hasOne(\App\Models\BMS\ProductPhase::class)

@@ -24,6 +24,7 @@ const FRONTEND_ROOT = path.resolve(__dirname, '..');
 
 // Pure specs: no Angular TestBed / DOM imports, safe to run on Node.
 const PURE_SPECS = [
+  'src/app/components/bms/bms-catalog.spec.ts',
   'src/app/pipes/max-length.pipe.spec.ts',
   'src/app/services/module-pages.registry.spec.ts',
   'src/app/services/user-perms.cache.spec.ts',

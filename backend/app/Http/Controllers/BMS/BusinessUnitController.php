@@ -11,10 +11,9 @@ class BusinessUnitController extends BmsController
 {
     public function index()
     {
-        $query = BusinessUnit::with(['parent','director:id,username,firstname,lastname,email','users:id,username,firstname,lastname,email']);
-        if (!$this->access->roles()->contains(fn($r)=>in_array($r->slug,['system_admin','executive','operations'],true))) {
-            $query->whereIn('id',$this->access->units());
-        }
+        $query = BusinessUnit::with(['parent','director:id,username,firstname,lastname,email','users:id,username,firstname,lastname,email','minutes.meeting']);
+        $visibleUnits=$this->access->visibleUnitIds();
+        if($visibleUnits!==null)$query->whereIn('id',$visibleUnits);
         return $this->ok($query->orderBy('name')->get());
     }
 
@@ -31,7 +30,7 @@ class BusinessUnitController extends BmsController
     public function show(BusinessUnit $unit)
     {
         $this->access->authorizeUnit($unit->id);
-        return $this->ok($unit->load(['parent','children','director','users','weeklyPlans.tasks']));
+        return $this->ok($unit->load(['parent','children','director','users','weeklyPlans.tasks','minutes.meeting']));
     }
 
     public function update(Request $request, BusinessUnit $unit)
@@ -58,7 +57,7 @@ class BusinessUnitController extends BmsController
         return $request->validate([
             'parent_id'=>'nullable|exists:business_units,id',
             'name'=>['required','string','max:150',Rule::unique('business_units','name')->ignore($id)],
-            'description'=>'nullable|string','services'=>'nullable|array','services.*'=>'string|max:255',
+            'description'=>'nullable|string','key_messages'=>'nullable|string','services'=>'nullable|array','services.*'=>'string|max:255',
             'director_id'=>'nullable|exists:users,id','is_active'=>'sometimes|boolean',
             'user_ids'=>'sometimes|array','user_ids.*'=>'exists:users,id',
         ]);

@@ -152,6 +152,16 @@ export const MODULE_PAGES: Record<string, ModulePage[]> = {
     { section: 'BMS', title: 'Weekly Plans', icon: 'bx bx-calendar-check', route: '/bms/plans' },
     { section: 'BMS', title: 'Opportunities & Tenders', icon: 'bx bx-briefcase', route: '/bms/opportunities' },
     { section: 'BMS', title: 'Product Tracking', icon: 'bx bx-package', route: '/bms/products' },
+    { section: 'BMS', title: 'Meetings & Minutes', icon: 'bx bx-calendar', route: '/bms/meetings' },
+    { section: 'BMS', title: 'Team Development', icon: 'bx bx-trending-up', route: '/bms/development' },
+    { section: 'BMS', title: 'Leads & Partnerships', icon: 'bx bx-network-chart', route: '/bms/leads' },
+    { section: 'BMS', title: 'Recruitment & Onboarding', icon: 'bx bx-user-plus', route: '/bms/recruitment' },
+    { section: 'BMS', title: 'Procurement', icon: 'bx bx-cart', route: '/bms/procurement' },
+    { section: 'BMS', title: 'PR Events & Protocol', icon: 'bx bx-calendar-star', route: '/bms/events' },
+    { section: 'BMS', title: 'Document & Brand Hub', icon: 'bx bx-folder-open', route: '/bms/documents' },
+    { section: 'BMS', title: 'Employee Directory', icon: 'bx bx-id-card', route: '/bms/directory' },
+    { section: 'BMS', title: 'Access & Roles', icon: 'bx bx-shield-quarter', route: '/bms/access' },
+    { section: 'BMS', title: 'Reports', icon: 'bx bx-file', route: '/bms/reports' },
   ],
   // ---- Standalone always-on links (Notes) + the perm-gated Time Sheet ----
   core: [

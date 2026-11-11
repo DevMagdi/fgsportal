@@ -11,11 +11,20 @@ class LookupController extends BmsController
 {
     public function index()
     {
+        $visibleUnits=$this->access->visibleUnitIds();
+        $units=\App\Models\BMS\BusinessUnit::when($visibleUnits!==null,fn($q)=>$q->whereIn('id',$visibleUnits))->orderBy('name')->get(['id','name','parent_id']);
+        $products=Product::when($visibleUnits!==null,fn($q)=>$q->whereHas('businessUnits',fn($u)=>$u->whereIn('business_units.id',$visibleUnits)))->orderBy('product_name')->get(['id','product_name']);
+        $leads=$this->access->can('leads.view')?\App\Models\BMS\Lead::when($visibleUnits!==null,fn($q)=>$q->whereIn('business_unit_id',$visibleUnits))->orderBy('name')->get(['id','name']):collect();
+        $opportunities=$this->access->can('opportunities.view')?\App\Models\BMS\Opportunity::when($visibleUnits!==null,fn($q)=>$q->whereIn('business_unit_id',$visibleUnits))->orderBy('title')->get(['id','title','reference']):collect();
         return $this->ok([
+            'current_user'=>$this->access->user()->only(['id','username','email']),
             'users'=>User::orderBy('username')->get(['id','username','firstname','lastname','email']),
-            'units'=>\App\Models\BMS\BusinessUnit::orderBy('name')->get(['id','name','parent_id']),
+            'units'=>$units,
             'departments'=>Department::orderBy('department_name')->get(['id','department_name']),
-            'products'=>Product::orderBy('product_name')->get(['id','product_name']),
+            'products'=>$products,
+            'leads'=>$leads,
+            'lead_stages'=>\App\Models\BMS\PipelineStage::where('is_active',true)->orderBy('sequence')->get(),
+            'opportunities'=>$opportunities,
             'roles'=>BmsRole::orderBy('name')->get(['id','name','slug','abilities']),
             'abilities'=>array_values(array_unique(array_merge(...BmsRole::pluck('abilities')->map(fn($a)=>$a?:[])->all() ?: [[]]))),
             'can'=>$this->currentAbilities(),
@@ -43,7 +52,7 @@ class LookupController extends BmsController
 
     private function currentAbilities(): array
     {
-        $all=['dashboard.view','dashboard.export','units.view','units.manage','plans.view','plans.manage','tasks.manage','tasks.update_own','opportunities.view','opportunities.manage','opportunities.decide','opportunities.import','products.view','products.manage','support.view','support.manage','support.respond','roles.manage'];
-        return collect($all)->filter(fn($a)=>$this->access->can($a))->values()->all();
+        $all=BmsRole::pluck('abilities')->flatMap(fn($abilities)=>$abilities?:[])->unique();
+        return $all->filter(fn($a)=>$this->access->can($a))->values()->all();
     }
 }

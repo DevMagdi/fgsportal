@@ -1,0 +1,50 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { BmsApiService } from '../bms-api.service';
+import { BmsBaseComponent } from '../bms-base.component';
+import { BmsCollectionConfig, BmsField } from '../bms-catalog';
+import { BmsExportService } from '../bms-export.service';
+import { BmsLanguageService } from '../bms-language.service';
+
+@Component({selector:'app-bms-collection',templateUrl:'./bms-collection.component.html',styleUrls:['../bms-shared.scss']})
+export class BmsCollectionComponent extends BmsBaseComponent implements OnInit {
+  config:BmsCollectionConfig;items:any[]=[];filtered:any[]=[];selected:any=null;draft:any={};files:{[key:string]:File}={};search='';unitFilter='';stageFilter='';editing=false;
+  interaction:any={interaction_type:'meeting',happened_at:'',outcome:'',notes:''};study:any={title:'',owner_id:'',status:'planned',due_date:'',notes:''};
+  candidate:any={name:'',email:''};hire:any={first_working_day:'',employee_id:''};
+  quote:any={vendor:'',amount:null,currency:'SAR'};finance:any={decision:'approved',budget_confirmed:true,finance_comment:''};
+  procedure:any={title:'',category:'pr_protocol',content:'',is_published:true};procedures:any[]=[];
+  certificate:any={user_id:'',business_unit_id:'',name:'',issuer:'',issued_at:'',expires_at:''};history:any[]=[];allStages:any[]=[];newStage:any={code:'',name:'',name_ar:'',sequence:8,is_active:true};
+  constructor(api:BmsApiService,lang:BmsLanguageService,private route:ActivatedRoute,private exporter:BmsExportService){super(api,lang);}
+  ngOnInit():void{super.ngOnInit();this.route.data.subscribe(data=>{this.config=data.config;this.reset();this.load();if(this.config.kind==='events')this.loadProcedures();if(this.config.kind==='leads')this.loadStages();});}
+  load():void{if(!this.config)return;this.loading=true;const filters:any={};if(this.search)filters.search=this.search;if(this.unitFilter)filters.business_unit_id=this.unitFilter;if(this.stageFilter)filters.stage=this.stageFilter;this.api.get<any[]>(this.config.endpoint,filters).subscribe({next:data=>{this.items=data||[];this.filtered=this.items;this.selected=this.selected?this.items.find(i=>i.id===this.selected.id)||null:null;this.loading=false;},error:e=>this.showError(e)});}
+  applyFilters():void{this.load();}
+  reset():void{this.draft={...(this.config?.defaults||{})};this.files={};this.editing=false;}
+  edit(item:any):void{this.selected=item;this.draft={...item};this.config.fields.forEach(f=>{if(f.type==='datetime'&&this.draft[f.key])this.draft[f.key]=String(this.draft[f.key]).slice(0,16);});this.editing=true;window.scrollTo({top:0,behavior:'smooth'});}
+  select(item:any):void{this.selected=item;this.history=[];}
+  file(event:any,key:string):void{const file=event.target.files?.[0];if(file)this.files[key]=file;}
+  save():void{for(const field of this.config.fields){if(field.required&&field.type!=='file'&&!this.draft[field.key])return;}const hasFiles=Object.keys(this.files).length>0;let body:any={...this.draft};if(hasFiles){const form=new FormData();Object.keys(body).forEach(key=>{if(body[key]!==null&&body[key]!==undefined&&typeof body[key]!=='object')form.append(key,body[key]);});Object.keys(this.files).forEach(key=>form.append(key,this.files[key]));body=form;}const request=this.editing?this.api.put(`${this.config.endpoint}/${this.draft.id}`,body):this.api.post(this.config.endpoint,body);request.subscribe({next:()=>{this.saved();this.reset();this.load();},error:e=>this.showError(e)});}
+  addInteraction():void{if(!this.interaction.happened_at||!this.interaction.outcome)return;this.api.post(`leads/${this.selected.id}/interactions`,this.interaction).subscribe({next:data=>{this.selected=data;this.saved();this.interaction={interaction_type:'meeting',happened_at:'',outcome:'',notes:''};this.load();},error:e=>this.showError(e)});}
+  addStudyItem():void{if(!this.study.title)return;this.api.post(`leads/${this.selected.id}/study-items`,this.study).subscribe({next:data=>{this.selected=data;this.saved();this.study={title:'',owner_id:'',status:'planned',due_date:'',notes:''};this.load();},error:e=>this.showError(e)});}
+  saveStudyItem(item:any):void{this.api.put(`lab-study-items/${item.id}`,{title:item.title,owner_id:item.owner_id,status:item.status,due_date:item.due_date,notes:item.notes}).subscribe({next:data=>{this.selected=data;this.saved();},error:e=>this.showError(e)});}
+  convertLead():void{this.api.post(`leads/${this.selected.id}/convert`).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
+  addCandidate():void{if(!this.candidate.name)return;const form=new FormData();form.append('name',this.candidate.name);if(this.candidate.email)form.append('email',this.candidate.email);if(this.files.cv)form.append('cv',this.files.cv);this.api.post(`recruitment/${this.selected.id}/candidates`,form).subscribe({next:data=>{this.selected=data;this.saved();this.candidate={name:'',email:''};delete this.files.cv;this.load();},error:e=>this.showError(e)});}
+  saveCandidate(candidate:any):void{this.api.put(`candidates/${candidate.id}/interview`,{interview_at:candidate.interview_at,interview_notes:candidate.interview_notes,interview_decision:candidate.interview_decision,status:candidate.interview_decision==='pass'?'selected':candidate.interview_decision==='reject'?'rejected':'interviewed'}).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
+  hireCandidate(candidate:any):void{if(!this.hire.first_working_day||!this.hire.employee_id)return;this.api.post(`candidates/${candidate.id}/hire`,this.hire).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
+  saveOnboarding(item:any):void{this.api.put(`onboarding/${item.id}`,{status:item.status,owner_id:item.owner_id,notes:item.notes}).subscribe({next:data=>{this.selected=data;this.saved();},error:e=>this.showError(e)});}
+  addQuote():void{if(!this.quote.vendor||this.quote.amount===null)return;const form=new FormData();Object.keys(this.quote).forEach(key=>form.append(key,this.quote[key]));if(this.files.quotation)form.append('quotation',this.files.quotation);this.api.post(`procurement/${this.selected.id}/quotations`,form).subscribe({next:data=>{this.selected=data;this.saved();this.quote={vendor:'',amount:null,currency:'SAR'};delete this.files.quotation;this.load();},error:e=>this.showError(e)});}
+  review():void{if(!this.finance.finance_comment)return;this.api.post(`procurement/${this.selected.id}/review`,this.finance).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
+  saveChecklist(item:any):void{this.api.put(`event-checklist/${item.id}`,{status:item.status,owner_id:item.owner_id}).subscribe({next:data=>{this.selected=data;this.saved();},error:e=>this.showError(e)});}
+  loadProcedures():void{this.api.get<any[]>('procedures').subscribe({next:data=>this.procedures=data,error:e=>this.showError(e)});}
+  addProcedure():void{if(!this.procedure.title||!this.procedure.content)return;this.api.post('procedures',this.procedure).subscribe({next:()=>{this.saved();this.procedure={title:'',category:'pr_protocol',content:'',is_published:true};this.loadProcedures();},error:e=>this.showError(e)});}
+  addCertificate():void{if(!this.certificate.user_id||!this.certificate.name||!this.files.file)return;const form=new FormData();Object.keys(this.certificate).forEach(key=>{if(this.certificate[key])form.append(key,this.certificate[key]);});form.append('file',this.files.file);this.api.post('certificates',form).subscribe({next:()=>{this.saved();this.certificate={user_id:'',business_unit_id:'',name:'',issuer:'',issued_at:'',expires_at:''};delete this.files.file;this.load();},error:e=>this.showError(e)});}
+  options(field:BmsField):any[]{return this.config.kind==='leads'&&field.key==='stage'?(this.lookups.lead_stages||[]).map((s:any)=>({value:s.code,label:this.lang.current==='ar'?(s.name_ar||s.name):s.name})):field.options||[];}
+  loadStages():void{this.api.get<any[]>('pipeline-stages').subscribe({next:data=>this.allStages=data,error:e=>this.showError(e)});}
+  saveStage(stage:any):void{this.api.put(`pipeline-stages/${stage.id}`,{name:stage.name,name_ar:stage.name_ar,sequence:Number(stage.sequence),is_active:Boolean(stage.is_active)}).subscribe({next:()=>{this.saved();this.loadLookups();this.loadStages();},error:e=>this.showError(e)});}
+  addStage():void{if(!this.newStage.code||!this.newStage.name)return;this.api.post('pipeline-stages',this.newStage).subscribe({next:()=>{this.saved();this.newStage={code:'',name:'',name_ar:'',sequence:(this.lookups.lead_stages?.length||0)+1,is_active:true};this.loadLookups();},error:e=>this.showError(e)});}
+  showHistory():void{this.api.get<any[]>(`documents/${this.selected.id}/history`).subscribe({next:data=>this.history=data,error:e=>this.showError(e)});}
+  download(path:string,name:string):void{this.api.download(path,name,()=>this.error=this.lang.t('error'));}
+  value(item:any,key:string):any{const v=item?.[key];if(key==='stage'&&this.config.kind==='leads'){const stage=(this.lookups.lead_stages||[]).find((s:any)=>s.code===v);if(stage)return this.lang.current==='ar'?(stage.name_ar||stage.name):stage.name;}if(key==='unit')return v?.name||'-';if(key==='owner'||key==='uploader'||key==='reviewer')return this.name(v);if(key==='units')return(v||[]).map((u:any)=>u.name).join(', ')||'-';if(key==='candidates'||key==='certificates'||key==='quotations')return(v||[]).length;if(v===null||v===undefined||v==='')return'-';if(typeof v==='string'&&/^\d{4}-\d{2}-\d{2}T/.test(v))return v.slice(0,16).replace('T',' ');return v;}
+  exportExcel():void{this.exporter.excel([{name:this.config.key,rows:this.rows()}],`bms-${this.config.key}`);}
+  exportPdf():void{this.exporter.pdf(this.lang.t(this.config.title),this.rows(),`bms-${this.config.key}`);}
+  private rows():any[]{return this.filtered.map(item=>{const row:any={};this.config.columns.forEach(key=>row[this.lang.t(key)]=this.value(item,key));return row;});}
+}

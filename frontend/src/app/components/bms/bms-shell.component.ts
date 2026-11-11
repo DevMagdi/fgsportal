@@ -1,11 +1,15 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { BmsApiService } from './bms-api.service';
 import { BmsLanguageService } from './bms-language.service';
-
 @Component({ selector:'app-bms-shell', templateUrl:'./bms-shell.component.html', styleUrls:['./bms-shared.scss'] })
-export class BmsShellComponent implements OnDestroy {
-  direction:'ltr'|'rtl' = this.lang.direction;
+export class BmsShellComponent implements OnInit,OnDestroy {
+  direction:'ltr'|'rtl' = this.lang.direction;alerts:any[]=[];showAlerts=false;lookups:any={can:[]};
   private subscription = this.lang.language$.subscribe(() => { this.direction = this.lang.direction; document.documentElement.dir = this.direction; });
-  constructor(public lang: BmsLanguageService) {}
+  constructor(public lang: BmsLanguageService,private api:BmsApiService) {}
+  ngOnInit():void{this.api.get<any>('lookups').subscribe({next:data=>{this.lookups=data;if((data.can||[]).includes('opportunities.view'))this.loadAlerts();},error:()=>{}});}
+  can(ability:string):boolean{return(this.lookups.can||[]).includes(ability);}
+  loadAlerts():void{this.api.get<any[]>('alerts').subscribe({next:data=>this.alerts=data,error:()=>{}});}
+  read(alert:any):void{this.api.put(`alerts/${alert.id}/read`,{}).subscribe({next:()=>{this.alerts=this.alerts.filter(a=>a.id!==alert.id);},error:()=>{}});}
   ngOnDestroy(): void { this.subscription.unsubscribe(); document.documentElement.dir = 'ltr'; }
 }
