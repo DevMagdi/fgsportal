@@ -46,7 +46,7 @@ class ProductTrackingController extends BmsController
     public function storePhase(Request $request, Product $product)
     {
         $this->authorizeProduct($product);
-        $data=$this->phaseData($request);
+        $data=$this->phaseData($request,true,$product->id);
         $phase=$product->phases()->create($data+['updated_by'=>$this->access->user()->id]);
         $this->audit->record($phase,'product_phase.created',[],$phase->toArray());
         return $this->ok($phase,'Product phase created',201);
@@ -55,7 +55,7 @@ class ProductTrackingController extends BmsController
     public function updatePhase(Request $request, ProductPhase $phase)
     {
         $this->authorizeProduct($phase->product);
-        $data=$this->phaseData($request,false);
+        $data=$this->phaseData($request,false,$phase->product_id,$phase->id);
         $data['updated_by']=$this->access->user()->id;
         $old=$phase->only(array_keys($data));$phase->update($data);
         $this->audit->record($phase,'product_phase.updated',$old,$phase->only(array_keys($data)));
@@ -76,10 +76,10 @@ class ProductTrackingController extends BmsController
         abort_unless($product->businessUnits()->whereIn('business_units.id',$ids)->exists(),403,'This product is outside your assigned unit scope.');
     }
 
-    private function phaseData(Request $request,bool $creating=true): array
+    private function phaseData(Request $request,bool $creating=true,?int $productId=null,?int $ignoreId=null): array
     {
         return $request->validate([
-            'name'=>($creating?'required':'sometimes').'|string|max:150','sequence'=>($creating?'required':'sometimes').'|integer|min:1',
+            'name'=>($creating?'required':'sometimes').'|string|max:150','sequence'=>[$creating?'required':'sometimes','integer','min:1',Rule::unique('product_phases','sequence')->where('product_id',$productId)->ignore($ignoreId)],
             'status'=>['sometimes',Rule::in(['not_started','in_progress','completed','blocked'])],
             'blockers'=>'nullable|string','data_needs'=>'nullable|string','support_needs'=>'nullable|string',
             'start_date'=>'nullable|date','end_date'=>'nullable|date|after_or_equal:start_date',
