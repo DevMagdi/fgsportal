@@ -328,7 +328,7 @@ public function PendingActivitySendNotification(User $user2, ContactLeadActivity
 
                     if(!empty($mailto)){
                       $message  =  Carbon::parse( $value->endDate)->format('m/d/Y');
-                      // $mailto = "ataha@firstgulfsolutions.com";
+                      // $mailto = "ataha@alphaiota.com.sa";
                      
                       try{
                       

@@ -20,16 +20,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'fgsPM'`, () => {
+  it(`should have as title 'alphaiota'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('fgsPM');
+    expect(app.title).toEqual('alphaiota');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('fgsPM app is running!');
+    expect(compiled.querySelector('.content span').textContent).toContain('alphaiota app is running!');
   });
 });

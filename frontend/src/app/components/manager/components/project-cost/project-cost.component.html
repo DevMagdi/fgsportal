@@ -16,7 +16,7 @@
                     <mat-optgroup label="Project">
                         <ng-container *ngFor="let project of filteredOptions | async">
                             <mat-option *ngIf="project.type == '2'" [value]="project">
-                                <span style="border-left: solid 3px #20B8CC;" *ngIf="project.status == '5'">
+                                <span style="border-left: solid 3px #F498C1;" *ngIf="project.status == '5'">
                                         {{project.title}} <span style="font-size: smaller;color: red;">"closed"</span>
                                 </span>
                                 <span *ngIf="project.status != '5'">
@@ -31,7 +31,7 @@
                     <mat-optgroup label="POC">
                         <ng-container *ngFor="let project of filteredOptions | async">
                             <mat-option *ngIf="project.type == '1'" [value]="project">
-                                <span style="border-left: solid 3px #20B8CC;" *ngIf="project.status == '5'">
+                                <span style="border-left: solid 3px #F498C1;" *ngIf="project.status == '5'">
                                         {{project.title}} <span style="font-size: smaller;color: red;">"closed"</span>
                                 </span>
                                 <span *ngIf="project.status != '5'">
@@ -126,10 +126,10 @@
                                             Budget
                                         </h3>
                                     </div>
-                                    <span style="cursor: pointer;color:#20B8CC;" *ngIf=" !editMode" class="material-icons edit" matTooltip="Edit" (click)="editCost()">
+                                    <span style="cursor: pointer;color:#F498C1;" *ngIf=" !editMode" class="material-icons edit" matTooltip="Edit" (click)="editCost()">
                                         edit
                                     </span>
-                                    <span style="cursor: pointer;color:#20B8CC;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="Save" (click)="saveTotalCost()">
+                                    <span style="cursor: pointer;color:#F498C1;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="Save" (click)="saveTotalCost()">
                                         save
                                     </span>
                                     <span style="cursor: pointer;color:#9e9e9e;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="cancel" (click)="cancelEditTotalCost()">
@@ -216,10 +216,10 @@
                                             </h2>
 
                                         </div>
-                                        <span style="cursor: pointer;color:#20B8CC;" *ngIf=" !editMode" class="material-icons edit" matTooltip="Edit" (click)="editCost()">
+                                        <span style="cursor: pointer;color:#F498C1;" *ngIf=" !editMode" class="material-icons edit" matTooltip="Edit" (click)="editCost()">
                                             edit
                                         </span>
-                                        <span style="cursor: pointer;color:#20B8CC;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="Save" (click)="saveTotalCost()">
+                                        <span style="cursor: pointer;color:#F498C1;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="Save" (click)="saveTotalCost()">
                                             save
                                         </span>
                                         <span style="cursor: pointer;color:#9e9e9e;" *ngIf=" !!editMode" class="material-icons edit" matTooltip="cancel" (click)="cancelEditTotalCost()">

@@ -165,7 +165,7 @@ MessageController::notificationSendclient($msg);
              if(!empty($mailto)){
               $mailto = $mailto . ";";
 
-             //   $mailto = "ataha@firstgulfsolutions.com";
+             //   $mailto = "ataha@alphaiota.com.sa";
                Mail::to($mailto)->send(new TicketUpdate(" ",$ticket->contact_account_id_fun->fullname ,$ticket->id,$ticket->title,$request->comment,"Updated",$request->title));
              }
             } 
@@ -224,7 +224,7 @@ MessageController::notificationSendclient($msg);
                     }
                   }
                   if(!empty($mailto)){
-                 //   $mailto = "ataha@firstgulfsolutions.com";
+                 //   $mailto = "ataha@alphaiota.com.sa";
 
                      Mail::to($mailto)->send(new TicketUpdate(" ",Auth::guard('client_api')->user()->fullname,$ticket->id,$ticket->title,$request->comment,"Updated",$request->title));
                   }
@@ -311,7 +311,7 @@ MessageController::notificationSendclient($msg);
                       
                      }
                      if(!empty($mailto)){
-                      // $mailto = "ataha@firstgulfsolutions.com";
+                      // $mailto = "ataha@alphaiota.com.sa";
                         $mailto = $mailto .";";
                         Mail::to($mailto)->send(new TicketUpdate(" ",Auth::guard('client_api')->user()->fullname,$ticket->id,$ticket->title,$request->comment,"Escalated","Ticket Esclated"));
                      }

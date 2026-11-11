@@ -18,8 +18,8 @@ class CompaniesTableSeeder extends Seeder
         $company = Company::updateOrCreate(
             ['slug' => 'default'],
             [
-                'name' => 'First Gulf Solutions',
-                'description' => 'Default company for legacy users and the main FGS Connect tenant.',
+                'name' => 'Alphaiota',
+                'description' => 'Default company for legacy users and the main Alphaiota tenant.',
                 'is_active' => true,
             ]
         );

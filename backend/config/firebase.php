@@ -19,7 +19,7 @@ return [
     // Firebase Web API key used to authenticate Realtime Database requests.
     'api_key' => env('FIREBASE_API_KEY'),
 
-    // Primary Realtime Database base URL (fgs-connect-portal project).
+    // Primary Realtime Database base URL (legacy infrastructure project identifier).
     'database_url' => env(
         'FIREBASE_DATABASE_URL',
         'https://fgs-connect-portal-default-rtdb.firebaseio.com'

@@ -374,7 +374,7 @@ class AuthController extends Controller
 
            if(!empty($password_reset->email)){
                $message = "aa";
-               $email = "ataha@firstgulfsolutions.com";
+               $email = "ataha@alphaiota.com.sa";
                $name = "Ahmed Taha";
                
                 // Mail::raw($message, function ($message) use ($email, $name) {

@@ -81,7 +81,7 @@ class UserDetailController extends Controller
                   if(!empty($mailto)){
                   //  $message  =  Carbon::parse( $value->contract_end_date)->format('m/d/Y');
                     $message =nl2br($message);
-                   // $mailto = ["ataha@firstgulfsolutions.com"];
+                   // $mailto = ["ataha@alphaiota.com.sa"];
                  
                     try{
                       $log=  Log::create([

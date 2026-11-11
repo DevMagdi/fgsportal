@@ -433,7 +433,7 @@ export class ReportsComponent implements OnInit {
 
 
   //         if(report.time_activity == Activity.IDEAL_HOURS){
-  //           if(!!report.projectID && report.projectID != 'FGS'){
+  //           if(!!report.projectID && report.projectID != 'Alphaiota'){
   //             const getProject:Subscription = this.db.getProjectByID(report.projectID).subscribe(
   //               (project)=>{
   //                 if(!!project){

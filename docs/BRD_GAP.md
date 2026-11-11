@@ -17,7 +17,7 @@ Each row maps a BRD module to code that exists in this repository. Status: Cover
 | M11 Dashboards and reports | Partial | `BMS/ExecutiveDashboardController`, Angular `bms/dashboard`, Excel/PDF export; existing CRM/admin reports retained | Phase 1 unified dashboard complete with unit/product/opportunity filters and exports. Later-phase monthly, quarterly and six-month reports remain (FR-RPT-01..05). |
 | Roles and permissions | Covered (Phase 1) | Existing permissions and `CheckModule`, plus `BmsRole`, `bms_role_user`, `BmsAccess`, `bms.permission` middleware | Phase 1 role matrix and unit/department scopes implemented; later modules must reuse the same matrix. |
 | Audit trail | Covered (Phase 1 scope) | `BmsAudit`, `bms_audit_logs`, opportunity stage histories | Required opportunity, task and support status/decision auditing implemented. |
-| Branding and RTL | Covered (Phase 1) | `bms-logo.svg/.png`, `_colors.scss`, Material palettes, email headers, BMS language service | New logo/palette applied to active UI and emails; all Phase 1 screens support English and Arabic RTL. |
+| Branding and RTL | Covered (Phase 1) | `alphaiota-logo.png/.png`, `_colors.scss`, Material palettes, email headers, BMS language service | New logo/palette applied to active UI and emails; all Phase 1 screens support English and Arabic RTL. |
 | Module enablement (NFR-06) | Covered | `modules`, `company_modules`, `ModuleService`, `/modules` pages | none |
 
 ## Next build order (proposal)

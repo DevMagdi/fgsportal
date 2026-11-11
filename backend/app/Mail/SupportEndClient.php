@@ -30,7 +30,7 @@ class SupportEndClient extends Mailable
      */
     public function build()
     {
-        return $this->from("support@firstgulfsolutions.com")->subject('FGS Portal')->markdown('emails.supportclient');
+        return $this->from("support@alphaiota.com.sa")->subject('Alphaiota Portal')->markdown('emails.supportclient');
 
     }
 }

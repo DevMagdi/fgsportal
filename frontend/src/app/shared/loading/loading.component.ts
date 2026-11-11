@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { LoadingService } from 'src/app/services/loading.service';
 
 @Component({
-  selector: 'fgs-loading',
+  selector: 'alphaiota-loading',
   templateUrl: './loading.component.html',
   styleUrls: ['./loading.component.scss']
 })

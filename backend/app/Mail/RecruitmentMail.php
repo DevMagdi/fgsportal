@@ -23,7 +23,7 @@ class RecruitmentMail extends Mailable
         $this->email_subject = $email_subject;
         $this->send_link = $send_link;
         
-        $this->url = "https://connect.firstgulfsolutions.com/#/uploadattachment?token_id=".$token."&email=". $email;
+        $this->url = "https://connect.alphaiota.com.sa/#/uploadattachment?token_id=".$token."&email=". $email;
 
     }
 
@@ -34,6 +34,7 @@ class RecruitmentMail extends Mailable
      */
     public function build()
     {
+       // Keep the existing authenticated Gmail sender so recruitment delivery is unaffected.
        $mail =  $this->from("firstgulfsolutionspm@gmail.com")->subject(  $this->email_subject)->markdown('emails.recruitmentMail');
         foreach ($this->attachmentPaths as $attachmentPath) {
             $mail->attach($attachmentPath);

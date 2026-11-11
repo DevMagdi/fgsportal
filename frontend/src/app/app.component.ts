@@ -12,7 +12,7 @@ import { ModuleService } from './services/module.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'fgsPM';
+  title = 'alphaiota';
   message;
   loggedIn: boolean = true;
   loading$ = this.loadingService.loading$;

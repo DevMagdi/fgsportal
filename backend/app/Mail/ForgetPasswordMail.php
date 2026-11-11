@@ -19,7 +19,7 @@ class ForgetPasswordMail extends Mailable
     {
         $this->email = $email;
         $this->token = $token;
-        $this->url = "https://community.firstgulfsolutions.com/#/forgetpassowrd?token=".$token."&email=". $email;
+        $this->url = "https://community.alphaiota.com.sa/#/forgetpassowrd?token=".$token."&email=". $email;
     }
 
     /**
@@ -29,6 +29,6 @@ class ForgetPasswordMail extends Mailable
      */
     public function build()
     {
-        return  $this->from("support@firstgulfsolutions.com")->subject('FGS Portal Forget Password')->markdown('emails.forgetpasswordmails');
+        return  $this->from("support@alphaiota.com.sa")->subject('Alphaiota Portal Forget Password')->markdown('emails.forgetpasswordmails');
     }
 }

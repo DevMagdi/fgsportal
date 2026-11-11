@@ -215,7 +215,7 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     if(priority == ClientTicketPeriority.Normal){
       return '#1CCC6D'
     }else if(priority == ClientTicketPeriority.High){
-      return '#D94691'
+      return '#45436E'
     }else if(priority == ClientTicketPeriority.Critical){
       return '#CC1C52'
     }else{
@@ -572,17 +572,17 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //         Client Ticket Updated.<br>
     //         <br>
     //         <br>
-    //         There Is An Update On <a href="https://connect.firstgulfsolutions.com/#/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
+    //         There Is An Update On <a href="https://connect.alphaiota.com.sa/#/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
     //         <br>
     //         <br>
     //         Best Regards,
     //         <br>
-    //         <a href="https://connect.firstgulfsolutions.com/">First Gulf Solutions</a>
+    //         <a href="https://connect.alphaiota.com.sa/">Alphaiota</a>
     //         <br>
     //         <br>
-    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="Alphaiota" class="icon" src="https://connect.alphaiota.com.sa/assets/img/alphaiota-logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //         `
-    //         this._emailing.supportCenter(user.email , 'FGS Support', message)
+    //         this._emailing.supportCenter(user.email , 'Alphaiota Support', message)
     //       }
           
     //     })
@@ -599,17 +599,17 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //         Client Ticket Assigned To YOU.<br>
     //         <br>
     //         <br>
-    //         There Is An Update On <a href="https://connect.firstgulfsolutions.com/#/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
+    //         There Is An Update On <a href="https://connect.alphaiota.com.sa/#/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
     //         <br>
     //         <br>
     //         Best Regards,
     //         <br>
-    //         <a href="https://connect.firstgulfsolutions.com/">First Gulf Solutions</a>
+    //         <a href="https://connect.alphaiota.com.sa/">Alphaiota</a>
     //         <br>
     //         <br>
-    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="Alphaiota" class="icon" src="https://connect.alphaiota.com.sa/assets/img/alphaiota-logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //         `
-    //         this._emailing.supportCenter(user.email , 'FGS Support', message)
+    //         this._emailing.supportCenter(user.email , 'Alphaiota Support', message)
     //       }
           
     //     })
@@ -622,17 +622,17 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //       Hello ${client.username},
     //       <br>
     //       <br>
-    //       Thank you for contacting First Gulf Solutions Technical Support.<br>
+    //       Thank you for contacting Alphaiota Technical Support.<br>
     //       <br>
     //       <br>
-    //       There Is An Update On <a href="https://connect.firstgulfsolutions.com/#/support/tickets/">Ticket ${this.currentClientTicket.key}</a>.
+    //       There Is An Update On <a href="https://connect.alphaiota.com.sa/#/support/tickets/">Ticket ${this.currentClientTicket.key}</a>.
     //       <br>
     //       <br>
     //       We marked the issue as closed. If you need further assistance with this case, please feel free to reopen the case within the next 14 days and we will be happy to assist you further.
     //       <br>
     //       <br>
     //       Within the next day or so,
-    //       you might receive a Customer Satisfaction survey from First Gulf Solutions.
+    //       you might receive a Customer Satisfaction survey from Alphaiota.
     //       It is our commitment to deliver world-class support to our Customers and Partners.
     //       We greatly appreciate your feedback in advance,
     //       as your feedback will help improve our services.
@@ -643,12 +643,12 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //       <br>
     //       Best Regards,
     //       <br>
-    //       <a href="https://connect.firstgulfsolutions.com/#/">First Gulf Solutions</a>
+    //       <a href="https://connect.alphaiota.com.sa/#/">Alphaiota</a>
     //       <br>
     //       <br>
-    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="Alphaiota" class="icon" src="https://connect.alphaiota.com.sa/assets/img/alphaiota-logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //       `
-    //       this._emailing.supportCenter(client.email , `FGS Support Case ${this.currentClientTicket.key}`, messageToClient)
+    //       this._emailing.supportCenter(client.email , `Alphaiota Support Case ${this.currentClientTicket.key}`, messageToClient)
     //     })
     //   }else{
     //     const gettingClientMail:Subscription = this._auth.getUserByKey(this.currentClientTicket.clientKey).subscribe(user=>{
@@ -657,20 +657,20 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //       Hello ${user.username},
     //       <br>
     //       <br>
-    //       Thank you for contacting First Gulf Solutions Technical Support.<br>
+    //       Thank you for contacting Alphaiota Technical Support.<br>
     //       <br>
     //       <br>
-    //       There Is An Update On <a href="https://connect.firstgulfsolutions.com/#/support/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
+    //       There Is An Update On <a href="https://connect.alphaiota.com.sa/#/support/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
     //       <br>
     //       <br>
     //       Best Regards,
     //       <br>
-    //       <a href="https://connect.firstgulfsolutions.com/#/">First Gulf Solutions</a>
+    //       <a href="https://connect.alphaiota.com.sa/#/">Alphaiota</a>
     //       <br>
     //       <br>
-    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="Alphaiota" class="icon" src="https://connect.alphaiota.com.sa/assets/img/alphaiota-logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //       `
-    //       this._emailing.supportCenter(user.email , `FGS Support Case ${this.currentClientTicket.key}`, messageToClient)
+    //       this._emailing.supportCenter(user.email , `Alphaiota Support Case ${this.currentClientTicket.key}`, messageToClient)
     //     })
     //   }
 
@@ -721,20 +721,20 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //       Hello ${user.username},
     //       <br>
     //       <br>
-    //       Thank you for contacting First Gulf Solutions Technical Support.<br>
+    //       Thank you for contacting Alphaiota Technical Support.<br>
     //       <br>
     //       <br>
-    //       There Is An Update On <a href="https://connect.firstgulfsolutions.com/#/support/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
+    //       There Is An Update On <a href="https://connect.alphaiota.com.sa/#/support/tickets/${this.currentClientTicket.key}">Ticket ${this.currentClientTicket.key}</a>.
     //       <br>
     //       <br>
     //       Best Regards,
     //       <br>
-    //       <a href="https://connect.firstgulfsolutions.com/#/">First Gulf Solutions</a>
+    //       <a href="https://connect.alphaiota.com.sa/#/">Alphaiota</a>
     //       <br>
     //       <br>
-    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="Alphaiota" class="icon" src="https://connect.alphaiota.com.sa/assets/img/alphaiota-logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //       `
-    //       this._emailing.supportCenter(user.email , 'FGS Support', messageToClient)
+    //       this._emailing.supportCenter(user.email , 'Alphaiota Support', messageToClient)
     //     })     
     //   }
 

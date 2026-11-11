@@ -85,16 +85,16 @@ export class MessagingService {
     let title = notify_data['title']
     let option = {
       body :notify_data['body'],
-      icon:'../../assets/img/bms-logo.svg',
-      badge : '../../assets/img/bms-logo.svg',
-      image : '../../assets/img/bms-logo.svg'
+      icon:'../../assets/img/alphaiota-logo.png',
+      badge : '../../assets/img/alphaiota-logo.png',
+      image : '../../assets/img/alphaiota-logo.png'
     };
 
     console.log('new message received. ', notify_data);
     let notify:Notification = new Notification (title , option)
     notify.onclick = event => {
       event.preventDefault();
-      window.location.href = 'https://connect.firstgulfsolutions.com'
+      window.location.href = 'https://connect.alphaiota.com.sa'
     }
   }
 

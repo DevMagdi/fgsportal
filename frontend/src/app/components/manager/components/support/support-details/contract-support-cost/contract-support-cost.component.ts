@@ -275,8 +275,8 @@ export class ContractSupportCostComponent implements OnInit {
 
   getRandomColor(index) {
     var colors = [
-      '#D94691',
-      '#20B8CC',
+      '#45436E',
+      '#F498C1',
       '#707070',
       '#2c0d69',
       '#905017',

@@ -305,7 +305,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                       Mail::to($mailtoa)->send(new TicketUserOpen($ticket->contact_account_id_fun->fullname,$ticket->ticket_number,$ticket->title));
@@ -617,7 +617,7 @@ class TicketController extends Controller
                "receverName"=> $user2->username,
                "redirection"=> "/tickets" ."/".$report->id,
                "senderKey"=> 36,
-               "senderName"=> "FGS",
+               "senderName"=> "Alphaiota",
                "status"=> 0,
                "createdAt"=>Carbon::now(),
                "title"=> "Ticket Has No Action ". $report->title ,
@@ -672,7 +672,7 @@ class TicketController extends Controller
                   if(!empty($mailtoa)){
                     $mailtoa = $mailtoa . ";";
 
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
 
                       Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"No Project Manager Assign to This Ticket Yet."));
                   }
@@ -695,7 +695,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                       Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"No Project Manager Assign to This Ticket Yet."));
@@ -719,7 +719,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                       Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"No Project Manager Assign to This Ticket Yet."));
@@ -757,7 +757,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                       Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"No Developer Assign to This Ticket Yet."));
@@ -781,7 +781,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                        Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"No Developer Assign to This Ticket Yet."));
@@ -805,7 +805,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                        Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"No Developer Assign to This Ticket Yet."));
@@ -844,7 +844,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                       Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"Ticket Still Open"));
@@ -868,7 +868,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                        Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"Ticket Still Open"));
@@ -892,7 +892,7 @@ class TicketController extends Controller
                     }
 
                   if(!empty($mailtoa)){
-                       // $mailtoa = "ataha@firstgulfsolutions.com";
+                       // $mailtoa = "ataha@alphaiota.com.sa";
                        $mailtoa = $mailtoa . ";";
 
                        Mail::to($mailtoa)->send(new TicketUsernoAction($tickets->ticket_number,$tickets->id,$tickets->title,"Ticket Still Open"));

@@ -111,8 +111,8 @@ class ContractSupportController extends Controller
                 if(!empty($mailto)){
                   $message  =  Carbon::parse( $value->contract_end_date)->format('m/d/Y');
 
-                //  $mailto = "ataha@firstgulfsolutions.com";
-                //  $mailto = ["ataha@firstgulfsolutions.com", 'ahassan@firstgulfsolutions.com'];
+                //  $mailto = "ataha@alphaiota.com.sa";
+                //  $mailto = ["ataha@alphaiota.com.sa", 'ahassan@alphaiota.com.sa'];
              //  return $mailto;
                   try{
                     $log=  Log::create([
@@ -148,8 +148,8 @@ class ContractSupportController extends Controller
                 if(!empty($clientmailto)){
                   $message  =  Carbon::parse( $value->contract_end_date)->format('m/d/Y');
 
-                //  $mailto = "ataha@firstgulfsolutions.com";
-                //  $mailto = ["ataha@firstgulfsolutions.com", 'ahassan@firstgulfsolutions.com'];
+                //  $mailto = "ataha@alphaiota.com.sa";
+                //  $mailto = ["ataha@alphaiota.com.sa", 'ahassan@alphaiota.com.sa'];
              //  return $mailto;
                   try{
                     $log=  Log::create([
