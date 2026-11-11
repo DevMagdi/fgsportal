@@ -30,6 +30,7 @@ class OpportunityController extends BmsController
     {
         $data=$this->validateData($request);
         $this->authorizeData($data,true);
+        $data['currency'] = strtoupper($data['currency'] ?? config('bms.default_currency'));
         $data['reference']=$data['reference']??$this->reference();
         $data['created_by']=$this->access->user()->id;
         $data['last_update_at']=now();
@@ -124,6 +125,7 @@ class OpportunityController extends BmsController
                 $validator=validator($normalized,$this->rules(null,false));
                 if ($validator->fails()) throw new \InvalidArgumentException(implode(' ',$validator->errors()->all()));
                 $data=$validator->validated();
+                $data['currency'] = strtoupper($data['currency'] ?? config('bms.default_currency'));
                 $this->authorizeData($data);
                 $reference=$data['reference']??null;
                 unset($data['reference']);
@@ -159,7 +161,7 @@ class OpportunityController extends BmsController
             'type'=>['sometimes',Rule::in(['opportunity','tender','project','client','internal','external'])],
             'business_unit_id'=>'nullable|exists:business_units,id','contact_lead_id'=>'nullable|exists:contact_leads,id',
             'product_id'=>'nullable|exists:products,id','owner_id'=>'nullable|exists:users,id',
-            'stage'=>['sometimes',Rule::in(self::STAGES)],'value'=>'nullable|numeric|min:0','currency'=>'sometimes|string|max:10',
+            'stage'=>['sometimes',Rule::in(self::STAGES)],'value'=>'nullable|numeric|min:0','currency'=>['sometimes','string',Rule::in(config('bms.currencies'))],
             'submission_date'=>'nullable|date','expected_close_date'=>'nullable|date','last_update_at'=>'nullable|date','stage_note'=>'nullable|string',
         ];
         if ($withReference) $rules['reference']=['nullable','string','max:80',Rule::unique('bms_opportunities','reference')->ignore($id)];
