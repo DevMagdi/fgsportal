@@ -54,9 +54,9 @@ class ModuleManagementEndpointsTest extends TestCase
 
         $response->assertStatus(200);
         $modules = collect($response->json('data'));
-        $this->assertSame(6, $modules->count());
+        $this->assertSame(7, $modules->count());
         $this->assertSame(
-            ['admin', 'core', 'crm', 'hr', 'projects', 'ticketing'],
+            ['admin', 'bms', 'core', 'crm', 'hr', 'projects', 'ticketing'],
             $modules->pluck('slug')->sort()->values()->all()
         );
 
@@ -91,7 +91,7 @@ class ModuleManagementEndpointsTest extends TestCase
 
         $response->assertStatus(200);
         $slugs = collect($response->json('data'))->pluck('slug')->sort()->values()->all();
-        $this->assertSame(['admin', 'core', 'crm', 'hr', 'projects', 'ticketing'], $slugs);
+        $this->assertSame(['admin', 'bms', 'core', 'crm', 'hr', 'projects', 'ticketing'], $slugs);
     }
 
     public function test_admin_can_disable_and_enable_a_module(): void

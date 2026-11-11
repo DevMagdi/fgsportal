@@ -2,7 +2,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
@@ -19,7 +22,9 @@
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^5.10",
-        "phpunit/phpunit": "^9.5.10"
+        "phpunit/phpunit": "^9.5.10",
+        "php-cs-fixer/shim": "3.95.30",
+        "phpstan/phpstan": "2.3.5"
     },
     "autoload": {
         "psr-4": {
@@ -46,7 +51,10 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ]
+        ],
+        "test": "phpunit",
+        "lint": "php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.php",
+        "analyse": "phpstan analyse --configuration=phpstan.neon --no-progress --debug"
     },
     "extra": {
         "laravel": {
@@ -59,5 +67,53 @@
         "sort-packages": true
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "php-cs-fixer/shim",
+                "version": "3.95.30",
+                "dist": {
+                    "type": "zip",
+                    "url": "https://codeload.github.com/php-cs-fixer/shim/zip/413c9705404163fa3e5f7854208c5e9ae1a4590d"
+                },
+                "require": {
+                    "php": "^7.4 || ^8.0",
+                    "ext-json": "*",
+                    "ext-tokenizer": "*"
+                },
+                "replace": {
+                    "friendsofphp/php-cs-fixer": "self.version"
+                },
+                "bin": [
+                    "php-cs-fixer",
+                    "php-cs-fixer.phar"
+                ]
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "phpstan/phpstan",
+                "version": "2.3.5",
+                "dist": {
+                    "type": "zip",
+                    "url": "https://codeload.github.com/phpstan/phpstan/zip/2.3.5"
+                },
+                "require": {
+                    "php": "^7.4|^8.0"
+                },
+                "bin": [
+                    "phpstan",
+                    "phpstan.phar"
+                ],
+                "autoload": {
+                    "files": [
+                        "bootstrap.php"
+                    ]
+                }
+            }
+        }
+    ]
 }
