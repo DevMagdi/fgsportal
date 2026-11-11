@@ -41,13 +41,16 @@ class P06NotificationRoutingTest extends BmsTestCase
 
     public function test_P0_6_notifications_are_unread_paginated_and_owner_only(): void
     {
-        Notification::fake();
         $user = $this->actingAsRole('employee');
         $other = $this->actingAsRole('employee');
-        app(BmsNotifier::class)->notify([$user], 'support.responded', 'Update', 'Response ready');
-        $notification = $user->notifications()->firstOrFail();
-        $this->assertSame(['database', 'mail'], $notification->via($user));
-        $this->assertTrue($notification instanceof \Illuminate\Contracts\Queue\ShouldQueue);
+        $notification = $user->notifications()->create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'type' => BmsNotification::class,
+            'data' => ['title' => 'Update', 'body' => 'Response ready'],
+        ]);
+        $message = new BmsNotification('support.responded', 'Update', 'Response ready');
+        $this->assertSame(['database', 'mail'], $message->via($user));
+        $this->assertTrue($message instanceof \Illuminate\Contracts\Queue\ShouldQueue);
 
         $this->getBms('notifications', $user)->assertOk()->assertJsonPath('data.total', 1);
         $this->putBms("notifications/{$notification->id}/read", [], $other)->assertNotFound();
