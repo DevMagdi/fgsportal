@@ -22,6 +22,8 @@ class ProcurementController extends BmsController
         if(!empty($data['business_unit_id']))$this->access->authorizeUnit((int)$data['business_unit_id']);
         $data['reference']='PRC-'.now()->format('Ymd').'-'.strtoupper(Str::random(5));$data['requested_by']=$this->access->user()->id;
         $item=ProcurementRequest::create($data);$this->audit->record($item,'procurement.submitted',[],$item->toArray());
+        app(\App\Services\BMS\BmsNotifier::class)->notifyRoles(['finance'],'procurement.created','New procurement request',$item->item);
+        app(\App\Services\BMS\BmsNotifier::class)->notifyRoles(['finance'],'procurement.created','New procurement request',$item->item);
         return $this->ok($this->load($item),'Procurement request submitted to Finance',201);
     }
     public function quote(Request $request,ProcurementRequest $procurement)
@@ -41,6 +43,8 @@ class ProcurementController extends BmsController
         $old=$procurement->only(['status','budget_confirmed','finance_comment']);
         $procurement->update(['status'=>$data['decision'],'budget_confirmed'=>$data['budget_confirmed'],'finance_comment'=>$data['finance_comment'],'reviewed_by'=>$this->access->user()->id,'reviewed_at'=>now()]);
         $this->audit->record($procurement,'procurement.finance_reviewed',$old,$procurement->only(['status','budget_confirmed','finance_comment','reviewed_by','reviewed_at']),$data['finance_comment']);
+        app(\App\Services\BMS\BmsNotifier::class)->notify([$procurement->requester],'procurement.reviewed','Procurement '.$procurement->status,$procurement->item);
+        app(\App\Services\BMS\BmsNotifier::class)->notify([$procurement->requester],'procurement.reviewed','Procurement '.$procurement->status,$procurement->item);
         return $this->ok($this->load($procurement),'Finance decision recorded');
     }
     public function quotation(ProcurementQuotation $quotation)

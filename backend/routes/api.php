@@ -1347,6 +1347,8 @@ Route::group(['middleware' => ['cors', 'jwt.verify'], 'prefix' => 'company/modul
 // BMS Phase 1 — every write is protected by the central BRD role matrix.
 Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(function () {
     Route::get('/lookups', [\App\Http\Controllers\BMS\LookupController::class, 'index']);
+    Route::get('/notifications', [\App\Http\Controllers\BMS\NotificationController::class, 'index']);
+    Route::put('/notifications/{id}/read', [\App\Http\Controllers\BMS\NotificationController::class, 'read']);
     Route::post('/roles/assign', [\App\Http\Controllers\BMS\LookupController::class, 'assignRole'])->middleware('bms.permission:roles.manage');
     Route::post('/roles/revoke', [\App\Http\Controllers\BMS\LookupController::class, 'revokeRole'])->middleware('bms.permission:roles.manage');
 
