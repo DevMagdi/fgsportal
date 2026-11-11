@@ -103,10 +103,7 @@ describe('module-pages registry', () => {
       '/users',
       '/manager/client-support',
       '/tickets',
-      '/manager/license',
       '/manager/partners',
-      ['/manager/installments', 't'].join(' '),
-      ['/manager/installments', 'v'].join(' '),
       '/manager/salaries',
       '/admin-panel/vacations',
       '/admin-panel/announces',
@@ -240,12 +237,9 @@ describe('module-pages registry', () => {
   it('hides permission-gated pages when the permission is missing', () => {
     const withoutPerm = visiblePages('ticketing', ctx({ permissionIds: [] }));
     expect(withoutPerm.find((p) => p.title === 'Support Reports')).toBeUndefined();
-    expect(withoutPerm.find((p) => p.title === 'Installments')).toBeUndefined();
 
-    const withPerm = visiblePages('ticketing', ctx({ permissionIds: [25, 18] }));
+    const withPerm = visiblePages('ticketing', ctx({ permissionIds: [25] }));
     expect(withPerm.find((p) => p.title === 'Support Reports')).toBeTruthy();
-    expect(withPerm.find((p) => p.title === 'Installments')).toBeTruthy();
-    expect(withPerm.find((p) => p.title === 'Investment and expenses')).toBeTruthy();
   });
 
   it('evaluates department, role and position conditions', () => {
@@ -371,7 +365,7 @@ describe('module-pages registry', () => {
 
     // Support block — role-gated Support Reports/Finance sections are dropped.
     expect(titlesOf('ticketing')).toEqual([
-      ['Support', ['Support Contract', 'Tickets', 'License', 'Clients']],
+      ['Support', ['Support Contract', 'Tickets', 'Clients']],
     ]);
 
     // HR block followed by the standalone Requests block.

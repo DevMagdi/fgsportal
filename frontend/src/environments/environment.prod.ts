@@ -21,8 +21,5 @@ export const environment = {
   serverAPI: 'YOUR_LEGACY_SERVER_API_URL',
   newServerApi: 'YOUR_BACKEND_API_BASE_URL',
   currecnyConvert: 'https://openexchangerates.org/api/latest.json?',
-  currecnyConvertAppID: 'YOUR_OPEN_EXCHANGE_RATES_APP_ID',
-  // Optional ChatGPT integration (unused unless configured)
-  chatGPTApi: 'YOUR_CHATGPT_API_URL',
-  chatGPTApiKey: 'YOUR_OPENAI_KEY_GOES_HERE'
+  currecnyConvertAppID: 'YOUR_OPEN_EXCHANGE_RATES_APP_ID'
 };

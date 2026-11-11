@@ -74,7 +74,6 @@ export class NavbarComponent implements OnInit {
   crmOpened:boolean = false;
   iconSideBarVisible:boolean = false;
   requestsOpened:boolean = false;
-  financeOpened:boolean = false;
   hrOpened:boolean = false;
   
   myOpenToWork:OpenToWork[]=[];

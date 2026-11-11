@@ -4,7 +4,6 @@ import { AuthApiService } from 'src/app/services/auth-api.service';
 // import { SnackBarState } from 'src/app/components/snackbar/snackbar.component';
 // import { Ramadan } from 'src/app/interfaces/ramadan';
 // import { DurationCalculationService } from 'src/app/services/duration-calculation.service';
-// import { FirebaseServiceService } from 'src/app/services/firebase-service.service';
 // import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({

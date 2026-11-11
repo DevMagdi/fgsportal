@@ -1,9 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminPanelComponent } from './components/admin/admin-panel/admin-panel.component';
-import { ChatGPTComponent } from './components/chat-gpt/chat-gpt.component';
-// import { CommunityComponent } from './components/community/community.component';
-// import { IssueDetailsComponent } from './components/community/issue-details/issue-details.component';
 import { CrmMainComponent } from './components/crm/Components/crm-main/crm-main.component';
 import { DevComponent } from './components/dev/components/dev/dev.component';
 import { FollowClientTicketDetailsComponent } from './components/follow-client-tickets/follow-client-ticket-details/follow-client-ticket-details.component';
@@ -41,8 +38,6 @@ const routes: Routes = [
   {path: 'user/:id',component:UserDetailsComponent , canActivate:[AuthGuardService]},
   {path: 'users',component:PublicUsersPageComponent , canActivate:[AuthGuardService]},
   {path: 'notification',component:NotificationPageComponent , canActivate:[AuthGuardService]},
-  // {path: 'community',component:CommunityComponent , canActivate:[AuthGuardService]},
-  // {path: 'community/:id',component:IssueDetailsComponent , canActivate:[AuthGuardService]},
   {path: 'logs',component:SystemLogsComponent , canActivate:[ManagerGuard]},
   {path: 'notes',component:NotesComponent , canActivate:[AuthGuardService]},
   {path: 'my_work',component:GlobalTimeSheetComponent , canActivate:[AuthGuardService]},
@@ -53,8 +48,6 @@ const routes: Routes = [
   {path: 'tickets',component:FollowClientTicketsComponent , canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
   {path: 'tickets/:id',component:FollowClientTicketDetailsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
   {path: 'support-reports',component:SupportReportsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
-  
-  // {path: 'fgsGPT',component:ChatGPTComponent , canActivate:[AuthGuardService]},
 
   {
     path: 'manager',

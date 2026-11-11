@@ -654,21 +654,7 @@
                 Tickets
               </a>
             </li>
-            <li *ngIf="
-                currentUser.department == DepartmentEnum.MANAGEMENT ||
-                (!!userPerms && !!checkIfHasPerm(9))
-              " class="nav-item">
-              <a *ngIf="
-                  currentUser.department == DepartmentEnum.MANAGEMENT ||
-                  (currentUser.department == DepartmentEnum.TECHNICAL_TEAM &&
-                    currentUser.accPosition == AccountPositionEnum.MANAGER)
-                " mat-list-item routerLink="/manager/license" routerLinkActive="active">
-                <!-- <i class="pi pi-book pr-1"></i> -->
-                <img src="../../../assets/img/Icon.png" class="icon-img me-2" >
-                <img src="../../../assets/img/arrow-right.png" class="active-img me-2" >
-                License
-              </a>
-            </li>
+            
             <li *ngIf="currentUser.department == DepartmentEnum.MANAGEMENT ||(!!userPerms && !!checkIfHasPerm(7))"
               class="nav-item">
               <a mat-list-item routerLink="/manager/partners" routerLinkActive="active">
@@ -794,45 +780,6 @@
           Notes
           <mat-divider></mat-divider>
         </a>
-
-
-        <!-- <a mat-list-item routerLink="/manager/finance" routerLinkActive="active" *ngIf="!!checkIfHasPerm(18)">
-                    <i class="pi pi-money-bill pr-1"></i> Finance
-                    <mat-divider></mat-divider>
-                </a> -->
-
-
-        <!-- ===================================== Finance =============================================== -->
-
-
-        <a *ngIf="!!checkIfHasPerm(18) && isModuleEnabled('ticketing')" (dblclick)="financeOpened = !financeOpened"
-          (click)="financeOpened = !financeOpened" mat-list-item class="nav-link" data-bs-toggle="collapse"
-          href="#finance" aria-expanded="true" aria-controls="finance">
-          <div data-i18n="Analytics">
-            <i class="pi pi-money-bill pr-1"></i>
-            Finance
-            <i *ngIf="!financeOpened" class="menu-icon tf-icons bx bx-chevron-right"></i>
-            <i *ngIf="financeOpened" class="menu-icon tf-icons bx bx-chevron-down"></i>
-          </div>
-        </a>
-
-
-        <div class="collapse" id="finance" *ngIf="isModuleEnabled('ticketing')">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <a *ngIf="!!checkIfHasPerm(18)" [routerLink]="['/manager/installments', 't']" mat-list-item
-                routerLinkActive="active">
-                Installments
-              </a>
-            </li>
-            <li class="nav-item">
-              <a *ngIf="!!checkIfHasPerm(18)" [routerLink]="['/manager/installments', 'v']" mat-list-item
-                routerLinkActive="active">
-                Investment and expenses
-              </a>
-            </li>
-          </ul>
-        </div>
 
 
         <mat-divider></mat-divider>

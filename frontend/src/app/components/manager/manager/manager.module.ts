@@ -56,8 +56,6 @@ import { ClientsAccountsComponent } from '../components/accounts-center/clients-
 import { SupportComponent } from '../components/support/support.component';
 import { SupportDetailsComponent } from '../components/support/support-details/support-details.component';
 import { VacationReportComponent } from '../components/allReports/vacation-report/vacation-report.component';
-import { LicenseComponent } from '../components/license/license.component';
-import { LicenseDetailsComponent } from '../components/license/license-details/license-details.component';
 import { PartnersComponent } from '../components/partners/partners.component';
 import { PartnerDetailsComponent } from '../components/partners/partner-details/partner-details.component';
 import { OrgChartComponent } from '../components/org-chart/org-chart.component';
@@ -71,10 +69,6 @@ import { PublicReportsComponent } from '../components/public-reports/public-repo
 import { EmpWeeklyReportsComponent } from '../components/public-reports/emp-weekly-reports/emp-weekly-reports.component';
 import { ManageAdminTasksComponent } from '../components/manage-admin-tasks/manage-admin-tasks.component';
 import { DevProgressComponent } from '../components/dev-progress/dev-progress.component';
-import { InstallmentsComponent } from '../components/installments/installments.component';
-import { NewInstallmentComponent } from '../components/installments/new-installment/new-installment.component';
-import { InstallmentDetailsComponent } from '../components/installments/installment-details/installment-details.component';
-import { AllInstallmentsComponent } from '../components/installments/all-installments/all-installments.component';
 import { DialogModule } from 'primeng/dialog';
 import { CloneProjectComponent } from '../components/clone-project/clone-project.component';
 import { AvailableDevComponent } from '../components/available-dev/available-dev.component';
@@ -114,8 +108,6 @@ import { ContractSupportCostComponent } from '../components/support/support-deta
     SupportComponent,
     SupportDetailsComponent,
     VacationReportComponent,
-    LicenseComponent,
-    LicenseDetailsComponent,
     PartnersComponent,
     PartnerDetailsComponent,
     OrgChartComponent,
@@ -129,10 +121,6 @@ import { ContractSupportCostComponent } from '../components/support/support-deta
     EmpWeeklyReportsComponent,
     ManageAdminTasksComponent,
     DevProgressComponent,
-    InstallmentsComponent,
-    NewInstallmentComponent,
-    InstallmentDetailsComponent,
-    AllInstallmentsComponent,
     CloneProjectComponent,
     AvailableDevComponent,
     ProjectManagerReportComponent,

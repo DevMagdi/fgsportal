@@ -35,9 +35,9 @@ const crmSections: ModulePageSection[] = [
       { section: 'CRM', title: 'Activities', icon: 'bx bx-calendar-event', route: '/CRM/activities' },
       {
         section: 'CRM',
-        title: 'Installments',
+        title: 'Closed Leads',
         icon: 'bx bx-money',
-        route: ['/manager/installments', 't'],
+        route: ['/CRM/closed-leads', 't'],
       },
     ],
   },
@@ -117,7 +117,7 @@ describe('ModuleDetailsComponent', () => {
       expect(links[0].getAttribute('ng-reflect-router-link')).toContain('/CRM/dashboard');
       // Array router links are serialised with commas by the testing renderer.
       expect(links[2].getAttribute('ng-reflect-router-link')).toContain(
-        '/manager/installments'
+        '/CRM/closed-leads'
       );
     });
 
@@ -126,7 +126,7 @@ describe('ModuleDetailsComponent', () => {
       expect(component.pages.map((page: ModulePage) => page.title)).toEqual([
         'Insights',
         'Activities',
-        'Installments',
+        'Closed Leads',
       ]);
       expect(component.totalCards).toBe(3);
     });

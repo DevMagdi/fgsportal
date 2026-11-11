@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http'
+import { HttpClient } from '@angular/common/http'
 import { environment } from '../../environments/environment'
 import { Observable, Subject } from 'rxjs';
 import { SystemLogs } from '../interfaces/system-logs';
@@ -40,19 +40,6 @@ export class DatabaseService {
   }
 
   // ===================================== Date Section ==============================
-
-  chatGPTConnection(prompt: string): Observable<any> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${environment.chatGPTApiKey}`
-    });
-    const data = {
-      prompt: prompt,
-      max_tokens: 100,
-      temperature: 0.7
-    };
-    return this._http.post(environment.chatGPTApi, data, { headers });
-  }
 
   getLocalStringDate() {
     return `${new Date().getMonth() + 1}/${new Date().getDate()}/${new Date().getFullYear()}, ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`
@@ -1662,68 +1649,6 @@ export class DatabaseService {
     let token;
     token = JSON.parse(myLocal || '')
     return this._http.get(`${environment.newServerApi}/api/users/GetAllProduct?token=${token._token}`)
-  }
-  /* ===================================== License Section ======================================= */
-
-  getLicenseTypes(): Observable<any> {
-    const myLocal = localStorage.getItem('userData')
-    let token;
-    token = JSON.parse(myLocal || '')
-    return this._http.get(`${environment.newServerApi}/api/users/GetAllLicenseType?token=${token._token}`)
-  }
-
-  getAllLicense(): Observable<any> {
-    const myLocal = localStorage.getItem('userData')
-    let token;
-    token = JSON.parse(myLocal || '')
-    return this._http.get(`${environment.newServerApi}/api/users/GetAllLicense?token=${token._token}`)
-  }
-
-  createLicense(fd: FormData): Observable<any> {
-    const myLocal = localStorage.getItem('userData')
-    let token;
-    token = JSON.parse(myLocal || '')
-    fd.append('token', token._token)
-    return this._http.post(`${environment.newServerApi}/api/users/CreateLicense`, fd)
-  }
-
-  getLicenseByID(license_id: string): Observable<any> {
-    const myLocal = localStorage.getItem('userData')
-    let token;
-    token = JSON.parse(myLocal || '')
-    let reqOptions = {
-      'token': token._token,
-      'license_id': license_id,
-    }
-    return this._http.post(`${environment.newServerApi}/api/users/GetSpecificLicense`, reqOptions)
-  }
-
-
-  updateLicense(fd: FormData): Observable<any> {
-    const myLocal = localStorage.getItem('userData')
-    let token;
-    token = JSON.parse(myLocal || '')
-    fd.append('token', token._token)
-    return this._http.post(`${environment.newServerApi}/api/users/UpdateLicense`, fd)
-  }
-
-  renewLicense(fd: FormData): Observable<any> {
-    const myLocal = localStorage.getItem('userData')
-    let token;
-    token = JSON.parse(myLocal || '')
-    fd.append('token', token._token)
-    return this._http.post(`${environment.newServerApi}/api/users/RenewLicense`, fd)
-  }
-
-  deleteLicense(license_id: string): Observable<any> {
-    const myLocal = localStorage.getItem('userData')
-    let token;
-    token = JSON.parse(myLocal || '')
-    let reqOptions = {
-      'token': token._token,
-      'license_id': license_id,
-    }
-    return this._http.post(`${environment.newServerApi}/api/users/DeleteLicense`, reqOptions)
   }
 
 

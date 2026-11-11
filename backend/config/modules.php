@@ -50,12 +50,10 @@ return [
         'App\\Http\\Controllers\\Client\\Partner\\OrganizationTypeController' => 'crm',
 
         // ===== Ticketing: support portal, tickets, contracts, client accounts,
-        // partner/licence management, satisfaction ratings, installments =====
+        // partner management, satisfaction ratings =====
         'App\\Http\\Controllers\\Client\\TicketingSystem' => 'ticketing',
         'App\\Http\\Controllers\\Client\\Partner\\PartnerController' => 'ticketing',
-        'App\\Http\\Controllers\\Settings\\License' => 'ticketing',
         'App\\Http\\Controllers\\Rating' => 'ticketing',
-        'App\\Http\\Controllers\\InstallmentFeature' => 'ticketing',
 
         // ===== Projects: projects, processes, tasks, reports, PM team =====
         'App\\Http\\Controllers\\Project' => 'projects',

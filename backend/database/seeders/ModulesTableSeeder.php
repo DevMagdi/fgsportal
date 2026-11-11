@@ -29,7 +29,7 @@ class ModulesTableSeeder extends Seeder
             [
                 'name' => 'Ticketing & Support',
                 'slug' => 'ticketing',
-                'description' => 'Client tickets, contract support, client accounts, licences, ratings and installments.',
+                'description' => 'Client tickets, contract support, client accounts and ratings.',
                 'is_core' => false,
             ],
             [

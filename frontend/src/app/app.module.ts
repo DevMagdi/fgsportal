@@ -47,14 +47,11 @@ import { AsyncPipe } from "../../node_modules/@angular/common";
 import { NotificationPageComponent } from './components/notification-page/notification-page.component';
 import { OverDueTasksComponent } from './components/user-details/over-due-tasks/over-due-tasks.component';
 import { PublicUsersPageComponent } from './components/public-users-page/public-users-page.component';
-// import { CommunityComponent } from './components/community/community.component';
-// import { IssueDetailsComponent } from './components/community/issue-details/issue-details.component';
 import { SystemLogsComponent } from './components/system-logs/system-logs.component';
 import { FollowClientTicketsComponent } from './components/follow-client-tickets/follow-client-tickets.component';
 import { FollowClientTicketDetailsComponent } from './components/follow-client-tickets/follow-client-ticket-details/follow-client-ticket-details.component';
 import { UnderMaintenanceComponent } from './components/under-maintenance/under-maintenance.component';
 import { ForgetpassowrdComponent } from './components/forgetpassowrd/forgetpassowrd.component';
-import { ChatGPTComponent } from './components/chat-gpt/chat-gpt.component';
 import { StandardRateFormComponent } from './components/standard-rate-form/standard-rate-form.component';
 import { NotesComponent } from './components/notes/notes.component';
 import { GlobalTimeSheetComponent } from './components/global-time-sheet/global-time-sheet.component';
@@ -91,14 +88,11 @@ import { ChartModule } from 'primeng/chart';
     NotificationPageComponent,
     OverDueTasksComponent,
     PublicUsersPageComponent,
-    // CommunityComponent,
-    // IssueDetailsComponent,
     SystemLogsComponent,
     FollowClientTicketsComponent,
     FollowClientTicketDetailsComponent,
     UnderMaintenanceComponent,
     ForgetpassowrdComponent,
-    ChatGPTComponent,
     StandardRateFormComponent,
     NotesComponent,
     GlobalTimeSheetComponent,

@@ -25,13 +25,5 @@ return [
         'https://fgs-connect-portal-default-rtdb.firebaseio.com'
     ),
 
-    // Legacy Realtime Database base URL (fgspmproduction project).
-    'legacy_database_url' => env(
-        'FIREBASE_LEGACY_DATABASE_URL',
-        'https://fgspmproduction-default-rtdb.firebaseio.com'
-    ),
-
-    // Legacy database auth secret appended as ?auth= in migration scripts.
-    'legacy_db_auth_token' => env('FIREBASE_LEGACY_DB_AUTH_TOKEN'),
 
 ];

@@ -11,7 +11,7 @@ import {
 export interface ModulePage {
   title: string;
   icon: string;
-  /** Router link: either a path or a router-link array (e.g. ['/manager/installments','t']). */
+  /** Router link: either a path or a router-link array. */
   route: string | unknown[];
   /**
    * Sidebar group the card belongs to. Mirrors a collapsible sidebar section
@@ -67,7 +67,7 @@ export const MODULE_META: Record<string, ModuleMeta> = {
   ticketing: {
     name: 'Ticketing & Support',
     description:
-      'Client tickets, contract support, client accounts, licences, ratings and installments.',
+      'Client tickets, contract support, client accounts and ratings.',
     icon: 'bx bx-support',
   },
   projects: {
@@ -361,34 +361,10 @@ export const MODULE_PAGES: Record<string, ModulePage[]> = {
     },
     {
       section: 'Support',
-      title: 'License',
-      icon: 'bx bx-book',
-      route: '/manager/license',
-      condition: or(
-        dept(Department.MANAGEMENT),
-        and(dept(Department.TECHNICAL_TEAM), position(AccountPositions.MANAGER))
-      ),
-    },
-    {
-      section: 'Support',
       title: 'Clients',
       icon: 'bx bx-user',
       route: '/manager/partners',
       condition: or(dept(Department.MANAGEMENT), perm(7)),
-    },
-    {
-      section: 'Finance',
-      title: 'Installments',
-      icon: 'bx bx-money',
-      route: ['/manager/installments', 't'],
-      condition: perm(18),
-    },
-    {
-      section: 'Finance',
-      title: 'Investment and expenses',
-      icon: 'bx bx-wallet',
-      route: ['/manager/installments', 'v'],
-      condition: perm(18),
     },
   ],
 

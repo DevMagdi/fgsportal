@@ -32,9 +32,6 @@ use App\Http\Controllers\Project\Tools\TaskTypeController;
 use App\Http\Controllers\Project\Tools\TaskStructureController;
 use App\Http\Controllers\Project\Tools\TaskCommentController;
 use App\Http\Controllers\Project\Tools\ProcessAttachController;
-use App\Http\Controllers\Settings\License\LicenseTypeController;
-use App\Http\Controllers\Settings\License\LicenseStatusController;
-use App\Http\Controllers\Settings\License\LicenseController;
 use App\Http\Controllers\Settings\PublicRequest\PublicRequestTypeController;
 use App\Http\Controllers\Settings\PublicRequest\PublicRequestStatusController;
 use App\Http\Controllers\Settings\PublicRequest\PublicRequestController;
@@ -79,8 +76,6 @@ use App\Http\Controllers\User\PermissionGroup\UserPermissionGroupController;
 use App\Http\Controllers\Settings\Announce\AnnounceController;
 
 
-use App\Http\Controllers\DatabaseConvertSecondController;
-use App\Http\Controllers\DatabaseConvertController;
 
 //crm
 use App\Http\Controllers\User\Business\Settings\LabelColor\LabelColorController;
@@ -144,9 +139,6 @@ use App\Http\Controllers\AdminReport\AdminTaskController;
 
 
 // installment Feature 
-use App\Http\Controllers\InstallmentFeature\InstallmentStatusController;
-use App\Http\Controllers\InstallmentFeature\InstallmentTypeController;
-use App\Http\Controllers\InstallmentFeature\InstallmentController;
 
 // Team Request From PM to CEO
 use App\Http\Controllers\Project\PMTeamRequest\PMTeamRequestStatusController;
@@ -220,7 +212,6 @@ Route::group(['middleware' => [ 'cors','api'],'prefix' => 'users'], function ($r
 
   
   Route::post('/ClosePreviousReport', [AuthController::class, 'ClosePreviousReport']);
-  Route::post('/ExpiredLicense', [LicenseController::class, 'ExpiredLicense']);
   Route::post('/ActivityNotification', [ContactLeadActivityController::class, 'ActivityNotification']);
 
   
@@ -546,19 +537,9 @@ Route::group(['middleware' => [ 'cors','jwt.verify','module'],'prefix' => 'users
       Route::post('/UpdateTaskComment', [TaskCommentController::class, 'UpdateTaskComment']);    
       Route::post('/DeleteTaskComment', [TaskCommentController::class, 'DeleteTaskComment']);  
 
-      ##################################### License Type ###########################################################
-      Route::get('/GetAllLicenseType', [LicenseTypeController::class, 'GetAllLicenseType']);    
-      Route::post('/CreateLicenseType', [LicenseTypeController::class, 'CreateLicenseType']);    
-      Route::post('/UpdateLicenseType', [LicenseTypeController::class, 'UpdateLicenseType']);    
-      Route::post('/DeleteLicenseType', [LicenseTypeController::class, 'DeleteLicenseType']);   
       
       
 
-      ##################################### License Status ###########################################################
-      Route::get('/GetAllLicenseStatus', [LicenseStatusController::class, 'GetAllLicenseStatus']);    
-      Route::post('/CreateLicenseStatus', [LicenseStatusController::class, 'CreateLicenseStatus']);    
-      Route::post('/UpdateLicenseStatus', [LicenseStatusController::class, 'UpdateLicenseStatus']);    
-      Route::post('/DeleteLicenseStatus', [LicenseStatusController::class, 'DeleteLicenseStatus']);  
 
       ##################################### Process Attach ###########################################################
       Route::post('/GetProcessAttach', [ProcessAttachController::class, 'GetProcessAttach']);    
@@ -566,13 +547,6 @@ Route::group(['middleware' => [ 'cors','jwt.verify','module'],'prefix' => 'users
       Route::post('/DeleteProcessAttach', [ProcessAttachController::class, 'DeleteProcessAttach']);  
 
 
-       ##################################### License  ###########################################################
-      Route::get('/GetAllLicense', [LicenseController::class, 'GetAllLicense']);    
-      Route::post('/CreateLicense', [LicenseController::class, 'CreateLicense']);    
-      Route::post('/UpdateLicense', [LicenseController::class, 'UpdateLicense']);    
-      Route::post('/DeleteLicense', [LicenseController::class, 'DeleteLicense']);   
-      Route::post('/GetSpecificLicense', [LicenseController::class, 'GetSpecificLicense']);   
-      Route::post('/RenewLicense', [LicenseController::class, 'RenewLicense']);   
 
 
        ##################################### Public Request Type ###########################################################
@@ -1192,36 +1166,9 @@ Route::group(['middleware' => [ 'cors','jwt.verify','module'],'prefix' => 'users
                 Route::post('/GetMyAdminRunningTasks', [AdminTaskController::class, 'GetMyAdminRunningTasks']);
 
                 
-           ##################################### Installment Status ###########################################################
-            Route::post('/GetAllInstallmentStatus', [InstallmentStatusController::class, 'GetAllInstallmentStatus']);    
-            Route::post('/CreateInstallmentStatus', [InstallmentStatusController::class, 'CreateInstallmentStatus']);    
-            Route::post('/UpdateInstallmentStatus', [InstallmentStatusController::class, 'UpdateInstallmentStatus']);    
-            Route::post('/DeleteInstallmentStatus', [InstallmentStatusController::class, 'DeleteInstallmentStatus']);  
-
-             ##################################### Installment Type ###########################################################
-             Route::post('/GetAllInstallmentType', [InstallmentTypeController::class, 'GetAllInstallmentType']);    
-             Route::post('/CreateInstallmentType', [InstallmentTypeController::class, 'CreateInstallmentType']);    
-             Route::post('/UpdateInstallmentType', [InstallmentTypeController::class, 'UpdateInstallmentType']);    
-             Route::post('/DeleteInstallmentType', [InstallmentTypeController::class, 'DeleteInstallmentType']);  
 
 
-             ##################################### Installment  ###########################################################
-             Route::post('/DeleteInstallment', [InstallmentController::class, 'DeleteInstallment']);    
-              Route::post('/UpdateInstallmentPeriod', [InstallmentController::class, 'UpdateInstallmentPeriod']);    
-              Route::post('/UpdateInstallment', [InstallmentController::class, 'UpdateInstallment']);    
-              Route::post('/CreateInstallment', [InstallmentController::class, 'CreateInstallment']);  
-              Route::post('/GetAllInstallment', [InstallmentController::class, 'GetAllInstallment']);  
-              Route::post('/GetAllPendingInstallment', [InstallmentController::class, 'GetAllPendingInstallment']);  
-              Route::post('/GetAllInstallmentForSpecificStatus', [InstallmentController::class, 'GetAllInstallmentForSpecificStatus']);  
-              Route::post('/GetAllInstallmentForSpecificType', [InstallmentController::class, 'GetAllInstallmentForSpecificType']);  
-              Route::post('/GetAllNearestInstallment', [InstallmentController::class, 'GetAllNearestInstallment']);  
-              Route::post('/DeleteInstallmentPeriod', [InstallmentController::class, 'DeleteInstallmentPeriod']);  
-              Route::post('/UpdateInstallmentPeriod', [InstallmentController::class, 'UpdateInstallmentPeriod']);  
-              Route::post('/CreateInstallmentPeriod', [InstallmentController::class, 'CreateInstallmentPeriod']);  
-              Route::post('/GetSpecificInstallment', [InstallmentController::class, 'GetSpecificInstallment']);  
-              Route::post('/GetInstallmentDashboard', [InstallmentController::class, 'GetInstallmentDashboard']);  
-              Route::post('/GetInstallmentDashboardForSpecificType', [InstallmentController::class, 'GetInstallmentDashboardForSpecificType']);  
-              Route::post('/GetAllPendingInstallmentForSpecificType', [InstallmentController::class, 'GetAllPendingInstallmentForSpecificType']);  
+
 
 
 
@@ -1354,40 +1301,17 @@ Route::group(['middleware' => [ 'cors','jwt.verify','module'],'prefix' => 'users
 
 
 
-    // Route::post('/getProject', [DatabaseConvertController::class, 'getProject']);  
-    // Route::post('/getUser', [DatabaseConvertController::class, 'getUser']);  
-    // Route::post('/getUserDeactivate', [DatabaseConvertController::class, 'getUserDeactivate']);  
-    // Route::post('/annualrequest', [DatabaseConvertController::class, 'annualrequest']);  
-    // Route::post('/pendingannualrequest', [DatabaseConvertController::class, 'pendingannualrequest']);  
-    // Route::post('/getprocess', [DatabaseConvertController::class, 'getprocess']);  
-    // Route::post('/gettask', [DatabaseConvertController::class, 'gettask']);  
 
-    // Route::post('/getSalary', [DatabaseConvertSecondController::class, 'getSalary']);  
     
     
     
-    //     Route::post('/getApprovedamountmonthly', [DatabaseConvertSecondController::class, 'getApprovedamountmonthly']);  
-    //     Route::post('/getpendingamountmonthly', [DatabaseConvertSecondController::class, 'getpendingamountmonthly']);  
-    // Route::post('/getReportDev', [DatabaseConvertSecondController::class, 'getReportDev']);  
 
-    //     Route::post('/getLog', [DatabaseConvertSecondController::class, 'getLog']);  
-    // Route::post('/getSingleUnit', [DatabaseConvertSecondController::class, 'getSingleUnit']);  
-    //     Route::post('/getIncentive', [DatabaseConvertSecondController::class, 'getIncentive']);  
 
-    //     Route::post('/getBudgetProject', [DatabaseConvertSecondController::class, 'getBudgetProject']);  
 
-    //     Route::post('/getTransportation', [DatabaseConvertSecondController::class, 'getTransportation']);  
-    // Route::post('/getPublicReqeust', [DatabaseConvertSecondController::class, 'getPublicReqeust']);  
-    // Route::post('/getlicense', [DatabaseConvertSecondController::class, 'getlicense']);  
 
-    //     Route::post('/getlicensehistory', [DatabaseConvertSecondController::class, 'getlicensehistory']);  
 
     
-    //     Route::post('/getclientsupport', [DatabaseConvertSecondController::class, 'getclientsupport']);  
 
-    //     Route::post('/getclientticket', [DatabaseConvertSecondController::class, 'getclientticket']);  
-    // Route::post('/getclienttickettimeline', [DatabaseConvertSecondController::class, 'getclienttickettimeline']);  
-    // Route::post('/getAnnounces', [DatabaseConvertSecondController::class, 'getAnnounces']);  
 
     
     
