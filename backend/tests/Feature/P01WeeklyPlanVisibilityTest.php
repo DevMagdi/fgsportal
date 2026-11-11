@@ -36,6 +36,9 @@ class P01WeeklyPlanVisibilityTest extends BmsTestCase
         $outside = $units->last();
         $this->getBms('weekly-plans/'.$outside->weeklyPlans()->first()->id, $director)
             ->assertForbidden();
+        $this->postBms('weekly-plans', [
+            'business_unit_id' => $outside->id, 'week_start' => '2026-11-15',
+        ], $director)->assertForbidden();
 
         $employeeUnit = $units[1];
         $employee = $this->actingAsRole('employee', [$employeeUnit->id]);

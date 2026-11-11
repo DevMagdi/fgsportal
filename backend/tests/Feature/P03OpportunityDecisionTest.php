@@ -71,6 +71,30 @@ class P03OpportunityDecisionTest extends BmsTestCase
         $this->getBms('opportunities/'.$opportunity->id, $director)->assertForbidden();
     }
 
+    public function test_P0_3_no_go_configuration_and_every_closed_stage_are_enforced(): void
+    {
+        config(['bms.no_go_sets_declined' => false]);
+        $operations = $this->actingAsRole('operations');
+        $delta = $this->actingAsRole('alpha_delta');
+        $unit = BusinessUnit::where('slug', 'alpha-x')->firstOrFail();
+        $opportunity = Opportunity::create($this->payload($unit->id, $operations->id) + [
+            'reference' => 'CONFIG-NO-GO', 'created_by' => $operations->id, 'last_update_at' => now(),
+        ]);
+        $this->postBms('opportunities/'.$opportunity->id.'/decision', [
+            'decision' => 'no_go', 'reason' => 'Configurable decision',
+        ], $delta)->assertOk()->assertJsonPath('data.stage', 'review');
+
+        foreach (['won', 'lost', 'declined'] as $stage) {
+            $closed = Opportunity::create($this->payload($unit->id, $operations->id) + [
+                'reference' => 'CLOSED-'.$stage, 'stage' => $stage,
+                'created_by' => $operations->id, 'last_update_at' => now(),
+            ]);
+            $this->postBms('opportunities/'.$closed->id.'/decision', [
+                'decision' => 'go', 'reason' => 'Closed records are immutable',
+            ], $delta)->assertStatus(422);
+        }
+    }
+
     private function payload(int $unitId, int $ownerId): array
     {
         return [
