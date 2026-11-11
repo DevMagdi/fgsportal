@@ -1374,6 +1374,7 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::post('/meetings/availability', [\App\Http\Controllers\BMS\MeetingController::class, 'availability'])->middleware('bms.permission:meetings.view');
     Route::post('/meetings', [\App\Http\Controllers\BMS\MeetingController::class, 'store'])->middleware('bms.permission:meetings.manage');
     Route::put('/meetings/{meeting}', [\App\Http\Controllers\BMS\MeetingController::class, 'update'])->middleware('bms.permission:meetings.manage');
+    Route::post('/meetings/{meeting}/cancel', [\App\Http\Controllers\BMS\MeetingController::class, 'cancel'])->middleware('bms.permission:meetings.manage');
     Route::post('/meetings/{meeting}/invite', [\App\Http\Controllers\BMS\MeetingController::class, 'invite'])->middleware('bms.permission:meetings.manage');
     Route::post('/meetings/{meeting}/minutes', [\App\Http\Controllers\BMS\MeetingController::class, 'saveMinutes'])->middleware('bms.permission:meetings.manage');
     Route::put('/meeting-attendees/{attendee}/response', [\App\Http\Controllers\BMS\MeetingController::class, 'respond'])->middleware('bms.permission:meetings.view');
