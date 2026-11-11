@@ -93,7 +93,7 @@ class P07SecurityHardeningTest extends BmsTestCase
     public function test_P0_7_login_is_rate_limited(): void
     {
         for ($attempt = 0; $attempt < 10; $attempt++) {
-            $this->postJson('/api/users/login', [])->assertStatus(422);
+            $this->postJson('/api/users/login', [])->assertStatus(400);
         }
         $this->postJson('/api/users/login', [])->assertStatus(429);
     }

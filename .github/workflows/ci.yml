@@ -47,7 +47,7 @@ jobs:
           vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml > test-output.txt 2>&1
           status=$?
           cat test-output.txt
-          if [ "$status" -ne 0 ]; then echo "::error::PHPUNIT_BASE64=$((grep -A35 -E '^There (was|were)|^Tests:|^OK' test-output.txt || tail -n 40 test-output.txt) | gzip -9 | base64 -w0)"; fi
+          if [ "$status" -ne 0 ]; then echo "::error::PHPUNIT_BASE64=$((grep -A100 -E '^There (was|were)|^Tests:|^OK' test-output.txt || tail -n 40 test-output.txt) | gzip -9 | base64 -w0)"; fi
           exit "$status"
       - name: Report SQLite test summary
         if: success()

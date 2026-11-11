@@ -90,7 +90,7 @@ class P08CoreEndpointCoverageTest extends BmsTestCase
         $this->deleteJson('/api/bms/product-phases/'.$phase['id'], [], $this->jwtHeaders($director))->assertOk();
 
         $lead = $this->postBms('leads', [
-            'name' => 'P08 Lead', 'business_unit_id' => $unit->id,
+            'name' => 'P08 Lead', 'entity_type' => 'government', 'business_unit_id' => $unit->id,
             'owner_id' => $director->id, 'stage' => 'identified',
         ], $director)->assertCreated()->json('data');
         $this->postBms("leads/{$lead['id']}/study-items", ['title' => 'Blocked'], $director)->assertStatus(422);

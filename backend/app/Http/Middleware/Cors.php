@@ -12,7 +12,8 @@ class Cors
     {
         $isBms = $request->is('api/bms', 'api/bms/*', 'bms/meeting-response/*');
         if (!$isBms) {
-            return $next($request)
+            $response = $request->isMethod('OPTIONS') ? response('', 204) : $next($request);
+            return $response
                 ->header('Access-Control-Allow-Origin', '*')
                 ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         }

@@ -89,6 +89,7 @@ class P03OpportunityDecisionTest extends BmsTestCase
                 'reference' => 'CLOSED-'.$stage, 'stage' => $stage,
                 'created_by' => $operations->id, 'last_update_at' => now(),
             ]);
+            $closed->update(['stage' => $stage]);
             $this->postBms('opportunities/'.$closed->id.'/decision', [
                 'decision' => 'go', 'reason' => 'Closed records are immutable',
             ], $delta)->assertStatus(422);
