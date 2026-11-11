@@ -1365,6 +1365,7 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::post('/weekly-plans/{plan}/submit', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'submit'])->middleware('bms.permission:plans.manage');
     Route::get('/weekly-plans/{plan}/sunday-report', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'report'])->middleware('bms.permission:plans.view');
     Route::post('/weekly-plans/{plan}/tasks', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'storeTask'])->middleware('bms.permission:tasks.manage');
+    Route::get('/employee-tasks', [\App\Http\Controllers\BMS\EmployeeTaskController::class, 'index'])->middleware('bms.permission:plans.view');
     Route::put('/tasks/{task}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'updateTask'])->middleware('bms.permission:plans.view');
     Route::post('/weekly-plans/{plan}/support-requests', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'storeSupport'])->middleware('bms.permission:support.manage');
     Route::put('/support-requests/{support}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'updateSupport'])->middleware('bms.permission:support.view');

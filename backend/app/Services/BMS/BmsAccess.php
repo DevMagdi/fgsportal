@@ -46,6 +46,12 @@ class BmsAccess
         ], true));
     }
 
+    /** Directors, the Coordinator and global roles see every employee in scope; employees only themselves. */
+    public function canViewTeamTasks(?User $user = null): bool
+    {
+        return $this->can('plans.manage', $user) || $this->hasGlobalUnitScope($user);
+    }
+
     /** Null means all units; an array is a hard unit scope. */
     public function visibleUnitIds(?User $user = null): ?array
     {

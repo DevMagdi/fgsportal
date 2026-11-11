@@ -47,6 +47,7 @@ abstract class BmsTestCase extends TestCase
             '2026_11_11_000004_add_meeting_response_timestamps.php',
             '2026_11_11_000005_add_alert_renotification_policy.php',
             '2026_11_11_000006_create_bms_notifications_table.php',
+            '2026_11_12_000007_add_bms_completion_columns.php',
         ] as $filename) {
             require_once base_path('database/migrations/'.$filename);
         }
@@ -55,6 +56,7 @@ abstract class BmsTestCase extends TestCase
         (new \AddMeetingResponseTimestamps())->up();
         (new \AddAlertRenotificationPolicy())->up();
         (new \CreateBmsNotificationsTable())->up();
+        (new \AddBmsCompletionColumns())->up();
 
         (new BmsPhaseOneSeeder())->run();
         $this->enableBmsModule();

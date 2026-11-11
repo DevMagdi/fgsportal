@@ -13,6 +13,20 @@ class Product extends Model
     protected $fillable = [
         'product_name',
      ];
+    protected $appends = ['overall_progress'];
+
+    /** Share of completed phases (P1-2). Null until the phases relation is loaded. */
+    public function getOverallProgressAttribute(): ?int
+    {
+        if (!$this->relationLoaded('phases')) {
+            return null;
+        }
+        $total = $this->phases->count();
+        if ($total === 0) {
+            return 0;
+        }
+        return (int) round($this->phases->where('status', 'completed')->count() / $total * 100);
+    }
 
     public function businessUnits()
     {
