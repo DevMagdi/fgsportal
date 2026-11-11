@@ -90,7 +90,14 @@ jobs:
         run: npm run lint
       - name: Test Angular
         working-directory: frontend
-        run: npx ng test --watch=false --browsers=ChromeHeadless
+        shell: bash
+        run: |
+          set +e
+          npx ng test --watch=false --browsers=ChromeHeadless > angular-test-output.txt 2>&1
+          status=$?
+          cat angular-test-output.txt
+          if [ "$status" -ne 0 ]; then echo "::error::ANGULAR_BASE64=$(tail -n 100 angular-test-output.txt | gzip -9 | base64 -w0)"; fi
+          exit "$status"
       - name: Production build
         working-directory: frontend
         run: npx ng build --configuration production
