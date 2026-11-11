@@ -83,6 +83,7 @@ class P1KernelRegressionTest extends BmsTestCase
         $this->putJson('/api/bms/weekly-plans/999999', [], $this->jwtHeaders($employee))->assertForbidden();
 
         $this->company->modules()->updateExistingPivot(Module::where('slug', 'bms')->value('id'), ['is_enabled' => false]);
+        app(\App\Services\ModuleService::class)->forgetCache($this->company->id, 'bms');
         $this->getJson('/api/bms/weekly-plans/999999', $this->jwtHeaders($employee))->assertForbidden();
     }
 }
