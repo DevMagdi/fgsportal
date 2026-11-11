@@ -46,7 +46,7 @@ class ProductTrackingController extends BmsController
     public function storePhase(Request $request, Product $product)
     {
         $this->authorizeProduct($product);
-        $data=$this->phaseData($request,true,$product->id);
+        $data=$this->normalizeProgress($this->phaseData($request,true,$product->id));
         $phase=$product->phases()->create($data+['updated_by'=>$this->access->user()->id]);
         $this->audit->record($phase,'product_phase.created',[],$phase->toArray());
         return $this->ok($phase,'Product phase created',201);
@@ -55,7 +55,7 @@ class ProductTrackingController extends BmsController
     public function updatePhase(Request $request, ProductPhase $phase)
     {
         $this->authorizeProduct($phase->product);
-        $data=$this->phaseData($request,false,$phase->product_id,$phase->id);
+        $data=$this->normalizeProgress($this->phaseData($request,false,$phase->product_id,$phase->id),$phase);
         $data['updated_by']=$this->access->user()->id;
         $old=$phase->only(array_keys($data));$phase->update($data);
         $this->audit->record($phase,'product_phase.updated',$old,$phase->only(array_keys($data)));
@@ -81,8 +81,27 @@ class ProductTrackingController extends BmsController
         return $request->validate([
             'name'=>($creating?'required':'sometimes').'|string|max:150','sequence'=>[$creating?'required':'sometimes','integer','min:1',Rule::unique('product_phases','sequence')->where('product_id',$productId)->ignore($ignoreId)],
             'status'=>['sometimes',Rule::in(['not_started','in_progress','completed','blocked'])],
+            'progress'=>'sometimes|integer|min:0|max:100',
             'blockers'=>'nullable|string','data_needs'=>'nullable|string','support_needs'=>'nullable|string',
             'start_date'=>'nullable|date','end_date'=>'nullable|date|after_or_equal:start_date',
         ]);
+    }
+
+    /**
+     * P1-2: completed implies 100 and not_started implies 0. A conflicting explicit
+     * value is rejected instead of being silently rewritten.
+     */
+    private function normalizeProgress(array $data,?ProductPhase $phase=null): array
+    {
+        $status=$data['status']??($phase->status??'not_started');
+        $given=array_key_exists('progress',$data);
+        if($status==='completed'){
+            abort_if($given&&(int)$data['progress']!==100,422,'A completed phase must have progress 100.');
+            $data['progress']=100;
+        }elseif($status==='not_started'){
+            abort_if($given&&(int)$data['progress']!==0,422,'A phase that has not started must have progress 0.');
+            if(!$phase||array_key_exists('status',$data))$data['progress']=0;
+        }
+        return $data;
     }
 }

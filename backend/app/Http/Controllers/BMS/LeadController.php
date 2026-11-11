@@ -55,10 +55,22 @@ class LeadController extends BmsController
     {
         $this->access->authorize('leads.convert');$this->authorizeLead($lead);
         abort_if($lead->converted_opportunity_id,422,'This lead has already been converted.');
-        $opportunity=DB::transaction(function()use($lead){
-            $opportunity=Opportunity::create(['reference'=>'BMS-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),'title'=>$lead->name,'client_name'=>$lead->name,'type'=>'opportunity','business_unit_id'=>$lead->business_unit_id,'owner_id'=>$lead->owner_id,'created_by'=>$this->access->user()->id,'stage'=>'qualification','last_update_at'=>now(),'currency'=>'SAR']);
-            $opportunity->history()->create(['to_stage'=>'qualification','note'=>'Converted from lead #'.$lead->id,'changed_by'=>$this->access->user()->id]);
+        $userId=$this->access->user()->id;
+        $opportunity=DB::transaction(function()use($lead,$userId){
+            $opportunity=Opportunity::create([
+                'reference'=>'BMS-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
+                'title'=>$lead->name,'client_name'=>$lead->name,'type'=>'opportunity',
+                'business_unit_id'=>$lead->business_unit_id,'owner_id'=>$lead->owner_id,
+                'created_by'=>$userId,'stage'=>'qualification','last_update_at'=>now(),'currency'=>config('bms.default_currency','SAR'),
+                'bms_lead_id'=>$lead->id,'sector'=>$lead->sector,'notes'=>$lead->notes,
+                'contact_name'=>$lead->contact_name,'contact_email'=>$lead->contact_email,'contact_phone'=>$lead->contact_phone,
+            ]);
+            $opportunity->history()->create(['to_stage'=>'qualification','note'=>'Converted from lead #'.$lead->id,'changed_by'=>$userId]);
             $lead->update(['converted_opportunity_id'=>$opportunity->id,'stage'=>'converted']);
+            $lead->interactions()->create([
+                'interaction_type'=>'note','happened_at'=>now(),'created_by'=>$userId,
+                'outcome'=>'Converted to opportunity '.$opportunity->reference,
+            ]);
             $this->audit->record($lead,'lead.converted',[],['opportunity_id'=>$opportunity->id]);
             return $opportunity;
         });

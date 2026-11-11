@@ -58,6 +58,7 @@ class ExecutiveDashboardController extends BmsController
                 'delayed'=>$opportunities->where('type','tender')->where('is_delayed',true)->count(),
                 'no_update'=>$opportunities->where('type','tender')->where('has_no_update',true)->count(),
             ],
+            'employee_tasks'=>array_slice((new \App\Services\BMS\EmployeeTaskRollup())->summarize($this->access->canViewTeamTasks()?$tasks:$tasks->where('owner_id',$this->access->user()->id),false),0,10),
             'opportunities'=>$opportunities->values(),'products'=>$products,
             'summary'=>['units'=>$units->count(),'tasks'=>$tasks->count(),'achieved'=>$tasks->where('status','achieved')->count(),
                 'blocked_tasks'=>$tasks->filter(fn($t)=>!empty($t->blockers))->count(),
