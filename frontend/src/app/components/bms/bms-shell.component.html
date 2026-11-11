@@ -1,0 +1,14 @@
+<div class="bms-workspace" [dir]="direction">
+  <header class="bms-header">
+    <a routerLink="/bms/dashboard" class="bms-brand"><img src="assets/img/bms-logo.svg" alt="FGS Connect"><span>{{lang.t('bms')}}</span></a>
+    <button type="button" class="btn btn-outline-primary language-button" (click)="lang.toggle()">{{lang.t('language')}}</button>
+  </header>
+  <nav class="bms-tabs" [attr.aria-label]="lang.t('bms')">
+    <a routerLink="dashboard" routerLinkActive="active"><i class="bx bx-bar-chart-alt-2"></i>{{lang.t('dashboard')}}</a>
+    <a routerLink="units" routerLinkActive="active"><i class="bx bx-buildings"></i>{{lang.t('units')}}</a>
+    <a routerLink="plans" routerLinkActive="active"><i class="bx bx-calendar-check"></i>{{lang.t('plans')}}</a>
+    <a routerLink="opportunities" routerLinkActive="active"><i class="bx bx-briefcase"></i>{{lang.t('opportunities')}}</a>
+    <a routerLink="products" routerLinkActive="active"><i class="bx bx-package"></i>{{lang.t('products')}}</a>
+  </nav>
+  <main class="bms-content"><router-outlet></router-outlet></main>
+</div>

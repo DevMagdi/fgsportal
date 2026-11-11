@@ -71,6 +71,11 @@ describe('module-pages registry', () => {
   it('keeps full route parity with the active sidebar links', () => {
     const sidebarRoutes = [
       '/my_work',
+      '/bms/dashboard',
+      '/bms/units',
+      '/bms/plans',
+      '/bms/opportunities',
+      '/bms/products',
       '/notes',
       '/admin-panel/dashboard',
       '/support-reports',

@@ -1343,3 +1343,43 @@ Route::group(['middleware' => ['cors', 'jwt.verify'], 'prefix' => 'company/modul
 |
 | Route::group(['middleware' => ['jwt.verify', 'module:crm']], function () { ... });
 */
+
+// BMS Phase 1 — every write is protected by the central BRD role matrix.
+Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(function () {
+    Route::get('/lookups', [\App\Http\Controllers\BMS\LookupController::class, 'index']);
+    Route::post('/roles/assign', [\App\Http\Controllers\BMS\LookupController::class, 'assignRole'])->middleware('bms.permission:roles.manage');
+    Route::post('/roles/revoke', [\App\Http\Controllers\BMS\LookupController::class, 'revokeRole'])->middleware('bms.permission:roles.manage');
+
+    Route::get('/units', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'index'])->middleware('bms.permission:units.view');
+    Route::post('/units', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'store'])->middleware('bms.permission:units.manage');
+    Route::get('/units/{unit}', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'show'])->middleware('bms.permission:units.view');
+    Route::put('/units/{unit}', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'update'])->middleware('bms.permission:units.manage');
+    Route::delete('/units/{unit}', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'destroy'])->middleware('bms.permission:units.manage');
+
+    Route::get('/weekly-plans', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'index'])->middleware('bms.permission:plans.view');
+    Route::post('/weekly-plans', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'store'])->middleware('bms.permission:plans.manage');
+    Route::get('/weekly-plans/{plan}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'show'])->middleware('bms.permission:plans.view');
+    Route::put('/weekly-plans/{plan}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'update'])->middleware('bms.permission:plans.manage');
+    Route::post('/weekly-plans/{plan}/submit', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'submit'])->middleware('bms.permission:plans.manage');
+    Route::get('/weekly-plans/{plan}/sunday-report', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'report'])->middleware('bms.permission:plans.view');
+    Route::post('/weekly-plans/{plan}/tasks', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'storeTask'])->middleware('bms.permission:tasks.manage');
+    Route::put('/tasks/{task}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'updateTask'])->middleware('bms.permission:plans.view');
+    Route::post('/weekly-plans/{plan}/support-requests', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'storeSupport'])->middleware('bms.permission:support.manage');
+    Route::put('/support-requests/{support}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'updateSupport'])->middleware('bms.permission:support.view');
+
+    Route::get('/opportunities', [\App\Http\Controllers\BMS\OpportunityController::class, 'index'])->middleware('bms.permission:opportunities.view');
+    Route::post('/opportunities', [\App\Http\Controllers\BMS\OpportunityController::class, 'store'])->middleware('bms.permission:opportunities.manage');
+    Route::post('/opportunities/import', [\App\Http\Controllers\BMS\OpportunityController::class, 'import'])->middleware('bms.permission:opportunities.import');
+    Route::get('/opportunities/{opportunity}', [\App\Http\Controllers\BMS\OpportunityController::class, 'show'])->middleware('bms.permission:opportunities.view');
+    Route::put('/opportunities/{opportunity}', [\App\Http\Controllers\BMS\OpportunityController::class, 'update'])->middleware('bms.permission:opportunities.manage');
+    Route::post('/opportunities/{opportunity}/decision', [\App\Http\Controllers\BMS\OpportunityController::class, 'decide'])->middleware('bms.permission:opportunities.decide');
+
+    Route::get('/products', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'index'])->middleware('bms.permission:products.view');
+    Route::post('/products', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'store'])->middleware('bms.permission:products.manage');
+    Route::put('/products/{product}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'update'])->middleware('bms.permission:products.manage');
+    Route::post('/products/{product}/phases', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'storePhase'])->middleware('bms.permission:products.manage');
+    Route::put('/product-phases/{phase}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'updatePhase'])->middleware('bms.permission:products.manage');
+    Route::delete('/product-phases/{phase}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'destroyPhase'])->middleware('bms.permission:products.manage');
+
+    Route::get('/executive-dashboard', [\App\Http\Controllers\BMS\ExecutiveDashboardController::class, 'index'])->middleware('bms.permission:dashboard.view');
+});

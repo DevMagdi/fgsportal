@@ -78,6 +78,12 @@ const routes: Routes = [
     loadChildren: () => import('./components/crm/crm.module').then(m => m.CRMModule),
   },
   {
+    path: 'bms',
+    canActivate: [AuthGuardService, ModuleGuard],
+    data: { module: 'bms' },
+    loadChildren: () => import('./components/bms/bms.module').then(m => m.BmsModule),
+  },
+  {
     path: 'hr',
     canActivate: [ModuleGuard],
     data: { module: 'hr' },

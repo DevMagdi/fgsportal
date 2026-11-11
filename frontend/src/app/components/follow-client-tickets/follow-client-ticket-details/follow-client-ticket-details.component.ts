@@ -215,7 +215,7 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     if(priority == ClientTicketPeriority.Normal){
       return '#1CCC6D'
     }else if(priority == ClientTicketPeriority.High){
-      return '#513982'
+      return '#D94691'
     }else if(priority == ClientTicketPeriority.Critical){
       return '#CC1C52'
     }else{
@@ -580,7 +580,7 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //         <a href="https://connect.firstgulfsolutions.com/">First Gulf Solutions</a>
     //         <br>
     //         <br>
-    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/new%20logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //         `
     //         this._emailing.supportCenter(user.email , 'FGS Support', message)
     //       }
@@ -607,7 +607,7 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //         <a href="https://connect.firstgulfsolutions.com/">First Gulf Solutions</a>
     //         <br>
     //         <br>
-    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/new%20logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //         <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //         `
     //         this._emailing.supportCenter(user.email , 'FGS Support', message)
     //       }
@@ -646,7 +646,7 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //       <a href="https://connect.firstgulfsolutions.com/#/">First Gulf Solutions</a>
     //       <br>
     //       <br>
-    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/new%20logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //       `
     //       this._emailing.supportCenter(client.email , `FGS Support Case ${this.currentClientTicket.key}`, messageToClient)
     //     })
@@ -668,7 +668,7 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //       <a href="https://connect.firstgulfsolutions.com/#/">First Gulf Solutions</a>
     //       <br>
     //       <br>
-    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/new%20logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //       `
     //       this._emailing.supportCenter(user.email , `FGS Support Case ${this.currentClientTicket.key}`, messageToClient)
     //     })
@@ -732,7 +732,7 @@ export class FollowClientTicketDetailsComponent implements OnInit {
     //       <a href="https://connect.firstgulfsolutions.com/#/">First Gulf Solutions</a>
     //       <br>
     //       <br>
-    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/new%20logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+    //       <a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.svg" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
     //       `
     //       this._emailing.supportCenter(user.email , 'FGS Support', messageToClient)
     //     })     

@@ -15,6 +15,12 @@ class ModulesTableSeeder extends Seeder
     {
         $modules = [
             [
+                'name' => 'Business Management Solutions',
+                'slug' => 'bms',
+                'description' => 'Business units, weekly plans, opportunities, product tracking and the executive dashboard.',
+                'is_core' => false,
+            ],
+            [
                 'name' => 'Core (Users, Auth & Permissions)',
                 'slug' => 'core',
                 'description' => 'Authentication, users, roles and permissions. Always required and always enabled.',

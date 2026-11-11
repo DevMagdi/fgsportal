@@ -4,7 +4,7 @@
 <nav class="navbar navbar-expand-sm bg-white">
   <!-- <a class="navbar-brand ml-2" routerLink="/">
         <div class="logo mr-2">
-            <img src="../../../assets/img/new logo.png" />
+            <img src="../../../assets/img/bms-logo.svg" />
         </div>
     </a> -->
   <!-- <span class="clock ml-2">
@@ -204,7 +204,7 @@
         <div class="logo-main">
           <a class="navbar-brand" routerLink="/">
             <div class="logo">
-              <img src="../../../assets/img/Frame 4379.png">
+              <img src="../../../assets/img/bms-logo.svg">
             </div>
           </a>
         </div>
@@ -299,6 +299,14 @@
         <i class="menu-icon tf-icons bx bx-grid-alt me-2"></i>
         <span>Modules</span>
       </a>
+
+      <div *ngIf="isModuleEnabled('bms')" class="bmsModule">
+        <a mat-list-item routerLink="/bms/dashboard" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-bar-chart-alt-2 me-2"></i><span>Executive Dashboard</span></a>
+        <a mat-list-item routerLink="/bms/units" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-buildings me-2"></i><span>Business Units</span></a>
+        <a mat-list-item routerLink="/bms/plans" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-calendar-check me-2"></i><span>Weekly Plans</span></a>
+        <a mat-list-item routerLink="/bms/opportunities" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-briefcase me-2"></i><span>Opportunities &amp; Tenders</span></a>
+        <a mat-list-item routerLink="/bms/products" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-package me-2"></i><span>Product Tracking</span></a>
+      </div>
 
       <a *ngIf="checkIfHasPerm(12)" mat-list-item routerLink="/my_work" routerLinkActive="active">
         Time Sheet

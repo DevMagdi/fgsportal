@@ -155,8 +155,8 @@ li :hover {
                     display: none;
                 }
                 &.active {
-                    border-left: solid 5px #FFAB00;
-                    background: #74619B;
+                    border-left: solid 5px #D94691;
+                    background: #20B8CC;
                     animation: activatePage 0.25s;
                     .icon-img {
                         display: none;
@@ -192,9 +192,9 @@ li :hover {
     }
     .collapse {
         .nav {
-            background: #74619B;
+            background: #20B8CC;
             li {
-                border-bottom: 1px solid #9788B4;
+                border-bottom: 1px solid #79CFE3;
             }
         }
         a {

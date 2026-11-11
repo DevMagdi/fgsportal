@@ -10,8 +10,10 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$fgsPM-primary: mat.define-palette(mat.$indigo-palette);
-$fgsPM-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$bms-primary-palette: (50: #fdf0f7, 100: #fad5e8, 200: #f5b9d5, 300: #ef8cbb, 400: #e665a4, 500: #D94691, 600: #c33b82, 700: #B72F76, 800: #98275f, 900: #741c47, A100: #fad5e8, A200: #ef8cbb, A400: #e665a4, A700: #B72F76, contrast: (50: #263453, 100: #263453, 200: #263453, 300: #ffffff, 400: #ffffff, 500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff, A100: #263453, A200: #263453, A400: #ffffff, A700: #ffffff));
+$bms-secondary-palette: (50: #eff9fb, 100: #cceff4, 200: #A9E8F7, 300: #79CFE3, 400: #43c3d6, 500: #20B8CC, 600: #18a3b5, 700: #128B9B, 800: #0e7280, 900: #09545e, A100: #cceff4, A200: #79CFE3, A400: #20B8CC, A700: #128B9B, contrast: (50: #263453, 100: #263453, 200: #263453, 300: #263453, 400: #263453, 500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff, A100: #263453, A200: #263453, A400: #ffffff, A700: #ffffff));
+$fgsPM-primary: mat.define-palette($bms-primary-palette, 500, 100, 700);
+$fgsPM-accent: mat.define-palette($bms-secondary-palette, 500, 100, 700);
 // The warn palette is optional (defaults to red).
 $fgsPM-warn: mat.define-palette(mat.$red-palette);
 // Create the theme object. A theme consists of configurations for individual
@@ -21,29 +23,6 @@ $fgsPM-theme: mat.define-light-theme((color: (primary: $fgsPM-primary, accent: $
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.all-component-themes($fgsPM-theme);
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
-@import '@angular/material/theming';
-// Plus imports for other components in your app.
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$fgsPM-primary: mat.define-palette(mat.$indigo-palette);
-$fgsPM-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
-// The warn palette is optional (defaults to red).
-$fgsPM-warn: mat.define-palette(mat.$red-palette);
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
-$fgsPM-theme: mat.define-light-theme((color: (primary: $fgsPM-primary, accent: $fgsPM-accent, warn: $fgsPM-warn, )));
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($fgsPM-theme);
-
 /* You can add global styles to this file, and also import other style files */
 
 @import './app/colors';

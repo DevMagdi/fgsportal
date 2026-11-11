@@ -70,7 +70,7 @@ Reason these were not deleted: removing them needs edits to logic inside control
 
 ## 6. BUILD-LATER (BRD need, no code)
 
-M1 calendar availability, invitations and Minutes of Meeting; M7 procurement; M8 PR events; M9 document and brand hub with latest-version control; unit weekly plan entity and Sunday report; product phases and blockers; unified dashboard with unit filter; Excel tracker import (FR-OPP-07); six-month social media report.
+M1 calendar availability, invitations and Minutes of Meeting; M7 procurement; M8 PR events; M9 document and brand hub with latest-version control; six-month social media report. Phase 1 unit plans/Sunday reports, product phases/blockers, unified dashboard and Excel tracker import are now implemented under `app/Http/Controllers/BMS` and `frontend/src/app/components/bms`.
 
 ## 7. Known pre-existing issues (present on `master`, not caused by this branch)
 
