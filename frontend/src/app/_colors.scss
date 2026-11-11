@@ -1,15 +1,28 @@
-$mainThemeColor:#513982;
-$subThemeColor:#74619B;
-$subSubThemeColor:#9788B4;
-$softThemeColor:#EEEBF3;
-$borderColor:#CBC4DA;
-$buttonMainBackgroundColor:#f4831f; //#F5821F;
-$buttonSubBackgroundColor:#FFAB00; //#F5821F;
-$buttonSubSubBackgroundColor:#FE7E15; //#F5821F;
-$secondFontColor:#707070;
-$grayBackGroundColor:#F6F7F8;
+// Brand palette sampled from the magenta → cyan gradient sphere.
+$mainThemeColor:#D94691;
+$subThemeColor:#20B8CC;
+$subSubThemeColor:#79CFE3;
+$softThemeColor:#FDF0F7;
+$borderColor:#E6D8E5;
+$buttonMainBackgroundColor:#20B8CC;
+$buttonSubBackgroundColor:#D94691;
+$buttonSubSubBackgroundColor:#20B8CC;
+$secondFontColor:#667085;
+$grayBackGroundColor:#F6F8FB;
 $whiteColor:#fff;
-$mainFontFamily: 'Cairo';
-$softGrayBackGroundColor:#FCFCFC;
-$bgLight:#FAFBFC;
-$tabBackGround:#f1ecf0;
+$mainFontFamily: 'Cairo', 'Public Sans', sans-serif;
+$softGrayBackGroundColor:#FCFDFE;
+$bgLight:#F7FAFC;
+$tabBackGround:#EFF9FB;
+
+:root {
+  --brand-primary: #D94691;
+  --brand-primary-dark: #B72F76;
+  --brand-secondary: #20B8CC;
+  --brand-secondary-dark: #128B9B;
+  --brand-accent: #A9E8F7;
+  --brand-ink: #263453;
+  --brand-muted: #71809C;
+  --brand-surface: #F7FAFC;
+  --brand-gradient: linear-gradient(135deg, #D94691 0%, #8D78D5 48%, #20B8CC 100%);
+}

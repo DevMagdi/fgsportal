@@ -256,8 +256,8 @@ openModal(){
         datasets: [
             {
                 data: [this.devProgressReport?.total_working_hours, this.devProgressReport?.idle_hours, this.devProgressReport?.offical_vacation,this.devProgressReport?.unpaid_vacation],
-                backgroundColor: ['#513982','#9747FF','#FFAB00','#EC2525'],
-                hoverBackgroundColor: ['#74619B', '#9788B4', '#bda168','#EC2525']
+                backgroundColor: ['#D94691','#20B8CC','#D94691','#EC2525'],
+                hoverBackgroundColor: ['#20B8CC', '#79CFE3', '#A9E8F7','#EC2525']
             }
         ]
     };

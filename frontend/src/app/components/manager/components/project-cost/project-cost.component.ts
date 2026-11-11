@@ -696,8 +696,8 @@ sidebarVisible1=false;
 
   getRandomColor(index) {
     var colors = [
-      '#513982',
-      '#f4831f',
+      '#D94691',
+      '#20B8CC',
       '#707070',
       '#2c0d69',
       '#905017',
@@ -776,7 +776,7 @@ sidebarVisible1=false;
   getColor(){
     const green = '#197900';
     const warning = '#cf0101';
-    const moderate = '#f4831f';
+    const moderate = '#20B8CC';
     const exceeded = '#8a0000'
     
     if(!!this.projectTotalCost.budgetryCost){

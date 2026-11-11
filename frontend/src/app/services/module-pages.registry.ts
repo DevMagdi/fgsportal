@@ -52,6 +52,11 @@ export interface ModuleMeta {
 }
 
 export const MODULE_META: Record<string, ModuleMeta> = {
+  bms: {
+    name: 'Business Management Solutions',
+    description: 'Business units, weekly plans, opportunities, products and the executive dashboard.',
+    icon: 'bx bx-bar-chart-alt-2',
+  },
   core: {
     name: 'Core (Users, Auth & Permissions)',
     description:
@@ -90,7 +95,7 @@ export const MODULE_META: Record<string, ModuleMeta> = {
   },
 };
 
-export const MODULE_SLUGS = ['core', 'crm', 'ticketing', 'projects', 'hr', 'admin'];
+export const MODULE_SLUGS = ['core', 'bms', 'crm', 'ticketing', 'projects', 'hr', 'admin'];
 
 const perm = (id: number): PageCondition => ({ kind: 'perm', id });
 const dept = (...values: Department[]): PageCondition => ({ kind: 'dept', values });
@@ -141,6 +146,13 @@ const requestPages = (): ModulePage[] => [
  * section, title, router target and *ngIf visibility condition.
  */
 export const MODULE_PAGES: Record<string, ModulePage[]> = {
+  bms: [
+    { section: 'BMS', title: 'Executive Dashboard', icon: 'bx bx-bar-chart-alt-2', route: '/bms/dashboard' },
+    { section: 'BMS', title: 'Business Units', icon: 'bx bx-buildings', route: '/bms/units' },
+    { section: 'BMS', title: 'Weekly Plans', icon: 'bx bx-calendar-check', route: '/bms/plans' },
+    { section: 'BMS', title: 'Opportunities & Tenders', icon: 'bx bx-briefcase', route: '/bms/opportunities' },
+    { section: 'BMS', title: 'Product Tracking', icon: 'bx bx-package', route: '/bms/products' },
+  ],
   // ---- Standalone always-on links (Notes) + the perm-gated Time Sheet ----
   core: [
     {

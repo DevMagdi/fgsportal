@@ -84,6 +84,9 @@ return [
         'App\\Http\\Controllers\\User\\PermissionGroup' => 'admin',
         'App\\Http\\Controllers\\User\\Dashboard\\AdminDashboardController' => 'admin',
 
+        // ===== BMS: business units, weekly plans, opportunities, products, executive dashboard =====
+        'App\\Http\\Controllers\\BMS' => 'bms',
+
         // ===== Core (unmapped => always allowed) =====
         // User\Auth, User\Profile, User\Dashboard\DashboardController,
         // Client\Auth, ApiMessage, Tools, ToDo ...

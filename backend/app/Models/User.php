@@ -80,6 +80,17 @@ class User extends Authenticatable implements JWTSubject
         return app(\App\Services\ModuleService::class)->isEnabled($moduleSlug, $this);
     }
 
+    public function businessUnits()
+    {
+        return $this->belongsToMany(\App\Models\BMS\BusinessUnit::class)->withTimestamps();
+    }
+
+    public function bmsRoles()
+    {
+        return $this->belongsToMany(\App\Models\BMS\BmsRole::class, 'bms_role_user')
+            ->withPivot('business_unit_id')->withTimestamps();
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

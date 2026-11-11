@@ -28,6 +28,6 @@ Thank you again and have a great day!,
 <br>
 <br>
 <br>
-<a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/new%20logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
+<a href="" style="text-decoration: none;" target="_blank"><img align="center" alt="First Gulf Solutions" class="icon" src="https://connect.firstgulfsolutions.com/assets/img/bms-logo.png" style="display: block; height: auto; margin: 0 auto; border: 0;"/></a>
 @endcomponent 
  

@@ -85,9 +85,9 @@ export class MessagingService {
     let title = notify_data['title']
     let option = {
       body :notify_data['body'],
-      icon:'../../assets/img/new logo.png',
-      badge : '../../assets/img/new logo.png',
-      image : '../../assets/img/new logo.png'
+      icon:'../../assets/img/bms-logo.svg',
+      badge : '../../assets/img/bms-logo.svg',
+      image : '../../assets/img/bms-logo.svg'
     };
 
     console.log('new message received. ', notify_data);

@@ -230,7 +230,7 @@ export class FollowClientTicketsComponent implements OnInit {
     if(priority == ClientTicketPeriority.Normal){
       return '#36B37E'
     }else if(priority == ClientTicketPeriority.High){
-      return '#513982'
+      return '#D94691'
     }else if(priority == ClientTicketPeriority.Critical){
       return '#CC1C52'
     }else{
