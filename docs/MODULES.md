@@ -10,7 +10,7 @@ always present.
 | --- | --- | --- | --- |
 | `core` | Core (Users, Auth & Permissions) | ✅ | Authentication, users, roles, permission groups, profile, notifications, notes |
 | `crm` | CRM | — | Leads, contacts, accounts, activities, campaigns, POC & RFP requests, partner organisation types |
-| `ticketing` | Ticketing & Support | — | Client tickets, contract support, client accounts, partner & licence management, satisfaction ratings, installments/finance |
+| `ticketing` | Ticketing & Support | — | Client tickets, contract support, client accounts, partner management, satisfaction ratings |
 | `projects` | Projects | — | Projects, processes, tasks, timesheets, reports, PM team requests, open-to-work |
 | `hr` | Human Resources | — | Recruitment & onboarding, salaries, vacations/annual requests, incentives, transport requests, work hours, company policies |
 | `admin` | Administration | — | Departments, products, permissions, work degrees, public requests, announcements, logs, admin dashboard |

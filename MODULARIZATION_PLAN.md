@@ -104,11 +104,11 @@ two-line change instead of editing ~1 000 routes. The 12 unmapped controllers
 | Module | Controller namespaces (prefixes) |
 | --- | --- |
 | `crm` | `User\Business`, `Client\Partner\OrganizationTypeController` |
-| `ticketing` | `Client\TicketingSystem`, `Client\Partner\PartnerController`, `Settings\License`, `Rating`, `InstallmentFeature` |
+| `ticketing` | `Client\TicketingSystem`, `Client\Partner\PartnerController`, `Rating` |
 | `projects` | `Project`, `AdminReport`, `Report`, `TaskTeamController`, `User\Manager\ManagerReportController`, `User\OpenToWork` |
 | `hr` | `HRModule`, `User\Salary`, `User\FamilyInformation`, `Settings\Annual`, `Settings\Incentive`, `Settings\TransportationRequest`, `Settings\WorkHours` |
 | `admin` | `Settings\{Department,DeveloperDivision,WorkDegree,Permission,Product,Logs,PublicRequest,Announce}`, `User\PermissionGroup`, `User\Dashboard\AdminDashboardController` |
-| `core` (unmapped) | `User\Auth`, `User\Profile`, `User\Dashboard\DashboardController`, `Client\Auth`, `ApiMessage`, `Tools`, `ToDo`, `DatabaseConvert*` |
+| `core` (unmapped) | `User\Auth`, `User\Profile`, `User\Dashboard\DashboardController`, `Client\Auth`, `ApiMessage`, `Tools`, `ToDo` |
 
 ### Management API (JWT + Management/Administration only)
 
@@ -167,8 +167,7 @@ default company). Wired through `DatabaseSeeder`.
 - FTP host/user/password removed from `frontend/package.json` → environment vars.
 - Firebase/FCM/exchange-rate keys replaced with placeholders;
   `environment.example.ts` added.
-- Hardcoded Firebase/FCM keys in `MessageController`, `DatabaseConvertController`
-  and `DatabaseConvertSecondController` now resolve through `config/firebase.php`
+- Hardcoded Firebase/FCM keys in `MessageController` now resolve through `config/firebase.php`
   and `FIREBASE_*` environment variables.
 - A tracked Firebase Admin service-account JSON (real private key) was deleted;
   `*firebase-adminsdk*.json` is git-ignored.

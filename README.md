@@ -71,7 +71,7 @@ php artisan serve
 ```
 
 > **Fresh-database note:** the historical codebase only ships migrations for
-> part of its schema — many feature tables (CRM, HR, ticketing, recruitment, …)
+> part of its schema — many feature tables (CRM, HR, recruitment, …)
 > were created directly in deployed databases. A clean `migrate` + `seed` is
 > enough to run authentication and the modules dashboard. For the full feature
 > set, import a `mysqldump` from an existing environment into an empty database
@@ -128,8 +128,6 @@ them into `backend/.env` (never commit real values):
 | `FIREBASE_SERVER_KEY` | FCM legacy server key for push notifications |
 | `FIREBASE_API_KEY` | Firebase Web API key |
 | `FIREBASE_DATABASE_URL` | Realtime Database base URL (current project) |
-| `FIREBASE_LEGACY_DATABASE_URL` | Legacy project Realtime Database URL |
-| `FIREBASE_LEGACY_DB_AUTH_TOKEN` | Legacy database access token |
 
 Service-account JSON files (`*firebase-adminsdk*.json`) are git-ignored and must
 be provisioned on the server out of band. The frontend keeps `YOUR_*` placeholders
