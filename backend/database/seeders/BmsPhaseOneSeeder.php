@@ -43,9 +43,12 @@ class BmsPhaseOneSeeder extends Seeder
 
         // Preserve access for existing Management users on the first deployment;
         // they can subsequently assign the narrower BRD roles from the API.
-        $admin=BmsRole::where('slug','system_admin')->first();
-        foreach (\App\Models\User::where('sub_departments_id',1)->get() as $user) {
-            $user->bmsRoles()->syncWithoutDetaching([$admin->id=>['business_unit_id'=>null]]);
+        if (config('bms.seed_existing_admins')) {
+            $admin=BmsRole::where('slug','system_admin')->first();
+            $ids=config('bms.admin_sub_department_ids', [1, 4]);
+            foreach (\App\Models\User::whereIn('sub_departments_id',$ids)->get() as $user) {
+                $user->bmsRoles()->syncWithoutDetaching([$admin->id=>['business_unit_id'=>null]]);
+            }
         }
     }
 }

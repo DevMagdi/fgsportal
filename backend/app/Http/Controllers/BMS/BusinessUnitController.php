@@ -24,6 +24,7 @@ class BusinessUnitController extends BmsController
         $unit=BusinessUnit::create($data);
         $unit->users()->sync($request->input('user_ids',[]));
         $this->syncDirectorRole($unit);
+        $this->audit->record($unit,'unit.created',[],$unit->toArray());
         return $this->ok($unit->load(['parent','director','users']),'Business unit created',201);
     }
 
@@ -48,7 +49,9 @@ class BusinessUnitController extends BmsController
     public function destroy(BusinessUnit $unit)
     {
         abort_if($unit->children()->exists() || $unit->weeklyPlans()->exists(),422,'A unit with children or weekly plans cannot be deleted.');
+        $snapshot=$unit->toArray();
         $unit->delete();
+        $this->audit->record($unit,'unit.deleted',$snapshot,[]);
         return $this->ok(null,'Business unit deleted');
     }
 

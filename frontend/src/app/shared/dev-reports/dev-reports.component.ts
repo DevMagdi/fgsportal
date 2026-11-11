@@ -6,7 +6,7 @@ import { AccountPositions, AccountType, Department, User } from 'src/app/interfa
 import { AuthApiService } from 'src/app/services/auth-api.service';
 import { DatabaseService } from 'src/app/services/database.service';
 import { NotificationService } from 'src/app/services/notification.service';
-import * as XLSX from 'xlsx'; 
+import { ExportExcelService } from 'src/app/services/export-excel.service';
 
 @Component({
   selector: 'app-dev-reports',
@@ -30,7 +30,8 @@ export class DevReportsComponent implements OnInit {
   
   constructor(private notify:NotificationService,
               private _db:DatabaseService,
-              private _auth:AuthApiService) { }
+              private _auth:AuthApiService,
+              private excel:ExportExcelService) { }
 
   ngOnInit(): void {
 
@@ -135,17 +136,8 @@ export class DevReportsComponent implements OnInit {
 
 
   exportexcel():void{
-    /* table id is passed over here */   
-    let element = document.getElementById('excel-table'); 
-    const ws: XLSX.WorkSheet =XLSX.utils.table_to_sheet(element);
-
-    /* generate workbook and add the worksheet */
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-
-    /* save to file */
-    XLSX.writeFile(wb, this.fileName);
- }
+    this.excel.exportexcel(document.getElementById('excel-table'), this.fileName);
+  }
 }
 function compare(a: number | string, b: number | string, isAsc: boolean) {
   return (a < b ? -1 : 1) * (isAsc ? 1 : -1);

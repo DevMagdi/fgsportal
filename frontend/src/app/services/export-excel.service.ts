@@ -1,33 +1,19 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
+import { Workbook } from 'exceljs';
+import { saveAs } from 'file-saver';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ExportExcelService {
-
-  constructor() { }
-
-
-  exportexcel(element, fileName, columnWidth?: number): void {
-    /* table id is passed over here */
-    const ws: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-
-    const range = ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']) : null;
-    if (range) {
-      const totalColumns = range.e.c - range.s.c + 1;
-      const width = columnWidth || 20;
-      ws['!cols'] = Array.from({ length: totalColumns }, () => ({ wch: width }));
-    }
-
-    /* generate workbook and add the worksheet */
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-
-    /* save to file */
-    XLSX.writeFile(wb, fileName);
+  exportexcel(element: any, fileName: string, columnWidth = 20): void {
+    if (!element) return;
+    const book = new Workbook();
+    const sheet = book.addWorksheet('Sheet1');
+    (Array.from(element.rows) as HTMLTableRowElement[]).forEach(row => {
+      sheet.addRow(Array.from(row.cells).map(cell => cell.innerText));
+    });
+    sheet.columns.forEach(column => { column.width = columnWidth; });
+    void book.xlsx.writeBuffer().then(buffer => {
+      saveAs(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), fileName);
+    });
   }
-
-
-
 }

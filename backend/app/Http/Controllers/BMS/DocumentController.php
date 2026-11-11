@@ -38,6 +38,6 @@ class DocumentController extends BmsController
     public function download(BrandDocument $document)
     {
         abort_unless($document->is_published,404);abort_unless(Storage::disk('local')->exists($document->file_path),404,'Document file not found.');
-        return Storage::disk('local')->download($document->file_path,$document->original_name);
+        return Storage::disk('local')->download($document->file_path,\App\Services\BMS\SafeFilename::forDownload($document->original_name));
     }
 }

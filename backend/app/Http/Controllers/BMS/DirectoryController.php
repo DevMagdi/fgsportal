@@ -32,6 +32,6 @@ class DirectoryController extends BmsController
     public function download(EmployeeCertificate $certificate)
     {
         if($certificate->business_unit_id)$this->access->authorizeUnit((int)$certificate->business_unit_id);
-        abort_unless(Storage::disk('local')->exists($certificate->file_path),404);return Storage::disk('local')->download($certificate->file_path,$certificate->original_name);
+        abort_unless(Storage::disk('local')->exists($certificate->file_path),404);return Storage::disk('local')->download($certificate->file_path,\App\Services\BMS\SafeFilename::forDownload($certificate->original_name));
     }
 }

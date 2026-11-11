@@ -34,19 +34,23 @@ class LookupController extends BmsController
     public function assignRole(Request $request)
     {
         $data=$request->validate(['user_id'=>'required|exists:users,id','role_id'=>'required|exists:bms_roles,id','business_unit_id'=>'nullable|exists:business_units,id']);
-        User::findOrFail($data['user_id'])->bmsRoles()->syncWithoutDetaching([
+        $target=User::findOrFail($data['user_id']);
+        $target->bmsRoles()->syncWithoutDetaching([
             $data['role_id']=>['business_unit_id'=>$data['business_unit_id']??null]
         ]);
+        $this->audit->record($target,'role.assigned',[],$data);
         return $this->ok(null,'BMS role assigned');
     }
 
     public function revokeRole(Request $request)
     {
         $data=$request->validate(['user_id'=>'required|exists:users,id','role_id'=>'required|exists:bms_roles,id','business_unit_id'=>'nullable|exists:business_units,id']);
-        $relation=User::findOrFail($data['user_id'])->bmsRoles();
+        $target=User::findOrFail($data['user_id']);
+        $relation=$target->bmsRoles();
         if (empty($data['business_unit_id'])) $relation->wherePivotNull('business_unit_id');
         else $relation->wherePivot('business_unit_id',$data['business_unit_id']);
         $relation->detach($data['role_id']);
+        $this->audit->record($target,'role.revoked',[],$data);
         return $this->ok(null,'BMS role revoked');
     }
 
