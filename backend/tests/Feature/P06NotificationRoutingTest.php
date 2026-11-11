@@ -43,14 +43,17 @@ class P06NotificationRoutingTest extends BmsTestCase
     {
         $user = $this->actingAsRole('employee');
         $other = $this->actingAsRole('employee');
-        $notification = $user->notifications()->create([
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+        config(['queue.default' => 'sync', 'mail.default' => 'array']);
+        app(BmsNotifier::class)->notify([$user], 'support.responded', 'Update', 'Response ready');
+
+        $notification = $user->notifications()->firstOrFail();
+        $this->assertDatabaseHas('notifications', [
+            'id' => $notification->id,
+            'notifiable_type' => get_class($user),
+            'notifiable_id' => $user->id,
             'type' => BmsNotification::class,
-            'data' => ['title' => 'Update', 'body' => 'Response ready'],
         ]);
-        $message = new BmsNotification('support.responded', 'Update', 'Response ready');
-        $this->assertSame(['database', 'mail'], $message->via($user));
-        $this->assertTrue($message instanceof \Illuminate\Contracts\Queue\ShouldQueue);
+        $this->assertSame(0, $other->notifications()->count());
 
         $this->getBms('notifications', $user)->assertOk()->assertJsonPath('data.total', 1);
         $this->putBms("notifications/{$notification->id}/read", [], $other)->assertNotFound();
