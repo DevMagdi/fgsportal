@@ -1,14 +1,25 @@
 <div class="bms-workspace" [dir]="direction">
   <header class="bms-header">
     <a routerLink="/bms/dashboard" class="bms-brand"><img src="assets/img/alphaiota-logo.png" alt="Alphaiota"><span class="alphaiota-wordmark">Alphaiota<small>{{lang.t('bms')}}</small></span></a>
-    <button type="button" class="btn btn-outline-primary language-button" (click)="lang.toggle()">{{lang.t('language')}}</button>
+    <div class="header-actions"><button type="button" class="alert-button" *ngIf="can('opportunities.view')" (click)="showAlerts=!showAlerts" [attr.aria-label]="lang.t('alerts')"><i class="bx bx-bell"></i><span *ngIf="alerts.length">{{alerts.length}}</span></button><button type="button" class="btn btn-outline-primary language-button" (click)="lang.toggle()">{{lang.t('language')}}</button></div>
+    <aside class="alert-panel" *ngIf="showAlerts"><div class="page-heading"><h2>{{lang.t('alerts')}}</h2><button class="btn-link" (click)="showAlerts=false">×</button></div><div *ngFor="let alert of alerts"><strong>{{alert.opportunity?.reference}}</strong><p>{{alert.message}}</p><button class="btn-link" (click)="read(alert)">{{lang.t('markRead')}}</button></div><p *ngIf="!alerts.length">{{lang.t('noAlerts')}}</p></aside>
   </header>
   <nav class="bms-tabs" [attr.aria-label]="lang.t('bms')">
-    <a routerLink="dashboard" routerLinkActive="active"><i class="bx bx-bar-chart-alt-2"></i>{{lang.t('dashboard')}}</a>
-    <a routerLink="units" routerLinkActive="active"><i class="bx bx-buildings"></i>{{lang.t('units')}}</a>
-    <a routerLink="plans" routerLinkActive="active"><i class="bx bx-calendar-check"></i>{{lang.t('plans')}}</a>
-    <a routerLink="opportunities" routerLinkActive="active"><i class="bx bx-briefcase"></i>{{lang.t('opportunities')}}</a>
-    <a routerLink="products" routerLinkActive="active"><i class="bx bx-package"></i>{{lang.t('products')}}</a>
+    <a routerLink="dashboard" routerLinkActive="active" *ngIf="can('dashboard.view')"><i class="bx bx-bar-chart-alt-2"></i>{{lang.t('dashboard')}}</a>
+    <a routerLink="units" routerLinkActive="active" *ngIf="can('units.view')"><i class="bx bx-buildings"></i>{{lang.t('units')}}</a>
+    <a routerLink="plans" routerLinkActive="active" *ngIf="can('plans.view')"><i class="bx bx-calendar-check"></i>{{lang.t('plans')}}</a>
+    <a routerLink="opportunities" routerLinkActive="active" *ngIf="can('opportunities.view')"><i class="bx bx-briefcase"></i>{{lang.t('opportunities')}}</a>
+    <a routerLink="products" routerLinkActive="active" *ngIf="can('products.view')"><i class="bx bx-package"></i>{{lang.t('products')}}</a>
+    <a routerLink="meetings" routerLinkActive="active" *ngIf="can('meetings.view')"><i class="bx bx-calendar"></i>{{lang.t('meetings')}}</a>
+    <a routerLink="development" routerLinkActive="active" *ngIf="can('development.view')"><i class="bx bx-trending-up"></i>{{lang.t('development')}}</a>
+    <a routerLink="leads" routerLinkActive="active" *ngIf="can('leads.view')"><i class="bx bx-network-chart"></i>{{lang.t('leads')}}</a>
+    <a routerLink="recruitment" routerLinkActive="active" *ngIf="can('recruitment.view')"><i class="bx bx-user-plus"></i>{{lang.t('recruitment')}}</a>
+    <a routerLink="procurement" routerLinkActive="active" *ngIf="can('procurement.view')"><i class="bx bx-cart"></i>{{lang.t('procurement')}}</a>
+    <a routerLink="events" routerLinkActive="active" *ngIf="can('events.view')"><i class="bx bx-calendar-star"></i>{{lang.t('events')}}</a>
+    <a routerLink="documents" routerLinkActive="active" *ngIf="can('documents.view')"><i class="bx bx-folder-open"></i>{{lang.t('documents')}}</a>
+    <a routerLink="directory" routerLinkActive="active" *ngIf="can('directory.view')"><i class="bx bx-id-card"></i>{{lang.t('directory')}}</a>
+    <a routerLink="access" routerLinkActive="active" *ngIf="can('roles.manage')"><i class="bx bx-shield-quarter"></i>{{lang.t('accessRoles')}}</a>
+    <a routerLink="reports" routerLinkActive="active" *ngIf="can('reports.view')"><i class="bx bx-file"></i>{{lang.t('reports')}}</a>
   </nav>
   <main class="bms-content"><router-outlet></router-outlet></main>
 </div>

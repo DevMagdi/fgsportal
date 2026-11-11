@@ -85,6 +85,7 @@ class WeeklyPlanController extends BmsController
         $this->access->authorizeUnit($plan->business_unit_id);
         abort_if($plan->status==='submitted',422,'A submitted weekly plan is read-only.');
         $data=$this->taskData($request);
+        if(($data['status']??'in_progress')==='achieved'&&empty($data['completion_date']))$data['completion_date']=today();
         $task=$plan->tasks()->create($data+['business_unit_id'=>$plan->business_unit_id,'updated_by'=>$this->access->user()->id]);
         $this->audit->record($task,'task.created',[],$task->toArray());
         return $this->ok($task->load('owner'),'Task created',201);
@@ -95,6 +96,8 @@ class WeeklyPlanController extends BmsController
         $this->access->authorizeUnit($task->business_unit_id);
         if (!$this->access->can('tasks.manage')) abort_unless($task->owner_id===$this->access->user()->id,403,'You can only update your own tasks.');
         $data=$this->taskData($request,false);
+        if(($data['status']??$task->status)==='achieved'&&empty($task->completion_date)&&empty($data['completion_date']))$data['completion_date']=today();
+        if(($data['status']??null)&&$data['status']!=='achieved')$data['completion_date']=null;
         $old=$task->only(array_keys($data)); $data['updated_by']=$this->access->user()->id;
         $task->update($data);
         $this->audit->record($task,'task.updated',$old,$task->only(array_keys($data)));
@@ -135,7 +138,7 @@ class WeeklyPlanController extends BmsController
         return $request->validate([
             'title'=>($creating?'required':'sometimes').'|string|max:200','description'=>'nullable|string',
             'owner_id'=>'nullable|exists:users,id','status'=>['sometimes',Rule::in(['achieved','in_progress','not_done'])],
-            'progress'=>'sometimes|integer|min:0|max:100','blockers'=>'nullable|string','due_date'=>'nullable|date',
+            'progress'=>'sometimes|integer|min:0|max:100','blockers'=>'nullable|string','due_date'=>'nullable|date','completion_date'=>'nullable|date',
         ]);
     }
 }

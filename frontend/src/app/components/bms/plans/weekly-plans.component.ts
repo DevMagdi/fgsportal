@@ -25,7 +25,10 @@ export class WeeklyPlansComponent extends BmsBaseComponent implements OnInit {
   updateSupport(support:any):void{this.api.put(`support-requests/${support.id}`,{status:support.status,response:support.response}).subscribe({next:()=>this.saved(),error:e=>this.showError(e)});}
   submit():void{this.api.post<any>(`weekly-plans/${this.selected.id}/submit`).subscribe({next:data=>{this.report=data;this.saved();this.load();},error:e=>this.showError(e)});}
   generateReport():void{this.api.get<any>(`weekly-plans/${this.selected.id}/sunday-report`).subscribe({next:data=>this.report=data,error:e=>this.showError(e)});}
-  private rows():any[]{return (this.report?.tasks||[]).map((t:any)=>({Task:t.title,Owner:t.owner?.username,Status:t.status,Progress:`${t.progress}%`,Blockers:t.blockers,DueDate:t.due_date}));}
+  exportPlansExcel():void{this.exporter.excel([{name:'Weekly plans',rows:this.planRows()}],'bms-weekly-plans');}
+  exportPlansPdf():void{this.exporter.pdf(this.lang.t('plans'),this.planRows(),'bms-weekly-plans');}
+  private planRows():any[]{return this.plans.map(p=>({Unit:p.unit?.name,WeekStart:p.week_start,Status:p.status,Objectives:p.objectives,NextWeekPlan:p.next_week_plan,Tasks:p.tasks?.length||0,SupportRequests:p.support_requests?.length||0,SubmittedAt:p.submitted_at}));}
+  private rows():any[]{return (this.report?.tasks||[]).map((t:any)=>({Task:t.title,Owner:t.owner?.username,Status:t.status,Progress:`${t.progress}%`,Blockers:t.blockers,DueDate:t.due_date,CompletionDate:t.completion_date}));}
   exportExcel():void{this.exporter.excel([{name:'Sunday tasks',rows:this.rows()},{name:'Support requests',rows:(this.report?.support_requests||[]).map((s:any)=>({Title:s.title,Department:s.department?.department_name,Status:s.status,Details:s.details,Response:s.response}))}],`sunday-report-${this.report.unit.slug}-${String(this.report.week_start).slice(0,10)}`);}
   exportPdf():void{this.exporter.pdf(`Sunday report - ${this.report.unit.name} - ${String(this.report.week_start).slice(0,10)}`,this.rows(),`sunday-report-${this.report.unit.slug}`);}
 }

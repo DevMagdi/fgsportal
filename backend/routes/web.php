@@ -22,10 +22,10 @@ Route::get('/', function () {
 Route::get('/cron', function(){
     $a= App\Models\PhoneType::create(['phone_type'=>'ahmed']);
     return 'da';
-});   
-   
+});
+
 Route::get('/cleareverything', function () {
-    
+
     $clearcache = Artisan::call('cache:clear');
     echo "Cache cleared<br>";
 
@@ -38,10 +38,11 @@ Route::get('/cleareverything', function () {
 });
 
 Route::get('/startserver', function () {
-    
+
     $clearcache = Artisan::call('clear-compiled');
     echo "Cache cleared<br>";
 
 
 });
- 
+
+Route::get('/bms/meeting-response/{token}/{response}', \App\Http\Controllers\BMS\PublicMeetingResponseController::class)->name('bms.meeting.response');
