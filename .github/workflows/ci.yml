@@ -41,7 +41,14 @@ jobs:
           php artisan jwt:secret
       - name: Test SQLite with coverage
         working-directory: backend
-        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+        shell: bash
+        run: |
+          set +e
+          vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml > test-output.txt 2>&1
+          status=$?
+          cat test-output.txt
+          if [ "$status" -ne 0 ]; then tail -n 60 test-output.txt | sed 's/^/::error::/'; fi
+          exit "$status"
       - name: Test MySQL 8
         working-directory: backend
         run: vendor/bin/phpunit -c phpunit.mysql.xml
