@@ -124,7 +124,6 @@ class OpportunityController extends BmsController
 
     public function alerts()
     {
-        $this->generateAlerts();
         return $this->ok(\App\Models\BMS\BmsAlert::with('opportunity:id,reference,title,stage,owner_id')->where('user_id',$this->access->user()->id)->whereNull('read_at')->latest()->get());
     }
 
@@ -256,16 +255,6 @@ class OpportunityController extends BmsController
     {
         if($opportunity->business_unit_id)$this->access->authorizeUnit((int)$opportunity->business_unit_id);
         else abort_unless($opportunity->owner_id===$this->access->user()->id||$this->access->hasGlobalUnitScope(),403);
-    }
-    private function generateAlerts():void
-    {
-        $stale=Opportunity::whereNotIn('stage',['won','lost','declined'])->where(function($q){$q->where('last_update_at','<',now()->subDays(config('bms.opportunity_no_update_days')))->orWhereDate('expected_close_date','<',today());})->get();
-        $coordinators=\App\Models\User::whereHas('bmsRoles',fn($q)=>$q->whereIn('slug',['coordinator','system_admin']))->pluck('users.id');
-        foreach($stale as $opportunity){
-            $type=$opportunity->expected_close_date&&$opportunity->expected_close_date->isBefore(today())?'delayed':'no_update';
-            $message=$type==='delayed'?'Opportunity deadline passed: '.$opportunity->title:'No opportunity update for '.config('bms.opportunity_no_update_days').' days: '.$opportunity->title;
-            foreach($coordinators->merge([$opportunity->owner_id])->filter()->unique() as $userId)\App\Models\BMS\BmsAlert::firstOrCreate(['bms_opportunity_id'=>$opportunity->id,'user_id'=>$userId,'alert_type'=>$type],['message'=>$message]);
-        }
     }
     private function reference(): string { return 'BMS-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)); }
 
