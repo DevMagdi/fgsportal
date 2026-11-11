@@ -38,7 +38,10 @@ class P05OpportunityAlertsTest extends BmsTestCase
         Carbon::setTestNow(now()->addDays(3));
         Artisan::call('bms:generate-alerts');
         $this->assertSame(2, $alert->fresh()->occurrences);
-        Notification::assertSentTo($coordinator, BmsNotification::class);
+        Notification::assertSentTo($coordinator, BmsNotification::class, function (BmsNotification $notification) use ($coordinator) {
+            return $notification->via($coordinator) === ['database', 'mail']
+                && $notification instanceof \Illuminate\Contracts\Queue\ShouldQueue;
+        });
 
         $opportunity->update(['last_update_at' => now()]);
         Artisan::call('bms:generate-alerts');

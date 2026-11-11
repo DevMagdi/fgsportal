@@ -49,9 +49,20 @@ jobs:
           cat test-output.txt
           if [ "$status" -ne 0 ]; then echo "::error::PHPUNIT_BASE64=$(tail -n 120 test-output.txt | base64 -w0)"; fi
           exit "$status"
+      - name: Report SQLite test summary
+        if: success()
+        working-directory: backend
+        run: echo "::notice::SQLITE_$(grep -E '^(OK|Tests:)' test-output.txt | tail -n 1)"
       - name: Test MySQL 8
         working-directory: backend
-        run: vendor/bin/phpunit -c phpunit.mysql.xml
+        shell: bash
+        run: |
+          set +e
+          vendor/bin/phpunit -c phpunit.mysql.xml > mysql-test-output.txt 2>&1
+          status=$?
+          cat mysql-test-output.txt
+          if [ "$status" -ne 0 ]; then echo "::error::MYSQL_BASE64=$(tail -n 80 mysql-test-output.txt | base64 -w0)"; else echo "::notice::MYSQL_$(grep -E '^(OK|Tests:)' mysql-test-output.txt | tail -n 1)"; fi
+          exit "$status"
       - name: Lint BMS PHP
         working-directory: backend
         run: composer lint
