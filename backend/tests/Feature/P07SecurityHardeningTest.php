@@ -15,7 +15,7 @@ class P07SecurityHardeningTest extends BmsTestCase
     public function test_P0_7_cors_allow_list_preflight_and_security_headers(): void
     {
         config(['bms.cors_allowed_origins' => ['https://bms.example.test']]);
-        $this->options('/api/bms/units', [
+        $this->optionsJson('/api/bms/units', [], [
             'Origin' => 'https://bms.example.test',
             'Access-Control-Request-Method' => 'GET',
         ])->assertNoContent()
@@ -23,7 +23,7 @@ class P07SecurityHardeningTest extends BmsTestCase
             ->assertHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Accept, X-Requested-With')
             ->assertHeader('X-Content-Type-Options', 'nosniff');
 
-        $this->options('/api/bms/units', [
+        $this->optionsJson('/api/bms/units', [], [
             'Origin' => 'https://attacker.example', 'Access-Control-Request-Method' => 'GET',
         ])->assertNoContent()->assertHeaderMissing('Access-Control-Allow-Origin');
 

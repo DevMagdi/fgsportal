@@ -139,7 +139,8 @@ class P08CoreEndpointCoverageTest extends BmsTestCase
             if (!str_starts_with($route->uri(), 'api/bms')) continue;
             $uri = preg_replace('/\{[^}]+\}/', '1', $route->uri());
             foreach (array_diff($route->methods(), ['HEAD', 'OPTIONS']) as $method) {
-                $this->json($method, '/'.$uri, [], $this->jwtHeaders($admin))->assertForbidden();
+                $response = $this->json($method, '/'.$uri, [], $this->jwtHeaders($admin));
+                $this->assertSame(403, $response->getStatusCode(), "{$method} {$uri}");
                 $checked++;
             }
         }
