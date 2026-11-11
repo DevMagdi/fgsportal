@@ -111,6 +111,7 @@ class WeeklyPlanController extends BmsController
         $data=$request->validate(['department_id'=>'required|exists:departments,id','title'=>'required|string|max:200','details'=>'required|string']);
         $support=$plan->supportRequests()->create($data+['business_unit_id'=>$plan->business_unit_id,'requested_by'=>$this->access->user()->id,'status'=>'pending']);
         $this->audit->record($support,'support.created',[],$support->toArray());
+        app(\App\Services\BMS\BmsNotifier::class)->notifyDepartment((int)$support->department_id,'support.created','New support request',$support->title);
         return $this->ok($support->load(['department','requester']),'Support request created',201);
     }
 
@@ -131,6 +132,7 @@ class WeeklyPlanController extends BmsController
         }
         $support->update($data);
         $this->audit->record($support,'support.status_changed',$old,$support->only(array_keys($data)));
+        app(\App\Services\BMS\BmsNotifier::class)->notify([$support->requester],'support.responded','Support request updated: '.$support->status,$support->title);
         return $this->ok($support->load(['department','requester','responder']));
     }
 

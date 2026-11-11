@@ -21,13 +21,18 @@ class EventController extends BmsController
         $event=PrEvent::create($data+['requested_by'=>$this->access->user()->id]);
         foreach(['Photography','Social media announcement','Visitor entry','Parking','Visitor exit'] as $title)$event->checklist()->create(['title'=>$title]);
         $this->audit->record($event,'event.requested',[],$event->toArray());
+        app(\App\Services\BMS\BmsNotifier::class)->notifyRoles(['pr_marketing'],'event.created','New event request',$event->title);
+        app(\App\Services\BMS\BmsNotifier::class)->notifyRoles(['pr_marketing'],'event.created','New event request',$event->title);
         return $this->ok($this->load($event),'Event routed to PR',201);
     }
     public function update(Request $request,PrEvent $event)
     {
         $this->authorizeEvent($event);
         $data=$this->data($request,false);$old=$event->only(array_keys($data));$event->update($data);
-        $this->audit->record($event,'event.updated',$old,$event->only(array_keys($data)));return $this->ok($this->load($event));
+        $this->audit->record($event,'event.updated',$old,$event->only(array_keys($data)));
+        if(($data['status']??null)==='completed')app(\App\Services\BMS\BmsNotifier::class)->notify([$event->requester],'event.completed','Event completed',$event->title);
+        if(($data['status']??null)==='completed')app(\App\Services\BMS\BmsNotifier::class)->notify([$event->requester],'event.completed','Event completed',$event->title);
+        return $this->ok($this->load($event));
     }
     public function checklist(Request $request,EventChecklistItem $item)
     {

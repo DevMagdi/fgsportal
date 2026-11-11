@@ -24,6 +24,7 @@ class RecruitmentController extends BmsController
         $this->access->authorizeUnit((int)$data['business_unit_id']);
         $hiring=HiringRequest::create($data+['requested_by'=>$this->access->user()->id,'status'=>'submitted']);
         $this->audit->record($hiring,'hiring.submitted',[],$hiring->toArray());
+        app(\App\Services\BMS\BmsNotifier::class)->notifyRoles(['coordinator'],'recruitment.created','New hiring request',$hiring->job_title);
         return $this->ok($this->load($hiring),'Hiring request routed to Coordinator',201);
     }
     public function update(Request $request,HiringRequest $hiring)
@@ -70,7 +71,13 @@ class RecruitmentController extends BmsController
             \App\Models\User::findOrFail($data['employee_id'])->businessUnits()->syncWithoutDetaching([$hiring->business_unit_id]);
             $hiring->update(['status'=>'hired','first_working_day'=>$data['first_working_day']]);
             $items=[['department'=>'IT','title'=>'Create official email'],['department'=>'IT','title'=>'Prepare laptop'],['department'=>'PR','title'=>'Create employee directory entry'],['department'=>'HR','title'=>'Complete employee records']];
-            foreach($items as $item)$hiring->onboarding()->create($item+['employee_id'=>$data['employee_id']]);
+            foreach($items as $item){
+                $hiring->onboarding()->create($item+['employee_id'=>$data['employee_id']]);
+                $department=\App\Models\SubDepartment::whereHas('departments_id_fun',function($query)use($item){
+                    $query->where('department_name','like','%'.$item['department'].'%');
+                })->value('departments_id');
+                if($department)app(\App\Services\BMS\BmsNotifier::class)->notifyDepartment((int)$department,'onboarding.created','New onboarding task: '.$item['title'],$hiring->job_title);
+            }
             $this->audit->record($hiring,'candidate.hired',[],$hiring->toArray());
         });
         return $this->ok($this->load($hiring->fresh()),'Hiring completed; onboarding started');

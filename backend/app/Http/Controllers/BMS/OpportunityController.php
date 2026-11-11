@@ -97,6 +97,7 @@ class OpportunityController extends BmsController
             $recipients=\App\Models\User::whereHas('bmsRoles',fn($q)=>$q->whereIn('slug',['operations','coordinator','system_admin']))->pluck('users.id')->merge([$opportunity->created_by,$opportunity->owner_id])->filter()->unique();
             foreach($recipients as $userId)\App\Models\BMS\BmsAlert::updateOrCreate(['bms_opportunity_id'=>$opportunity->id,'user_id'=>$userId,'alert_type'=>'decision'],['message'=>'Alpha Delta decision '.$data['decision'].': '.$opportunity->title,'read_at'=>null]);
             $this->audit->record($opportunity,'opportunity.go_no_go',$old,$opportunity->only(['go_no_go','decision_reason','decided_by','decided_at','stage']),$data['reason']);
+            app(\App\Services\BMS\BmsNotifier::class)->notify([$opportunity->owner,$opportunity->creator],'opportunity.decision','Opportunity decision: '.$opportunity->go_no_go,$opportunity->title);
         });
         return $this->ok($this->present($opportunity->fresh()->load(['unit','product','owner','decisionMaker','history.user','minutes.meeting'])),'Decision recorded');
     }

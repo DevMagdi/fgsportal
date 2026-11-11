@@ -13,6 +13,15 @@ return [
     'notifications' => [
         'events' => [
             'opportunity.alert' => env('BMS_NOTIFY_OPPORTUNITY_ALERTS', true),
+            'opportunity.decision' => env('BMS_NOTIFY_OPPORTUNITY_DECISION', true),
+            'recruitment.created' => env('BMS_NOTIFY_RECRUITMENT', true),
+            'onboarding.created' => env('BMS_NOTIFY_ONBOARDING', true),
+            'support.created' => env('BMS_NOTIFY_SUPPORT', true),
+            'support.responded' => env('BMS_NOTIFY_SUPPORT_RESPONSE', true),
+            'procurement.created' => env('BMS_NOTIFY_PROCUREMENT', true),
+            'procurement.reviewed' => env('BMS_NOTIFY_PROCUREMENT_REVIEW', true),
+            'event.created' => env('BMS_NOTIFY_EVENT', true),
+            'event.completed' => env('BMS_NOTIFY_EVENT_COMPLETED', true),
         ],
     ],
 ];
