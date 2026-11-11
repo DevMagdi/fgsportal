@@ -34,3 +34,7 @@ MySQL 8, full middleware/IDOR matrix, comprehensive endpoint tests, lint/PHPStan
 ## CI verification update
 
 Run `43106563370`: SQLite PHPUnit **passed**, and MySQL 8 PHPUnit **passed**. The previous run had 72 tests with one B3 failure and one P0-6 error; both were corrected in `3f7196d`. Coverage collection now targets BMS directories instead of loading duplicate legacy controller class names. Backend `composer lint` still fails and PHPStan is consequently not reached. Frontend lint also remains red. P0-6 implementation is Done against its committed tests; the wider B5/B6/P0-7/P0-8/P1/P2/Phase Z checklist is not complete and production remains NO-GO.
+
+## Security and endpoint verification update
+
+CI run `43114330006`: SQLite and MySQL 8 both report `OK (84 tests, 587 assertions)`. P0-6 now tests actual sync-queue notification dispatch and recipient persistence, not a manually inserted notification. P0-7 security controls are implemented with five tests; dependency findings remain documented and therefore P0-7 is Partial. P0-8 added five broad endpoint/entitlement tests and exposed middleware-order and phase-validation defects, but the full per-controller scenario matrix and 85% line-coverage gate remain incomplete. Current BMS line coverage is 52.49%, not a release pass. Production remains NO-GO.
