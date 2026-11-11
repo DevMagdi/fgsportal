@@ -11,15 +11,15 @@ use Tests\BmsTestCase;
 /**
  * STEP 1: the middleware priority change in Kernel.php affects every route. These tests prove that
  * non-BMS routes with implicit model binding keep working for authorised users and keep the correct
- * 401/403/404 order: authentication, then module entitlement, then model binding.
+ * token/403/404 order: authentication, then module entitlement, then model binding.
  */
 class P1KernelRegressionTest extends BmsTestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
-        Route::middleware(['jwt.verify', 'module:crm'])->get('/api/test/crm-lead/{lead}', fn (ContactLead $lead) => response()->json(['name' => $lead->name]));
-        Route::middleware(['jwt.verify'])->get('/api/test/core-lead/{lead}', fn (ContactLead $lead) => response()->json(['name' => $lead->name]));
+        Route::middleware(['jwt.verify', 'module:crm', \Illuminate\Routing\Middleware\SubstituteBindings::class])->get('/api/test/crm-lead/{lead}', fn (ContactLead $lead) => response()->json(['name' => $lead->name]));
+        Route::middleware(['jwt.verify', \Illuminate\Routing\Middleware\SubstituteBindings::class])->get('/api/test/core-lead/{lead}', fn (ContactLead $lead) => response()->json(['name' => $lead->name]));
     }
 
     private function legacyLead(string $name): ContactLead
@@ -54,7 +54,8 @@ class P1KernelRegressionTest extends BmsTestCase
 
         $this->getJson('/api/test/crm-lead/999999', $this->jwtHeaders($user))->assertNotFound();
         $this->getJson('/api/test/core-lead/999999', $this->jwtHeaders($user))->assertNotFound();
-        $this->getJson('/api/test/crm-lead/999999')->assertUnauthorized();
+        // Legacy JwtMiddleware answers a missing token with HTTP 404 and this message (documented quirk).
+        $this->getJson('/api/test/crm-lead/999999')->assertStatus(404)->assertSee('Authorization Token not found');
     }
 
     public function test_P1_S1_module_entitlement_runs_before_binding(): void
@@ -77,7 +78,7 @@ class P1KernelRegressionTest extends BmsTestCase
         ])];
         $employee = $this->actingAsRole('employee', [$unitId]);
 
-        $this->getJson('/api/bms/weekly-plans/'.$plan->id)->assertUnauthorized();
+        $this->getJson('/api/bms/weekly-plans/'.$plan->id)->assertStatus(404)->assertSee('Authorization Token not found');
         $this->getJson('/api/bms/weekly-plans/999999', $this->jwtHeaders($employee))->assertNotFound();
         $this->putJson('/api/bms/weekly-plans/999999', [], $this->jwtHeaders($employee))->assertForbidden();
 
