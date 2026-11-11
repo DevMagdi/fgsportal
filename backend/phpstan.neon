@@ -1,0 +1,10 @@
+parameters:
+    level: 5
+    paths:
+        - app/Http/Controllers/BMS
+        - app/Services/BMS
+        - app/Models/BMS
+        - app/Console/Commands
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+

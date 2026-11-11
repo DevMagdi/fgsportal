@@ -16,8 +16,9 @@ class WeeklyPlanController extends BmsController
         $query=WeeklyPlan::with(['unit','creator:id,username','submitter:id,username','tasks.owner:id,username','supportRequests.department']);
         if ($request->business_unit_id) $query->where('business_unit_id',$request->business_unit_id);
         if ($request->week_start) $query->whereDate('week_start',$request->week_start);
-        if (!$this->access->roles()->contains(fn($r)=>in_array($r->slug,['system_admin','executive','operations'],true))) {
-            $query->whereIn('business_unit_id',$this->access->units());
+        $visibleUnitIds = $this->access->visibleUnitIds();
+        if ($visibleUnitIds !== null) {
+            $query->whereIn('business_unit_id', $visibleUnitIds);
         }
         return $this->ok($query->latest('week_start')->get());
     }

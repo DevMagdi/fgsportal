@@ -20,12 +20,12 @@ class ModulesTableSeederTest extends TestCase
         $this->setUpModuleDatabase();
     }
 
-    public function test_seeder_creates_the_six_sellable_modules_with_correct_slugs(): void
+    public function test_seeder_creates_the_seven_sellable_modules_with_correct_slugs(): void
     {
         $slugs = Module::orderBy('id')->pluck('slug')->all();
 
         $this->assertSame(
-            ['core', 'crm', 'ticketing', 'projects', 'hr', 'admin'],
+            ['bms', 'core', 'crm', 'ticketing', 'projects', 'hr', 'admin'],
             $slugs
         );
     }
@@ -35,7 +35,7 @@ class ModulesTableSeederTest extends TestCase
         $this->assertTrue(Module::where('slug', 'core')->first()->is_core);
 
         $nonCore = Module::where('slug', '!=', 'core')->get();
-        $this->assertCount(5, $nonCore);
+        $this->assertCount(6, $nonCore);
         foreach ($nonCore as $module) {
             $this->assertFalse((bool) $module->is_core, "{$module->slug} must not be core");
             $this->assertTrue((bool) $module->is_active, "{$module->slug} must be globally active");
@@ -47,7 +47,7 @@ class ModulesTableSeederTest extends TestCase
         $company = Company::where('slug', 'default')->first();
         $this->assertNotNull($company);
 
-        $this->assertSame(6, CompanyModule::where('company_id', $company->id)->count());
-        $this->assertSame(6, CompanyModule::where('company_id', $company->id)->where('is_enabled', true)->count());
+        $this->assertSame(7, CompanyModule::where('company_id', $company->id)->count());
+        $this->assertSame(7, CompanyModule::where('company_id', $company->id)->where('is_enabled', true)->count());
     }
 }

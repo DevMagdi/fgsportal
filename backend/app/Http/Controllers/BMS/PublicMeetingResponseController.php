@@ -1,14 +1,67 @@
 <?php
+
 namespace App\Http\Controllers\BMS;
+
 use App\Http\Controllers\Controller;
 use App\Models\BMS\MeetingAttendee;
+use App\Services\BMS\BmsAudit;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
 class PublicMeetingResponseController extends Controller
 {
-    public function __invoke(string $token,string $response)
+    public function show(string $token)
     {
-        abort_unless(in_array($response,['accepted','tentative','declined'],true),404);
-        $attendee=MeetingAttendee::where('response_token',$token)->firstOrFail();
-        $attendee->update(['response'=>$response]);
-        return response('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Alphaiota BMS</title><body style="font-family:sans-serif;background:#F8F6F3;display:grid;place-items:center;min-height:100vh;margin:0"><main style="background:white;padding:36px;border-radius:16px;color:#45436E;text-align:center"><h1>Response recorded</h1><p>Your meeting response: <strong>'.htmlspecialchars($response,ENT_QUOTES,'UTF-8').'</strong></p><p>You may close this page.</p></main></body></html>');
+        $attendee = $this->validAttendee($token);
+
+        return response()->view('bms.meeting-response', [
+            'attendee' => $attendee,
+            'meeting' => $attendee->meeting,
+            'token' => $token,
+        ]);
+    }
+
+    public function store(Request $request, string $token, BmsAudit $audit)
+    {
+        $attendee = $this->validAttendee($token);
+        $data = $request->validate([
+            'response' => ['required', Rule::in(['accepted', 'tentative', 'declined'])],
+        ]);
+
+        abort_if(
+            config('bms.meeting_response_one_time') && $attendee->response_recorded_at !== null,
+            410,
+            'This response link has already been used.'
+        );
+        abort_if(
+            config('bms.meeting_response_changes_until_start') && now()->greaterThanOrEqualTo($attendee->meeting->starts_at),
+            410,
+            'Responses closed when the meeting started.'
+        );
+
+        $old = $attendee->only(['response', 'response_recorded_at']);
+        $attendee->update([
+            'response' => $data['response'],
+            'response_recorded_at' => now(),
+        ]);
+        $audit->record($attendee, 'meeting.public_response_recorded', $old, $attendee->only([
+            'response', 'response_recorded_at',
+        ]));
+
+        return response()->view('bms.meeting-response', [
+            'attendee' => $attendee,
+            'meeting' => $attendee->meeting,
+            'token' => $token,
+            'recorded' => true,
+        ]);
+    }
+
+    private function validAttendee(string $token): MeetingAttendee
+    {
+        $attendee = MeetingAttendee::with('meeting')->where('response_token', $token)->firstOrFail();
+        $expiresAt = $attendee->meeting->ends_at->copy()->addHours((int) config('bms.meeting_response_expiry_hours'));
+        abort_if(now()->greaterThan($expiresAt), 410, 'This response link has expired.');
+
+        return $attendee;
     }
 }

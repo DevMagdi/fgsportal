@@ -14,10 +14,22 @@ class OpportunityController extends BmsController
 
     public function index(Request $request)
     {
+        $request->validate(['go_no_go' => ['nullable', Rule::in(['pending', 'go', 'no_go'])]]);
         $query=Opportunity::with(['unit','product','owner:id,username','creator:id,username','decisionMaker:id,username','history.user:id,username','minutes.meeting'])->latest('last_update_at');
         $query->filter($request->only(['business_unit_id','product_id']));
         $visibleUnits=$this->access->visibleUnitIds();
-        if($visibleUnits!==null)$query->where(function($q)use($visibleUnits){$q->whereIn('business_unit_id',$visibleUnits)->orWhere('owner_id',$this->access->user()->id);});
+        $query->where(function ($scope) use ($visibleUnits) {
+            $scope->where(function ($q) use ($visibleUnits) {
+                if ($visibleUnits === null) {
+                    return;
+                }
+                $q->whereIn('business_unit_id', $visibleUnits)->orWhere('owner_id', $this->access->user()->id);
+            });
+            if ($this->access->can('opportunities.decide')) {
+                $scope->orWhereIn('go_no_go', ['pending', 'go', 'no_go']);
+            }
+        });
+        if ($request->filled('go_no_go')) $query->where('go_no_go', $request->go_no_go);
         if ($request->filled('stage')) $query->where('stage',$request->stage);
         if ($request->filled('alert')) {
             if ($request->alert==='no_update') $query->where('last_update_at','<',now()->subDays(config('bms.opportunity_no_update_days')));
@@ -30,6 +42,7 @@ class OpportunityController extends BmsController
     {
         $data=$this->validateData($request);
         $this->authorizeData($data,true);
+        $data['currency'] = strtoupper($data['currency'] ?? config('bms.default_currency'));
         $data['reference']=$data['reference']??$this->reference();
         $data['created_by']=$this->access->user()->id;
         $data['last_update_at']=now();
@@ -37,6 +50,9 @@ class OpportunityController extends BmsController
             $item=Opportunity::create($data);
             $item->history()->create(['from_stage'=>null,'to_stage'=>$item->stage,'note'=>'Registered in BMS','changed_by'=>$this->access->user()->id]);
             $this->audit->record($item,'opportunity.created',[],$item->toArray());
+            if ($item->go_no_go === 'pending' && in_array($item->type, ['tender', 'project', 'opportunity'], true)) {
+                $this->notifyDecisionMakers($item);
+            }
             return $item;
         });
         return $this->ok($this->present($opportunity->load(['unit','product','owner','history.user','minutes.meeting'])),'Opportunity registered',201);
@@ -44,7 +60,7 @@ class OpportunityController extends BmsController
 
     public function show(Opportunity $opportunity)
     {
-        $this->authorizeOpportunity($opportunity);
+        $this->authorizeOpportunityView($opportunity);
         return $this->ok($this->present($opportunity->load(['unit','product','owner','creator','decisionMaker','history.user','minutes.meeting'])));
     }
 
@@ -67,14 +83,22 @@ class OpportunityController extends BmsController
 
     public function decide(Request $request, Opportunity $opportunity)
     {
-        $this->authorizeOpportunity($opportunity);
+        $this->authorizeOpportunityView($opportunity);
+        abort_if(in_array($opportunity->stage, ['won', 'lost', 'declined'], true), 422, 'A closed opportunity cannot receive a new decision.');
         $data=$request->validate(['decision'=>['required',Rule::in(['go','no_go'])],'reason'=>'required|string|min:3']);
-        $old=$opportunity->only(['go_no_go','decision_reason','decided_by','decided_at']);
-        $opportunity->update(['go_no_go'=>$data['decision'],'decision_reason'=>$data['reason'],'decided_by'=>$this->access->user()->id,'decided_at'=>now(),'last_update_at'=>now()]);
-        $recipients=\App\Models\User::whereHas('bmsRoles',fn($q)=>$q->whereIn('slug',['operations','coordinator','system_admin']))->pluck('users.id')->merge([$opportunity->created_by,$opportunity->owner_id])->filter()->unique();
-        foreach($recipients as $userId)\App\Models\BMS\BmsAlert::updateOrCreate(['bms_opportunity_id'=>$opportunity->id,'user_id'=>$userId,'alert_type'=>'decision'],['message'=>'Alpha Delta decision '.$data['decision'].': '.$opportunity->title,'read_at'=>null]);
-        $this->audit->record($opportunity,'opportunity.go_no_go',$old,$opportunity->only(['go_no_go','decision_reason','decided_by','decided_at']),$data['reason']);
-        return $this->ok($this->present($opportunity->load(['unit','product','owner','decisionMaker','history.user','minutes.meeting'])),'Decision recorded');
+        $old=$opportunity->only(['go_no_go','decision_reason','decided_by','decided_at','stage']);
+        DB::transaction(function () use ($opportunity, $data, $old) {
+            $oldStage = $opportunity->stage;
+            $opportunity->update(['go_no_go'=>$data['decision'],'decision_reason'=>$data['reason'],'decided_by'=>$this->access->user()->id,'decided_at'=>now(),'last_update_at'=>now()]);
+            if ($data['decision'] === 'no_go' && config('bms.no_go_sets_declined')) {
+                $opportunity->update(['stage' => 'declined']);
+                $opportunity->history()->create(['from_stage' => $oldStage, 'to_stage' => 'declined', 'note' => $data['reason'], 'changed_by' => $this->access->user()->id]);
+            }
+            $recipients=\App\Models\User::whereHas('bmsRoles',fn($q)=>$q->whereIn('slug',['operations','coordinator','system_admin']))->pluck('users.id')->merge([$opportunity->created_by,$opportunity->owner_id])->filter()->unique();
+            foreach($recipients as $userId)\App\Models\BMS\BmsAlert::updateOrCreate(['bms_opportunity_id'=>$opportunity->id,'user_id'=>$userId,'alert_type'=>'decision'],['message'=>'Alpha Delta decision '.$data['decision'].': '.$opportunity->title,'read_at'=>null]);
+            $this->audit->record($opportunity,'opportunity.go_no_go',$old,$opportunity->only(['go_no_go','decision_reason','decided_by','decided_at','stage']),$data['reason']);
+        });
+        return $this->ok($this->present($opportunity->fresh()->load(['unit','product','owner','decisionMaker','history.user','minutes.meeting'])),'Decision recorded');
     }
 
     public function uploadDocument(Request $request,Opportunity $opportunity)
@@ -100,7 +124,6 @@ class OpportunityController extends BmsController
 
     public function alerts()
     {
-        $this->generateAlerts();
         return $this->ok(\App\Models\BMS\BmsAlert::with('opportunity:id,reference,title,stage,owner_id')->where('user_id',$this->access->user()->id)->whereNull('read_at')->latest()->get());
     }
 
@@ -124,6 +147,7 @@ class OpportunityController extends BmsController
                 $validator=validator($normalized,$this->rules(null,false));
                 if ($validator->fails()) throw new \InvalidArgumentException(implode(' ',$validator->errors()->all()));
                 $data=$validator->validated();
+                $data['currency'] = strtoupper($data['currency'] ?? config('bms.default_currency'));
                 $this->authorizeData($data);
                 $reference=$data['reference']??null;
                 unset($data['reference']);
@@ -159,7 +183,7 @@ class OpportunityController extends BmsController
             'type'=>['sometimes',Rule::in(['opportunity','tender','project','client','internal','external'])],
             'business_unit_id'=>'nullable|exists:business_units,id','contact_lead_id'=>'nullable|exists:contact_leads,id',
             'product_id'=>'nullable|exists:products,id','owner_id'=>'nullable|exists:users,id',
-            'stage'=>['sometimes',Rule::in(self::STAGES)],'value'=>'nullable|numeric|min:0','currency'=>'sometimes|string|max:10',
+            'stage'=>['sometimes',Rule::in(self::STAGES)],'value'=>'nullable|numeric|min:0','currency'=>['sometimes','string',Rule::in(config('bms.currencies'))],
             'submission_date'=>'nullable|date','expected_close_date'=>'nullable|date','last_update_at'=>'nullable|date','stage_note'=>'nullable|string',
         ];
         if ($withReference) $rules['reference']=['nullable','string','max:80',Rule::unique('bms_opportunities','reference')->ignore($id)];
@@ -201,20 +225,36 @@ class OpportunityController extends BmsController
         if(!empty($data['business_unit_id']))$this->access->authorizeUnit((int)$data['business_unit_id']);
         if($creating)abort_unless($this->access->can('opportunities.manage'),403);
     }
+    private function authorizeOpportunityView(Opportunity $opportunity): void
+    {
+        if ($this->access->can('opportunities.decide') && in_array($opportunity->go_no_go, ['pending', 'go', 'no_go'], true)) {
+            return;
+        }
+        $this->authorizeOpportunity($opportunity);
+    }
+
+    private function notifyDecisionMakers(Opportunity $opportunity): void
+    {
+        $roleIds = \App\Models\BMS\BmsRole::all()->filter(function ($role) {
+            return in_array('opportunities.decide', $role->abilities ?: [], true)
+                || in_array('*', $role->abilities ?: [], true);
+        })->pluck('id');
+        $users = \App\Models\User::whereHas('bmsRoles', function ($query) use ($roleIds) {
+            $query->whereIn('bms_roles.id', $roleIds);
+        })->pluck('users.id');
+        foreach ($users as $userId) {
+            \App\Models\BMS\BmsAlert::updateOrCreate([
+                'bms_opportunity_id' => $opportunity->id,
+                'user_id' => $userId,
+                'alert_type' => 'decision_request',
+            ], ['message' => 'Decision requested: '.$opportunity->title, 'read_at' => null]);
+        }
+    }
+
     private function authorizeOpportunity(Opportunity $opportunity):void
     {
         if($opportunity->business_unit_id)$this->access->authorizeUnit((int)$opportunity->business_unit_id);
         else abort_unless($opportunity->owner_id===$this->access->user()->id||$this->access->hasGlobalUnitScope(),403);
-    }
-    private function generateAlerts():void
-    {
-        $stale=Opportunity::whereNotIn('stage',['won','lost','declined'])->where(function($q){$q->where('last_update_at','<',now()->subDays(config('bms.opportunity_no_update_days')))->orWhereDate('expected_close_date','<',today());})->get();
-        $coordinators=\App\Models\User::whereHas('bmsRoles',fn($q)=>$q->whereIn('slug',['coordinator','system_admin']))->pluck('users.id');
-        foreach($stale as $opportunity){
-            $type=$opportunity->expected_close_date&&$opportunity->expected_close_date->isBefore(today())?'delayed':'no_update';
-            $message=$type==='delayed'?'Opportunity deadline passed: '.$opportunity->title:'No opportunity update for '.config('bms.opportunity_no_update_days').' days: '.$opportunity->title;
-            foreach($coordinators->merge([$opportunity->owner_id])->filter()->unique() as $userId)\App\Models\BMS\BmsAlert::firstOrCreate(['bms_opportunity_id'=>$opportunity->id,'user_id'=>$userId,'alert_type'=>$type],['message'=>$message]);
-        }
     }
     private function reference(): string { return 'BMS-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)); }
 
