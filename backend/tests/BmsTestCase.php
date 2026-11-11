@@ -28,7 +28,7 @@ abstract class BmsTestCase extends TestCase
         parent::setUp();
 
         config([
-            'app.key' => 'base64:'.base64_encode(str_repeat('bms-test-key-32-bytes-long!', 2)),
+            'app.key' => 'base64:YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=',
             'database.default' => env('BMS_TEST_DB_CONNECTION', 'sqlite'),
             'database.connections.sqlite.database' => ':memory:',
             'database.connections.sqlite.foreign_key_constraints' => true,
@@ -44,11 +44,13 @@ abstract class BmsTestCase extends TestCase
         foreach ([
             '2026_11_11_000001_create_bms_phase_one_tables.php',
             '2026_11_11_000002_complete_bms_brd_tables.php',
+            '2026_11_11_000004_add_meeting_response_timestamps.php',
         ] as $filename) {
             require_once base_path('database/migrations/'.$filename);
         }
         (new \CreateBmsPhaseOneTables())->up();
         (new \CompleteBmsBrdTables())->up();
+        (new \AddMeetingResponseTimestamps())->up();
 
         (new BmsPhaseOneSeeder())->run();
         $this->enableBmsModule();

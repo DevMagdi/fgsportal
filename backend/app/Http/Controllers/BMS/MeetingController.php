@@ -80,7 +80,7 @@ class MeetingController extends BmsController
                 if(!$attendee->response_token)$attendee->response_token=Str::random(64);
                 $base=\Illuminate\Support\Facades\URL::to('/bms/meeting-response/'.$attendee->response_token);
                 $safeTitle=htmlspecialchars($meeting->title,ENT_QUOTES,'UTF-8');$safeLocation=htmlspecialchars($meeting->location?:'To be confirmed',ENT_QUOTES,'UTF-8');
-                $body="You are invited to {$safeTitle}.<br>Start: {$meeting->starts_at}<br>End: {$meeting->ends_at}<br>Location: {$safeLocation}<br><br><a href=\"{$base}/accepted\">Accept</a> · <a href=\"{$base}/tentative\">Tentative</a> · <a href=\"{$base}/declined\">Decline</a>";
+                $body="You are invited to {$safeTitle}.<br>Start: {$meeting->starts_at}<br>End: {$meeting->ends_at}<br>Location: {$safeLocation}<br><br><a href=\"{$base}\">Review the invitation and choose your response</a>";
                 $ics=$this->calendarInvite($meeting,$attendee);
                 Mail::html($body,function($message)use($email,$name,$meeting,$ics){$message->to($email,$name)->subject('BMS meeting invitation: '.$meeting->title)->attachData($ics,'meeting.ics',['mime'=>'text/calendar; charset=utf-8; method=REQUEST']);});
                 $attendee->update(['delivery_status'=>'sent','invited_at'=>now()]);

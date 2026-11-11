@@ -45,4 +45,7 @@ Route::get('/startserver', function () {
 
 });
 
-Route::get('/bms/meeting-response/{token}/{response}', \App\Http\Controllers\BMS\PublicMeetingResponseController::class)->name('bms.meeting.response');
+Route::middleware('throttle:20,1')->group(function () {
+    Route::get('/bms/meeting-response/{token}/{legacy_response?}', [\App\Http\Controllers\BMS\PublicMeetingResponseController::class, 'show'])->name('bms.meeting.response');
+    Route::post('/bms/meeting-response/{token}', [\App\Http\Controllers\BMS\PublicMeetingResponseController::class, 'store'])->name('bms.meeting.response.store');
+});
