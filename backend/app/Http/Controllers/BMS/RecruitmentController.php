@@ -48,7 +48,7 @@ class RecruitmentController extends BmsController
     {
         $this->access->authorizeUnit($candidate->hiringRequest->business_unit_id);
         abort_unless($candidate->cv_path&&\Illuminate\Support\Facades\Storage::disk('local')->exists($candidate->cv_path),404);
-        return \Illuminate\Support\Facades\Storage::disk('local')->download($candidate->cv_path,$candidate->name.'-CV.'.pathinfo($candidate->cv_path,PATHINFO_EXTENSION));
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($candidate->cv_path,\App\Services\BMS\SafeFilename::forDownload($candidate->name.'-CV.'.pathinfo($candidate->cv_path,PATHINFO_EXTENSION)));
     }
     public function interview(Request $request,Candidate $candidate)
     {

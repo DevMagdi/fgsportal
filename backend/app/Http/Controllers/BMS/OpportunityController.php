@@ -120,7 +120,7 @@ class OpportunityController extends BmsController
     public function downloadDocument(\App\Models\BMS\OpportunityDocument $document)
     {
         $this->authorizeOpportunity($document->opportunity);abort_unless(\Illuminate\Support\Facades\Storage::disk('local')->exists($document->file_path),404);
-        return \Illuminate\Support\Facades\Storage::disk('local')->download($document->file_path,$document->original_name);
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($document->file_path,\App\Services\BMS\SafeFilename::forDownload($document->original_name));
     }
 
     public function alerts()

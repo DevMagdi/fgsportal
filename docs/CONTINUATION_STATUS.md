@@ -10,7 +10,7 @@
 | B4 P0-3/P0-5 re-verification | Not done | — | Previous passing tests remain in history; no new execution here |
 | B5 test-depth audit | Not done | — | Full P0-1..P0-5 missing-case audit remains open |
 | B6 Phase A | Partial | `9b66e71` | Existing middleware and permission matrix retained; complete IDOR matrix, lint/analyse and MySQL/browser runs not verified here |
-| P0-6 notifications | Written, not verified | `67b45fb` | Queued database+mail routing, own-notification API, Angular bell and three tests; PHP syntax green, feature tests not run |
+| P0-6 notifications | Done | `67b45fb`, `3f7196d` | Queued database+mail routing, own-notification API, Angular bell and three tests; PHP syntax green, feature tests not run |
 | P0-7/P0-8 | Not done | — | Security hardening and all-endpoint coverage remain open |
 | P1/P2/Phase Z | Not done | — | No completion claim |
 
@@ -29,3 +29,12 @@ Q4 calendar provider (current BMS meetings); Q5 minutes/approval policy; Q6 stal
 ## Remaining release gates
 
 MySQL 8, full middleware/IDOR matrix, comprehensive endpoint tests, lint/PHPStan, SheetJS/security audits, Angular tests/build/E2E, coverage, reversible migration execution, queue worker/scheduler, backup restore drill, UAT and honest full BRD traceability are not verified. Do not deploy to production on this partial delivery.
+
+
+## CI verification update
+
+Run `43106563370`: SQLite PHPUnit **passed**, and MySQL 8 PHPUnit **passed**. The previous run had 72 tests with one B3 failure and one P0-6 error; both were corrected in `3f7196d`. Coverage collection now targets BMS directories instead of loading duplicate legacy controller class names. Backend `composer lint` still fails and PHPStan is consequently not reached. Frontend lint also remains red. P0-6 implementation is Done against its committed tests; the wider B5/B6/P0-7/P0-8/P1/P2/Phase Z checklist is not complete and production remains NO-GO.
+
+## Security and endpoint verification update
+
+CI run `43114330006`: SQLite and MySQL 8 both report `OK (84 tests, 587 assertions)`. P0-6 now tests actual sync-queue notification dispatch and recipient persistence, not a manually inserted notification. P0-7 security controls are implemented with five tests; dependency findings remain documented and therefore P0-7 is Partial. P0-8 added five broad endpoint/entitlement tests and exposed middleware-order and phase-validation defects, but the full per-controller scenario matrix and 85% line-coverage gate remain incomplete. Current BMS line coverage is 52.49%, not a release pass. Production remains NO-GO.

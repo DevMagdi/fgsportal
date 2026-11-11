@@ -52,7 +52,7 @@ class ProcurementController extends BmsController
         $this->access->authorize('procurement.view');
         abort_unless($this->access->hasGlobalUnitScope()||$quotation->request->requested_by===$this->access->user()->id,403);
         abort_unless($quotation->file_path&&Storage::disk('local')->exists($quotation->file_path),404);
-        return Storage::disk('local')->download($quotation->file_path,$quotation->original_name);
+        return Storage::disk('local')->download($quotation->file_path,\App\Services\BMS\SafeFilename::forDownload($quotation->original_name));
     }
     private function load(ProcurementRequest $item):ProcurementRequest{return $item->load(['unit','requester:id,username','reviewer:id,username','quotations']);}
 }

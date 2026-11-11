@@ -184,7 +184,7 @@ Route::group(['middleware' => [ 'cors','api'],'prefix' => 'clients'], function (
 
   #################################### User Auth#########################################
   Route::post('/logout', [AuthClientController::class, 'logout'])->middleware(['jwt.verify']);
-  Route::post('/login', [AuthClientController::class, 'login']);
+  Route::post('/login', [AuthClientController::class, 'login'])->middleware('throttle:10,1');
   Route::post('/ForgetPasswordClient', [AuthClientController::class, 'ForgetPasswordClient']);
   Route::post('/NewPasswordClient', [AuthClientController::class, 'NewPasswordClient']);
   Route::get('/GetTimeDate', [LogController::class, 'GetTimeDate']);    
@@ -195,7 +195,7 @@ Route::group(['middleware' => [ 'cors','api'],'prefix' => 'users'], function ($r
 
   #################################### User Auth#########################################
   Route::post('/logout', [AuthController::class, 'logout'])->middleware(['jwt.verify']);
-  Route::post('/login', [AuthController::class, 'login']);
+  Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
   Route::post('/ForgetPasswordUser', [AuthController::class, 'ForgetPasswordUser']);
   Route::post('/NewPasswordUser', [AuthController::class, 'NewPasswordUser']);
   

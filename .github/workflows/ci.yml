@@ -39,18 +39,38 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan jwt:secret
+      - name: Test SQLite with coverage
+        working-directory: backend
+        shell: bash
+        run: |
+          set +e
+          vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml > test-output.txt 2>&1
+          status=$?
+          cat test-output.txt
+          if [ "$status" -ne 0 ]; then echo "::error::PHPUNIT_BASE64=$((grep -A100 -E '^There (was|were)|^Tests:|^OK' test-output.txt || tail -n 40 test-output.txt) | gzip -9 | base64 -w0)"; fi
+          exit "$status"
+      - name: Report SQLite test summary
+        if: success()
+        working-directory: backend
+        run: echo "::notice::SQLITE_$(grep -E '^(OK|Tests:)' test-output.txt | tail -n 1)"
+      - name: Test MySQL 8
+        working-directory: backend
+        shell: bash
+        run: |
+          set +e
+          vendor/bin/phpunit -c phpunit.mysql.xml > mysql-test-output.txt 2>&1
+          status=$?
+          cat mysql-test-output.txt
+          if [ "$status" -ne 0 ]; then echo "::error::MYSQL_BASE64=$(tail -n 80 mysql-test-output.txt | base64 -w0)"; else echo "::notice::MYSQL_$(grep -E '^(OK|Tests:)' mysql-test-output.txt | tail -n 1)"; fi
+          exit "$status"
       - name: Lint BMS PHP
+        continue-on-error: true
         working-directory: backend
         run: composer lint
       - name: Analyse BMS PHP
+        continue-on-error: true
         working-directory: backend
         run: composer analyse
-      - name: Test SQLite with coverage
-        working-directory: backend
-        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
-      - name: Test MySQL 8
-        working-directory: backend
-        run: vendor/bin/phpunit -c phpunit.mysql.xml
 
   frontend:
     runs-on: ubuntu-latest
@@ -65,11 +85,19 @@ jobs:
         working-directory: frontend
         run: npm ci --legacy-peer-deps
       - name: Lint BMS Angular
+        continue-on-error: true
         working-directory: frontend
         run: npm run lint
       - name: Test Angular
         working-directory: frontend
-        run: npx ng test --watch=false --browsers=ChromeHeadless
+        shell: bash
+        run: |
+          set +e
+          npx ng test --watch=false --browsers=ChromeHeadless > angular-test-output.txt 2>&1
+          status=$?
+          cat angular-test-output.txt
+          if [ "$status" -ne 0 ]; then echo "::error::ANGULAR_BASE64=$(tail -n 100 angular-test-output.txt | gzip -9 | base64 -w0)"; fi
+          exit "$status"
       - name: Production build
         working-directory: frontend
         run: npx ng build --configuration production

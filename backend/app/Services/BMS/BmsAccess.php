@@ -25,7 +25,7 @@ class BmsAccess
         $user = $user ?: $this->user();
         if (!$user) return false;
         // Existing Management/Administration users administer BMS role assignment.
-        if ($ability === 'roles.manage' && in_array((int) $user->sub_departments_id, [1, 4], true)) return true;
+        if ($ability === 'roles.manage' && in_array((int) $user->sub_departments_id, config('bms.admin_sub_department_ids', [1, 4]), true)) return true;
         return $this->roles($user)->contains(function ($role) use ($ability) {
             $abilities = $role->abilities ?: [];
             return in_array('*', $abilities, true) || in_array($ability, $abilities, true);

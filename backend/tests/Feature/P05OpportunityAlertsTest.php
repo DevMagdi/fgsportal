@@ -38,7 +38,10 @@ class P05OpportunityAlertsTest extends BmsTestCase
         Carbon::setTestNow(now()->addDays(3));
         Artisan::call('bms:generate-alerts');
         $this->assertSame(2, $alert->fresh()->occurrences);
-        Notification::assertSentTo($coordinator, BmsNotification::class);
+        Notification::assertSentTo($coordinator, BmsNotification::class, function (BmsNotification $notification) use ($coordinator) {
+            return $notification->via($coordinator) === ['database', 'mail']
+                && $notification instanceof \Illuminate\Contracts\Queue\ShouldQueue;
+        });
 
         $opportunity->update(['last_update_at' => now()]);
         Artisan::call('bms:generate-alerts');
@@ -70,6 +73,28 @@ class P05OpportunityAlertsTest extends BmsTestCase
         $outsider = $this->actingAsRole('coordinator');
         $this->getBms('alerts', $outsider)->assertOk()->assertJsonCount(0, 'data');
         $this->putBms('alerts/'.BmsAlert::firstOrFail()->id.'/read', [], $outsider)->assertForbidden();
+    }
+
+    public function test_P0_5_stale_and_renotification_intervals_are_configurable(): void
+    {
+        Notification::fake();
+        Carbon::setTestNow('2026-11-11 08:00:00');
+        config(['bms.opportunity_no_update_days' => 10, 'bms.alert_renotify_days' => 5]);
+        $coordinator = $this->actingAsRole('coordinator');
+        $opportunity = $this->opportunity($coordinator->id, now()->copy()->subDays(9));
+        Artisan::call('bms:generate-alerts');
+        $this->assertSame(0, BmsAlert::count());
+
+        $opportunity->update(['last_update_at' => now()->copy()->subDays(10)]);
+        Artisan::call('bms:generate-alerts');
+        $alert = BmsAlert::where('alert_type', 'no_update')->firstOrFail();
+        $this->assertSame(1, $alert->occurrences);
+        Carbon::setTestNow(now()->addDays(4));
+        Artisan::call('bms:generate-alerts');
+        $this->assertSame(1, $alert->fresh()->occurrences);
+        Carbon::setTestNow(now()->addDay());
+        Artisan::call('bms:generate-alerts');
+        $this->assertSame(2, $alert->fresh()->occurrences);
     }
 
     private function opportunity(int $ownerId, Carbon $updatedAt): Opportunity

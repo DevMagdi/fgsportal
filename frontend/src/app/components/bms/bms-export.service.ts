@@ -1,19 +1,26 @@
 import { Injectable } from '@angular/core';
+import { Workbook } from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
 
 @Injectable()
 export class BmsExportService {
   excel(sheets: { name: string, rows: any[] }[], filename: string): void {
-    const book = XLSX.utils.book_new();
+    void this.writeExcel(sheets, filename);
+  }
+
+  private async writeExcel(sheets: { name: string, rows: any[] }[], filename: string): Promise<void> {
+    const book = new Workbook();
     sheets.forEach(sheet => {
       const rows = sheet.rows.length ? sheet.rows : [{ Message: 'No data' }];
-      const worksheet = XLSX.utils.json_to_sheet(rows);
-      worksheet['!cols'] = Object.keys(rows[0]).map(() => ({ wch: 24 }));
-      (worksheet as any)['!views'] = [{ rightToLeft: /[\u0600-\u06FF]/.test(JSON.stringify(rows)) }];
-      XLSX.utils.book_append_sheet(book, worksheet, sheet.name.substring(0, 31));
+      const worksheet = book.addWorksheet(sheet.name.substring(0, 31), {
+        views: [{ rightToLeft: /[\u0600-\u06FF]/.test(JSON.stringify(rows)) }],
+      });
+      worksheet.columns = Object.keys(rows[0]).map(key => ({ header: key, key, width: 24 }));
+      rows.forEach(row => worksheet.addRow(row));
     });
-    XLSX.writeFile(book, `${filename}.xlsx`);
+    const buffer = await book.xlsx.writeBuffer();
+    saveAs(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${filename}.xlsx`);
   }
 
   /** Browser-rendered PDF preserves Arabic shaping and RTL instead of Helvetica placeholders. */
