@@ -24,7 +24,7 @@
     height: 3rem;
     border-radius: 0.6rem;
     background-color: rgba(105, 108, 255, 0.1);
-    color: #696cff;
+    color: #45436E;
     font-size: 1.5rem;
 
     &--disabled {
@@ -41,7 +41,7 @@
   &--disabled {
     opacity: 0.6;
     filter: grayscale(70%);
-    background-color: #f5f6fa;
+    background-color: #F5F3F0;
     cursor: not-allowed;
 
     &:hover,
@@ -64,3 +64,10 @@
     font-weight: 500;
   }
 }
+
+.modules-brand { display:flex;align-items:center;gap:16px;color:#45436E; }
+.modules-brand img { width:58px;height:58px;filter:drop-shadow(0 7px 14px rgba(69,67,110,.14)); }
+.module-card { border-color:rgba(69,67,110,.14);border-radius:16px;box-shadow:0 8px 28px rgba(42,39,69,.05); }
+.module-card:hover,.module-card:focus-visible { border-color:rgba(69,67,110,.30);box-shadow:0 14px 34px rgba(42,39,69,.10); }
+.module-card__icon { color:#45436E;background:linear-gradient(145deg,rgba(244,152,193,.18),rgba(231,186,237,.24));border-radius:14px; }
+.module-card--core { border-color:rgba(69,67,110,.35); }

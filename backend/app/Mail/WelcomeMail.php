@@ -27,13 +27,13 @@ class WelcomeMail extends Mailable
             $header = 'Dear valued customer,';
             $message = ' We would like to extend a warm welcome to our support center. We are dedicated to providing you with the best possible service and assistance. 
             Whether you have a question about our products or services, or need help troubleshooting an issue, our team is here to help.';
-            $URL = 'https://connect.firstgulfsolutions.com';
+            $URL = 'https://connect.alphaiota.com.sa';
             
             
         }else{
             $header = 'Dear Employee,';
             $message = 'We would like to extend a warm welcome';
-            $URL = 'https://community.firstgulfsolutions.com/';
+            $URL = 'https://community.alphaiota.com.sa/';
         }
      
     }
@@ -46,6 +46,6 @@ class WelcomeMail extends Mailable
     public function build()
     {
 
-        return $this->subject('FGS Support Portal')->markdown('emails.welcomemail');
+        return $this->subject('Alphaiota Support Portal')->markdown('emails.welcomemail');
     }
 }

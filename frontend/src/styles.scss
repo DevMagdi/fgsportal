@@ -1,28 +1,17 @@
-// Custom Theming for Angular Material
+// Alphaiota Angular Material theme.
 @use '@angular/material' as mat;
-// For more information: https://material.angular.io/guide/theming
 @import '@angular/material/theming';
-// Plus imports for other components in your app.
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
 @include mat.core();
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$bms-primary-palette: (50: #fdf0f7, 100: #fad5e8, 200: #f5b9d5, 300: #ef8cbb, 400: #e665a4, 500: #D94691, 600: #c33b82, 700: #B72F76, 800: #98275f, 900: #741c47, A100: #fad5e8, A200: #ef8cbb, A400: #e665a4, A700: #B72F76, contrast: (50: #263453, 100: #263453, 200: #263453, 300: #ffffff, 400: #ffffff, 500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff, A100: #263453, A200: #263453, A400: #ffffff, A700: #ffffff));
-$bms-secondary-palette: (50: #eff9fb, 100: #cceff4, 200: #A9E8F7, 300: #79CFE3, 400: #43c3d6, 500: #20B8CC, 600: #18a3b5, 700: #128B9B, 800: #0e7280, 900: #09545e, A100: #cceff4, A200: #79CFE3, A400: #20B8CC, A700: #128B9B, contrast: (50: #263453, 100: #263453, 200: #263453, 300: #263453, 400: #263453, 500: #ffffff, 600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff, A100: #263453, A200: #263453, A400: #ffffff, A700: #ffffff));
-$fgsPM-primary: mat.define-palette($bms-primary-palette, 500, 100, 700);
-$fgsPM-accent: mat.define-palette($bms-secondary-palette, 500, 100, 700);
-// The warn palette is optional (defaults to red).
-$fgsPM-warn: mat.define-palette(mat.$red-palette);
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
-$fgsPM-theme: mat.define-light-theme((color: (primary: $fgsPM-primary, accent: $fgsPM-accent, warn: $fgsPM-warn, )));
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($fgsPM-theme);
+
+$alphaiota-primary-palette:(50:#F8F6F3,100:#E8E6EF,200:#D5D2E1,300:#B4AFC9,400:#8B87A9,500:#45436E,600:#3B395F,700:#322F53,800:#2A2745,900:#1E1C33,A100:#E7BAED,A200:#DBCEBF,A400:#8B87A9,A700:#45436E,contrast:(50:#2A2745,100:#2A2745,200:#2A2745,300:#2A2745,400:#FFFFFF,500:#FFFFFF,600:#FFFFFF,700:#FFFFFF,800:#FFFFFF,900:#FFFFFF,A100:#2A2745,A200:#2A2745,A400:#FFFFFF,A700:#FFFFFF));
+$alphaiota-accent-palette:(50:#FFF8FB,100:#FDE4EF,200:#F9C9DF,300:#F498C1,400:#ED81B1,500:#E7BAED,600:#D99DDD,700:#B982C2,800:#8D6998,900:#45436E,A100:#FDE4EF,A200:#F498C1,A400:#E7BAED,A700:#8D6998,contrast:(50:#2A2745,100:#2A2745,200:#2A2745,300:#2A2745,400:#2A2745,500:#2A2745,600:#2A2745,700:#FFFFFF,800:#FFFFFF,900:#FFFFFF,A100:#2A2745,A200:#2A2745,A400:#2A2745,A700:#FFFFFF));
+$alphaiota-warn-palette:(50:#FFF5F7,100:#F8DCE4,200:#EEB7C6,300:#DF8CA4,400:#CC6C89,500:#B8506F,600:#A34461,700:#8B3852,800:#712D43,900:#542133,A100:#F8DCE4,A200:#EEB7C6,A400:#CC6C89,A700:#8B3852,contrast:(50:#2A2745,100:#2A2745,200:#2A2745,300:#2A2745,400:#FFFFFF,500:#FFFFFF,600:#FFFFFF,700:#FFFFFF,800:#FFFFFF,900:#FFFFFF,A100:#2A2745,A200:#2A2745,A400:#FFFFFF,A700:#FFFFFF));
+$alphaiota-primary:mat.define-palette($alphaiota-primary-palette,500,100,800);
+$alphaiota-accent:mat.define-palette($alphaiota-accent-palette,300,100,700);
+$alphaiota-warn:mat.define-palette($alphaiota-warn-palette,500,100,700);
+$alphaiota-theme:mat.define-light-theme((color:(primary:$alphaiota-primary,accent:$alphaiota-accent,warn:$alphaiota-warn)));
+@include mat.all-component-themes($alphaiota-theme);
+
 /* You can add global styles to this file, and also import other style files */
 
 @import './app/colors';
@@ -327,3 +316,128 @@ body {
 // @import "~bootstrap/scss/bootstrap";
 // /* Importing Datepicker SCSS file. */
 // @import "~ngx-bootstrap/datepicker/bs-datepicker";
+/* Alphaiota global soft-tech surface system */
+body {
+    background: #F8F6F3;
+    color: #2A2745;
+    letter-spacing: .005em;
+}
+
+h1, h2, h3, h4, h5, h6,
+.mat-toolbar,
+.text-primary,
+.main-color {
+    color: var(--brand-primary) !important;
+}
+
+a { transition: color .2s ease, opacity .2s ease; }
+a:hover { color: var(--brand-primary); }
+
+.btn-primary,
+.btn-primary:focus,
+.mat-raised-button.mat-primary,
+.mat-flat-button.mat-primary,
+.mat-fab.mat-primary,
+.mat-mini-fab.mat-primary {
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 5px 16px rgba(69,67,110,.16);
+}
+
+.btn-primary:hover,
+.mat-raised-button.mat-primary:hover,
+.mat-flat-button.mat-primary:hover {
+    background-color: var(--brand-primary-dark) !important;
+    border-color: var(--brand-primary-dark) !important;
+}
+
+.btn-outline-primary {
+    color: var(--brand-primary);
+    border-color: rgba(69,67,110,.45);
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #FFFFFF;
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.card,
+.mat-card,
+.mat-expansion-panel {
+    border: 1px solid var(--brand-border);
+    border-radius: 16px !important;
+    background: #FFFFFF;
+    box-shadow: var(--brand-shadow);
+}
+
+.table,
+.newTableCustom,
+.newTableCustomDah {
+    color: var(--brand-ink);
+}
+.table thead th,
+.mat-header-cell {
+    color: var(--brand-primary);
+    background: #F5F3F0;
+    border-bottom-color: var(--brand-border) !important;
+}
+.table td,
+.mat-cell,
+.mat-row {
+    border-bottom-color: var(--brand-border) !important;
+}
+.mat-row:hover,
+.table-hover tbody tr:hover {
+    background-color: rgba(231,186,237,.10);
+}
+
+.badge,
+.mat-chip,
+.mat-standard-chip {
+    border-radius: 999px !important;
+    font-weight: 500;
+}
+.badge.bg-primary,
+.mat-chip.mat-primary {
+    background: var(--brand-primary) !important;
+}
+.bg-light,
+.soft-surface {
+    background-color: #F5F3F0 !important;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+    color: rgba(69,67,110,.22);
+}
+.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: var(--brand-primary);
+}
+.mat-checkbox-checked.mat-accent .mat-checkbox-background,
+.mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+    background-color: var(--brand-primary);
+}
+
+.spinner-border,
+.spinner-grow,
+.mat-progress-spinner circle,
+.mat-spinner circle {
+    color: var(--brand-primary);
+    stroke: var(--brand-primary) !important;
+}
+.p-progress-spinner-svg {
+    color: var(--brand-primary) !important;
+}
+
+::selection {
+    color: #2A2745;
+    background: #E7BAED;
+}
+
+footer,
+.app-footer {
+    color: var(--brand-primary);
+    background: #FFFFFF;
+    border-top: 1px solid var(--brand-border);
+}

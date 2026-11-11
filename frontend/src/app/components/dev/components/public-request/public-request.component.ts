@@ -119,8 +119,8 @@ export class PublicRequestComponent implements OnInit {
       newReq.processName = processName;
     }
     if(this.currentUser.department == Department.Business_Development){
-      newReq.processKey = environment.staticFGSProjectKey;
-      newReq.processName = environment.staticFGSProcessKey;
+      newReq.processKey = environment.staticAlphaiotaProjectKey;
+      newReq.processName = environment.staticAlphaiotaProcessKey;
     }
         
     this._db.createPublicRequest(newReq).subscribe(res=>{

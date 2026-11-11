@@ -13,7 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
         <h2 class="mb-3">Module not enabled</h2>
         <p class="text-muted">
           The <strong>{{ moduleSlug }}</strong> module is not enabled for your company.
-          Please contact your administrator or the FGS Connect sales team to enable it.
+          Please contact your administrator or the Alphaiota sales team to enable it.
         </p>
         <div class="d-flex gap-2 justify-content-center mt-3">
           <button class="btn btn-outline-primary" type="button" (click)="browseModules()">Browse all modules</button>

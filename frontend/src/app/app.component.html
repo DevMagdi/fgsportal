@@ -1,12 +1,12 @@
 
 <div *ngIf="loggedIn">
-    <fgs-loading></fgs-loading>
+    <alphaiota-loading></alphaiota-loading>
     <app-navbar></app-navbar>
 </div>
 
 <!-- <app-signin *ngIf="!loggedIn"></app-signin> -->
 <div class="main" *ngIf="!loggedIn">
-    <fgs-loading></fgs-loading>
+    <alphaiota-loading></alphaiota-loading>
     <router-outlet></router-outlet>
 </div>
 

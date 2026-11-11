@@ -19,5 +19,5 @@ export class ExecutiveDashboardComponent extends BmsBaseComponent implements OnI
   unitRows(): any[] { return (this.data.unit_progress||[]).map((u:any)=>({Unit:u.name,Director:u.director?.username,Tasks:u.total,Achieved:u.achieved,InProgress:u.in_progress,NotDone:u.not_done,Blocked:u.blocked,Progress:`${u.progress}%`})); }
   productRows(): any[] { return (this.data.products||[]).map((p:any)=>({Product:p.product_name,Units:(p.business_units||[]).map((u:any)=>u.name).join(', '),CurrentPhase:p.current_phase?.name,Status:p.current_phase?.status,Blockers:p.current_phase?.blockers,DataNeeds:p.current_phase?.data_needs,SupportNeeds:p.current_phase?.support_needs})); }
   excel(): void { this.exporter.excel([{name:'Units',rows:this.unitRows()},{name:'Opportunities',rows:this.opportunityRows()},{name:'Products',rows:this.productRows()}],`executive-dashboard-${new Date().toISOString().slice(0,10)}`); }
-  pdf(): void { this.exporter.pdf('FGS Connect - Unified Executive Dashboard',[...this.unitRows(),...this.opportunityRows(),...this.productRows()],`executive-dashboard-${new Date().toISOString().slice(0,10)}`); }
+  pdf(): void { this.exporter.pdf('Alphaiota - Unified Executive Dashboard',[...this.unitRows(),...this.opportunityRows(),...this.productRows()],`executive-dashboard-${new Date().toISOString().slice(0,10)}`); }
 }

@@ -26,7 +26,7 @@ export class OrgChartComponent implements OnInit {
 
   restructionOrg(){
     this.data1 = [{
-      label: 'FGS',
+      label: 'Alphaiota',
       type: 'person',
       styleClass: 'p-person',
       expanded: true,

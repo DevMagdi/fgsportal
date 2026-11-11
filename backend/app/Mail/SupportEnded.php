@@ -30,6 +30,6 @@ class SupportEnded extends Mailable
      */
     public function build()
     {
-        return $this->subject('FGS Portal')->bcc('ahassan@firstgulfsolutions.com','Technical')->bcc('ataha@firstgulfsolutions.com','Technical')->markdown('emails.support');
+        return $this->subject('Alphaiota Portal')->bcc('ahassan@alphaiota.com.sa','Technical')->bcc('ataha@alphaiota.com.sa','Technical')->markdown('emails.support');
     }
 }

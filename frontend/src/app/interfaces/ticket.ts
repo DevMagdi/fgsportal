@@ -1,5 +1,6 @@
 export enum TicketPendingOn{
-    FGS = 'fgs',
+    // Keep the persisted value unchanged for existing ticket records.
+    Alphaiota = 'fgs',
     CLIENT = 'client'
 }
 

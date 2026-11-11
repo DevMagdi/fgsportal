@@ -1,28 +1,33 @@
-// Brand palette sampled from the magenta → cyan gradient sphere.
-$mainThemeColor:#D94691;
-$subThemeColor:#20B8CC;
-$subSubThemeColor:#79CFE3;
-$softThemeColor:#FDF0F7;
-$borderColor:#E6D8E5;
-$buttonMainBackgroundColor:#20B8CC;
-$buttonSubBackgroundColor:#D94691;
-$buttonSubSubBackgroundColor:#20B8CC;
-$secondFontColor:#667085;
-$grayBackGroundColor:#F6F8FB;
-$whiteColor:#fff;
-$mainFontFamily: 'Cairo', 'Public Sans', sans-serif;
-$softGrayBackGroundColor:#FCFDFE;
-$bgLight:#F7FAFC;
-$tabBackGround:#EFF9FB;
+// Alphaiota — calm, intelligent soft-tech identity.
+$mainThemeColor:#45436E;
+$subThemeColor:#DBCEBF;
+$subSubThemeColor:#E7BAED;
+$softThemeColor:#F5F3F0;
+$borderColor:rgba(69,67,110,.16);
+$buttonMainBackgroundColor:#45436E;
+$buttonSubBackgroundColor:#45436E;
+$buttonSubSubBackgroundColor:#5A577F;
+$secondFontColor:#716D82;
+$grayBackGroundColor:#F8F6F3;
+$whiteColor:#FFFFFF;
+$mainFontFamily:'Cairo','Public Sans',sans-serif;
+$softGrayBackGroundColor:#FFFFFF;
+$bgLight:#F8F6F3;
+$tabBackGround:#F5F3F0;
 
 :root {
-  --brand-primary: #D94691;
-  --brand-primary-dark: #B72F76;
-  --brand-secondary: #20B8CC;
-  --brand-secondary-dark: #128B9B;
-  --brand-accent: #A9E8F7;
-  --brand-ink: #263453;
-  --brand-muted: #71809C;
-  --brand-surface: #F7FAFC;
-  --brand-gradient: linear-gradient(135deg, #D94691 0%, #8D78D5 48%, #20B8CC 100%);
+  --brand-primary:#45436E;
+  --brand-primary-dark:#1E1C33;
+  --brand-secondary:#DBCEBF;
+  --brand-secondary-dark:#45436E;
+  --brand-accent:#F498C1;
+  --brand-lavender:#E7BAED;
+  --brand-beige:#DBCEBF;
+  --brand-ink:#2A2745;
+  --brand-muted:#716D82;
+  --brand-surface:#F8F6F3;
+  --brand-border:rgba(69,67,110,.16);
+  --brand-gradient:linear-gradient(135deg,#F498C1 0%,#E7BAED 48%,#A8DFDC 100%);
+  --brand-indigo-gradient:linear-gradient(135deg,#45436E 0%,#5A577F 100%);
+  --brand-shadow:0 12px 36px rgba(42,39,69,.08);
 }

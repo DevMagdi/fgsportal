@@ -1,6 +1,6 @@
 # Modules — catalogue & client provisioning
 
-FGS Connect is sold as a **core platform plus optional modules**. Each module is
+Alphaiota is sold as a **core platform plus optional modules**. Each module is
 enabled or disabled per **company** (the client/tenant). The Core module is
 always present.
 

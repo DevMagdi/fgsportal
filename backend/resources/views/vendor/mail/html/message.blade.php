@@ -1,8 +1,8 @@
 @component('mail::layout')
 {{-- Header --}}
 @slot('header')
-@component('mail::header', ['url' => "https://www.firstgulfsolutions.com/"])
-First Gulf Solutions
+@component('mail::header', ['url' => "https://www.alphaiota.com.sa/"])
+Alphaiota
 @endcomponent
 @endslot
 

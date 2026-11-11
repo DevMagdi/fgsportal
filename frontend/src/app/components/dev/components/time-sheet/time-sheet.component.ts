@@ -503,8 +503,8 @@ export class TimeSheetComponent implements OnInit {
     //   if(!!this.newReport.projectID){ 
     //     this.newReport.projectName = this.myProjectsList.find(project=>project.key == this.newReport.projectID)?.title
     //   }else{
-    //     this.newReport.projectName = environment.staticFGSProjectTitle;
-    //     this.newReport.projectID = environment.staticFGSProjectKey;
+    //     this.newReport.projectName = environment.staticAlphaiotaProjectTitle;
+    //     this.newReport.projectID = environment.staticAlphaiotaProjectKey;
     //   }
     // }
 
@@ -884,8 +884,8 @@ export class TimeSheetComponent implements OnInit {
     //   if(!!this.newReport.projectID){ 
     //     this.newReport.projectName = this.myProjectsList.find(project=>project.key == this.newReport.projectID)?.title
     //   }else{
-    //     this.newReport.projectName = environment.staticFGSProjectTitle;
-    //     this.newReport.projectID = environment.staticFGSProjectKey;
+    //     this.newReport.projectName = environment.staticAlphaiotaProjectTitle;
+    //     this.newReport.projectID = environment.staticAlphaiotaProjectKey;
     //   }
     // }
 

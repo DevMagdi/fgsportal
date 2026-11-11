@@ -6,7 +6,7 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "fgsPM": {
+        "alphaiota": {
             "projectType": "application",
             "schematics": {
                 "@schematics/angular:component": {
@@ -23,7 +23,7 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:browser",
                     "options": {
-                        "outputPath": "dist/fgsPM",
+                        "outputPath": "dist/alphaiota",
                         "index": "src/index.html",
                         "main": "src/main.ts",
                         "polyfills": "src/polyfills.ts",
@@ -88,10 +88,10 @@
                     "options": {},
                     "configurations": {
                         "production": {
-                            "browserTarget": "fgsPM:build:production"
+                            "browserTarget": "alphaiota:build:production"
                         },
                         "development": {
-                            "browserTarget": "fgsPM:build:development"
+                            "browserTarget": "alphaiota:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -99,7 +99,7 @@
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "browserTarget": "fgsPM:build"
+                        "browserTarget": "alphaiota:build"
                     }
                 },
                 "test": {
@@ -126,10 +126,10 @@
                     },
                     "configurations": {
                         "production": {
-                            "devServerTarget": "fgsPM:serve:production"
+                            "devServerTarget": "alphaiota:serve:production"
                         },
                         "development": {
-                            "devServerTarget": "fgsPM:serve:development"
+                            "devServerTarget": "alphaiota:serve:development"
                         }
                     },
                     "defaultConfiguration": "development"
@@ -140,5 +140,5 @@
             }
         }
     },
-    "defaultProject": "fgsPM"
+    "defaultProject": "alphaiota"
 }

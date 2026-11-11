@@ -201,7 +201,7 @@ class ClientTicketUpdateController extends Controller
 
                          }
                          if(!empty($mailto)){
-                         ///  $mailto = "ataha@firstgulfsolutions.com";
+                         ///  $mailto = "ataha@alphaiota.com.sa";
                          $mailto = $mailto.";";
                              Mail::to($mailto)->send(new TicketUpdate(" ",Auth::guard('client_api')->user()->fullname,$ticket->id,$ticket->title,$request->comment,"Updated","Ticket Updated"));
                          }

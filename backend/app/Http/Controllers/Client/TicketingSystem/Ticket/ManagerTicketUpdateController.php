@@ -137,7 +137,7 @@ class ManagerTicketUpdateController extends Controller
                              }
                              if(!empty($mailto)){
                               $mailto = $mailto . ";";
-                              //  $mailto = "ataha@firstgulfsolutions.com";
+                              //  $mailto = "ataha@alphaiota.com.sa";
                                  Mail::to($mailto)->send(new TicketUpdate(" ",Auth::guard('user_api')->user()->fullname,$ticket->id,$ticket->title,$request->comment,"Updated","Ticket Updated"));
                              }
                             } 

@@ -347,8 +347,8 @@ export class RejectedReportsComponent implements OnInit {
       if(!!this.reportToEdit.projectID){ 
         this.reportToEdit.projectName = this.myProjectsList.find(project=>project.key == this.reportToEdit.projectID)?.title
       }else{
-        this.reportToEdit.projectName = environment.staticFGSProjectTitle;
-        this.reportToEdit.projectID = environment.staticFGSProjectKey;
+        this.reportToEdit.projectName = environment.staticAlphaiotaProjectTitle;
+        this.reportToEdit.projectID = environment.staticAlphaiotaProjectKey;
       }
     }
 

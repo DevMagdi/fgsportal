@@ -31,6 +31,6 @@ class TicketClose extends Mailable
      */
     public function build()
     {
-        return $this->from("support@firstgulfsolutions.com")->bcc('ahassan@firstgulfsolutions.com','Technical')->bcc('ataha@firstgulfsolutions.com','Technical')->subject('FGS Portal')->markdown('emails.ticketclose');
+        return $this->from("support@alphaiota.com.sa")->bcc('ahassan@alphaiota.com.sa','Technical')->bcc('ataha@alphaiota.com.sa','Technical')->subject('Alphaiota Portal')->markdown('emails.ticketclose');
     }
 }

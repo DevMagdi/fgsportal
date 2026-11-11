@@ -100,7 +100,7 @@ export class PendingVacationRequestsComponent implements OnInit {
     //       approvalCycle:annualLeaveApprovalCycle.Finished,
     //       managerDissision:true,
     //       managerDissisionKey:'jjuyajnYK6clqnD7PIMEuQesyiy2',
-    //       managerDissisionName:'FGS',
+    //       managerDissisionName:'Alphaiota',
     //       managerDissisionAt:new Date().toLocaleString(),
     //       hrDissision:true,
     //       hrDissisionKey:this.currenUser.key,

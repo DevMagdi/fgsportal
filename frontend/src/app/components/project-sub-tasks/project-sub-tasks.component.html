@@ -97,7 +97,7 @@
                                                 <p-avatar *ngIf="item.photoURL" [image]="newServerApi+item.photoURL" size="small" shape="circle"></p-avatar>
                                                 <p-avatar *ngIf="!item.photoURL" [image]="'../../../../../assets/img/avatarman.png'" size="small" shape="circle"></p-avatar>
                                             </ng-container>
-                                            <p-avatar *ngIf="projectDetails.BAsTeam!.length>2" label="+{{projectDetails.BAsTeam!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#D94691', 'color': '#ffffff'}"></p-avatar>
+                                            <p-avatar *ngIf="projectDetails.BAsTeam!.length>2" label="+{{projectDetails.BAsTeam!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#45436E', 'color': '#ffffff'}"></p-avatar>
                                         </p-avatarGroup>
                                     </div>
                                     <ng-template #BAsTeam>
@@ -123,7 +123,7 @@
                                             </ng-container>
 
 
-                                            <p-avatar *ngIf="projectDetails.Devs_mempers!.length>2" label="+{{projectDetails.Devs_mempers!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#D94691', 'color': '#ffffff'}"></p-avatar>
+                                            <p-avatar *ngIf="projectDetails.Devs_mempers!.length>2" label="+{{projectDetails.Devs_mempers!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#45436E', 'color': '#ffffff'}"></p-avatar>
                                         </p-avatarGroup>
                                     </div>
                                     <ng-template #Devs_mempers>
@@ -153,7 +153,7 @@
                                             </ng-container>
 
 
-                                            <p-avatar *ngIf="projectDetails.OtherTeam!.length>2" label="+{{projectDetails.OtherTeam!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#D94691', 'color': '#ffffff'}"></p-avatar>
+                                            <p-avatar *ngIf="projectDetails.OtherTeam!.length>2" label="+{{projectDetails.OtherTeam!.length-2}}" shape="circle" size="small" [style]="{'background-color':'#45436E', 'color': '#ffffff'}"></p-avatar>
                                         </p-avatarGroup>
                                     </div>
                                     <ng-template #OtherTeam>

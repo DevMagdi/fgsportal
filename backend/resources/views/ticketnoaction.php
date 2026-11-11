@@ -18,7 +18,7 @@ if ($date1 > $date2 && $date1 < $date3)
           'Access-Control-Allow-Origin: *'
      );
 $ch = curl_init();
-curl_setopt( $ch,CURLOPT_URL, 'https://community.firstgulfsolutions.com/ConnectPortal/FrontEndApi/api/users/Ticketmanagment' );
+curl_setopt( $ch,CURLOPT_URL, 'https://community.alphaiota.com.sa/ConnectPortal/FrontEndApi/api/users/Ticketmanagment' );
 curl_setopt( $ch,CURLOPT_POST, true );
 curl_setopt( $ch,CURLOPT_HTTPHEADER, $headers );
 curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
