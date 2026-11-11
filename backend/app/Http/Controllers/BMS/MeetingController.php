@@ -5,6 +5,7 @@ use App\Models\BMS\Meeting;
 use App\Models\BMS\MeetingAttendee;
 use App\Models\BMS\Minutes;
 use App\Models\User;
+use App\Services\BMS\MeetingInvitations;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -55,40 +56,84 @@ class MeetingController extends BmsController
         return $this->ok($this->load($meeting),'Meeting created',201);
     }
 
-    public function update(Request $request,Meeting $meeting)
+    public function update(Request $request, Meeting $meeting, MeetingInvitations $invitations)
     {
         $this->authorizeMeeting($meeting);
-        $data=$this->meetingData($request,false);
-        $old=$meeting->only(array_keys($data));$meeting->update($data);
-        if($request->has('attendees')) {
-            $meeting->attendees()->delete();
-            foreach($this->attendees($request) as $attendee) $meeting->attendees()->create($attendee);
+        abort_if($meeting->status === 'cancelled', 422, 'A cancelled meeting cannot be changed.');
+        $data = $this->meetingData($request, false);
+        $old = $meeting->only(array_keys($data));
+        $meeting->fill($data);
+        $rescheduled = $meeting->isDirty(['starts_at', 'ends_at', 'location']);
+        if ($rescheduled) {
+            $meeting->sequence = (int) $meeting->sequence + 1;
         }
-        $this->audit->record($meeting,'meeting.updated',$old,$meeting->fresh()->only(array_keys($data)));
+        $meeting->save();
+
+        $added = collect();
+        $removed = collect();
+        if ($request->has('attendees')) {
+            [$added, $removed] = $this->syncAttendees($meeting, $this->attendees($request));
+        }
+        $this->audit->record($meeting, 'meeting.updated', $old, $meeting->fresh()->only(array_keys($data)));
+
+        $meeting->load('attendees.user', 'creator');
+        if ($removed->isNotEmpty()) {
+            $invitations->send($meeting, $removed, 'CANCEL');
+        }
+        $notify = $rescheduled ? $meeting->attendees : $added;
+        if ($notify->isNotEmpty()) {
+            $invitations->send($meeting, $notify, 'REQUEST');
+        }
         return $this->ok($this->load($meeting->fresh()));
     }
 
-    public function invite(Meeting $meeting)
+    public function cancel(Meeting $meeting, MeetingInvitations $invitations)
     {
         $this->authorizeMeeting($meeting);
-        $meeting->load('attendees.user');$deliveries=[];
-        foreach($meeting->attendees as $attendee) {
-            $email=$attendee->external_email?:$attendee->user->email??null;
-            $name=$attendee->external_name?:$attendee->user->username??'Attendee';
-            if(!$email){$attendee->update(['delivery_status'=>'no_email']);$deliveries[]=['id'=>$attendee->id,'status'=>'no_email'];continue;}
-            try {
-                if(!$attendee->response_token)$attendee->response_token=Str::random(64);
-                $base=\Illuminate\Support\Facades\URL::to('/bms/meeting-response/'.$attendee->response_token);
-                $safeTitle=htmlspecialchars($meeting->title,ENT_QUOTES,'UTF-8');$safeLocation=htmlspecialchars($meeting->location?:'To be confirmed',ENT_QUOTES,'UTF-8');
-                $body="You are invited to {$safeTitle}.<br>Start: {$meeting->starts_at}<br>End: {$meeting->ends_at}<br>Location: {$safeLocation}<br><br><a href=\"{$base}\">Review the invitation and choose your response</a>";
-                $ics=$this->calendarInvite($meeting,$attendee);
-                Mail::html($body,function($message)use($email,$name,$meeting,$ics){$message->to($email,$name)->subject('BMS meeting invitation: '.$meeting->title)->attachData($ics,'meeting.ics',['mime'=>'text/calendar; charset=utf-8; method=REQUEST']);});
-                $attendee->update(['delivery_status'=>'sent','invited_at'=>now()]);
-            } catch(\Throwable $e) {$attendee->update(['delivery_status'=>'failed']);}
-            $deliveries[]=['id'=>$attendee->id,'status'=>$attendee->delivery_status];
+        abort_if($meeting->status === 'cancelled', 422, 'The meeting is already cancelled.');
+        $meeting->update(['status' => 'cancelled', 'sequence' => (int) $meeting->sequence + 1]);
+        $meeting->load('attendees.user', 'creator');
+        $invitations->send($meeting, $meeting->attendees, 'CANCEL');
+        $this->audit->record($meeting, 'meeting.cancelled', ['status' => 'scheduled'], ['status' => 'cancelled']);
+        return $this->ok($this->load($meeting->fresh()), 'Meeting cancelled');
+    }
+
+    public function invite(Meeting $meeting, MeetingInvitations $invitations)
+    {
+        $this->authorizeMeeting($meeting);
+        abort_if($meeting->status === 'cancelled', 422, 'A cancelled meeting cannot be invited.');
+        $meeting->load('attendees.user', 'creator');
+        $result = $invitations->send($meeting, $meeting->attendees, 'REQUEST');
+        $deliveries = [];
+        foreach ($result as $id => $status) {
+            $deliveries[] = ['id' => $id, 'status' => $status];
         }
-        $this->audit->record($meeting,'meeting.invitations_sent',[],['deliveries'=>$deliveries]);
-        return $this->ok($this->load($meeting),'Invitation delivery completed');
+        $this->audit->record($meeting, 'meeting.invitations_sent', [], ['deliveries' => $deliveries]);
+        return $this->ok($this->load($meeting), 'Invitation delivery completed');
+    }
+
+    /**
+     * Diff-based sync: keep rows (and their responses) for people who stay,
+     * add new ones, delete the ones that disappeared.
+     * @return array{0:\Illuminate\Support\Collection,1:\Illuminate\Support\Collection} [added, removed]
+     */
+    private function syncAttendees(Meeting $meeting, array $incoming): array
+    {
+        $key = fn($a) => !empty($a['user_id']) ? 'u:' . $a['user_id'] : 'e:' . strtolower((string) ($a['external_email'] ?? ''));
+        $existing = $meeting->attendees()->get()->keyBy(fn($a) => $key($a->only('user_id', 'external_email')));
+        $wanted = collect($incoming)->keyBy($key);
+        $removed = $existing->diffKeys($wanted)->values();
+        foreach ($removed as $attendee) {
+            $attendee->delete();
+        }
+        $added = collect();
+        foreach ($wanted->diffKeys($existing) as $row) {
+            $added->push($meeting->attendees()->create($row));
+        }
+        foreach ($wanted->intersectKeys($existing) as $k => $row) {
+            $existing[$k]->update(array_intersect_key($row, array_flip(['external_name', 'external_email', 'user_id'])));
+        }
+        return [$added->each->load('user'), $removed];
     }
 
     public function respond(Request $request,MeetingAttendee $attendee)
@@ -110,11 +155,6 @@ class MeetingController extends BmsController
         return $this->ok($this->load($meeting->fresh()),'Minutes saved and indexed');
     }
 
-    private function calendarInvite(Meeting $meeting,MeetingAttendee $attendee):string
-    {
-        $escape=fn($value)=>str_replace([chr(92),';',',',"\n"],['\\','\;','\,','\n'],(string)$value);
-        return implode("\r\n",['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alphaiota//BMS//EN','METHOD:REQUEST','BEGIN:VEVENT','UID:bms-meeting-'.$meeting->id.'-'.$attendee->id.'@alphaiota','DTSTAMP:'.now()->utc()->format('Ymd\THis\Z'),'DTSTART:'.$meeting->starts_at->copy()->utc()->format('Ymd\THis\Z'),'DTEND:'.$meeting->ends_at->copy()->utc()->format('Ymd\THis\Z'),'SUMMARY:'.$escape($meeting->title),'LOCATION:'.$escape($meeting->location),'STATUS:CONFIRMED','END:VEVENT','END:VCALENDAR']);
-    }
     private function meetingData(Request $request,bool $creating=true):array
     {
         return $request->validate(['title'=>($creating?'required':'sometimes').'|string|max:200','business_unit_id'=>'nullable|exists:business_units,id','starts_at'=>($creating?'required':'sometimes').'|date','ends_at'=>($creating?'required':'sometimes').'|date|after:starts_at','meeting_type'=>['sometimes',Rule::in(['internal','external'])],'location'=>'nullable|string|max:250','status'=>['sometimes',Rule::in(['scheduled','completed','cancelled'])]]);
