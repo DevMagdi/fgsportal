@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ActivityFormComponent } from './activity-form.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ActivityFormComponent', () => {
   let component: ActivityFormComponent;
@@ -8,6 +9,7 @@ describe('ActivityFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ ActivityFormComponent ]
     })
     .compileComponents();

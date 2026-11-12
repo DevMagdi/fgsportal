@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { IncentiveHistoryComponent } from './incentive-history.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('IncentiveHistoryComponent', () => {
   let component: IncentiveHistoryComponent;
@@ -8,6 +9,7 @@ describe('IncentiveHistoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ IncentiveHistoryComponent ]
     })
     .compileComponents();

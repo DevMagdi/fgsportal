@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UserAnnualLeaveComponent } from './user-annual-leave.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('UserAnnualLeaveComponent', () => {
   let component: UserAnnualLeaveComponent;
@@ -8,6 +9,7 @@ describe('UserAnnualLeaveComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [MatSnackBarModule],
       declarations: [ UserAnnualLeaveComponent ]
     })
     .compileComponents();

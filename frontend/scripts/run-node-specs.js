@@ -53,7 +53,7 @@ const failures = [];
 let passCount = 0;
 
 function describe(name, fn) {
-  const suite = { name, specs: [], parent: currentSuite };
+  const suite = { name, specs: [], parent: currentSuite, beforeEach: [], afterEach: [] };
   suites.push(suite);
   const previous = currentSuite;
   currentSuite = suite;
@@ -275,6 +275,11 @@ function run() {
     currentSuite.beforeEach = currentSuite.beforeEach || [];
     currentSuite.beforeEach.push(fn);
   };
+  global.afterEach = (fn) => {
+    if (!currentSuite) throw new Error('afterEach outside describe()');
+    currentSuite.afterEach = currentSuite.afterEach || [];
+    currentSuite.afterEach.push(fn);
+  };
   global.createSpy = createSpy;
 
   for (const specFile of specs) {
@@ -296,6 +301,15 @@ function run() {
         } catch (error) {
           failures.push({ file: rel, suite: suite.name, spec: spec.name, error });
           console.log(`  ✗ ${suite.name} > ${spec.name}`);
+        } finally {
+          for (const fn of [...(suite.afterEach || [])].reverse()) {
+            try {
+              fn();
+            } catch (error) {
+              failures.push({ file: rel, suite: suite.name, spec: spec.name, error });
+              console.log(`  ✗ ${suite.name} > ${spec.name} (afterEach)`);
+            }
+          }
         }
       }
     }

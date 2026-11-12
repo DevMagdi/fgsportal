@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ForgetpassowrdComponent } from './forgetpassowrd.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ForgetpassowrdComponent', () => {
   let component: ForgetpassowrdComponent;
@@ -8,6 +9,7 @@ describe('ForgetpassowrdComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ ForgetpassowrdComponent ]
     })
     .compileComponents();

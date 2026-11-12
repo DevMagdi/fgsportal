@@ -74,7 +74,7 @@ describe('ModuleService', () => {
     service.loadEnabledModules().subscribe((slugs) => (result = slugs));
 
     const req = httpMock.expectOne(
-      (r) => r.url === `${environment.newServerApi}/api/company/modules`
+      (r) => r.urlWithParams === `${environment.newServerApi}/api/company/modules?token=jwt-token`
     );
     expect(req.request.params.get('token')).toBe('jwt-token');
 
@@ -100,7 +100,7 @@ describe('ModuleService', () => {
     service.loadEnabledModules().subscribe((slugs) => (result = slugs));
 
     httpMock
-      .expectOne((r) => r.url === `${environment.newServerApi}/api/company/modules`)
+      .expectOne((r) => r.urlWithParams === `${environment.newServerApi}/api/company/modules?token=jwt-token`)
       .error(new ErrorEvent('network'));
 
     expect(result).toEqual(['core', 'admin']);
@@ -115,7 +115,7 @@ describe('ModuleService', () => {
     service.loadCatalogue().subscribe((modules) => (catalogue = modules));
 
     const req = httpMock.expectOne(
-      (r) => r.url === `${environment.newServerApi}/api/modules`
+      (r) => r.urlWithParams === `${environment.newServerApi}/api/modules?token=jwt-token`
     );
     expect(req.request.params.get('token')).toBe('jwt-token');
 

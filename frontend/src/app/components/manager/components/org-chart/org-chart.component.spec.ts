@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OrgChartComponent } from './org-chart.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('OrgChartComponent', () => {
   let component: OrgChartComponent;
@@ -8,6 +9,7 @@ describe('OrgChartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ OrgChartComponent ]
     })
     .compileComponents();

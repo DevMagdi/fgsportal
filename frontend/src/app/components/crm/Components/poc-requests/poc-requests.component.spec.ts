@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PocRequestsComponent } from './poc-requests.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('PocRequestsComponent', () => {
   let component: PocRequestsComponent;
@@ -8,6 +9,7 @@ describe('PocRequestsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ PocRequestsComponent ]
     })
     .compileComponents();

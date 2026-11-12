@@ -46,7 +46,10 @@ jobs:
           php -l backend/app/Http/Controllers/BMS/ExecutiveDashboardController.php
           php -l backend/app/Http/Controllers/BMS/EmployeeController.php
           php -l backend/app/Http/Controllers/BMS/ProductTrackingController.php
+          php -l backend/app/Http/Controllers/BMS/MeetingController.php
+          php -l backend/tests/Feature/P16MeetingsTest.php
           php -l backend/tests/Feature/P17EmployeeManagementTest.php
+          php -l backend/tests/Feature/ModulesTableSeederTest.php
       - name: Focused P22 selected-unit regression
         id: p22
         if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
@@ -76,6 +79,18 @@ jobs:
         if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
         working-directory: backend
         run: vendor/bin/phpunit tests/Feature/P1Batch1Test.php --filter test_P1_1_dashboard_card_lists_employees_without_task_bodies
+      - name: P16 meeting attendee synchronization regression
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P16MeetingsTest.php
+      - name: P19 employee manager cross-company regression
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P17EmployeeManagementTest.php --filter test_P19_manager_assignment_blocks_cycles_cross_company_and_out_of_scope_managers
+      - name: Module catalogue core contract regression
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/ModulesTableSeederTest.php
       - name: Test SQLite with coverage
         id: full_suite
         if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}

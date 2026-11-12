@@ -61,26 +61,32 @@ class MeetingController extends BmsController
         $this->authorizeMeeting($meeting);
         abort_if($meeting->status === 'cancelled', 422, 'A cancelled meeting cannot be changed.');
         $data = $this->meetingData($request, false);
-        $old = $meeting->only(array_keys($data));
-        $meeting->fill($data);
-        $rescheduled = $meeting->isDirty(['starts_at', 'ends_at', 'location']);
-        if ($rescheduled) {
-            $meeting->sequence = (int) $meeting->sequence + 1;
-        }
-        $meeting->save();
+        $changes = DB::transaction(function () use ($meeting, $data, $request) {
+            $old = $meeting->only(array_keys($data));
+            $meeting->fill($data);
+            $rescheduled = $meeting->isDirty(['starts_at', 'ends_at', 'location']);
+            if ($rescheduled) {
+                $meeting->sequence = (int) $meeting->sequence + 1;
+            }
+            $meeting->save();
 
-        $added = collect();
-        $removed = collect();
-        if ($request->has('attendees')) {
-            [$added, $removed] = $this->syncAttendees($meeting, $this->attendees($request));
-        }
-        $this->audit->record($meeting, 'meeting.updated', $old, $meeting->fresh()->only(array_keys($data)));
+            $added = collect();
+            $removed = collect();
+            if ($request->has('attendees')) {
+                [$added, $removed] = $this->syncAttendees($meeting, $this->attendees($request));
+            }
+            $this->audit->record($meeting, 'meeting.updated', $old, $meeting->fresh()->only(array_keys($data)));
 
+            return compact('added', 'removed', 'rescheduled');
+        });
+
+        // Delivery is an external side effect: run only after all database
+        // updates and the audit row have committed successfully.
         $meeting->load('attendees.user', 'creator');
-        if ($removed->isNotEmpty()) {
-            $invitations->send($meeting, $removed, 'CANCEL');
+        if ($changes['removed']->isNotEmpty()) {
+            $invitations->send($meeting, $changes['removed'], 'CANCEL');
         }
-        $notify = $rescheduled ? $meeting->attendees : $added;
+        $notify = $changes['rescheduled'] ? $meeting->attendees : $changes['added'];
         if ($notify->isNotEmpty()) {
             $invitations->send($meeting, $notify, 'REQUEST');
         }
@@ -130,10 +136,29 @@ class MeetingController extends BmsController
         foreach ($wanted->diffKeys($existing) as $row) {
             $added->push($meeting->attendees()->create($row));
         }
-        foreach ($wanted->intersectKeys($existing) as $k => $row) {
-            $existing[$k]->update(array_intersect_key($row, array_flip(['external_name', 'external_email', 'user_id'])));
+        foreach ($wanted as $k => $row) {
+            if (!$existing->has($k)) {
+                continue;
+            }
+
+            $attributes = array_intersect_key($row, array_flip(['external_name', 'external_email', 'user_id']));
+            $attendee = $existing[$k];
+            $changed = false;
+            foreach ($attributes as $attribute => $value) {
+                $current = $attendee->getAttribute($attribute);
+                $same = $attribute === 'user_id'
+                    ? (($current === null && $value === null) || ($current !== null && $value !== null && (int) $current === (int) $value))
+                    : $current === $value;
+                if (!$same) {
+                    $changed = true;
+                    break;
+                }
+            }
+            if ($changed) {
+                $attendee->update($attributes);
+            }
         }
-        return [$added->each->load('user'), $removed];
+        return [$added->each->load('user'), $removed->each->load('user')];
     }
 
     public function respond(Request $request,MeetingAttendee $attendee)

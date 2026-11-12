@@ -373,6 +373,7 @@ class P17EmployeeManagementTest extends BmsTestCase
             'password' => 'secret-pass', 'business_unit_ids' => [$unit->id], 'manager_id' => $a['id'],
         ], $admin)->assertStatus(201)->json('data');
         $this->assertSame($a['id'], $b['manager_id']);
+        $this->assertSame($a['id'], \App\Models\User::findOrFail($b['id'])->manager_id);
 
         // A -> B -> A must be refused, and so must self-management.
         $this->putBms('employees/'.$a['id'], ['manager_id' => $b['id']], $admin)->assertStatus(422);
@@ -381,9 +382,16 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->putBms('employees/'.$b['id'], ['manager_id' => null], $admin)->assertOk();
         $this->assertNull(\App\Models\User::findOrFail($b['id'])->manager_id);
 
-        // Cross-company managers are refused.
-        $outsider = $this->makeUser(['company_id' => 999]);
+        // Cross-company managers are refused using two persisted tenant rows.
+        $otherCompany = \App\Models\Company::create([
+            'name' => 'Other Company',
+            'slug' => 'other-company',
+        ]);
+        $outsider = $this->makeUser(['company_id' => $otherCompany->id]);
+        $this->assertSame($this->company->id, (int) \App\Models\User::findOrFail($a['id'])->company_id);
+        $this->assertSame($otherCompany->id, (int) $outsider->company_id);
         $this->putBms('employees/'.$a['id'], ['manager_id' => $outsider->id], $admin)->assertStatus(422);
+        $this->assertNull(\App\Models\User::findOrFail($a['id'])->manager_id);
 
         // Unit-scoped actors may not attach a manager they cannot see.
         $director = $this->actingAsRole('unit_director', [$unit->id]);

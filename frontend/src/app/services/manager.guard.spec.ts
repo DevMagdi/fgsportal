@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ManagerGuard } from './manager.guard';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ManagerGuard', () => {
   let guard: ManagerGuard;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ imports: [HttpClientTestingModule] });
     guard = TestBed.inject(ManagerGuard);
   });
 

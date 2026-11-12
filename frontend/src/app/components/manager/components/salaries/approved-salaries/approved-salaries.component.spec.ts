@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ApprovedSalariesComponent } from './approved-salaries.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ApprovedSalariesComponent', () => {
   let component: ApprovedSalariesComponent;
@@ -8,6 +9,7 @@ describe('ApprovedSalariesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ ApprovedSalariesComponent ]
     })
     .compileComponents();

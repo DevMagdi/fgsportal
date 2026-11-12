@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { JobProfileManagementComponent } from './job-profile-management.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('JobProfileManagementComponent', () => {
   let component: JobProfileManagementComponent;
@@ -8,6 +9,7 @@ describe('JobProfileManagementComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ JobProfileManagementComponent ]
     })
     .compileComponents();

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ReportsTableComponent } from './reports-table.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('ReportsTableComponent', () => {
   let component: ReportsTableComponent;
@@ -8,6 +9,7 @@ describe('ReportsTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [MatSnackBarModule],
       declarations: [ ReportsTableComponent ]
     })
     .compileComponents();

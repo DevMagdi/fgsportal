@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ClosedLeadsComponent } from './closed-leads.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ClosedLeadsComponent', () => {
   let component: ClosedLeadsComponent;
@@ -8,6 +9,7 @@ describe('ClosedLeadsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ ClosedLeadsComponent ]
     })
     .compileComponents();
