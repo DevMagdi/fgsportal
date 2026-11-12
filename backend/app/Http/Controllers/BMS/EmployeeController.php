@@ -387,6 +387,13 @@ class EmployeeController extends BmsController
                 $attributes['gender'] = $data['gender'];
             }
             $employee->update($this->onlyExistingColumns($attributes));
+            // User::$fillable intentionally excludes manager_id; persist the
+            // validated assignment (including an explicit null to clear it)
+            // after the existing manager scope/cycle checks.
+            if (array_key_exists('manager_id', $attributes) && \Schema::hasColumn('users', 'manager_id')) {
+                $employee->manager_id = $attributes['manager_id'];
+                $employee->save();
+            }
             if (array_key_exists('hiring_date', $data)) {
                 if ($employee->user_details_id_fun) {
                     $employee->user_details_id_fun->update(['hiringDate' => $data['hiring_date']]);

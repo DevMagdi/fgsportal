@@ -95,6 +95,13 @@ class ProductTrackingController extends BmsController
         $owned=$product->phases()->pluck('id')->all();
         abort_unless(count(array_diff($data['phase_ids'],$owned))===0 && count(array_diff($owned,$data['phase_ids']))===0,422,'The new order must list every phase of this product exactly once.');
         DB::transaction(function()use($product,$data){
+            // A unique (product_id, sequence) index is enforced immediately by
+            // SQLite and MySQL. Move each row above the current range first so a
+            // valid permutation cannot collide with an occupied sequence mid-loop.
+            $offset=(int)$product->phases()->max('sequence');
+            foreach($data['phase_ids'] as $index=>$phaseId){
+                $product->phases()->whereKey($phaseId)->update(['sequence'=>$offset+$index+1,'updated_by'=>$this->access->user()->id]);
+            }
             foreach($data['phase_ids'] as $index=>$phaseId){
                 $product->phases()->whereKey($phaseId)->update(['sequence'=>$index+1,'updated_by'=>$this->access->user()->id]);
             }

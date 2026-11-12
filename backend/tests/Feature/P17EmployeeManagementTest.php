@@ -282,7 +282,8 @@ class P17EmployeeManagementTest extends BmsTestCase
     {
         $unit = $this->makeUnit();
         $admin = $this->actingAsRole('system_admin');
-        $manager = $this->makeUser(['username' => 'boss']);
+        // Exercise the API's documented username fallback when the manager has no display name.
+        $manager = $this->makeUser(['username' => 'boss', 'firstname' => '', 'lastname' => '']);
         $manager->businessUnits()->attach($unit->id);
 
         $created = $this->postBms('employees', [
