@@ -1,6 +1,6 @@
 # BMS implementation roadmap after Phase 1 audit
 
-This roadmap records evidence-based work and dependencies. Phase 1 audit, Phase 2 shell, and Phase 3 dashboard implementation are in the active feature branch. Phase 3 backend/live-data/browser verification remains constrained by missing runtime and browser dependencies; Phase 4 and later are out of scope and require explicit approval.
+This roadmap records evidence-based work and dependencies. Phase 1 audit, Phase 2 shell, and Phase 3 dashboard implementation are in the active feature branch. Phase 3 focused backend and mocked-browser checks have run; full backend/Angular suites remain red and live backend/data verification is still outstanding. Phase 4 and later are out of scope and require explicit approval.
 
 ## Phase 1 — Complete Product Audit & UX Foundation
 
@@ -77,26 +77,28 @@ Executed supported headless Chromium 153 with Puppeteer Core 25.17.0 against the
 - No changes to backend permissions/data/migrations; focused Angular nav tests pass and no new frontend regressions.
 - Inspect diff; only Phase 2 scoped files changed.
 
-## Phase 3 — Executive Dashboard (implementation and frontend QA complete; backend verification pending)
+## Phase 3 — Executive Dashboard (implementation complete; final acceptance gate remains open)
 
 ### Scope and evidence
-- `PHASE_3_DASHBOARD_DATA_AUDIT.md` documents supported KPI formulas, source fields/API response, filters, permissions, limitations, and what is implementable. The deployed schema and representative live data were not verified.
-- The dashboard reuses the existing executive endpoint and validated unit/product/opportunity/week filters; no unsupported owner/status/date-range filter or new KPI source is invented.
-- UI includes permission-conditioned metrics/exports/report-derived history; synchronized API filters; loading, empty and retryable error states; English/Arabic locale and LTR/RTL; responsive cards/panels and accessible chart summaries.
-- A justified backend adjustment scopes recent-activity entries to the selected unit, including shared product-unit associations; a focused regression test was added. Endpoint route and permission are unchanged.
-- Implementation and exact test outcomes are recorded in `PHASE_3_IMPLEMENTATION_REPORT.md` and `PHASE_3_TEST_REPORT.md`; real Chromium screenshots for desktop, tablet and mobile plus RTL/state/permission scenarios are in `phase3-qa/`. Browser API responses were intercepted synthetic fixtures, not live backend evidence.
+- `PHASE_3_DASHBOARD_DATA_AUDIT.md` documents supported KPI formulas, source fields/API response, filters, permissions and limitations. The deployed schema and representative production data were not live-verified.
+- The dashboard reuses the existing executive endpoint and validated unit/product/opportunity/week filters; it invents no unsupported KPI source or filter.
+- UI includes permission-conditioned metrics/exports/report-derived history; synchronized filters; loading, empty and retryable error states; English/Arabic locale and LTR/RTL; responsive cards/panels and accessible chart summaries.
+- The selected-unit recent-activity backend adjustment preserves route/permission semantics and handles direct unit, shared product and product-phase relationships. Focused P22, P18, P19, P20 and P1.1 regressions all pass in CI.
+- Genuine Chromium 153 screenshots and interactions at 1440×1000, 768×1024 and 390×844 are in `phase3-qa/`. API responses were intercepted synthetic fixtures: no live backend or production-data validation is claimed. Latest layout measurements and CI results are recorded in `PHASE_3_TEST_REPORT.md`.
 
-### Acceptance / remaining verification
-- [x] Document KPI definition/source/filter/permission/limitations before implementation.
-- [x] Keep metrics tied to actual existing API aggregates and stored KPI history; do not combine unlike KPI series or currencies.
-- [x] Implement supported controls, states, permission visibility, responsive layout, localization, and accessible chart representation.
-- [x] Add pure helper regression specs and selected-unit/shared-product/ProductPhase/procurement/missing-scope backend regression coverage (source-reviewed; execution remains pending).
-- [x] Run the complete Angular/Karma suite without exclusions: 211 executed, 76 passed, 135 failed; Phase 2 baseline was 204 / 69 / 135, so seven more passes and the same failure count. Run the 42 Node specs and production build successfully.
-- [x] Run Chromium UI smoke QA and capture genuine screenshots at 1440×1000, 768×1024 and 390×844; exercise locale/direction, populated/empty/loading/error/retry, supported filters, restricted permissions, export visibility, landmarks/labels and horizontal overflow with intercepted synthetic API fixtures.
-- [ ] Run native PHP lint, focused P22 plus relevant/full backend suites; reconcile results against Phase 2 backend baseline (149 tests, 5 errors, 6 failures). PHP and `backend/vendor` are missing in this checkout; parser-only validation does not satisfy this item.
-- [ ] Validate API authorization and data behavior against a configured backend/database. Browser mocks do not satisfy live integration verification.
+### Acceptance status (final CI run 43297021468; commit `0a756586`)
+- [x] Document KPI source/formula, filters, permissions and limitations before implementation.
+- [x] Keep metrics tied to existing API aggregates and stored KPI history; do not combine unlike KPI series or currencies.
+- [x] Implement supported controls, states, permission visibility, responsive layout, localization and accessible chart summaries.
+- [x] Add helper and backend regression coverage. Native PHP syntax check plus focused P22/P18/P19/P20/P1.1 CI regressions pass.
+- [x] Run all Node specs: 42/42 pass. Local production Angular build passes (hash `79b2571d10234099`); CI build was skipped after Karma failed.
+- [x] Run the complete Angular/Karma suite without exclusions: 211 specs, 76 pass / 135 fail. Phase 2 was 204, 69 / 135. Exact failing labels and normalized primary diagnostics match; the suite remains red. See `phase3-qa/angular-failure-comparison.md`.
+- [x] Run unfiltered complete backend suites on SQLite and MySQL. Both run 150 tests and fail (1 error, 6 failures). Compared with the recorded Phase 2 baseline (149 tests, 5 errors, 6 failures), current run has four fewer errors and the same six failure labels/messages; see the test report for exact details and the historical-baseline log limitation.
+- [x] Run Chromium visual/interaction QA with mocked API data. At 1440×1000, document `scrollHeight=clientHeight=1000`; at 768×1024, `1151/1024`; at 390×844, `1906/844`. No horizontal overflow, dashboard-block overlaps or clipped descendants were measured. Scenarios include populated/empty/loading/error/retry, RTL/LTR, filters, exports and restricted permissions.
+- [ ] Obtain green complete backend and Angular/Karma suites; investigate baseline and current failures without skipping tests or weakening assertions. Local lint has no Angular target; CI lint/analyse are non-gating (`continue-on-error`) and emitted static-type diagnostics.
+- [ ] Validate backend authorization/data behavior against a configured live backend/database. Mocked browser requests do not meet this requirement; production data and comprehensive WCAG/assistive-technology behavior remain unverified.
 
-Phase 3 remains the stopping boundary. Do not begin Phase 4 or later without explicit user approval.
+**Phase 3 final gate is NOT PASSED; do not merge PR #26.** Phase 3 remains the stopping boundary. Do not begin Phase 4 or later without explicit user approval.
 
 ## Phase 4 — Organization & Access Management
 

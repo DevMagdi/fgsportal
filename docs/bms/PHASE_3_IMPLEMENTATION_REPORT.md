@@ -21,10 +21,11 @@ The pre-implementation evidence and KPI inventory is in [`PHASE_3_DASHBOARD_DATA
 
 ## Verification status and remaining limitations
 
-- A genuine Chromium 153 session now exercised the application at 1440×1000, 768×1024 and 390×844 with intercepted synthetic API responses. It checked populated/empty/loading/error/retry, Arabic RTL, supported filter query construction, restricted-permission visibility, basic landmarks/control semantics and horizontal overflow. Screenshots are in [`phase3-qa/`](phase3-qa/). This is a frontend smoke check with mocked endpoints, not live API authorization/data reconciliation or a comprehensive WCAG audit. External CDN SRI warnings and a placeholder Firebase websocket error were present because external services are unavailable; two 503s were deliberately injected for retry-state coverage.
-- Backend feature tests, native PHP lint and live API/database reconciliation remain **unverified**: PHP, `backend/vendor`, `backend/.env` and a database are absent. The temporary PHP parser accepts the edited test syntax but is not native lint. The P22/ProductPhase/procurement and unknown-scope activity regression assertions have not executed.
-- The full Angular/Karma suite did execute in Chromium: 211 specs, 76 passing and 135 failing, versus Phase 2's 204/69/135 baseline. Thus seven additional passes and the same raw failure count; the suite remains red because of legacy provider/directive setup failures. Pure Node tests (42/42) and the production Angular build passed after restoring the lockfile dependency tree.
-- See [`PHASE_3_TEST_REPORT.md`](PHASE_3_TEST_REPORT.md) for exact commands, baseline comparison, browser harness limitations and screenshot list. The KPI audit's source/permission trace remains based on checked-in code; no production schema/data claims are made.
+- Final CI run **43297021468** for pushed commit `0a756586624079905544a458607462a74fdc11b7` is red. Native PHP syntax and the focused P22, P18, P19, P20 and P1.1 regressions all pass. Full SQLite and MySQL suites each run 150 tests and fail with 1 error / 6 failures. The common remaining error is the existing product-metadata test's undefined `description` key; the six failure labels match the recorded Phase 2 failures. CI's non-gating lint/analyse steps are marked continue-on-error and output static-type diagnostics; see the exact comparison and outcome report in [`PHASE_3_TEST_REPORT.md`](PHASE_3_TEST_REPORT.md).
+- Local frontend verification: Node tests **42/42 pass**; production build passes (hash `79b2571d10234099`). The full Angular/Karma run is **76 pass / 135 fail out of 211**; Phase 2 was 69/135 out of 204. Failure labels and normalized primary diagnostics match exactly; the full suite is red. The Angular lint target is unavailable locally and CI lint is non-gating.
+- Chromium 153 screenshots and interactions at 1440×1000, 768×1024 and 390×844 use intercepted synthetic API responses, not a live backend. Measurements: desktop document `scrollHeight=clientHeight=1000`; tablet `1151/1024`; mobile `1906/844`. All tested widths had no horizontal overflow, dashboard-block overlap, or clipped descendants. Populated, empty, loading, error/retry, Arabic RTL/English LTR, filters, export controls and restricted permissions were reviewed with mocked responses. This is not live API authorization/data reconciliation or a complete WCAG audit. External CDN integrity and placeholder Firebase websocket warnings were environmental; the two 503 responses were deliberate retry-state fixtures.
+- Backend source/security and dashboard semantics were reviewed against the existing permission/filter contracts. Live integration, production schema/data reconciliation and full accessibility validation remain unverified. Mocked browser evidence is explicitly not live validation.
+- **Final acceptance gate is not passed; do not recommend merge.** PR #26 remains open; Phase 4 has not started.
 
 ## Files in implementation
 
@@ -36,4 +37,5 @@ The pre-implementation evidence and KPI inventory is in [`PHASE_3_DASHBOARD_DATA
 - `backend/tests/Feature/P17EmployeeManagementTest.php`
 - `docs/bms/PHASE_3_DASHBOARD_DATA_AUDIT.md`
 - `docs/bms/PHASE_3_TEST_REPORT.md`
+- `docs/bms/phase3-qa/angular-failure-comparison.md`
 - `docs/bms/IMPLEMENTATION_ROADMAP.md`

@@ -1,55 +1,71 @@
 # Phase 3 — Test and verification report
 
 **Date:** 2026-11-12 (UTC)
-**Branch:** `arena/e1389d1e-fgsportal`
-**Scope:** Phase 3 only. No checks were skipped or disabled. Browser API data below is explicitly mocked; it is not backend integration evidence.
+**Branch / PR:** `arena/e1389d1e-fgsportal` / [#26](https://github.com/DevMagdi/fgsportal/pull/26), base `BMS`
+**Validated commit:** `0a756586624079905544a458607462a74fdc11b7`
+**Scope:** Phase 3 only. No checks were skipped or disabled. Browser API responses are intercepted synthetic fixtures, not live backend data.
 
-## Completed checks
+## Final CI run — 43297021468
 
-| Command / check | Exit | Result |
-|---|---:|---|
-| `npm ci --legacy-peer-deps --no-audit --no-fund` (`frontend/`) | 0 | Installed 1,481 lockfile packages. npm reported existing dependency deprecation notices. |
-| `npm run test:node` (`frontend/`) | 0 | **42 passing, 0 failing.** Includes dashboard utility, BMS catalogue/navigation, module registry and permission-cache specs. No live API/database. |
-| `npm run build -- --configuration production` (`frontend/`) | 0 | Production Angular build passed. Build hash `ba668542072a6657`; existing Autoprefixer, CSS selector and CommonJS/canvg warnings remain. |
-| `npm test -- --watch=false --browsers=ChromeHeadless` with temporary Chromium 153 launcher (`frontend/`) | 1 | **211 executed: 76 passed, 135 failed.** All specs ran; none were skipped/filtered. Failure details include missing `HttpClient`, `MatSnackBar`, `Router` and `MessagingService` providers and a missing `formControl` directive in legacy component test modules. These are not reported as passing. |
-| `git diff --check` (repository root) | 0 | No whitespace errors at last check. |
-| Real Chromium UI smoke/interaction run, using Chromium 153 at 1440×1000, 768×1024, 390×844 | 0 | Dashboard rendered in Chromium with controlled, intercepted API responses. Checked populated, empty, loading, service-error, retry-success, Arabic/RTL, restricted-permission and filter-query states; saved genuine browser screenshots in `phase3-qa/`. No app page exception was observed in the successful run. The test intentionally intercepted API calls and is not live integration or a complete WCAG audit. |
+Run URL: https://github.com/DevMagdi/fgsportal/actions/runs/43297021468. Run conclusion: **failure**. The worktree changes were not merged; PR #26 remains open.
 
-## Phase 2 comparison
+| Check | Result | Evidence / details |
+|---|---|---|
+| Native PHP syntax check for every Phase 3 PHP change | **PASS** | CI step `Native syntax check for Phase 3 PHP changes` succeeded. |
+| Focused P22 selected-unit regression | **PASS** | CI step succeeded. |
+| P18 dashboard aggregate, P19 activity authorization, P20 deleted/missing model and dashboard-filter, P1.1 dashboard-card regressions | **PASS** | Each individual CI regression step succeeded. P18/P19 fixture changes now create and assert the intended audit events, including cross-unit non-leakage. |
+| Full backend PHPUnit, SQLite | **FAIL** | 150 tests, 1 error, 6 failures (1085 assertions). No tests were excluded. The lone error is `P17EmployeeManagementTest::test_P18_product_metadata_owner_and_phase_reordering` — `ErrorException: Undefined array key "description"`. Six failing test names and assertion/error text are compared with Phase 2 below. |
+| Full backend PHPUnit, MySQL 8 | **FAIL** | 150 tests, 1 error, 6 failures (1082 assertions). Same six failing test names as the SQLite run; see details below. The same P18 product-metadata error remains. |
+| Backend `composer lint` / `composer analyse` workflow steps | **Reported success by CI**, but both are configured `continue-on-error` | The check annotations include exit-code diagnostics and static-type findings on `BusinessUnitController` (`BusinessUnit::find/create` and `$id`). Their non-blocking step conclusion is not treated as proof those diagnostics are clean. Native PHP syntax validation above did pass. |
+| Frontend Karma / Angular suite | **FAIL** | CI test step failed; local full run executed 211 specs: 76 passed, 135 failed. Phase 2 and Phase 3 failure-label multisets are identical: 135 occurrences / 134 unique labels; no newly failing or resolved labels. |
+| Frontend Node tests | **PASS locally** | `npm run test:node`: 42/42 pass. |
+| Frontend production build | **PASS locally; CI build skipped** | `npm run build -- --configuration production` succeeded locally, hash `79b2571d10234099`. CI's production build step was skipped because Karma failed first. Existing Autoprefixer/CommonJS warnings remain. |
+| Frontend lint | **UNAVAILABLE locally / non-gating in CI** | Local `npm run lint` reports no Angular `lint` target. CI marks its lint step `continue-on-error`; no passing lint gate is claimed. |
+| `git diff --check` | **PASS** | Passed before the final workflow diagnostics commit. |
 
-- **Angular:** Phase 2 baseline was 204 tests, 135 failures and 69 passes. This full local Phase 3 run executed 211 tests, with the same 135 failures and 76 passes: **seven more passes, no increase in the raw failure count**, and seven more specs executed. The matching 135-failure count is not a green suite; baseline-style provider/test-module errors remain.
-- **Backend:** Phase 2 baseline recorded 149 tests, 5 errors and 6 failures. Phase 3 CI previously exposed a PHP parse error in `P17EmployeeManagementTest.php` at line 570. The edited test file parses with a temporary `php-parser`, including the corrected fully-qualified model references; this is only a parser check, not native PHP lint or a PHPUnit result. Current backend counts cannot be compared because no PHP runtime or `backend/vendor` exists locally and no rerun against the edited source has completed.
+### Backend comparison with the Phase 2 baseline
 
-## Backend checks not run
+The recorded Phase 2 baseline is **149 tests, 5 errors, 6 failures**. The final CI suite runs 150 tests (one additional test in the current source). Against the Phase 2 result, the current SQLite run has **four fewer errors** (one remains) and the **same six failures**. The same remaining error is `test_P18_product_metadata_owner_and_phase_reordering`, with the same `Undefined array key "description"` message.
 
-Native `php -l`, the focused P22 test, relevant dashboard/permission feature tests, and the full backend PHPUnit suite were attempted but could not start: `php` is not installed, `backend/vendor/bin/phpunit` is absent, and there is no configured `backend/.env`/database. The PHP parser syntax result must not be treated as native lint. Backend integration, database behavior and the new authorization regression remain unverified.
+The pre-final full-suite comparator (run 43289133463) exposed named fixture/setup errors for `test_P18_dashboard_reports_pending_procurement_upcoming_meetings_and_overdue_tasks`, `test_P19_recent_activity_never_leaks_other_units_records`, and `test_P20_recent_activity_separates_ids_shared_across_model_types_and_handles_deleted_records`; those no longer occur after the procurement/activity fixture fixes. The recorded Phase 2 count delta is five errors to one, but its retained test-log annotation is truncated during the error section, so it does not preserve all five error labels. We therefore report the exact count reduction and named resolved cases visible in the retained evidence without inventing a complete one-to-one list. The remaining product-metadata error is identical by test name and message.
 
-## Chromium QA detail and evidence
+The six remaining failure names are unchanged from the Phase 2 baseline:
 
-The temporary Chromium package could be launched after extracting its bundled Amazon Linux 2023 libraries. The Angular dev server compiled successfully. The QA harness supplied a test user and intercepted `/api/bms/*` responses; requests to the configured placeholder backend were not sent to a real server. It exercised the existing dashboard controls and captured the API query `business_unit_id=1&product_id=5&opportunity_id=7&week_start=2026-11-08`.
+1. `ModulesTableSeederTest::test_only_the_core_module_is_flagged_as_core` — `bms must not be core` (assertion: true is false).
+2. `P16MeetingsTest::test_P1_6_attendee_diff_cancels_removed_and_invites_only_added` — expected HTTP 200, received 500; `Collection::intersectKeys` is undefined.
+3. `P17EmployeeManagementTest::test_P18_employee_manager_reporting_line_is_stored_and_self_reference_rejected` — expected manager id 2, got null.
+4. `P17EmployeeManagementTest::test_P19_manager_assignment_blocks_cycles_cross_company_and_out_of_scope_managers` — expected manager id 2, got null.
+5. `P17EmployeeManagementTest::test_P19_employee_import_preview_is_read_only_and_reports_duplicates` — SQLite: expected 1, got 0; MySQL: expected HTTP 200, received 500.
+6. `P17EmployeeManagementTest::test_P20_import_rejects_duplicates_inside_the_uploaded_file` — SQLite: expected 1, got 0; MySQL: expected HTTP 200, received 500.
 
-- At **1440×1000**, **768×1024**, and **390×844**, document/body scroll widths equalled the viewport width (no horizontal overflow observed).
-- Arabic switch changed dashboard content to Arabic and its workspace direction to RTL; document root direction remained unchanged.
-- Populated and empty states rendered; a simulated 503 rendered the retry control; activating retry then returned populated data. A deliberately stalled dashboard request rendered the loading state.
-- With restricted abilities (`dashboard.view`, `plans.view` only), the dashboard showed no unit/product/opportunity filter controls, exports, opportunity/product/report/meeting content; only permitted task summary and recent-activity panel remained.
-- Basic landmarks, labeled filter controls, progressbar semantics and button/alert labels were inspected. This is a manual smoke check, not a comprehensive keyboard/screen-reader/WCAG conformance audit.
-- Browser console warnings/errors included external CDN integrity failures because external resources were stubbed under the sandbox network constraints, the configured placeholder Firebase websocket failure, and the two deliberate mocked 503 responses. Those harness/environment errors were not hidden or counted as application passes.
+The individual labels and assertion/error messages above were compared with the Phase 2 CI baseline annotations. The final workflow now emits test-name diagnostics and engine summaries so SQLite/MySQL output is independently reviewable. These failures are not hidden or treated as passes.
 
-Screenshots (genuine browser captures; test data is synthetic/mocked):
+### Frontend Phase 2 comparison
 
-- `phase3-qa/populated-desktop.png`
-- `phase3-qa/populated-tablet.png`
-- `phase3-qa/populated-mobile.png`
-- `phase3-qa/arabic-rtl-1440.png`
-- `phase3-qa/empty-1440.png`
-- `phase3-qa/loading-1440.png`
-- `phase3-qa/error-1440.png`
-- `phase3-qa/retry-1440.png`
-- `phase3-qa/restricted-mobile.png`
+Phase 2: 204 Karma specs, 69 pass / 135 fail. Phase 3: 211 specs, 76 pass / 135 fail. The failure occurrence multisets including normalized primary diagnostic messages match exactly across saved test logs, with no new/resolved failures (134 distinct labels; `DevReportsComponent should create` occurs twice). Seven additional specs pass, but the full suite remains red. See [`phase3-qa/angular-failure-comparison.md`](phase3-qa/angular-failure-comparison.md) for every exact failing label and primary diagnostic.
 
-## Remaining acceptance work
+## Chromium visual/interaction evidence
 
-1. Provide a supported PHP environment and run native lint, the focused P22 test, relevant dashboard/permission tests and full backend PHPUnit without skips; compare full results to Phase 2.
-2. Run the edited backend suite against its supported database configuration and validate Product/ProductPhase relationships plus unknown-scope activity behavior under both global and restricted roles.
-3. If acceptance requires real backend data, repeat browser/API checks against a configured backend and representative records; current browser screenshots demonstrate only frontend behavior with controlled fixtures.
-4. Re-run `git diff --check` after final documentation/source edits. Do not merge PR #26 or begin Phase 4 without explicit approval.
+A genuine Chromium 153 session exercised the dashboard with **intercepted mocked API responses**. It checked populated, empty, loading, service-error, retry-success, Arabic RTL / English LTR, filters, export controls, restricted-permission visibility, basic landmark/control semantics and responsive layout. This does **not** demonstrate live API/backend integration or production-data correctness.
+
+Latest measured viewport results:
+
+| Viewport | Document `scrollHeight` | `clientHeight` | Horizontal overflow | Overlap / clipped dashboard descendants |
+|---|---:|---:|---|---|
+| 1440×1000 | 1000 | 1000 | None | None detected |
+| 768×1024 | 1151 | 1024 | None | None detected |
+| 390×844 | 1906 | 844 | None | None detected |
+
+Thus the desktop viewport has no document vertical scroll; tablet/mobile have expected vertical page scrolling and no horizontal overflow. Evidence files (all synthetic fixture data):
+
+- `phase3-qa/desktop-1440x1000-validation.png`
+- `phase3-qa/tablet-768x1024-validation.png`
+- `phase3-qa/mobile-390x844-validation.png`
+- `phase3-qa/populated-desktop.png`, `populated-tablet.png`, `populated-mobile.png`
+- `phase3-qa/arabic-rtl-1440.png`, `empty-1440.png`, `loading-1440.png`, `error-1440.png`, `retry-1440.png`, `restricted-mobile.png`
+
+The UI smoke run used a test user and intercepted `/api/bms/*`; no request to a real backend/database was validated. Arabic switching changed content to RTL; a restricted `dashboard.view`/`plans.view` user did not see unauthorized filters, exports, report-derived KPI history, or unrelated panels. These are frontend observations, not a comprehensive WCAG audit. External CDN integrity and placeholder Firebase websocket warnings are environmental; two mocked 503 responses were intentional.
+
+## Gate status and remaining limits
+
+**Phase 3 final acceptance gate: NOT PASSED. Do not recommend merge.** Focused checks and syntax validation pass, but both complete backend engines and the complete Angular/Karma suite are red. Local production build and Node tests pass; lint is unavailable/non-gating. CI PHP static-analysis annotations also need review. Live integration, production-data reconciliation, keyboard/screen-reader coverage, and full WCAG conformance remain unverified. PR #26 remains open and unmerged; Phase 4 has not started.
