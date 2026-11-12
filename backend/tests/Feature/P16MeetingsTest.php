@@ -139,7 +139,8 @@ class P16MeetingsTest extends BmsTestCase
 
         $this->assertSame($rowIds, $meeting->attendees()->orderBy('id')->pluck('id')->all());
         $this->assertSame('tentative', $meeting->attendees()->where('user_id', $a->id)->value('response'));
-        $this->assertSame($oldTimestamp->toDateTimeString(), $meeting->attendees()->where('user_id', $a->id)->value('updated_at'));
+        $kept = $meeting->attendees()->where('user_id', $a->id)->firstOrFail();
+        $this->assertSame($oldTimestamp->toDateTimeString(), $kept->updated_at->toDateTimeString());
         $this->assertSame(0, $this->mailsTo('a@example.test', 'invitation'));
         $this->assertSame(0, $this->mailsTo('b@example.test', 'invitation'));
         $this->assertSame(0, $this->mailsTo('guest@example.test', 'invitation'));

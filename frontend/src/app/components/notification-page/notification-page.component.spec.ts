@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { AuthApiService } from 'src/app/services/auth-api.service';
 import { MessagingService } from 'src/app/services/messaging.service';
@@ -8,10 +8,11 @@ import { NotificationPageComponent } from './notification-page.component';
 describe('NotificationPageComponent', () => {
   let component: NotificationPageComponent;
   let fixture: ComponentFixture<NotificationPageComponent>;
+  let navigateByUrl: jasmine.Spy;
 
   beforeEach(async () => {
+    navigateByUrl = jasmine.createSpy('navigateByUrl').and.returnValue(Promise.resolve(true));
     await TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
       declarations: [NotificationPageComponent],
       providers: [
         {
@@ -24,6 +25,7 @@ describe('NotificationPageComponent', () => {
           },
         },
         { provide: AuthApiService, useValue: { user: new BehaviorSubject(null) } },
+        { provide: Router, useValue: { navigateByUrl } },
       ],
     }).compileComponents();
   });
@@ -34,7 +36,8 @@ describe('NotificationPageComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('redirects unauthenticated users to sign-in during initialization', () => {
     expect(component).toBeTruthy();
+    expect(navigateByUrl).toHaveBeenCalledOnceWith('/signin');
   });
 });
