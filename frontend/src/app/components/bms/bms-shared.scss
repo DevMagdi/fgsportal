@@ -113,3 +113,6 @@ th { background:#F5F3F0; }
 
 .trend-bars{display:inline-flex;align-items:flex-end;gap:2px;height:26px}
 .trend-bar{display:block;width:6px;background:var(--brand,#1f6feb);border-radius:2px;min-height:2px}
+
+/* Shared BMS-only tokens and primitives; never loaded by legacy components. */
+@import './bms-design-system';

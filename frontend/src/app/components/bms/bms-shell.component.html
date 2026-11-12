@@ -1,35 +1,109 @@
-<div class="bms-workspace" [dir]="direction">
-  <aside class="bms-sidebar" [class.open]="menuOpen">
-    <a routerLink="/bms/dashboard" class="bms-brand"><img src="assets/img/alphaiota-logo.png" alt="Alphaiota"><span class="alphaiota-wordmark">Alphaiota<small>{{lang.t('bms')}}</small></span></a>
-    <nav class="bms-nav" [attr.aria-label]="lang.t('bms')">
-      <ng-container *ngFor="let group of groups">
-        <p class="nav-group" *ngIf="group.visible()">{{lang.t(group.label)}}</p>
-        <ng-container *ngIf="group.visible()">
-          <ng-container *ngFor="let link of group.links">
-            <a *ngIf="can(link.ability)" [routerLink]="link.path" routerLinkActive="active"><i class="bx" [ngClass]="link.icon"></i>{{lang.t(link.label)}}</a>
+<div class="bms-workspace" [attr.lang]="lang.current" [dir]="direction">
+  <button *ngIf="isMobile && menuOpen" type="button" class="bms-sidebar-backdrop"
+    [attr.aria-label]="lang.t('closeMenu')" (click)="closeMenu()"></button>
+
+  <aside id="bms-sidebar" class="bms-sidebar" [class.open]="menuOpen"
+    [attr.aria-hidden]="isMobile && !menuOpen ? 'true' : null"
+    [attr.inert]="isMobile && !menuOpen ? '' : null">
+    <a routerLink="/bms/dashboard" class="bms-brand" (click)="closeMenu()">
+      <img src="assets/img/alphaiota-logo.png" alt="Alphaiota">
+      <span class="alphaiota-wordmark">Alphaiota<small>{{lang.t('bms')}}</small></span>
+    </a>
+
+    <nav class="bms-nav" [attr.aria-label]="lang.t('primaryNavigation')">
+      <app-bms-state *ngIf="lookupsError" kind="error" [message]="lookupsError"
+        [actionLabel]="lang.t('retry')" (action)="load()"></app-bms-state>
+
+      <section class="bms-nav-section" *ngFor="let group of groups" [class.expanded]="groupExpanded(group.id)"
+        [class.has-active-link]="isGroupActive(group.id)">
+        <h2 class="bms-nav-heading">
+          <button type="button" class="bms-nav-toggle" [attr.aria-expanded]="groupExpanded(group.id)"
+            [attr.aria-controls]="'bms-nav-' + group.id" (click)="toggleGroup(group.id)">
+            <i class="bx" [ngClass]="group.icon" aria-hidden="true"></i>
+            <span>{{lang.t(group.label)}}</span>
+            <i class="bx bx-chevron-down bms-nav-chevron" aria-hidden="true"></i>
+          </button>
+        </h2>
+        <div class="bms-nav-links" [id]="'bms-nav-' + group.id" [hidden]="!groupExpanded(group.id)">
+          <app-bms-state *ngIf="lookupsLoading" kind="loading" [message]="lang.t('loadingNavigation')"></app-bms-state>
+          <ng-container *ngIf="!lookupsLoading">
+            <a *ngFor="let link of linksFor(group)" [routerLink]="'/bms/' + link.path"
+              routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"
+              [attr.aria-current]="isActive(link) ? 'page' : null" (click)="closeMenu()">
+              <i class="bx" [ngClass]="link.icon" aria-hidden="true"></i>
+              <span>{{lang.t(link.label)}}</span>
+            </a>
+            <app-bms-state *ngIf="!linksFor(group).length" kind="empty"
+              [message]="lang.t('noPagesInCategory')"></app-bms-state>
           </ng-container>
-        </ng-container>
-      </ng-container>
+        </div>
+      </section>
     </nav>
   </aside>
+
   <div class="bms-main">
     <header class="bms-header">
-      <button type="button" class="menu-toggle" (click)="menuOpen=!menuOpen" [attr.aria-label]="lang.t('menu')"><i class="bx bx-menu"></i></button>
+      <button type="button" class="menu-toggle" *ngIf="isMobile" (click)="toggleMenu()"
+        [attr.aria-label]="lang.t(menuOpen ? 'closeMenu' : 'menu')" aria-controls="bms-sidebar"
+        [attr.aria-expanded]="menuOpen">
+        <i class="bx" [ngClass]="menuOpen ? 'bx-x' : 'bx-menu'" aria-hidden="true"></i>
+      </button>
+      <div class="bms-header-title">
+        <span *ngIf="currentCategoryKey()">{{lang.t(currentCategoryKey())}}</span>
+        <strong>{{lang.t(currentTitleKey())}}</strong>
+      </div>
       <div class="header-spacer"></div>
       <div class="header-actions">
-        <button type="button" class="alert-button" (click)="showAlerts=!showAlerts" [attr.aria-label]="lang.t('alerts')"><i class="bx bx-bell"></i><span *ngIf="alerts.length+notifications.length">{{alerts.length+notifications.length}}</span></button>
-        <button type="button" class="btn btn-outline-primary language-button" (click)="lang.toggle()">{{lang.t('language')}}</button>
-        <div class="user-chip" *ngIf="lookups.current_user"><i class="bx bx-user-circle"></i><div><strong>{{lookups.current_user.username}}</strong><small>{{lookups.current_user.email}}</small></div><a routerLink="/logout" class="btn-link">{{lang.t('signOut')}}</a></div>
+        <button type="button" class="alert-button" (click)="toggleAlerts()"
+          [attr.aria-label]="lang.t('alerts')" [attr.aria-expanded]="showAlerts" aria-controls="bms-alert-panel">
+          <i class="bx bx-bell" aria-hidden="true"></i>
+          <span *ngIf="alerts.length + notifications.length">{{alerts.length + notifications.length}}</span>
+        </button>
+        <button type="button" class="btn btn-outline-primary language-button" (click)="lang.toggle()"
+          [attr.aria-label]="lang.t('switchLanguage')">{{lang.t('language')}}</button>
+        <div class="user-chip" *ngIf="lookups.current_user">
+          <i class="bx bx-user-circle" aria-hidden="true"></i>
+          <div class="user-chip-copy"><strong>{{lookups.current_user.username}}</strong><small>{{lookups.current_user.email}}</small></div>
+          <a routerLink="/logout" class="btn-link">{{lang.t('signOut')}}</a>
+        </div>
       </div>
-      <aside class="alert-panel" *ngIf="showAlerts">
-        <div class="page-heading"><h2>{{lang.t('alerts')}}</h2><button class="btn-link" (click)="showAlerts=false">×</button></div>
-        <div *ngFor="let alert of alerts"><strong>{{alert.opportunity?.reference}}</strong><p>{{alert.message}}</p><button class="btn-link" (click)="read(alert)">{{lang.t('markRead')}}</button></div>
-        <div *ngFor="let notification of notifications"><strong>{{notification.data.title}}</strong><p>{{notification.data.body}}</p><button class="btn-link" (click)="readNotification(notification)">{{lang.t('markRead')}}</button></div>
-        <p *ngIf="!alerts.length&&!notifications.length">{{lang.t('noAlerts')}}</p>
+
+      <aside id="bms-alert-panel" class="alert-panel" *ngIf="showAlerts" role="region"
+        [attr.aria-label]="lang.t('alerts')" aria-live="polite">
+        <div class="alert-panel-heading"><h2>{{lang.t('alerts')}}</h2><button type="button" class="alert-close"
+          (click)="showAlerts=false" [attr.aria-label]="lang.t('close')">×</button></div>
+        <app-bms-state *ngIf="noticeSuccess" kind="success" [message]="noticeSuccess"></app-bms-state>
+        <app-bms-state *ngIf="alertsError" kind="error" [message]="alertsError"
+          [actionLabel]="lang.t('retry')" (action)="loadAlerts()"></app-bms-state>
+        <app-bms-state *ngIf="notificationsError" kind="error" [message]="notificationsError"
+          [actionLabel]="lang.t('retry')" (action)="loadNotifications()"></app-bms-state>
+        <app-bms-state *ngIf="alertsLoading || notificationsLoading" kind="loading"
+          [message]="lang.t('loadingAlerts')"></app-bms-state>
+        <ng-container *ngIf="!alertsLoading && !notificationsLoading">
+          <article class="bms-alert-item" *ngFor="let alert of alerts">
+            <div class="bms-alert-copy"><strong>{{alert.opportunity?.reference}}</strong><p>{{alert.message}}</p></div>
+            <button type="button" class="btn-link" (click)="read(alert)">{{lang.t('markRead')}}</button>
+          </article>
+          <article class="bms-alert-item" *ngFor="let notification of notifications">
+            <div class="bms-alert-copy"><strong>{{notification.data.title}}</strong><p>{{notification.data.body}}</p></div>
+            <button type="button" class="btn-link" (click)="readNotification(notification)">{{lang.t('markRead')}}</button>
+          </article>
+          <app-bms-state *ngIf="!alerts.length && !notifications.length && !alertsError && !notificationsError"
+            kind="empty" [message]="lang.t('noAlerts')"></app-bms-state>
+        </ng-container>
       </aside>
     </header>
+
     <main class="bms-content">
-      <nav class="bms-breadcrumbs" [attr.aria-label]="lang.t('breadcrumbs')"><a routerLink="/bms/dashboard">{{lang.t('bms')}}</a><span>/</span><span>{{lang.t(currentTitleKey())}}</span></nav>
+      <nav class="bms-breadcrumbs" [attr.aria-label]="lang.t('breadcrumbs')">
+        <a routerLink="/bms/dashboard">{{lang.t('bms')}}</a>
+        <ng-container *ngIf="currentCategoryKey()">
+          <i class="bx bx-chevron-right" aria-hidden="true"></i><span>{{lang.t(currentCategoryKey())}}</span>
+        </ng-container>
+        <ng-container *ngIf="currentTitleKey() !== 'bms' && currentTitleKey() !== currentCategoryKey()">
+          <i class="bx bx-chevron-right" aria-hidden="true"></i><span aria-current="page">{{lang.t(currentTitleKey())}}</span>
+        </ng-container>
+      </nav>
       <router-outlet></router-outlet>
     </main>
   </div>

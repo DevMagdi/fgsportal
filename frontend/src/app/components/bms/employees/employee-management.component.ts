@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BmsApiService } from '../bms-api.service';
 import { BmsBaseComponent } from '../bms-base.component';
 import { BmsExportService } from '../bms-export.service';
+import { BmsConfirmService } from '../bms-confirm.service';
 import { BmsLanguageService } from '../bms-language.service';
 
 /**
@@ -22,7 +23,7 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
   certificate: any = { name: '', issuer: '', issued_at: '', expires_at: '', business_unit_id: '' };
   certificateFile: File | null = null;
 
-  constructor(api: BmsApiService, lang: BmsLanguageService, private fb: FormBuilder, private exporter: BmsExportService) {
+  constructor(api: BmsApiService, lang: BmsLanguageService, private fb: FormBuilder, private exporter: BmsExportService, private confirmDialog: BmsConfirmService) {
     super(api, lang);
     this.form = fb.group({
       firstname: ['', Validators.required], lastname: ['', Validators.required],
@@ -100,10 +101,18 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
 
   toggleStatus(employee: any): void {
     const entity = this.lang.t('employee');
-    if (!confirm(`${employee.active ? this.lang.t('confirmDeactivate') : this.lang.t('confirmActivate')} — ${employee.name} (${entity})`)) return;
-    this.api.post(`employees/${employee.id}/status`, { active: !employee.active }).subscribe({
-      next: () => { this.saved(); this.load(); },
-      error: error => this.showError(error),
+    const deactivating = !!employee.active;
+    const message = `${deactivating ? this.lang.t('confirmDeactivate') : this.lang.t('confirmActivate')} — ${employee.name} (${entity})`;
+    this.confirmDialog.confirm(message, {
+      title: this.lang.t(deactivating ? 'deactivate' : 'activate'),
+      confirmLabel: this.lang.t(deactivating ? 'deactivate' : 'activate'),
+      destructive: deactivating,
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.api.post(`employees/${employee.id}/status`, { active: !employee.active }).subscribe({
+        next: () => { this.saved(); this.load(); },
+        error: error => this.showError(error),
+      });
     });
   }
 
@@ -146,11 +155,15 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
   }
   confirmImport(): void {
     if (!this.importFile || !this.importSummary?.valid) return;
-    if (!confirm(`${this.lang.t('confirmImport')} (${this.importSummary.valid})`)) return;
-    const form = new FormData(); form.append('file', this.importFile); form.append('dry_run', '0');
-    this.api.post<any>('employees/import', form).subscribe({
-      next: data => { this.saved(); this.importSummary = data.summary; this.importRows = data.rows || []; this.importFile = null; this.load(); },
-      error: error => this.showError(error),
+    this.confirmDialog.confirm(`${this.lang.t('confirmImport')} (${this.importSummary.valid})`, {
+      title: this.lang.t('bulkImport'), confirmLabel: this.lang.t('confirmImport'),
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      const form = new FormData(); form.append('file', this.importFile as File); form.append('dry_run', '0');
+      this.api.post<any>('employees/import', form).subscribe({
+        next: data => { this.saved(); this.importSummary = data.summary; this.importRows = data.rows || []; this.importFile = null; this.load(); },
+        error: error => this.showError(error),
+      });
     });
   }
   download(path: string, name: string): void { this.api.download(path, name, () => this.error = this.lang.t('error')); }

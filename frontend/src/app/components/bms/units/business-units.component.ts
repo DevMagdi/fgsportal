@@ -4,11 +4,12 @@ import { BmsApiService } from '../bms-api.service';
 import { BmsBaseComponent } from '../bms-base.component';
 import { BmsLanguageService } from '../bms-language.service';
 import { BmsExportService } from '../bms-export.service';
+import { BmsConfirmService } from '../bms-confirm.service';
 
 @Component({selector:'app-business-units',templateUrl:'./business-units.component.html',styleUrls:['../bms-shared.scss']})
 export class BusinessUnitsComponent extends BmsBaseComponent implements OnInit {
   units:any[]=[]; editing:any=null; form:FormGroup;
-  constructor(api:BmsApiService,lang:BmsLanguageService,private fb:FormBuilder,private exporter:BmsExportService){super(api,lang);this.form=fb.group({name:['',Validators.required],parent_id:[''],description:[''],key_messages:[''],servicesText:[''],director_id:[''],user_ids:[[]],is_active:[true]});}
+  constructor(api:BmsApiService,lang:BmsLanguageService,private fb:FormBuilder,private exporter:BmsExportService,private confirmDialog:BmsConfirmService){super(api,lang);this.form=fb.group({name:['',Validators.required],parent_id:[''],description:[''],key_messages:[''],servicesText:[''],director_id:[''],user_ids:[[]],is_active:[true]});}
   ngOnInit():void{super.ngOnInit();this.load();}
   load():void{this.loading=true;this.api.get<any[]>('units').subscribe({next:data=>{this.units=data;this.loading=false;},error:e=>this.showError(e)});}
   edit(unit:any):void{this.editing=unit;this.form.patchValue({...unit,servicesText:(unit.services||[]).join(', '),parent_id:unit.parent_id||'',director_id:unit.director_id||'',user_ids:(unit.users||[]).map((u:any)=>u.id)});window.scrollTo({top:0,behavior:'smooth'});}
@@ -20,5 +21,5 @@ export class BusinessUnitsComponent extends BmsBaseComponent implements OnInit {
   toggleStatus(unit:any):void{
     this.api.post(`units/${unit.id}/status`,{is_active:!unit.is_active}).subscribe({next:()=>{this.saved();this.load();},error:e=>this.showError(e)});
   }
-  remove(unit:any):void{if(!confirm(this.lang.t('confirmDelete')))return;this.api.delete(`units/${unit.id}`).subscribe({next:()=>{this.saved();this.load();},error:e=>this.showError(e)});}
+  remove(unit:any):void{this.confirmDialog.confirm(this.lang.t('confirmDelete'),{title:this.lang.t('delete'),confirmLabel:this.lang.t('delete'),destructive:true}).subscribe(confirmed=>{if(!confirmed)return;this.api.delete(`units/${unit.id}`).subscribe({next:()=>{this.saved();this.load();},error:e=>this.showError(e)});});}
 }
