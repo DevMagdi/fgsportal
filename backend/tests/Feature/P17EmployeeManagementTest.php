@@ -559,6 +559,45 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertCount(1, $filtered['unit_progress']);
     }
 
+    public function test_P21_monthly_report_products_are_limited_to_the_actors_units(): void
+    {
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$mine->id]);
+
+        $mineOnly = \App\Models\Product::create(['product_name' => 'Mine Only Product']);
+        $mineOnly->businessUnits()->attach($mine->id);
+        $theirsOnly = \App\Models\Product::create(['product_name' => 'Theirs Only Product']);
+        $theirsOnly->businessUnits()->attach($theirs->id);
+        $shared = \App\Models\Product::create(['product_name' => 'Shared Product']);
+        $shared->businessUnits()->attach([$mine->id, $theirs->id]);
+
+        // 1. No unit filter: the actor's scope still applies (this was the defect).
+        $report = $this->getBms('reports/monthly', $director)->assertOk()->json('data');
+        $names = collect($report['products'])->pluck('product_name')->all();
+        $this->assertContains('Mine Only Product', $names);
+        $this->assertContains('Shared Product', $names, 'A multi-unit product is visible when one of its units is authorised.');
+        $this->assertNotContains('Theirs Only Product', $names, 'A restricted user must never see another unit\'s product.');
+        $this->assertSame(count($names), $report['summary']['products']);
+
+        // 2. Requesting an authorised unit still intersects with the scope.
+        $filtered = $this->getBms('reports/monthly?business_unit_id='.$mine->id, $director)->assertOk()->json('data');
+        $filteredNames = collect($filtered['products'])->pluck('product_name')->all();
+        $this->assertContains('Mine Only Product', $filteredNames);
+        $this->assertNotContains('Theirs Only Product', $filteredNames);
+
+        // 3. Requesting a unit outside the scope is refused, not silently widened.
+        $this->getBms('reports/monthly?business_unit_id='.$theirs->id, $director)->assertForbidden();
+
+        // 4. An unrestricted actor keeps the previous visibility.
+        $admin = $this->actingAsRole('system_admin');
+        $all = collect($this->getBms('reports/monthly', $admin)->assertOk()->json('data')['products'])->pluck('product_name')->all();
+        $this->assertContains('Mine Only Product', $all);
+        $this->assertContains('Theirs Only Product', $all);
+        $this->assertContains('Shared Product', $all);
+        $this->assertSame(3, count($all));
+    }
+
     public function test_P17_unit_hierarchy_guards_and_safe_deletion(): void
     {
         $admin = $this->actingAsRole('system_admin');

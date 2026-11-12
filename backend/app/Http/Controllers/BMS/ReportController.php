@@ -24,7 +24,13 @@ class ReportController extends BmsController
         $tasks=UnitTask::with('unit:id,name')->whereBetween('updated_at',[$start,$end])->when($unitId,fn($q)=>$q->where('business_unit_id',$unitId))->when($ids!==null,fn($q)=>$q->whereIn('business_unit_id',$ids))->get();
         $support=SupportRequest::with(['unit:id,name','department'])->whereBetween('created_at',[$start,$end])->when($unitId,fn($q)=>$q->where('business_unit_id',$unitId))->when($ids!==null,fn($q)=>$q->whereIn('business_unit_id',$ids))->get();
         $opportunities=Opportunity::with(['unit:id,name','product:id,product_name'])->whereBetween('last_update_at',[$start,$end])->when($unitId,fn($q)=>$q->where('business_unit_id',$unitId))->when($ids!==null,fn($q)=>$q->whereIn('business_unit_id',$ids))->get();
-        $products=Product::with(['businessUnits:id,name','phases','currentPhase'])->when($unitId,fn($q)=>$q->whereHas('businessUnits',fn($u)=>$u->where('business_units.id',$unitId)))->get();
+        // A product is visible only through a unit the viewer is authorised for.
+        // The requested unit narrows that set; it never widens the actor's scope.
+        $products=Product::with(['businessUnits:id,name','phases','currentPhase'])
+            ->when($unitId,fn($q)=>$q->whereHas('businessUnits',fn($u)=>$u->where('business_units.id',$unitId)))
+            ->when($ids!==null,fn($q)=>$q->whereHas('businessUnits',fn($u)=>$u->whereIn('business_units.id',$ids)))
+            ->orderBy('product_name')
+            ->get();
         $unitRows=$units->map(function($unit)use($tasks,$support){$own=$tasks->where('business_unit_id',$unit->id);$needs=$support->where('business_unit_id',$unit->id);return ['unit'=>$unit,'tasks_total'=>$own->count(),'achievements'=>$own->where('status','achieved')->values(),'in_progress'=>$own->where('status','in_progress')->count(),'not_done'=>$own->where('status','not_done')->count(),'average_progress'=>$own->count()?(int)round($own->avg('progress')):0,'support_needs'=>$needs->values()];})->values();
         return $this->ok(['report_type'=>'Monthly performance','period'=>['start'=>$start->toDateString(),'end'=>$end->toDateString()],'generated_at'=>now(),'units'=>$unitRows,'products'=>$products,'opportunities'=>$opportunities->values(),'summary'=>['achievements'=>$tasks->where('status','achieved')->count(),'in_progress'=>$tasks->where('status','in_progress')->count(),'support_requests'=>$support->count(),'open_support'=>$support->where('status','!=','resolved')->count(),'products'=>$products->count(),'opportunities_updated'=>$opportunities->count()]]);
     }
