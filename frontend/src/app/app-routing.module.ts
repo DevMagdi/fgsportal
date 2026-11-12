@@ -43,8 +43,10 @@ const routes: Routes = [
   {path: 'my_work',component:GlobalTimeSheetComponent , canActivate:[AuthGuardService]},
   {path: 'publicReqsApply',component:PublicRequestsApprovalComponent , canActivate:[AuthGuardService]},
   {path: 'module-disabled', component: ModuleDisabledComponent, canActivate:[AuthGuardService]},
-  {path: 'modules', component: ModulesCardsComponent, canActivate:[AuthGuardService]},
-  {path: 'modules/:slug', component: ModuleDetailsComponent, canActivate:[AuthGuardService]},
+  // The old optional-module catalogue is retired from the user journey; the
+  // legacy URLs now lead straight into the unified BMS workspace.
+  {path: 'modules', redirectTo: '/bms/dashboard', pathMatch: 'full'},
+  {path: 'modules/:slug', redirectTo: '/bms/dashboard'},
   {path: 'tickets',component:FollowClientTicketsComponent , canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
   {path: 'tickets/:id',component:FollowClientTicketDetailsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
   {path: 'support-reports',component:SupportReportsComponent, canActivate:[AuthGuardService, ModuleGuard], data: { module: 'ticketing' }},
@@ -78,9 +80,9 @@ const routes: Routes = [
     loadChildren: () => import('./components/crm/crm.module').then(m => m.CRMModule),
   },
   {
+    // BMS is the product itself, not an optional module: no entitlement guard.
     path: 'bms',
-    canActivate: [AuthGuardService, ModuleGuard],
-    data: { module: 'bms' },
+    canActivate: [AuthGuardService],
     loadChildren: () => import('./components/bms/bms.module').then(m => m.BmsModule),
   },
   {

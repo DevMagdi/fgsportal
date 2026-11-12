@@ -67,6 +67,12 @@ class ModuleManagementEndpointsTest extends TestCase
             $this->assertTrue($module['is_enabled'], "{$module['slug']} should be enabled for the default company");
         }
         $this->assertTrue($modules->firstWhere('slug', 'core')['is_core']);
+        // BMS is the product itself (BRD section 2), so it is core as well.
+        $this->assertTrue($modules->firstWhere('slug', 'bms')['is_core']);
+        // ... and a core capability can never be switched off by the legacy
+        // optional-module screen.
+        $this->post('/api/company/modules/disable', ['module_slug' => 'bms'], $this->headers($this->admin))
+            ->assertStatus(422);
     }
 
     public function test_catalogue_and_company_list_reflect_a_disabled_module(): void

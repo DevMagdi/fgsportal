@@ -1,0 +1,12 @@
+<div class="access-denied">
+  <div class="card">
+    <h1 *ngIf="!loading">{{lang.t('noAccessTitle')}}</h1>
+    <h1 *ngIf="loading">{{lang.t('loading')}}</h1>
+    <p *ngIf="!loading">{{lang.t('noAccessBody')}}</p>
+    <p *ngIf="!loading" class="muted">{{lang.t('noAccessHint')}}</p>
+    <div class="button-row" *ngIf="!loading">
+      <button class="btn-brand" (click)="retry()">{{lang.t('retry')}}</button>
+      <a class="btn-soft" routerLink="/logout">{{lang.t('signOut')}}</a>
+    </div>
+  </div>
+</div>

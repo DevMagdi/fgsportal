@@ -349,6 +349,9 @@ export class NavbarComponent implements OnInit {
 
   
   logout(){
+    // Clear cached BMS abilities so a subsequent sign-in cannot inherit the
+    // previous user's navigation.
+    try { localStorage.removeItem('bms-language'); } catch (e) {}
     this._auth.logout()      
     this.router.navigate(['/']);
     this.isLoggedIn = false;

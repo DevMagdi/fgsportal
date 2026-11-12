@@ -12,6 +12,9 @@ class ProductTrackingController extends BmsController
     public function index(Request $request)
     {
         $query=Product::with(['businessUnits','phases','currentPhase','minutes.meeting'])->orderBy('product_name');
+        // Archived products stay in the database for history but leave the
+        // working list unless the caller explicitly asks for them.
+        if (!$request->boolean('include_archived')) $query->whereNull('deleted_at');
         $visibleUnits=$this->access->visibleUnitIds();
         if($visibleUnits!==null)$query->whereHas('businessUnits',fn($q)=>$q->whereIn('business_units.id',$visibleUnits));
         if ($request->filled('business_unit_id')) $query->whereHas('businessUnits',fn($q)=>$q->where('business_units.id',$request->business_unit_id));
@@ -67,6 +70,16 @@ class ProductTrackingController extends BmsController
         $this->authorizeProduct($phase->product);
         $this->audit->record($phase,'product_phase.deleted',$phase->toArray(),[]);
         $phase->delete();return $this->ok(null,'Product phase deleted');
+    }
+
+    /** Archive (soft delete) a product without destroying its phases/history. */
+    public function archive(Product $product)
+    {
+        $this->authorizeProduct($product);
+        $snapshot=$product->toArray();
+        $product->delete();
+        $this->audit->record($product,'product.archived',$snapshot,[]);
+        return $this->ok(null,'Product archived');
     }
 
     private function authorizeUnits(array $unitIds):void{foreach($unitIds as $unitId)$this->access->authorizeUnit((int)$unitId);}

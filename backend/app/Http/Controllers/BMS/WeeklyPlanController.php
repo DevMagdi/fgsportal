@@ -23,6 +23,41 @@ class WeeklyPlanController extends BmsController
         return $this->ok($query->latest('week_start')->get());
     }
 
+    /**
+     * "My Tasks" view: every task assigned to the signed-in employee, across
+     * weeks (optionally filtered by status / week). Team-capable roles get the
+     * same endpoint scoped to their units instead of just their own rows.
+     */
+    public function myTasks(Request $request)
+    {
+        $filters=$request->validate([
+            'status'=>'nullable|in:achieved,in_progress,not_done','week_start'=>'nullable|date','from'=>'nullable|date','to'=>'nullable|date|after_or_equal:from',
+        ]);
+        $user=$this->access->user();
+        $query=UnitTask::with(['owner:id,username','unit:id,name','plan:id,week_start,status'])
+            ->when(!$this->access->canViewTeamTasks(),fn($q)=>$q->where('owner_id',$user->id))
+            ->when($filters['status']??null,fn($q,$v)=>$q->where('status',$v))
+            ->when($filters['week_start']??null,fn($q,$v)=>$q->whereHas('plan',fn($p)=>$p->whereDate('week_start',$v)))
+            ->when($filters['from']??null,fn($q,$v)=>$q->whereHas('plan',fn($p)=>$p->whereDate('week_start','>=',$v)))
+            ->when($filters['to']??null,fn($q,$v)=>$q->whereHas('plan',fn($p)=>$p->whereDate('week_start','<=',$v)))
+            ->latest('due_date');
+        $visibleUnits=$this->access->visibleUnitIds();
+        if($visibleUnits!==null)$query->where(function($q)use($visibleUnits,$user){$q->whereIn('business_unit_id',$visibleUnits)->orWhere('owner_id',$user->id);});
+        $tasks=$query->get();
+        $today=today();
+        return $this->ok([
+            'data'=>$tasks,
+            'summary'=>[
+                'total'=>$tasks->count(),
+                'achieved'=>$tasks->where('status','achieved')->count(),
+                'in_progress'=>$tasks->where('status','in_progress')->count(),
+                'not_done'=>$tasks->where('status','not_done')->count(),
+                'overdue'=>$tasks->filter(fn($t)=>$t->status!=='achieved'&&$t->due_date&&$t->due_date->lt($today))->count(),
+                'blocked'=>$tasks->filter(fn($t)=>!empty($t->blockers))->count(),
+            ],
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data=$request->validate([

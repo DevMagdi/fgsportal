@@ -5,6 +5,7 @@ import { NotificationService } from 'src/app/services/notification.service';
 import { AccountPositions, AccountType, Department } from '../../interfaces/user'
 import { SnackBarState } from '../snackbar/snackbar.component';
 import { LoadingService } from 'src/app/services/loading.service';
+import { BmsAccessService } from '../bms/bms-access.service';
 
 @Component({
   selector: 'app-signin',
@@ -28,7 +29,8 @@ export class SigninComponent implements OnInit {
   constructor(private router:Router,
               private _AuthAPi:AuthApiService,
               private _notify:NotificationService,
-            private loaderService:LoadingService) { }
+            private loaderService:LoadingService,
+            private access:BmsAccessService) { }
 
   ngOnInit(): void {
     this._AuthAPi.user.subscribe(user=>{
@@ -65,19 +67,19 @@ export class SigninComponent implements OnInit {
 
 
 
+  /**
+   * Single BMS entry point (BRD section 3).
+   *
+   * Department-based redirects to legacy CRM / Admin / Dev dashboards are gone:
+   * every successful sign-in lands in the BMS workspace, on the first page the
+   * account is actually authorised to open, or on the "no access" screen.
+   */
   checkUser(loggedInUser){
-    if(!!loggedInUser){
-      if(loggedInUser.department == Department.TECHNICAL_TEAM && (loggedInUser.accPosition != AccountPositions.MANAGER && loggedInUser.accPosition != AccountPositions.Team_Leader)){
-        this.router.navigate(['/dev/timesheet'])
-      }
-      else if(loggedInUser.department == Department.MANAGEMENT || (loggedInUser.department == Department.TECHNICAL_TEAM && loggedInUser.accPosition == AccountPositions.MANAGER)){
-        this.router.navigate(['/admin-panel/dashboard'])
-      }else if(loggedInUser.department == Department.Business_Development){
-        this.router.navigate(['/CRM/activities'])
-      }else if(loggedInUser.department == Department.ADMINSTRATION){
-        this.router.navigate(['/admin-panel'])
-      }
-    }
+    if(!loggedInUser) return;
+    this.access.reset();
+    this.access.abilities().subscribe(() => {
+      this.router.navigateByUrl(this.access.firstLanding());
+    });
   }
 
 

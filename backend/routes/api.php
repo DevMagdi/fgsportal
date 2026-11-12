@@ -1351,12 +1351,14 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::put('/notifications/{id}/read', [\App\Http\Controllers\BMS\NotificationController::class, 'read']);
     Route::post('/roles/assign', [\App\Http\Controllers\BMS\LookupController::class, 'assignRole'])->middleware('bms.permission:roles.manage');
     Route::post('/roles/revoke', [\App\Http\Controllers\BMS\LookupController::class, 'revokeRole'])->middleware('bms.permission:roles.manage');
+    Route::get('/audit/role-changes', [\App\Http\Controllers\BMS\LookupController::class, 'roleAudit'])->middleware('bms.permission:roles.manage');
 
     Route::get('/units', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'index'])->middleware('bms.permission:units.view');
     Route::post('/units', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'store'])->middleware('bms.permission:units.manage');
     Route::get('/units/{unit}', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'show'])->middleware('bms.permission:units.view');
     Route::put('/units/{unit}', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'update'])->middleware('bms.permission:units.manage');
     Route::delete('/units/{unit}', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'destroy'])->middleware('bms.permission:units.manage');
+    Route::post('/units/{unit}/status', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'status'])->middleware('bms.permission:units.manage');
 
     Route::get('/weekly-plans', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'index'])->middleware('bms.permission:plans.view');
     Route::post('/weekly-plans', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'store'])->middleware('bms.permission:plans.manage');
@@ -1365,6 +1367,7 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::post('/weekly-plans/{plan}/submit', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'submit'])->middleware('bms.permission:plans.manage');
     Route::get('/weekly-plans/{plan}/sunday-report', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'report'])->middleware('bms.permission:plans.view');
     Route::post('/weekly-plans/{plan}/tasks', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'storeTask'])->middleware('bms.permission:tasks.manage');
+    Route::get('/my-tasks', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'myTasks'])->middleware('bms.permission:plans.view');
     Route::get('/employee-tasks', [\App\Http\Controllers\BMS\EmployeeTaskController::class, 'index'])->middleware('bms.permission:plans.view');
     Route::put('/tasks/{task}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'updateTask'])->middleware('bms.permission:plans.view');
     Route::post('/weekly-plans/{plan}/support-requests', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'storeSupport'])->middleware('bms.permission:support.manage');
@@ -1398,6 +1401,7 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::get('/candidates/{candidate}/cv', [\App\Http\Controllers\BMS\RecruitmentController::class, 'downloadCv'])->middleware('bms.permission:recruitment.view');
     Route::put('/candidates/{candidate}/interview', [\App\Http\Controllers\BMS\RecruitmentController::class, 'interview'])->middleware('bms.permission:recruitment.manage');
     Route::post('/candidates/{candidate}/hire', [\App\Http\Controllers\BMS\RecruitmentController::class, 'hire'])->middleware('bms.permission:recruitment.manage');
+    Route::post('/candidates/{candidate}/hire-new-employee', [\App\Http\Controllers\BMS\RecruitmentController::class, 'hireNewEmployee'])->middleware('bms.permission:recruitment.manage');
     Route::put('/onboarding/{item}', [\App\Http\Controllers\BMS\RecruitmentController::class, 'updateOnboarding'])->middleware('bms.permission:recruitment.view');
     Route::get('/procurement', [\App\Http\Controllers\BMS\ProcurementController::class, 'index'])->middleware('bms.permission:procurement.view');
     Route::post('/procurement', [\App\Http\Controllers\BMS\ProcurementController::class, 'store'])->middleware('bms.permission:procurement.manage');
@@ -1415,6 +1419,15 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::get('/documents/{document}/history', [\App\Http\Controllers\BMS\DocumentController::class, 'history'])->middleware('bms.permission:documents.view');
     Route::get('/documents/{document}/download', [\App\Http\Controllers\BMS\DocumentController::class, 'download'])->middleware('bms.permission:documents.view');
     Route::get('/directory', [\App\Http\Controllers\BMS\DirectoryController::class, 'index'])->middleware('bms.permission:directory.view');
+    // Employee administration (BRD section 5) reuses the legacy users table.
+    Route::get('/employees', [\App\Http\Controllers\BMS\EmployeeController::class, 'index'])->middleware('bms.permission:directory.view');
+    Route::get('/employees/{employee}', [\App\Http\Controllers\BMS\EmployeeController::class, 'show'])->middleware('bms.permission:directory.view');
+    Route::post('/employees', [\App\Http\Controllers\BMS\EmployeeController::class, 'store'])->middleware('bms.permission:directory.manage');
+    Route::put('/employees/{employee}', [\App\Http\Controllers\BMS\EmployeeController::class, 'update'])->middleware('bms.permission:directory.manage');
+    Route::post('/employees/{employee}/status', [\App\Http\Controllers\BMS\EmployeeController::class, 'status'])->middleware('bms.permission:directory.manage');
+    Route::post('/employees/{employee}/photo', [\App\Http\Controllers\BMS\EmployeeController::class, 'uploadPhoto'])->middleware('bms.permission:directory.manage');
+    Route::get('/employees/{employee}/photo', [\App\Http\Controllers\BMS\EmployeeController::class, 'photo'])->middleware('bms.permission:directory.view');
+    Route::get('/employees/{employee}/roles', [\App\Http\Controllers\BMS\LookupController::class, 'assignments'])->middleware('bms.permission:roles.manage');
     Route::post('/certificates', [\App\Http\Controllers\BMS\DirectoryController::class, 'certificate'])->middleware('bms.permission:directory.manage');
     Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\BMS\DirectoryController::class, 'download'])->middleware('bms.permission:directory.view');
     Route::get('/reports/monthly', [\App\Http\Controllers\BMS\ReportController::class, 'monthly'])->middleware('bms.permission:reports.view');
@@ -1437,6 +1450,7 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::get('/products', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'index'])->middleware('bms.permission:products.view');
     Route::post('/products', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'store'])->middleware('bms.permission:products.manage');
     Route::put('/products/{product}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'update'])->middleware('bms.permission:products.manage');
+    Route::post('/products/{product}/archive', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'archive'])->middleware('bms.permission:products.manage');
     Route::post('/products/{product}/phases', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'storePhase'])->middleware('bms.permission:products.manage');
     Route::put('/product-phases/{phase}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'updatePhase'])->middleware('bms.permission:products.manage');
     Route::delete('/product-phases/{phase}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'destroyPhase'])->middleware('bms.permission:products.manage');

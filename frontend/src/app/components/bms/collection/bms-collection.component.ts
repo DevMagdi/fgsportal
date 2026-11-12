@@ -11,6 +11,7 @@ export class BmsCollectionComponent extends BmsBaseComponent implements OnInit {
   config:BmsCollectionConfig;items:any[]=[];filtered:any[]=[];selected:any=null;draft:any={};files:{[key:string]:File}={};search='';unitFilter='';stageFilter='';editing=false;
   interaction:any={interaction_type:'meeting',happened_at:'',outcome:'',notes:''};study:any={title:'',owner_id:'',status:'planned',due_date:'',notes:''};
   candidate:any={name:'',email:''};hire:any={first_working_day:'',employee_id:''};
+  hireNew:any={mode:'new',username:'',email:'',firstname:'',lastname:'',password:'',work_degrees_id:'',role_id:''};
   quote:any={vendor:'',amount:null,currency:'SAR'};finance:any={decision:'approved',budget_confirmed:true,finance_comment:''};
   procedure:any={title:'',category:'pr_protocol',content:'',is_published:true};procedures:any[]=[];
   certificate:any={user_id:'',business_unit_id:'',name:'',issuer:'',issued_at:'',expires_at:''};history:any[]=[];allStages:any[]=[];newStage:any={code:'',name:'',name_ar:'',sequence:8,is_active:true};
@@ -29,7 +30,27 @@ export class BmsCollectionComponent extends BmsBaseComponent implements OnInit {
   convertLead():void{this.api.post(`leads/${this.selected.id}/convert`).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
   addCandidate():void{if(!this.candidate.name)return;const form=new FormData();form.append('name',this.candidate.name);if(this.candidate.email)form.append('email',this.candidate.email);if(this.files.cv)form.append('cv',this.files.cv);this.api.post(`recruitment/${this.selected.id}/candidates`,form).subscribe({next:data=>{this.selected=data;this.saved();this.candidate={name:'',email:''};delete this.files.cv;this.load();},error:e=>this.showError(e)});}
   saveCandidate(candidate:any):void{this.api.put(`candidates/${candidate.id}/interview`,{interview_at:candidate.interview_at,interview_notes:candidate.interview_notes,interview_decision:candidate.interview_decision,status:candidate.interview_decision==='pass'?'selected':candidate.interview_decision==='reject'?'rejected':'interviewed'}).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
-  hireCandidate(candidate:any):void{if(!this.hire.first_working_day||!this.hire.employee_id)return;this.api.post(`candidates/${candidate.id}/hire`,this.hire).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
+  hireCandidate(candidate:any):void{
+    // Option A: create the employee account from the successful candidate (BRD section 5).
+    if(this.hireNew.mode==='new'){
+      if(!this.hire.first_working_day||!this.hireNew.username||!this.hireNew.email||!this.hireNew.firstname||!this.hireNew.lastname||!this.hireNew.password){this.error=this.lang.t('validationError');return;}
+      const body={...this.hireNew,first_working_day:this.hire.first_working_day,role_id:this.hireNew.role_id||null};
+      delete body.mode;
+      this.api.post(`candidates/${candidate.id}/hire-new-employee`,body).subscribe({next:data=>{this.selected=data;this.saved();this.hireNew={mode:'new',username:'',email:'',firstname:'',lastname:'',password:'',work_degrees_id:'',role_id:''};this.load();},error:e=>this.showError(e)});
+      return;
+    }
+    // Option B: link an already existing employee account.
+    if(!this.hire.first_working_day||!this.hire.employee_id){this.error=this.lang.t('validationError');return;}
+    this.api.post(`candidates/${candidate.id}/hire`,{first_working_day:this.hire.first_working_day,employee_id:this.hire.employee_id}).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});
+  }
+  fillNewEmployee(candidate:any):void{
+    // Candidates only carry a full name; split it into the account fields.
+    const parts=String(candidate.name||'').trim().split(/\s+/);
+    this.hireNew.firstname=parts.shift()||'';
+    this.hireNew.lastname=parts.join(' ');
+    this.hireNew.email=candidate.email||'';
+    this.hireNew.username=(candidate.email||'').split('@')[0]||'';
+  }
   saveOnboarding(item:any):void{this.api.put(`onboarding/${item.id}`,{status:item.status,owner_id:item.owner_id,notes:item.notes}).subscribe({next:data=>{this.selected=data;this.saved();},error:e=>this.showError(e)});}
   addQuote():void{if(!this.quote.vendor||this.quote.amount===null)return;const form=new FormData();Object.keys(this.quote).forEach(key=>form.append(key,this.quote[key]));if(this.files.quotation)form.append('quotation',this.files.quotation);this.api.post(`procurement/${this.selected.id}/quotations`,form).subscribe({next:data=>{this.selected=data;this.saved();this.quote={vendor:'',amount:null,currency:'SAR'};delete this.files.quotation;this.load();},error:e=>this.showError(e)});}
   review():void{if(!this.finance.finance_comment)return;this.api.post(`procurement/${this.selected.id}/review`,this.finance).subscribe({next:data=>{this.selected=data;this.saved();this.load();},error:e=>this.showError(e)});}
