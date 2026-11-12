@@ -56,7 +56,8 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('app-navbar')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.main')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('alphaiota-loading')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
   });
 });
