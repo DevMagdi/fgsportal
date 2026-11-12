@@ -1,8 +1,9 @@
 # BMS Phase 3.5 — Frontend stabilization
 
-**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`  
-**Candidate SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`  
-**Current CI:** 43300908597 (candidate Karma/build still running at last observation).
+**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
+**Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`
+**Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26`
+**Current CI:** 43302623366 — **failure**.
 
 ## Confirmed date parsing defect and fix
 
@@ -16,9 +17,9 @@ Fixed the regex to `/^\d{4}-\d{2}-\d{2}$/` and added a spec comparing output to 
 |---|---|---|
 | Node tests | `TZ=America/Los_Angeles npm run test:node` — **43/43 pass** after date regression spec. | PASS |
 | Production build | `npm run build -- --configuration production` — exit 0; hash `dda2defb94f80af4`; existing CSS selector, Autoprefixer and CommonJS warnings. | PASS locally |
-| Complete Angular/Karma suite | Candidate CI run 43300908597 is running at last observation. Previous Phase 3 run: 211 specs, 76 passed / 135 failed. | BLOCKED pending candidate CI |
+| Complete Angular/Karma suite | CI 43302623366: 212 executed, 77 passed / 135 failed. Missing TestBed providers remain common (e.g. `MatSnackBar`, `HttpClient`, `MessagingService`). | FAIL |
 | Lint | `npm run lint` calls `ng lint`; this Angular project has no lint target/package. CI lint is `continue-on-error`. | NOT AVAILABLE as a gate; no pass claim |
-| Production build in CI | CI workflow now runs production build after dependency install even if Karma fails, unless cancelled. | PENDING candidate run |
+| Production build in CI | CI 43302623366 production build completed successfully after Karma failure. | PASS |
 | TypeScript/compiler | Production build compiles TypeScript; no separate strict typecheck configured. | Build evidence only |
 | Changed-file / whitespace | `git diff --check` passed before source commit. | PASS |
 
@@ -34,4 +35,4 @@ Previous genuine Chromium 153 runs reviewed populated/empty/loading/error/retry 
 
 ## Gate status
 
-Frontend gate is **NOT PASSED pending candidate Karma/CI build**, despite passing Node tests and production build locally. Lint remains unavailable. Dashboard API integration remains mocked, not real.
+Frontend gate is **NOT PASSED**: CI 43302623366 Karma suite failed (212 executed, 77 passed / 135 failed), despite passing Node tests and production builds locally and in CI. Lint remains unavailable. Dashboard API integration remains mocked, not real.

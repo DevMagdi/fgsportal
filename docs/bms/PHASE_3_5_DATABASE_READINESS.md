@@ -1,7 +1,7 @@
 # BMS Phase 3.5 — Database and migration readiness
 
-**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`  
-**Candidate SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`  
+**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
+**Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26`
 **Status:** Partial source audit; fresh-environment readiness **BLOCKED / NOT PASSED**.
 
 ## Safety

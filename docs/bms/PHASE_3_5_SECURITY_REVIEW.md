@@ -1,7 +1,8 @@
 # BMS Phase 3.5 — Security and authorization review
 
-**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`  
-**Candidate SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`  
+**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
+**Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`
+**Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26`
 **Status:** Targeted code review; security gate **NOT PASSED** due unresolved shared-product audit-scope semantics and no live integration.
 
 ## Reviewed boundaries
@@ -16,7 +17,7 @@
 
 | Scenario | Evidence | Outcome / limits |
 |---|---|---|
-| Authorized selected business unit | CI focused P22 test passed on preceding code baseline; latest CI for candidate pending at report preparation. | Selected-unit activity query regression has an automated check. Not yet a final-CI pass on candidate SHA. |
+| Authorized selected business unit | CI 43302623366 focused P22 regression passed on latest tested SHA. | Selected-unit activity query regression has an automated check and passed in this run. |
 | Cross-unit activity | P19 test explicitly asserts another unit's event is absent; CI regression previously passed. | The test does not settle event visibility for one Product attached to multiple units. |
 | Global permissions | Static review: `visibleUnitIds()` returns null for configured global-scope roles; controller applies global scope and selected unit authorization. | No new global bypass was added. Full role matrix not exhaustively rerun in this session. |
 | Restricted dashboard permissions | Chromium mocked browser QA hid controls/panels for a restricted ability set. | Mocked UI evidence only; real endpoint authorization remains unverified. |
@@ -34,4 +35,4 @@ The changes made in this stabilization candidate do **not** modify role abilitie
 
 ## Security gate
 
-**NOT PASSED.** Focused regression evidence is useful but not sufficient for production acceptance. Need the candidate CI results, real isolated backend authorization matrix, explicit shared-product audit event policy, tenant/company-to-unit schema contract, and live integration against an isolated test database. No Phase 4 work started.
+**NOT PASSED.** Focused regression evidence is useful but not sufficient for production acceptance. CI 43302623366 results are recorded in the test report; still need a real isolated backend authorization matrix, explicit shared-product audit event policy, tenant/company-to-unit schema contract, and live integration against an isolated test database. No Phase 4 work started.

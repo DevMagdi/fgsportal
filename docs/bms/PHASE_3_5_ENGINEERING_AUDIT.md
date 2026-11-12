@@ -1,10 +1,10 @@
 # BMS Phase 3.5 — Engineering audit
 
-**Audit base / starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`  
-**Working branch:** `arena/e1389d1e-fgsportal` (session branch; kept in place)  
-**Base:** `origin/BMS` at `891851bc85b2d2f274b811c9173d6268c8752795`  
-**PR:** #26, open, base `BMS`; no merge performed.  
-**Candidate after bounded fixes:** `7de9f0479c75269c658bf80772e2ddd343fe29c9` (CI 43300908597 is the validation run; see test report for its completion outcome).
+**Audit base / starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
+**Working branch:** `arena/e1389d1e-fgsportal` (session branch; kept in place)
+**Base:** `origin/BMS` at `891851bc85b2d2f274b811c9173d6268c8752795`
+**PR:** #26, open, base `BMS`; no merge performed.
+**Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`. **Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26` (CI 43302623366 failed; see test report).
 
 ## Summary / disposition
 
