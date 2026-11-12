@@ -85,8 +85,9 @@ jobs:
           status=$?
           cat test-output.txt
           if [ "$status" -ne 0 ]; then
-            awk '/^[0-9]+\) Tests\\/ { test=$0; if (getline > 0) printf "::error::%s -- %s\\n", test, $0 }' test-output.txt
-            echo "::error::PHPUNIT_BASE64=$((grep -A100 -E '^There (was|were)|^Tests:|^OK' test-output.txt || tail -n 40 test-output.txt) | gzip -9 | base64 -w0)"
+            awk '/^[0-9]+\) Tests\\/ { test=$0; if (getline > 0) printf "::error::SQLITE %s -- %s\n", test, $0 }' test-output.txt
+            grep -E '^(There (was|were)|Tests:|OK)' test-output.txt | tail -n 12 | while IFS= read -r line; do echo "::notice::SQLITE_SUMMARY $line"; done
+            echo "::error::PHPUNIT_BASE64=$( (grep -A100 -E '^There (was|were)|^Tests:|^OK' test-output.txt || tail -n 40 test-output.txt) | gzip -9 | base64 -w0)"
           fi
           exit "$status"
       - name: Report SQLite test summary
@@ -102,7 +103,13 @@ jobs:
           vendor/bin/phpunit -c phpunit.mysql.xml > mysql-test-output.txt 2>&1
           status=$?
           cat mysql-test-output.txt
-          if [ "$status" -ne 0 ]; then echo "::error::MYSQL_BASE64=$(tail -n 80 mysql-test-output.txt | base64 -w0)"; else echo "::notice::MYSQL_$(grep -E '^(OK|Tests:)' mysql-test-output.txt | tail -n 1)"; fi
+          if [ "$status" -ne 0 ]; then
+            awk '/^[0-9]+\) Tests\\/ { test=$0; if (getline > 0) printf "::error::MYSQL %s -- %s\n", test, $0 }' mysql-test-output.txt
+            grep -E '^(There (was|were)|Tests:|OK)' mysql-test-output.txt | tail -n 12 | while IFS= read -r line; do echo "::notice::MYSQL_SUMMARY $line"; done
+            echo "::error::MYSQL_BASE64=$(tail -n 80 mysql-test-output.txt | gzip -9 | base64 -w0)"
+          else
+            echo "::notice::MYSQL_$(grep -E '^(OK|Tests:)' mysql-test-output.txt | tail -n 1)"
+          fi
           exit "$status"
       - name: Lint BMS PHP
         if: always() && steps.prepare.outcome == 'success'
