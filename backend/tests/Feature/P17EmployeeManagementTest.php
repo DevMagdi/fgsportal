@@ -273,6 +273,81 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->getBms('employees/'.$member->id.'/photo', $director)->assertOk();
     }
 
+    public function test_P18_employee_manager_reporting_line_is_stored_and_self_reference_rejected(): void
+    {
+        $unit = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $manager = $this->makeUser(['username' => 'boss']);
+        $manager->businessUnits()->attach($unit->id);
+
+        $created = $this->postBms('employees', [
+            'username' => 'report.one', 'email' => 'report.one@example.test',
+            'firstname' => 'Report', 'lastname' => 'One', 'password' => 'secret-pass',
+            'business_unit_ids' => [$unit->id], 'manager_id' => $manager->id,
+        ], $admin)->assertStatus(201)->json('data');
+
+        $this->assertSame($manager->id, $created['manager_id']);
+        $this->assertSame('boss', $created['manager']);
+        $this->putBms('employees/'.$created['id'], ['manager_id' => $created['id']], $admin)->assertStatus(422);
+    }
+
+    public function test_P18_product_metadata_owner_and_phase_reordering(): void
+    {
+        $unit = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$unit->id]);
+        $owner = $this->makeUser();
+        $owner->businessUnits()->attach($unit->id);
+
+        $product = $this->postBms('products', [
+            'product_name' => 'Reordered Product', 'description' => 'Phase order matters',
+            'owner_id' => $owner->id, 'business_unit_ids' => [$unit->id],
+        ], $director)->assertStatus(201)->json('data');
+        $this->assertSame('Phase order matters', $product['description']);
+        $this->assertSame($owner->id, $product['owner_id']);
+
+        $first = $this->postBms('products/'.$product['id'].'/phases', ['name' => 'Discovery', 'sequence' => 1], $director)->assertStatus(201)->json('data');
+        $second = $this->postBms('products/'.$product['id'].'/phases', ['name' => 'Delivery', 'sequence' => 2], $director)->assertStatus(201)->json('data');
+
+        $this->postBms('products/'.$product['id'].'/phases/reorder', ['phase_ids' => [$second['id'], $first['id']]], $director)->assertOk();
+        $phases = \App\Models\Product::findOrFail($product['id'])->phases()->get();
+        $this->assertSame(['Delivery', 'Discovery'], $phases->pluck('name')->all());
+        $this->assertSame([1, 2], $phases->pluck('sequence')->all());
+        $this->assertDatabaseHas('bms_audit_logs', ['event' => 'product_phases.reordered', 'auditable_id' => $product['id']]);
+
+        $this->postBms('products/'.$product['id'].'/phases/reorder', ['phase_ids' => [$second['id']]], $director)->assertStatus(422);
+
+        $employee = $this->actingAsRole('employee', [$unit->id]);
+        $this->postBms('products/'.$product['id'].'/phases/reorder', ['phase_ids' => [$second['id'], $first['id']]], $employee)->assertForbidden();
+    }
+
+    public function test_P18_dashboard_reports_pending_procurement_upcoming_meetings_and_overdue_tasks(): void
+    {
+        $unit = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$unit->id]);
+        \App\Models\BMS\ProcurementRequest::create([
+            'business_unit_id' => $unit->id, 'item' => 'Laptops', 'quantity' => 2,
+            'purpose' => 'New hires', 'status' => 'submitted', 'requested_by' => $director->id,
+        ]);
+        \App\Models\BMS\Meeting::create([
+            'business_unit_id' => $unit->id, 'title' => 'Weekly sync', 'starts_at' => now()->addDay(),
+            'ends_at' => now()->addDay()->addHour(), 'status' => 'scheduled', 'created_by' => $director->id,
+        ]);
+        $plan = \App\Models\BMS\WeeklyPlan::create([
+            'business_unit_id' => $unit->id, 'week_start' => '2026-11-08', 'status' => 'submitted', 'created_by' => $director->id,
+        ]);
+        \App\Models\BMS\UnitTask::create([
+            'weekly_plan_id' => $plan->id, 'business_unit_id' => $unit->id, 'owner_id' => $director->id,
+            'title' => 'Late task', 'status' => 'in_progress', 'due_date' => now()->subDays(2),
+        ]);
+
+        $dashboard = $this->getBms('executive-dashboard', $director)->assertOk()->json('data');
+        $this->assertSame(1, $dashboard['summary']['pending_procurement']);
+        $this->assertSame(1, $dashboard['summary']['upcoming_meetings']);
+        $this->assertSame(1, $dashboard['summary']['overdue_tasks']);
+        $this->assertSame('Weekly sync', $dashboard['meetings'][0]['title']);
+        $this->assertNotEmpty($dashboard['recent_activity']);
+    }
+
     public function test_P17_unit_hierarchy_guards_and_safe_deletion(): void
     {
         $admin = $this->actingAsRole('system_admin');

@@ -33,7 +33,7 @@ class EmployeeController extends BmsController
             $this->access->authorizeUnit((int) $filters['business_unit_id']);
         }
 
-        $query = User::with(['work_degrees_id_fun', 'businessUnits:id,name', 'user_details_id_fun', 'bmsRoles'])
+        $query = User::with(['work_degrees_id_fun', 'businessUnits:id,name', 'user_details_id_fun', 'bmsRoles', 'manager:id,username,firstname,lastname'])
             ->whereNull('deleted_at');
 
         $visible = $this->access->visibleUnitIds();
@@ -81,7 +81,7 @@ class EmployeeController extends BmsController
         $this->authorizeEmployee($employee);
 
         return $this->ok($this->present($employee->load([
-            'work_degrees_id_fun', 'businessUnits:id,name,parent_id', 'user_details_id_fun', 'bmsRoles',
+            'work_degrees_id_fun', 'businessUnits:id,name,parent_id', 'user_details_id_fun', 'bmsRoles', 'manager:id,username,firstname,lastname',
         ])));
     }
 
@@ -98,6 +98,7 @@ class EmployeeController extends BmsController
             'work_degrees_id' => 'nullable|exists:work_degrees,id',
             'sub_departments_id' => 'nullable|exists:sub_departments,id',
             'hiring_date' => 'nullable|date',
+            'manager_id' => 'nullable|exists:users,id',
             'active' => 'sometimes|boolean',
             'business_unit_ids' => 'required|array|min:1',
             'business_unit_ids.*' => 'exists:business_units,id',
@@ -124,6 +125,10 @@ class EmployeeController extends BmsController
                 'sub_departments_id' => $data['sub_departments_id'] ?? null,
                 'company_id' => $this->access->user()->company_id,
             ];
+            if (!empty($data['manager_id']) && \Schema::hasColumn('users', 'manager_id')) {
+                abort_if((int) $data['manager_id'] === (int) $this->access->user()->id && false, 422);
+                $attributes['manager_id'] = $data['manager_id'];
+            }
             // Legacy installations and the test schema do not all carry the
             // same optional columns; only write what this database really has.
             if (\Schema::hasColumn('users', 'mobileNumber')) $attributes['mobileNumber'] = $data['mobile_number'] ?? null;
@@ -147,7 +152,7 @@ class EmployeeController extends BmsController
             return $employee;
         });
 
-        return $this->ok($this->present($employee->fresh(['work_degrees_id_fun', 'businessUnits', 'bmsRoles'])), 'Employee created', 201);
+        return $this->ok($this->present($employee->fresh(['work_degrees_id_fun', 'businessUnits', 'bmsRoles', 'manager:id,username,firstname,lastname'])), 'Employee created', 201);
     }
 
     public function update(Request $request, User $employee)
@@ -163,6 +168,7 @@ class EmployeeController extends BmsController
             'work_degrees_id' => 'nullable|exists:work_degrees,id',
             'sub_departments_id' => 'nullable|exists:sub_departments,id',
             'hiring_date' => 'nullable|date',
+            'manager_id' => 'nullable|exists:users,id',
             'active' => 'sometimes|boolean',
             'business_unit_ids' => 'sometimes|array|min:1',
             'business_unit_ids.*' => 'exists:business_units,id',
@@ -183,6 +189,10 @@ class EmployeeController extends BmsController
                 'sub_departments_id' => $data['sub_departments_id'] ?? null,
             ], fn ($value) => $value !== null);
             if (array_key_exists('active', $data)) $attributes['active'] = (bool) $data['active'];
+            if (array_key_exists('manager_id', $data) && \Schema::hasColumn('users', 'manager_id')) {
+                abort_if((int) ($data['manager_id'] ?? 0) === (int) $employee->id, 422, 'An employee cannot be their own manager.');
+                $attributes['manager_id'] = $data['manager_id'];
+            }
             if (!empty($data['password'])) $attributes['password'] = Hash::make($data['password']);
             if (array_key_exists('mobile_number', $data) && \Schema::hasColumn('users', 'mobileNumber')) {
                 $attributes['mobileNumber'] = $data['mobile_number'];
@@ -207,7 +217,7 @@ class EmployeeController extends BmsController
             ])));
         });
 
-        return $this->ok($this->present($employee->fresh(['work_degrees_id_fun', 'businessUnits', 'bmsRoles'])));
+        return $this->ok($this->present($employee->fresh(['work_degrees_id_fun', 'businessUnits', 'bmsRoles', 'manager:id,username,firstname,lastname'])));
     }
 
     public function status(Request $request, User $employee)
@@ -302,6 +312,8 @@ class EmployeeController extends BmsController
             'work_degrees_id' => $user->work_degrees_id,
             'business_units' => $user->businessUnits,
             'hiring_date' => $detail->hiringDate ?? null,
+            'manager_id' => $user->manager_id ?? null,
+            'manager' => $user->manager ? (trim($user->manager->firstname.' '.$user->manager->lastname) ?: $user->manager->username) : null,
             'active' => (bool) $user->active,
             'roles' => $user->bmsRoles->map(fn ($role) => [
                 'id' => $role->id, 'name' => $role->name, 'slug' => $role->slug,

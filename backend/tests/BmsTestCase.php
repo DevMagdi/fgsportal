@@ -50,6 +50,7 @@ abstract class BmsTestCase extends TestCase
             '2026_11_12_000007_add_bms_completion_columns.php',
             '2026_11_12_000008_add_bms_meeting_sequence.php',
             '2026_11_12_000009_make_bms_a_core_capability.php',
+            '2026_11_12_000010_add_bms_admin_metadata.php',
         ] as $filename) {
             require_once base_path('database/migrations/'.$filename);
         }
@@ -61,6 +62,7 @@ abstract class BmsTestCase extends TestCase
         (new \AddBmsCompletionColumns())->up();
         (new \AddBmsMeetingSequence())->up();
         (new \MakeBmsACoreCapability())->up();
+        (new \AddBmsAdminMetadata())->up();
 
         (new BmsPhaseOneSeeder())->run();
         $this->enableBmsModule();

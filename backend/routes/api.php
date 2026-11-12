@@ -1452,6 +1452,7 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::put('/products/{product}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'update'])->middleware('bms.permission:products.manage');
     Route::post('/products/{product}/archive', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'archive'])->middleware('bms.permission:products.manage');
     Route::post('/products/{product}/phases', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'storePhase'])->middleware('bms.permission:products.manage');
+    Route::post('/products/{product}/phases/reorder', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'reorderPhases'])->middleware('bms.permission:products.manage');
     Route::put('/product-phases/{phase}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'updatePhase'])->middleware('bms.permission:products.manage');
     Route::delete('/product-phases/{phase}', [\App\Http\Controllers\BMS\ProductTrackingController::class, 'destroyPhase'])->middleware('bms.permission:products.manage');
 
