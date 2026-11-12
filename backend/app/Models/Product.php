@@ -28,6 +28,12 @@ class Product extends Model
         return (int) round($this->phases->where('status', 'completed')->count() / $total * 100);
     }
 
+    /** Product owner (BRD §4.3). */
+    public function owner()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'owner_id');
+    }
+
     public function businessUnits()
     {
         return $this->belongsToMany(\App\Models\BMS\BusinessUnit::class, 'product_business_unit')->withTimestamps();

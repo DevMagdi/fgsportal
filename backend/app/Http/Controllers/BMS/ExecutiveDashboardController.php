@@ -41,17 +41,36 @@ class ExecutiveDashboardController extends BmsController
         })->values();
 
         $opportunityQuery=Opportunity::with(['unit','product','owner:id,username'])->filter($filters)->when($visibleUnits!==null,fn($q)=>$q->where(function($scoped)use($visibleUnits){$scoped->whereIn('business_unit_id',$visibleUnits)->orWhere('owner_id',$this->access->user()->id);}));
-        $opportunities=$opportunityQuery->latest('last_update_at')->get()->map(function($item){
-            $item->is_delayed=$item->expected_close_date&&$item->expected_close_date->isBefore(today())&&!in_array($item->stage,['won','lost','declined'],true);
-            $item->has_no_update=$item->last_update_at&&$item->last_update_at->lt(now()->subDays(config('bms.opportunity_no_update_days')));return $item;
+        $closedStages=['won','lost','declined','closed'];
+        $opportunities=$opportunityQuery->latest('last_update_at')->get()->map(function($item)use($closedStages){
+            $item->is_delayed=$item->expected_close_date&&$item->expected_close_date->isBefore(today())&&!in_array($item->stage,$closedStages,true);
+            // A record without any update timestamp is stale too, not "fresh".
+            $item->has_no_update=($item->last_update_at??$item->created_at)
+                && ($item->last_update_at??$item->created_at)->lt(now()->subDays(config('bms.opportunity_no_update_days')));return $item;
         });
         $productQuery=Product::with(['businessUnits','phases','currentPhase'])
             ->when($filters['product_id']??null,fn($q,$v)=>$q->where('id',$v))
             ->when($filters['business_unit_id']??null,fn($q,$v)=>$q->whereHas('businessUnits',fn($p)=>$p->where('business_units.id',$v)))
             ->when($visibleUnits!==null,fn($q)=>$q->whereHas('businessUnits',fn($p)=>$p->whereIn('business_units.id',$visibleUnits)));
         $products=$productQuery->orderBy('product_name')->get();
+        // Pending work that needs management attention (BRD §5.1): procurement
+        // awaiting the Finance decision and meetings starting within a week.
+        $procurementQuery=\App\Models\BMS\ProcurementRequest::query()
+            ->when($visibleUnits!==null,fn($q)=>$q->whereIn('business_unit_id',$visibleUnits))
+            ->when($filters['business_unit_id']??null,fn($q,$v)=>$q->where('business_unit_id',$v));
+        $meetingQuery=\App\Models\BMS\Meeting::with('unit:id,name')
+            ->whereBetween('starts_at',[now(),now()->addDays(7)])
+            ->where('status','!=','cancelled')
+            ->when($visibleUnits!==null,fn($q)=>$q->whereIn('business_unit_id',$visibleUnits))
+            ->when($filters['business_unit_id']??null,fn($q,$v)=>$q->where('business_unit_id',$v));
+        $procurementPending=$procurementQuery->where('status','submitted')->count();
+        $meetings=$meetingQuery->orderBy('starts_at')->limit(10)->get(['id','title','starts_at','ends_at','location','business_unit_id','status']);
+        $recent=$this->recentActivity($visibleUnits);
+
         return $this->ok([
             'generated_at'=>now(),'filters'=>$filters,'unit_progress'=>$unitProgress,
+            'procurement'=>['pending'=>\App\Models\BMS\ProcurementRequest::when($visibleUnits!==null,fn($q)=>$q->whereIn('business_unit_id',$visibleUnits))->where('status','submitted')->count()],
+            'meetings'=>$meetings,'recent_activity'=>$recent,
             'tenders'=>[
                 'total'=>$opportunities->where('type','tender')->count(),
                 'submitted'=>$opportunities->where('type','tender')->whereIn('stage',['submission','submitted'])->count(),
@@ -63,7 +82,28 @@ class ExecutiveDashboardController extends BmsController
             'summary'=>['units'=>$units->count(),'tasks'=>$tasks->count(),'achieved'=>$tasks->where('status','achieved')->count(),
                 'blocked_tasks'=>$tasks->filter(fn($t)=>!empty($t->blockers))->count(),
                 'opportunities'=>$opportunities->count(),'delayed_opportunities'=>$opportunities->where('is_delayed',true)->count(),
-                'stale_opportunities'=>$opportunities->where('has_no_update',true)->count(),'products'=>$products->count()],
+                'stale_opportunities'=>$opportunities->where('has_no_update',true)->count(),'products'=>$products->count(),
+                'pending_procurement'=>$procurementPending,'upcoming_meetings'=>$meetings->count(),
+                'overdue_tasks'=>$tasks->filter(fn($t)=>$t->status!=='achieved'&&$t->due_date&&$t->due_date->lt(today()))->count()],
         ]);
+    }
+
+    /** Latest audited business events inside the viewer's scope (BRD §5.1). */
+    private function recentActivity(?array $visibleUnits): array
+    {
+        $query=\App\Models\BMS\BmsAuditLog::with('user:id,username')->latest()->limit(40);
+        return $query->get()->filter(function($log)use($visibleUnits){
+            if($visibleUnits===null)return true;
+            $model=$log->auditable;
+            // "Unit of a record" without exploding the query count: the record's
+            // own column first, then the relations an audit row can carry.
+            $unitId=$model->business_unit_id??null;
+            if($unitId===null&&method_exists($model,'businessUnits')&&!($model instanceof \App\Models\User))$unitId=$model->businessUnits()->value('business_units.id');
+            if($unitId===null&&method_exists($model,'unit'))$unitId=optional($model->unit)->id;
+            return $unitId===null||in_array((int)$unitId,$visibleUnits,true);
+        })->take(12)->map(fn($log)=>[
+            'event'=>$log->event,'at'=>$log->created_at,'by'=>$log->user->username??null,
+            'type'=>class_basename($log->auditable_type),'id'=>$log->auditable_id,
+        ])->values()->all();
     }
 }

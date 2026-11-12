@@ -85,6 +85,17 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(\App\Models\BMS\BusinessUnit::class)->withTimestamps();
     }
 
+    /** Reporting line used by employee administration (BRD §4.1). */
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(User::class, 'manager_id');
+    }
+
     public function bmsRoles()
     {
         return $this->belongsToMany(\App\Models\BMS\BmsRole::class, 'bms_role_user')

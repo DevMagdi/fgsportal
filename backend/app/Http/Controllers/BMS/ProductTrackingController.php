@@ -11,7 +11,7 @@ class ProductTrackingController extends BmsController
 {
     public function index(Request $request)
     {
-        $query=Product::with(['businessUnits','phases','currentPhase','minutes.meeting'])->orderBy('product_name');
+        $query=Product::with(['businessUnits','owner:id,username,firstname,lastname','phases','currentPhase','minutes.meeting'])->orderBy('product_name');
         // Archived products stay in the database for history but leave the
         // working list unless the caller explicitly asks for them.
         if (!$request->boolean('include_archived')) $query->whereNull('deleted_at');
@@ -24,10 +24,15 @@ class ProductTrackingController extends BmsController
 
     public function store(Request $request)
     {
-        $data=$request->validate(['product_name'=>'required|string|max:150|unique:products,product_name','business_unit_ids'=>'required|array|min:1','business_unit_ids.*'=>'exists:business_units,id']);
+        $data=$this->productData($request,true);
+        $data['business_unit_ids']=$request->validate(['business_unit_ids'=>'required|array|min:1','business_unit_ids.*'=>'exists:business_units,id'])['business_unit_ids'];
         $this->authorizeUnits($data['business_unit_ids']);
         $product=DB::transaction(function()use($data){
-            $product=Product::create(['product_name'=>$data['product_name']]);
+            $product=Product::create(array_filter([
+                'product_name'=>$data['product_name'],
+                'description'=>$data['description']??null,
+                'owner_id'=>$data['owner_id']??null,
+            ],fn($v)=>$v!==null));
             $product->businessUnits()->sync($data['business_unit_ids']);
             $this->audit->record($product,'product.created',[],$product->toArray());
             return $product;
@@ -38,9 +43,12 @@ class ProductTrackingController extends BmsController
     public function update(Request $request, Product $product)
     {
         $this->authorizeProduct($product);
-        $data=$request->validate(['product_name'=>'sometimes|string|max:150|unique:products,product_name,'.$product->id,'business_unit_ids'=>'sometimes|array|min:1','business_unit_ids.*'=>'exists:business_units,id']);
-        if(isset($data['business_unit_ids']))$this->authorizeUnits($data['business_unit_ids']);
-        if (isset($data['product_name'])) $product->update(['product_name'=>$data['product_name']]);
+        $data=$this->productData($request,false,$product->id);
+        if($request->has('business_unit_ids')){
+            $data['business_unit_ids']=$request->validate(['business_unit_ids'=>'sometimes|array|min:1','business_unit_ids.*'=>'exists:business_units,id'])['business_unit_ids'];
+            $this->authorizeUnits($data['business_unit_ids']);
+        }
+        $product->update(collect($data)->only(['product_name','description','owner_id'])->filter(fn($v)=>$v!==null)->all());
         if (isset($data['business_unit_ids'])) $product->businessUnits()->sync($data['business_unit_ids']);
         $this->audit->record($product,'product.updated',[],$data);
         return $this->ok($product->load(['businessUnits','phases','currentPhase','minutes.meeting']));
@@ -70,6 +78,35 @@ class ProductTrackingController extends BmsController
         $this->authorizeProduct($phase->product);
         $this->audit->record($phase,'product_phase.deleted',$phase->toArray(),[]);
         $phase->delete();return $this->ok(null,'Product phase deleted');
+    }
+
+    /**
+     * Persist a new phase order (BRD §4.3). The payload is the full ordered list
+     * of phase ids; anything that is not part of this product is rejected, and
+     * the sequence numbers are rewritten inside one transaction.
+     */
+    public function reorderPhases(Request $request, Product $product)
+    {
+        $this->authorizeProduct($product);
+        $data=$request->validate(['phase_ids'=>'required|array|min:1','phase_ids.*'=>'integer']);
+        $owned=$product->phases()->pluck('id')->all();
+        abort_unless(count(array_diff($data['phase_ids'],$owned))===0 && count(array_diff($owned,$data['phase_ids']))===0,422,'The new order must list every phase of this product exactly once.');
+        DB::transaction(function()use($product,$data){
+            foreach($data['phase_ids'] as $index=>$phaseId){
+                $product->phases()->whereKey($phaseId)->update(['sequence'=>$index+1,'updated_by'=>$this->access->user()->id]);
+            }
+            $this->audit->record($product,'product_phases.reordered',[],['phase_ids'=>$data['phase_ids']]);
+        });
+        return $this->ok($product->fresh(['businessUnits','phases','currentPhase']),'Phase order saved');
+    }
+
+    private function productData(Request $request,bool $creating=false,?int $ignoreId=null): array
+    {
+        return $request->validate([
+            'product_name'=>($creating?'required':'sometimes').'|string|max:150|unique:products,product_name'.($ignoreId?','.$ignoreId:''),
+            'description'=>'nullable|string|max:2000',
+            'owner_id'=>'nullable|exists:users,id',
+        ]);
     }
 
     /** Archive (soft delete) a product without destroying its phases/history. */

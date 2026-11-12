@@ -22,6 +22,7 @@
     <label>{{lang.t('jobTitle')}}<select class="form-select" formControlName="work_degrees_id"><option value="">{{lang.t('none')}}</option><option *ngFor="let d of lookups.work_degrees || []" [value]="d.id">{{d.work_degree_name || d.name}}</option></select></label>
     <label>{{lang.t('businessUnits')}} *<select multiple class="form-select attendee-select" formControlName="business_unit_ids"><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
     <label>{{lang.t('hiringDate')}}<input type="date" class="form-control" formControlName="hiring_date"></label>
+    <label>{{lang.t('manager')}}<select class="form-select" formControlName="manager_id"><option value="">{{lang.t('none')}}</option><option *ngFor="let u of lookups.users" [value]="u.id" [disabled]="editing && u.id===editing.id">{{name(u)}}</option></select></label>
     <label class="check-label"><input type="checkbox" formControlName="active">{{lang.t('active')}}</label>
     <label *ngIf="!editing">{{lang.t('role')}}<select class="form-select" formControlName="role_id"><option value="">{{lang.t('none')}}</option><option *ngFor="let r of lookups.roles" [value]="r.id">{{r.name}}</option></select></label>
     <label *ngIf="!editing && form.value.role_id">{{lang.t('unitScope')}}<select class="form-select" formControlName="role_business_unit_id"><option value="">{{lang.t('globalRole')}}</option><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
@@ -35,7 +36,7 @@
     <tbody>
       <tr *ngFor="let e of employees" [class.selected-row]="selection?.id===e.id">
         <td><div class="employee-cell"><img *ngIf="e.has_photo" [src]="e.photo_url" [alt]="e.name"><div><strong>{{e.name}}</strong><div class="small muted">{{e.username}} · {{e.email}}</div></div></div></td>
-        <td>{{e.job_title || '-'}}</td>
+        <td>{{e.job_title || '-'}}<div class="small muted" *ngIf="e.manager">{{lang.t('manager')}}: {{e.manager}}</div></td>
         <td><span class="badge-status" *ngFor="let u of e.business_units">{{u.name}}</span></td>
         <td>{{e.hiring_date || '-'}}</td>
         <td><span class="badge-status" *ngFor="let r of e.roles">{{r.name}}<small *ngIf="r.business_unit_id"> · #{{r.business_unit_id}}</small></span></td>

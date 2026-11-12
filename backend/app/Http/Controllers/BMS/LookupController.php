@@ -41,6 +41,12 @@ class LookupController extends BmsController
             'users' => $users,
             'units' => $units,
             'departments' => Department::orderBy('department_name')->get(['id', 'department_name']),
+            // Centralised, read-only configuration lists (BRD §4.4): screens must
+            // not hardcode department / job-title / meeting-type values.
+            'meeting_types' => ['internal', 'external', 'hybrid'],
+            'task_statuses' => ['achieved', 'in_progress', 'not_done'],
+            'unit_categories' => \App\Models\BMS\BusinessUnit::whereNull('parent_id')->orderBy('name')->get(['id', 'name']),
+            'opportunity_types' => ['opportunity', 'tender'],
             'work_degrees' => \App\Models\WorkDegree::orderBy(
                 \Schema::hasColumn('work_degrees', 'work_degree_name') ? 'work_degree_name' : 'name'
             )->get(),

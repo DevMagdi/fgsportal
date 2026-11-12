@@ -29,7 +29,7 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
       username: ['', Validators.required], email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       mobile_number: [''], work_degrees_id: [''], sub_departments_id: [''],
-      hiring_date: [''], active: [true], business_unit_ids: [[], Validators.required],
+      hiring_date: [''], manager_id: [''], active: [true], business_unit_ids: [[], Validators.required],
       role_id: [''], role_business_unit_id: [''],
     });
   }
@@ -58,7 +58,7 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
 
   startCreate(): void {
     this.editing = null;
-    this.form.reset({ firstname: '', lastname: '', username: '', email: '', password: '', mobile_number: '', work_degrees_id: '', sub_departments_id: '', hiring_date: '', active: true, business_unit_ids: [], role_id: '', role_business_unit_id: '' });
+    this.form.reset({ firstname: '', lastname: '', username: '', email: '', password: '', mobile_number: '', work_degrees_id: '', sub_departments_id: '', hiring_date: '', manager_id: '', active: true, business_unit_ids: [], role_id: '', role_business_unit_id: '' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -67,7 +67,7 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
     this.form.reset({
       firstname: employee.name?.split(' ')[0] || '', lastname: employee.name?.split(' ').slice(1).join(' ') || '',
       username: employee.username, email: employee.email, password: '', mobile_number: '',
-      work_degrees_id: employee.work_degrees_id || '', sub_departments_id: '', hiring_date: employee.hiring_date || '',
+      work_degrees_id: employee.work_degrees_id || '', sub_departments_id: '', hiring_date: employee.hiring_date || '', manager_id: employee.manager_id || '',
       active: employee.active, business_unit_ids: (employee.business_units || []).map((unit: any) => unit.id), role_id: '', role_business_unit_id: '',
     });
     // Password is only required when creating a new account.
@@ -82,7 +82,7 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
     if (this.form.invalid) { this.form.markAllAsTouched(); this.error = this.lang.t('validationError'); return; }
     const value = this.form.value;
     const body: any = { ...value };
-    ['work_degrees_id', 'sub_departments_id', 'role_id', 'role_business_unit_id', 'hiring_date', 'mobile_number'].forEach(key => {
+    ['work_degrees_id', 'sub_departments_id', 'role_id', 'role_business_unit_id', 'hiring_date', 'mobile_number', 'manager_id'].forEach(key => {
       if (body[key] === '' || body[key] === null) body[key] = null;
     });
     if (!body.password) delete body.password;
