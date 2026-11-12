@@ -69,7 +69,23 @@ class P1KernelRegressionTest extends BmsTestCase
         $this->getJson('/api/test/crm-lead/999999', $this->jwtHeaders($user))->assertForbidden();
     }
 
-    public function test_P1_S1_bms_routes_keep_jwt_then_module_then_permission_then_binding_order(): void
+    public function test_P1_S1_bms_workspace_is_a_core_capability_not_an_optional_module(): void
+    {
+        // BRD section 2: BMS is the product itself. Removing the legacy company
+        // entitlement must not lock users out of the BMS workspace.
+        $this->company->modules()->updateExistingPivot(
+            \App\Models\Module::where('slug', 'bms')->firstOrFail()->id,
+            ['is_enabled' => false]
+        );
+        \Illuminate\Support\Facades\Cache::flush();
+        $user = $this->actingAsRole('coordinator');
+        $this->getBms('units', $user)->assertOk();
+        // Permissions are still enforced independently of the entitlement.
+        $employee = $this->actingAsRole('employee');
+        $this->getBms('audit/role-changes', $employee)->assertForbidden();
+    }
+
+    public function test_P1_S1_bms_routes_keep_jwt_then_permission_then_binding_order(): void
     {
         $unitId = \App\Models\BMS\BusinessUnit::where('slug', 'alpha-x')->value('id');
         $plan = (object) ['id' => DB::table('weekly_plans')->insertGetId([
@@ -81,9 +97,5 @@ class P1KernelRegressionTest extends BmsTestCase
         $this->getJson('/api/bms/weekly-plans/'.$plan->id)->assertStatus(404)->assertSee('Authorization Token not found');
         $this->getJson('/api/bms/weekly-plans/999999', $this->jwtHeaders($employee))->assertNotFound();
         $this->putJson('/api/bms/weekly-plans/999999', [], $this->jwtHeaders($employee))->assertForbidden();
-
-        $this->company->modules()->updateExistingPivot(Module::where('slug', 'bms')->value('id'), ['is_enabled' => false]);
-        app(\App\Services\ModuleService::class)->forgetCache($this->company->id, 'bms');
-        $this->getJson('/api/bms/weekly-plans/999999', $this->jwtHeaders($employee))->assertForbidden();
     }
 }

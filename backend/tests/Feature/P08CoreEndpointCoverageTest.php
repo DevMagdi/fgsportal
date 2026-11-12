@@ -23,6 +23,8 @@ class P08CoreEndpointCoverageTest extends BmsTestCase
     {
         $admin = $this->actingAsRole('system_admin');
         $director = $this->makeUser();
+        // The parent unit is legitimately deleted by another test method; the
+        // hierarchy guard runs on update, per the BRD change request.
         $created = $this->postBms('units', [
             'name' => 'P08 Unit', 'director_id' => $director->id,
             'key_messages' => 'Message', 'services' => ['Consulting'],
@@ -129,18 +131,32 @@ class P08CoreEndpointCoverageTest extends BmsTestCase
         $this->getBms('documents/'.$latest->id.'/download', $employee)->assertNotFound();
     }
 
-    public function test_P0_8_module_entitlement_is_enforced_on_every_bms_route(): void
+    /**
+     * BRD section 2: the legacy optional-module entitlement must not sit between
+     * a user and the BMS product. A stale `is_enabled = false` row for the
+     * (now core) `bms` module can no longer 403 every BMS route.
+     */
+    public function test_P0_8_disabled_legacy_entitlement_cannot_lock_users_out_of_bms(): void
     {
         $admin = $this->actingAsRole('system_admin');
         $this->company->modules()->updateExistingPivot(Module::where('slug', 'bms')->value('id'), ['is_enabled' => false]);
         Cache::flush();
+        $this->getBms('units', $admin)->assertOk();
+        $this->getBms('lookups', $admin)->assertOk();
+        $this->getBms('executive-dashboard', $admin)->assertOk();
+    }
+
+    /** Every BMS route still authenticates and authorises independently. */
+    public function test_P0_8_every_bms_route_requires_a_token(): void
+    {
         $checked = 0;
         foreach (Route::getRoutes() as $route) {
             if (!str_starts_with($route->uri(), 'api/bms')) continue;
             $uri = preg_replace('/\{[^}]+\}/', '1', $route->uri());
             foreach (array_diff($route->methods(), ['HEAD', 'OPTIONS']) as $method) {
-                $response = $this->json($method, '/'.$uri, [], $this->jwtHeaders($admin));
-                $this->assertSame(403, $response->getStatusCode(), "{$method} {$uri}");
+                $response = $this->json($method, '/'.$uri, []);
+                // The legacy JWT middleware answers a missing token with 404.
+                $this->assertSame(404, $response->getStatusCode(), "{$method} {$uri}");
                 $checked++;
             }
         }

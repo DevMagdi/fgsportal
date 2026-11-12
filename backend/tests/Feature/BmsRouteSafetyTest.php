@@ -43,12 +43,14 @@ class BmsRouteSafetyTest extends BmsTestCase
         $this->getJson('/api/bms/units')->assertStatus(404); // Legacy JWT middleware's missing-token response.
         $this->getBms('units', $user)->assertOk();
 
+        // BMS is a core capability: even a stale disabled pivot row must not
+        // remove the workspace from an authenticated user (BRD section 2).
         $this->company->modules()->updateExistingPivot(
             \App\Models\Module::where('slug', 'bms')->firstOrFail()->id,
             ['is_enabled' => false]
         );
         \Illuminate\Support\Facades\Cache::flush();
-        $this->getBms('units', $user)->assertForbidden();
+        $this->getBms('units', $user)->assertOk();
     }
 
     public function test_A3_seeded_roles_match_the_brd_permission_boundaries(): void

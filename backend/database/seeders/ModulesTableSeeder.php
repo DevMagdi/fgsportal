@@ -15,10 +15,13 @@ class ModulesTableSeeder extends Seeder
     {
         $modules = [
             [
+                // BMS is the product itself (BRD section 2): it is core, so a
+                // company can never lose access to it through the legacy
+                // optional-module entitlement screen.
                 'name' => 'Business Management Solutions',
                 'slug' => 'bms',
                 'description' => 'Business units, weekly plans, opportunities, product tracking and the executive dashboard.',
-                'is_core' => false,
+                'is_core' => true,
             ],
             [
                 'name' => 'Core (Users, Auth & Permissions)',

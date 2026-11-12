@@ -1,25 +1,36 @@
 <div class="bms-workspace" [dir]="direction">
-  <header class="bms-header">
+  <aside class="bms-sidebar" [class.open]="menuOpen">
     <a routerLink="/bms/dashboard" class="bms-brand"><img src="assets/img/alphaiota-logo.png" alt="Alphaiota"><span class="alphaiota-wordmark">Alphaiota<small>{{lang.t('bms')}}</small></span></a>
-    <div class="header-actions"><button type="button" class="alert-button" (click)="showAlerts=!showAlerts" [attr.aria-label]="lang.t('alerts')"><i class="bx bx-bell"></i><span *ngIf="alerts.length+notifications.length">{{alerts.length+notifications.length}}</span></button><button type="button" class="btn btn-outline-primary language-button" (click)="lang.toggle()">{{lang.t('language')}}</button></div>
-    <aside class="alert-panel" *ngIf="showAlerts"><div class="page-heading"><h2>{{lang.t('alerts')}}</h2><button class="btn-link" (click)="showAlerts=false">×</button></div><div *ngFor="let alert of alerts"><strong>{{alert.opportunity?.reference}}</strong><p>{{alert.message}}</p><button class="btn-link" (click)="read(alert)">{{lang.t('markRead')}}</button></div><div *ngFor="let notification of notifications"><strong>{{notification.data.title}}</strong><p>{{notification.data.body}}</p><button class="btn-link" (click)="readNotification(notification)">{{lang.t('markRead')}}</button></div><p *ngIf="!alerts.length&&!notifications.length">{{lang.t('noAlerts')}}</p></aside>
-  </header>
-  <nav class="bms-tabs" [attr.aria-label]="lang.t('bms')">
-    <a routerLink="dashboard" routerLinkActive="active" *ngIf="can('dashboard.view')"><i class="bx bx-bar-chart-alt-2"></i>{{lang.t('dashboard')}}</a>
-    <a routerLink="units" routerLinkActive="active" *ngIf="can('units.view')"><i class="bx bx-buildings"></i>{{lang.t('units')}}</a>
-    <a routerLink="plans" routerLinkActive="active" *ngIf="can('plans.view')"><i class="bx bx-calendar-check"></i>{{lang.t('plans')}}</a>
-    <a routerLink="opportunities" routerLinkActive="active" *ngIf="can('opportunities.view')"><i class="bx bx-briefcase"></i>{{lang.t('opportunities')}}</a>
-    <a routerLink="products" routerLinkActive="active" *ngIf="can('products.view')"><i class="bx bx-package"></i>{{lang.t('products')}}</a>
-    <a routerLink="meetings" routerLinkActive="active" *ngIf="can('meetings.view')"><i class="bx bx-calendar"></i>{{lang.t('meetings')}}</a>
-    <a routerLink="development" routerLinkActive="active" *ngIf="can('development.view')"><i class="bx bx-trending-up"></i>{{lang.t('development')}}</a>
-    <a routerLink="leads" routerLinkActive="active" *ngIf="can('leads.view')"><i class="bx bx-network-chart"></i>{{lang.t('leads')}}</a>
-    <a routerLink="recruitment" routerLinkActive="active" *ngIf="can('recruitment.view')"><i class="bx bx-user-plus"></i>{{lang.t('recruitment')}}</a>
-    <a routerLink="procurement" routerLinkActive="active" *ngIf="can('procurement.view')"><i class="bx bx-cart"></i>{{lang.t('procurement')}}</a>
-    <a routerLink="events" routerLinkActive="active" *ngIf="can('events.view')"><i class="bx bx-calendar-star"></i>{{lang.t('events')}}</a>
-    <a routerLink="documents" routerLinkActive="active" *ngIf="can('documents.view')"><i class="bx bx-folder-open"></i>{{lang.t('documents')}}</a>
-    <a routerLink="directory" routerLinkActive="active" *ngIf="can('directory.view')"><i class="bx bx-id-card"></i>{{lang.t('directory')}}</a>
-    <a routerLink="access" routerLinkActive="active" *ngIf="can('roles.manage')"><i class="bx bx-shield-quarter"></i>{{lang.t('accessRoles')}}</a>
-    <a routerLink="reports" routerLinkActive="active" *ngIf="can('reports.view')"><i class="bx bx-file"></i>{{lang.t('reports')}}</a>
-  </nav>
-  <main class="bms-content"><router-outlet></router-outlet></main>
+    <nav class="bms-nav" [attr.aria-label]="lang.t('bms')">
+      <ng-container *ngFor="let group of groups">
+        <p class="nav-group" *ngIf="group.visible()">{{lang.t(group.label)}}</p>
+        <ng-container *ngIf="group.visible()">
+          <ng-container *ngFor="let link of group.links">
+            <a *ngIf="can(link.ability)" [routerLink]="link.path" routerLinkActive="active"><i class="bx" [ngClass]="link.icon"></i>{{lang.t(link.label)}}</a>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </nav>
+  </aside>
+  <div class="bms-main">
+    <header class="bms-header">
+      <button type="button" class="menu-toggle" (click)="menuOpen=!menuOpen" [attr.aria-label]="lang.t('menu')"><i class="bx bx-menu"></i></button>
+      <div class="header-spacer"></div>
+      <div class="header-actions">
+        <button type="button" class="alert-button" (click)="showAlerts=!showAlerts" [attr.aria-label]="lang.t('alerts')"><i class="bx bx-bell"></i><span *ngIf="alerts.length+notifications.length">{{alerts.length+notifications.length}}</span></button>
+        <button type="button" class="btn btn-outline-primary language-button" (click)="lang.toggle()">{{lang.t('language')}}</button>
+        <div class="user-chip" *ngIf="lookups.current_user"><i class="bx bx-user-circle"></i><div><strong>{{lookups.current_user.username}}</strong><small>{{lookups.current_user.email}}</small></div><a routerLink="/logout" class="btn-link">{{lang.t('signOut')}}</a></div>
+      </div>
+      <aside class="alert-panel" *ngIf="showAlerts">
+        <div class="page-heading"><h2>{{lang.t('alerts')}}</h2><button class="btn-link" (click)="showAlerts=false">×</button></div>
+        <div *ngFor="let alert of alerts"><strong>{{alert.opportunity?.reference}}</strong><p>{{alert.message}}</p><button class="btn-link" (click)="read(alert)">{{lang.t('markRead')}}</button></div>
+        <div *ngFor="let notification of notifications"><strong>{{notification.data.title}}</strong><p>{{notification.data.body}}</p><button class="btn-link" (click)="readNotification(notification)">{{lang.t('markRead')}}</button></div>
+        <p *ngIf="!alerts.length&&!notifications.length">{{lang.t('noAlerts')}}</p>
+      </aside>
+    </header>
+    <main class="bms-content">
+      <nav class="bms-breadcrumbs" [attr.aria-label]="lang.t('breadcrumbs')"><a routerLink="/bms/dashboard">{{lang.t('bms')}}</a><span>/</span><span>{{lang.t(currentTitleKey())}}</span></nav>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>

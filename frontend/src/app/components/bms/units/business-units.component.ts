@@ -17,5 +17,8 @@ export class BusinessUnitsComponent extends BmsBaseComponent implements OnInit {
   rows():any[]{return this.units.map(u=>({Name:u.name,Parent:u.parent?.name,Director:this.name(u.director),Members:(u.users||[]).map((m:any)=>this.name(m)).join(', '),Services:(u.services||[]).join(', '),Description:u.description,KeyMessages:u.key_messages,Active:u.is_active?'Yes':'No'}));}
   excel():void{this.exporter.excel([{name:'Business units',rows:this.rows()}],'bms-business-units');}
   pdf():void{this.exporter.pdf(this.lang.t('units'),this.rows(),'bms-business-units');}
+  toggleStatus(unit:any):void{
+    this.api.post(`units/${unit.id}/status`,{is_active:!unit.is_active}).subscribe({next:()=>{this.saved();this.load();},error:e=>this.showError(e)});
+  }
   remove(unit:any):void{if(!confirm(this.lang.t('confirmDelete')))return;this.api.delete(`units/${unit.id}`).subscribe({next:()=>{this.saved();this.load();},error:e=>this.showError(e)});}
 }

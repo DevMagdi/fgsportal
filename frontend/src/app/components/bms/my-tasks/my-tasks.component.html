@@ -1,0 +1,24 @@
+<div class="page-heading"><div><h1>{{lang.t('myTasks')}}</h1><p>{{lang.t('myTasksSubtitle')}}</p></div><div class="button-row"><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div></div>
+<div class="alert-box alert-error" *ngIf="error">{{error}}</div><div class="alert-box alert-success" *ngIf="success">{{success}}</div>
+<div class="kpi-grid">
+  <div class="kpi"><div class="value">{{summary.total || 0}}</div><div class="label">{{lang.t('total')}}</div></div>
+  <div class="kpi"><div class="value">{{summary.achieved || 0}}</div><div class="label">{{lang.t('achieved')}}</div></div>
+  <div class="kpi"><div class="value">{{summary.in_progress || 0}}</div><div class="label">{{lang.t('inProgress')}}</div></div>
+  <div class="kpi"><div class="value">{{summary.overdue || 0}}</div><div class="label">{{lang.t('overdue')}}</div></div>
+  <div class="kpi"><div class="value">{{summary.blocked || 0}}</div><div class="label">{{lang.t('blocked')}}</div></div>
+</div>
+<section class="bms-card filter-card"><div class="filter-grid"><label>{{lang.t('status')}}<select class="form-select" [(ngModel)]="status" (change)="load()"><option value="">{{lang.t('all')}}</option><option value="achieved">{{lang.t('achieved')}}</option><option value="in_progress">{{lang.t('inProgress')}}</option><option value="not_done">{{lang.t('notDone')}}</option></select></label></div></section>
+<section class="bms-card"><div class="table-responsive"><table><thead><tr><th>{{lang.t('title')}}</th><th>{{lang.t('unit')}}</th><th>{{lang.t('weekStart')}}</th><th>{{lang.t('status')}}</th><th>{{lang.t('progress')}}</th><th>{{lang.t('blockers')}}</th><th>{{lang.t('dueDate')}}</th><th></th></tr></thead><tbody>
+<tr *ngFor="let t of tasks" [ngClass]="{'overdue-row': isOverdue(t)}">
+  <td><strong>{{t.title}}</strong><div class="small muted">{{t.description}}</div></td>
+  <td>{{t.unit?.name || '-'}}</td>
+  <td>{{t.plan?.week_start | date:'yyyy-MM-dd'}}</td>
+  <td><select class="form-select" [(ngModel)]="t.status"><option value="achieved">{{lang.t('achieved')}}</option><option value="in_progress">{{lang.t('inProgress')}}</option><option value="not_done">{{lang.t('notDone')}}</option></select></td>
+  <td><input type="number" min="0" max="100" class="form-control" [(ngModel)]="t.progress"></td>
+  <td><textarea class="form-control" [(ngModel)]="t.blockers"></textarea></td>
+  <td>{{t.due_date | date:'yyyy-MM-dd'}}</td>
+  <td><button class="btn-soft" (click)="update(t)">{{lang.t('save')}}</button></td>
+</tr>
+<tr *ngIf="!loading && !tasks.length"><td colspan="8" class="empty-state">{{lang.t('noData')}}</td></tr>
+<tr *ngIf="loading"><td colspan="8" class="empty-state">{{lang.t('loading')}}</td></tr>
+</tbody></table></div></section>

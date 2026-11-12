@@ -284,6 +284,9 @@ export class AuthApiService {
     this.userPerms = [];
     localStorage.removeItem('userData');
     UserPermsCache.clear(this.currentUser?.key);
+    // Clear every cached BMS ability as well: the next sign-in must re-derive
+    // navigation from the new account instead of the previous user's rights.
+    try { localStorage.removeItem('bms-language'); } catch (e) {}
     // Clear cached module entitlements on logout.
     this.moduleService.clear();
     return this.http.post(`${environment.newServerApi}/api/users/logout`,reqOptions)

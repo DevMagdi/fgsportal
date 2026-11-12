@@ -49,6 +49,7 @@ abstract class BmsTestCase extends TestCase
             '2026_11_11_000006_create_bms_notifications_table.php',
             '2026_11_12_000007_add_bms_completion_columns.php',
             '2026_11_12_000008_add_bms_meeting_sequence.php',
+            '2026_11_12_000009_make_bms_a_core_capability.php',
         ] as $filename) {
             require_once base_path('database/migrations/'.$filename);
         }
@@ -59,6 +60,7 @@ abstract class BmsTestCase extends TestCase
         (new \CreateBmsNotificationsTable())->up();
         (new \AddBmsCompletionColumns())->up();
         (new \AddBmsMeetingSequence())->up();
+        (new \MakeBmsACoreCapability())->up();
 
         (new BmsPhaseOneSeeder())->run();
         $this->enableBmsModule();
@@ -170,7 +172,11 @@ abstract class BmsTestCase extends TestCase
 
     private function enableBmsModule(): void
     {
-        $module = Module::create(['name' => 'BMS', 'slug' => 'bms', 'is_active' => true]);
+        // Mirrors the production catalogue after migration 000009: BMS is core.
+        $module = Module::updateOrCreate(
+            ['slug' => 'bms'],
+            ['name' => 'BMS', 'is_active' => true, 'is_core' => true]
+        );
         $this->company->modules()->attach($module->id, [
             'is_enabled' => true,
             'enabled_at' => now(),

@@ -1,0 +1,82 @@
+<div class="page-heading"><div><h1>{{lang.t('employees')}}</h1><p>{{lang.t('employeesSubtitle')}}</p></div><div class="button-row"><button class="btn-brand" *ngIf="can('directory.manage')" (click)="startCreate()">{{lang.t('addEmployee')}}</button><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div></div>
+<div class="alert-box alert-error" *ngIf="error">{{error}}</div><div class="alert-box alert-success" *ngIf="success">{{success}}</div>
+
+<section class="bms-card filter-card"><div class="filter-grid">
+  <label>{{lang.t('search')}}<input class="form-control" [(ngModel)]="filters.search" (keyup.enter)="load()"></label>
+  <label>{{lang.t('unit')}}<select class="form-select" [(ngModel)]="filters.business_unit_id"><option value="">{{lang.t('allUnits')}}</option><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
+  <label>{{lang.t('jobTitle')}}<select class="form-select" [(ngModel)]="filters.work_degrees_id"><option value="">{{lang.t('allValues')}}</option><option *ngFor="let d of lookups.work_degrees || []" [value]="d.id">{{d.work_degree_name || d.name}}</option></select></label>
+  <label>{{lang.t('role')}}<select class="form-select" [(ngModel)]="filters.role_id"><option value="">{{lang.t('allValues')}}</option><option *ngFor="let r of lookups.roles" [value]="r.id">{{r.name}}</option></select></label>
+  <label>{{lang.t('status')}}<select class="form-select" [(ngModel)]="filters.active"><option value="">{{lang.t('allValues')}}</option><option value="1">{{lang.t('active')}}</option><option value="0">{{lang.t('inactive')}}</option></select></label>
+  <button class="btn-soft" (click)="load()">{{lang.t('apply')}}</button>
+</div></section>
+
+<section class="bms-card" *ngIf="can('directory.manage') && form">
+  <div class="page-heading"><h2>{{editing ? lang.t('editEmployee') : lang.t('addEmployee')}}<span class="muted small" *ngIf="editing"> · {{editing.name}}</span></h2><button class="btn-soft" (click)="cancel()">{{lang.t('cancel')}}</button></div>
+  <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+    <label>{{lang.t('firstName')}} *<input class="form-control" formControlName="firstname"></label>
+    <label>{{lang.t('lastName')}} *<input class="form-control" formControlName="lastname"></label>
+    <label>{{lang.t('username')}} *<input class="form-control" formControlName="username"></label>
+    <label>{{lang.t('email')}} *<input type="email" class="form-control" formControlName="email"></label>
+    <label *ngIf="!editing">{{lang.t('password')}} *<input type="password" class="form-control" formControlName="password" autocomplete="new-password"><small class="muted">{{lang.t('passwordHint')}}</small></label>
+    <label>{{lang.t('mobilePhone')}}<input class="form-control" formControlName="mobile_number"></label>
+    <label>{{lang.t('jobTitle')}}<select class="form-select" formControlName="work_degrees_id"><option value="">{{lang.t('none')}}</option><option *ngFor="let d of lookups.work_degrees || []" [value]="d.id">{{d.work_degree_name || d.name}}</option></select></label>
+    <label>{{lang.t('businessUnits')}} *<select multiple class="form-select attendee-select" formControlName="business_unit_ids"><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
+    <label>{{lang.t('hiringDate')}}<input type="date" class="form-control" formControlName="hiring_date"></label>
+    <label class="check-label"><input type="checkbox" formControlName="active">{{lang.t('active')}}</label>
+    <label *ngIf="!editing">{{lang.t('role')}}<select class="form-select" formControlName="role_id"><option value="">{{lang.t('none')}}</option><option *ngFor="let r of lookups.roles" [value]="r.id">{{r.name}}</option></select></label>
+    <label *ngIf="!editing && form.value.role_id">{{lang.t('unitScope')}}<select class="form-select" formControlName="role_business_unit_id"><option value="">{{lang.t('globalRole')}}</option><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
+    <div class="button-row"><button class="btn-brand" [disabled]="loading">{{lang.t('save')}}</button><button type="button" class="btn-soft" (click)="cancel()">{{lang.t('cancel')}}</button></div>
+  </form>
+</section>
+
+<section class="bms-card">
+  <div class="table-responsive"><table>
+    <thead><tr><th>{{lang.t('employee')}}</th><th>{{lang.t('jobTitle')}}</th><th>{{lang.t('businessUnits')}}</th><th>{{lang.t('hiringDate')}}</th><th>{{lang.t('roles')}}</th><th>{{lang.t('status')}}</th><th>{{lang.t('actions')}}</th></tr></thead>
+    <tbody>
+      <tr *ngFor="let e of employees" [class.selected-row]="selection?.id===e.id">
+        <td><div class="employee-cell"><img *ngIf="e.has_photo" [src]="e.photo_url" [alt]="e.name"><div><strong>{{e.name}}</strong><div class="small muted">{{e.username}} · {{e.email}}</div></div></div></td>
+        <td>{{e.job_title || '-'}}</td>
+        <td><span class="badge-status" *ngFor="let u of e.business_units">{{u.name}}</span></td>
+        <td>{{e.hiring_date || '-'}}</td>
+        <td><span class="badge-status" *ngFor="let r of e.roles">{{r.name}}<small *ngIf="r.business_unit_id"> · #{{r.business_unit_id}}</small></span></td>
+        <td><span class="badge-status" [ngClass]="e.active?'achieved':'not_done'">{{e.active?lang.t('active'):lang.t('inactive')}}</span></td>
+        <td><div class="button-row"><button class="btn-soft" (click)="select(e)">{{lang.t('details')}}</button><button class="btn-link" *ngIf="can('directory.manage')" (click)="startEdit(e)">{{lang.t('edit')}}</button><button class="btn-link" *ngIf="can('directory.manage')" (click)="toggleStatus(e)">{{e.active?lang.t('deactivate'):lang.t('activate')}}</button></div></td>
+      </tr>
+      <tr *ngIf="!loading && !employees.length"><td colspan="7" class="empty-state">{{lang.t('noData')}}</td></tr>
+      <tr *ngIf="loading"><td colspan="7" class="empty-state">{{lang.t('loading')}}</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small muted" *ngIf="meta?.total">{{lang.t('showing')}} {{employees.length}} / {{meta.total}}</p>
+</section>
+
+<section class="bms-card detail-card" *ngIf="selection">
+  <div class="directory-profile">
+    <img *ngIf="selection.has_photo" [src]="selection.photo_url" [alt]="selection.name">
+    <div><h2>{{selection.name}}</h2><p>{{selection.job_title || '-'}} · {{selection.email}}</p><p>{{selection.username}}</p>
+      <p class="small muted">{{lang.t('businessUnits')}}: <span *ngFor="let u of selection.business_units">{{u.name}} </span></p>
+      <p class="small muted">{{lang.t('hiringDate')}}: {{selection.hiring_date || '-'}}</p></div>
+  </div>
+  <label *ngIf="can('directory.manage')" class="mt-2">{{lang.t('profilePhoto')}}<input type="file" class="form-control" accept=".png,.jpg,.jpeg,.webp" (change)="uploadPhoto($event, selection)"></label>
+
+  <h3>{{lang.t('roles')}}</h3>
+  <div class="phase-list"><div class="phase-item" *ngFor="let role of selection.roles"><strong>{{role.name}}</strong> <span class="badge-status">{{role.business_unit_id ? lang.t('unitScope') + ' #' + role.business_unit_id : lang.t('globalRole')}}</span></div>
+    <p class="muted small" *ngIf="!selection.roles?.length">{{lang.t('noRoles')}}</p></div>
+
+  <h3>{{lang.t('certificates')}}</h3>
+  <div class="phase-list"><div class="phase-item cert-row" *ngFor="let c of selection.certificates">
+    <div><strong>{{c.name}}</strong> <span class="muted small">{{c.issuer}}</span><div class="small">#{{c.issued_at || '-'}} → {{c.expires_at || '-'}}
+      <span class="badge-status" [ngClass]="expiryStatus(c)==='expired'?'not_done':expiryStatus(c)==='soon'?'pending':'achieved'">{{lang.t(expiryStatus(c)==='expired'?'expired':expiryStatus(c)==='soon'?'expiringSoon':'valid')}}</span></div></div>
+    <button class="btn-link" (click)="download('certificates/'+c.id+'/download', c.original_name || c.name)">{{lang.t('download')}}</button>
+  </div>
+  <p class="muted small" *ngIf="!selection.certificates?.length">{{lang.t('noCertificates')}}</p></div>
+
+  <form *ngIf="can('directory.manage')" class="form-grid mt-3" (ngSubmit)="addCertificate()">
+    <label>{{lang.t('certificate')}} *<input class="form-control" [(ngModel)]="certificate.name" name="cert_name"></label>
+    <label>{{lang.t('issuer')}}<input class="form-control" [(ngModel)]="certificate.issuer" name="cert_issuer"></label>
+    <label>{{lang.t('unit')}}<select class="form-select" [(ngModel)]="certificate.business_unit_id" name="cert_unit"><option value="">{{lang.t('none')}}</option><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
+    <label>{{lang.t('issuedAt')}}<input type="date" class="form-control" [(ngModel)]="certificate.issued_at" name="cert_issued"></label>
+    <label>{{lang.t('expiresAt')}}<input type="date" class="form-control" [(ngModel)]="certificate.expires_at" name="cert_expires"></label>
+    <label>{{lang.t('file')}} *<input type="file" class="form-control" accept=".pdf,.png,.jpg,.jpeg" (change)="file($event)"></label>
+    <div><button class="btn-brand">{{lang.t('addCertificate')}}</button></div>
+  </form>
+</section>

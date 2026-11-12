@@ -18,6 +18,9 @@ class PublicMeetingResponseController extends Controller
             'attendee' => $attendee,
             'meeting' => $attendee->meeting,
             'token' => $token,
+            // Not-yet-invited attendees have no usable token: do not expose a
+            // response form that silently fails or, worse, invites guessing.
+            'ready' => (bool) $attendee->invited_at,
         ]);
     }
 

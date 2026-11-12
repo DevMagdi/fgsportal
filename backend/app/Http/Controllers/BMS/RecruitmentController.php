@@ -66,22 +66,59 @@ class RecruitmentController extends BmsController
         abort_if($candidate->status==='hired',422,'Onboarding has already been created for this candidate.');
         abort_unless($candidate->interview_decision==='pass'||$candidate->status==='selected',422,'The candidate must pass the interview before hiring.');
         $data=$request->validate(['first_working_day'=>'required|date','employee_id'=>'required|exists:users,id']);
+        abort_if($hiring->onboarding()->exists(),422,'Onboarding tasks already exist for this hiring request.');
         DB::transaction(function()use($candidate,$hiring,$data){
             $candidate->update(['status'=>'hired']);
             \App\Models\User::findOrFail($data['employee_id'])->businessUnits()->syncWithoutDetaching([$hiring->business_unit_id]);
             $hiring->update(['status'=>'hired','first_working_day'=>$data['first_working_day']]);
-            $items=[['department'=>'IT','title'=>'Create official email'],['department'=>'IT','title'=>'Prepare laptop'],['department'=>'PR','title'=>'Create employee directory entry'],['department'=>'HR','title'=>'Complete employee records']];
-            foreach($items as $item){
-                $hiring->onboarding()->create($item+['employee_id'=>$data['employee_id']]);
-                $department=\App\Models\SubDepartment::whereHas('departments_id_fun',function($query)use($item){
-                    $query->where('department_name','like','%'.$item['department'].'%');
-                })->value('departments_id');
-                if($department)app(\App\Services\BMS\BmsNotifier::class)->notifyDepartment((int)$department,'onboarding.created','New onboarding task: '.$item['title'],$hiring->job_title);
-            }
+            $this->startOnboarding($candidate,$hiring,\App\Models\User::findOrFail($data['employee_id']),'existing');
             $this->audit->record($hiring,'candidate.hired',[],$hiring->toArray());
         });
         return $this->ok($this->load($hiring->fresh()),'Hiring completed; onboarding started');
     }
+    /**
+     * Hire a candidate by creating a new employee account in the same
+     * transaction (BRD section 5 "Recruitment integration"). No duplicate
+     * account is created: usernames/emails are validated as unique, and the
+     * endpoint refuses to run when onboarding already exists.
+     */
+    public function hireNewEmployee(Request $request,Candidate $candidate)
+    {
+        $hiring=$candidate->hiringRequest;$this->access->authorizeUnit($hiring->business_unit_id);
+        abort_if($candidate->status==='hired',422,'Onboarding has already been created for this candidate.');
+        abort_unless($candidate->interview_decision==='pass'||$candidate->status==='selected',422,'The candidate must pass the interview before hiring.');
+        $data=$request->validate([
+            'first_working_day'=>'required|date',
+            'username'=>'required|string|max:50|unique:users,username',
+            'email'=>'required|email|max:50|unique:users,email',
+            'firstname'=>'required|string|max:20',
+            'lastname'=>'required|string|max:20',
+            'password'=>'required|string|min:8',
+            'work_degrees_id'=>'nullable|exists:work_degrees,id',
+            'role_id'=>'nullable|exists:bms_roles,id',
+        ]);
+        abort_if($hiring->onboarding()->exists(),422,'Onboarding tasks already exist for this hiring request.');
+        $employee=DB::transaction(function()use($candidate,$hiring,$data){
+            $detail=\App\Models\UserDetail::create(['hiringDate'=>$data['first_working_day']]);
+            $columns=\Schema::getColumnListing('users');
+            $attributes=array_filter([
+                'username'=>$data['username'],'email'=>$data['email'],
+                'firstname'=>$data['firstname'],'lastname'=>$data['lastname'],
+                'password'=>\Illuminate\Support\Facades\Hash::make($data['password']),
+                'active'=>true,'user_creator_id'=>$this->access->user()->id,
+                'user_details_id'=>$detail->id,'work_degrees_id'=>$data['work_degrees_id']??null,
+                'company_id'=>$this->access->user()->company_id,
+            ],fn($key)=>in_array($key,$columns,true),ARRAY_FILTER_USE_KEY);
+            $employee=\App\Models\User::create($attributes);
+            $employee->businessUnits()->syncWithoutDetaching([$hiring->business_unit_id]);
+            if(!empty($data['role_id']))$employee->bmsRoles()->syncWithoutDetaching([$data['role_id']=>['business_unit_id'=>$hiring->business_unit_id]]);
+            $this->startOnboarding($candidate,$hiring,$employee,'new');
+            $this->audit->record($employee,'employee.created_from_hiring',[],['hiring_request_id'=>$hiring->id,'candidate_id'=>$candidate->id]);
+            return $employee;
+        });
+        return $this->ok($this->load($hiring->fresh())->setAttribute('created_employee',$employee->only(['id','username','email'])),'Hiring completed; employee created and onboarding started',201);
+    }
+
     public function updateOnboarding(Request $request,OnboardingItem $item)
     {
         $data=$request->validate(['status'=>['required',Rule::in(['pending','in_progress','completed'])],'owner_id'=>'nullable|exists:users,id','notes'=>'nullable|string']);
@@ -94,6 +131,22 @@ class RecruitmentController extends BmsController
         $item->update($data);$this->audit->record($item,'onboarding.updated',$old,$item->only(array_keys($data)));
         return $this->ok($this->load($hiring));
     }
+    /** Creates the IT/PR/HR checklist exactly once (guarded by the caller). */
+    private function startOnboarding(Candidate $candidate,HiringRequest $hiring,\App\Models\User $employee,string $mode): void
+    {
+        $candidate->update(['status'=>'hired']);
+        $employee->businessUnits()->syncWithoutDetaching([$hiring->business_unit_id]);
+        $hiring->update(['status'=>'hired']);
+        $items=[['department'=>'IT','title'=>'Create official email'],['department'=>'IT','title'=>'Prepare laptop'],['department'=>'PR','title'=>'Create employee directory entry'],['department'=>'HR','title'=>'Complete employee records']];
+        foreach($items as $item){
+            $hiring->onboarding()->create($item+['employee_id'=>$employee->id]);
+            $department=\App\Models\SubDepartment::whereHas('departments_id_fun',function($query)use($item){
+                $query->where('department_name','like','%'.$item['department'].'%');
+            })->value('departments_id');
+            if($department)app(\App\Services\BMS\BmsNotifier::class)->notifyDepartment((int)$department,'onboarding.created','New onboarding task: '.$item['title'],$hiring->job_title);
+        }
+    }
+
     private function departmentName():string
     {
         $roles=$this->access->roles()->pluck('slug');

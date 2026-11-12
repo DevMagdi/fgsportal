@@ -18,6 +18,10 @@ export class ProductTrackingComponent extends BmsBaseComponent implements OnInit
   openPhase(product:any):void{this.phaseProduct=product;this.phaseForm.reset({name:'',sequence:(product.phases?.length||0)+1,status:'not_started',blockers:'',data_needs:'',support_needs:'',start_date:'',end_date:''});}
   addPhase():void{if(this.phaseForm.invalid){this.phaseForm.markAllAsTouched();return;}const value=this.phaseForm.value;value.start_date=value.start_date||null;value.end_date=value.end_date||null;this.api.post(`products/${this.phaseProduct.id}/phases`,value).subscribe({next:()=>{this.saved();this.phaseProduct=null;this.load();},error:e=>this.showError(e)});}
   updatePhase(phase:any):void{this.api.put(`product-phases/${phase.id}`,{name:phase.name,sequence:Number(phase.sequence),status:phase.status,blockers:phase.blockers,data_needs:phase.data_needs,support_needs:phase.support_needs,start_date:phase.start_date,end_date:phase.end_date}).subscribe({next:()=>{this.saved();this.load();},error:e=>this.showError(e)});}
+  archive(product:any):void{
+    if(!confirm(this.lang.t('archiveProduct')+' — '+product.product_name))return;
+    this.api.post(`products/${product.id}/archive`,{}).subscribe({next:()=>{this.saved();this.load();},error:e=>this.showError(e)});
+  }
   rows():any[]{const rows:any[]=[];this.products.forEach(p=>(p.phases||[]).forEach((phase:any)=>rows.push({Product:p.product_name,Units:(p.business_units||[]).map((u:any)=>u.name).join(', '),Phase:phase.name,Sequence:phase.sequence,Status:phase.status,Blockers:phase.blockers,DataNeeds:phase.data_needs,SupportNeeds:phase.support_needs})));return rows;}
   excel():void{this.exporter.excel([{name:'Product phases',rows:this.rows()}],'product-tracking');}
   pdf():void{this.exporter.pdf('Product Tracking',this.rows(),'product-tracking');}

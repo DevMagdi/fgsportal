@@ -5,9 +5,9 @@ import * as path from 'path';
 
 describe('BMS BRD catalogue',()=>{
   it('exposes the core platform and every BRD workflow exactly once',()=>{
-    expect(BMS_MODULE_KEYS.length).toBe(15);
+    expect(BMS_MODULE_KEYS.length).toBe(16);
     expect(new Set(BMS_MODULE_KEYS).size).toBe(BMS_MODULE_KEYS.length);
-    ['dashboard','plans','opportunities','products','meetings','leads','recruitment','procurement','events','documents','directory','reports'].forEach(key=>expect(BMS_MODULE_KEYS).toContain(key));
+    ['dashboard','plans','my-tasks','opportunities','products','meetings','leads','recruitment','procurement','events','documents','employees','reports'].forEach(key=>expect(BMS_MODULE_KEYS).toContain(key));
   });
   it('uses real API endpoints and permission gates for every collection',()=>{
     Object.keys(BMS_COLLECTIONS).forEach(key=>{

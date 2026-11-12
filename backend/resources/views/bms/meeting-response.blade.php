@@ -15,12 +15,16 @@
         <p><strong>Starts:</strong> {{ $meeting->starts_at->toDayDateTimeString() }}</p>
         <p><strong>Ends:</strong> {{ $meeting->ends_at->toDayDateTimeString() }}</p>
         <p>{{ $meeting->location }}</p>
+        @if ($ready === false)
+            <p style="color:#a15c00">Notifications are not configured on this deployment, so the original response link was not delivered by email. Please contact the meeting organiser.</p>
+        @else
         <form method="post" action="{{ url('/bms/meeting-response/'.$token) }}">
             @csrf
             <button type="submit" name="response" value="accepted">Accept</button>
             <button type="submit" name="response" value="tentative">Tentative</button>
             <button type="submit" name="response" value="declined">Decline</button>
         </form>
+        @endif
     @endif
 </main>
 </body>

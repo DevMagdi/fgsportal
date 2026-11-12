@@ -296,15 +296,11 @@
       <!-- <mat-divider></mat-divider> -->
 
 
-      <a mat-list-item routerLink="/modules" routerLinkActive="active">
-        <i class="menu-icon tf-icons bx bx-grid-alt me-2"></i>
-        <span>Modules</span>
-      </a>
-
-      <div *ngIf="isModuleEnabled('bms')" class="bmsModule">
+      <div class="bmsModule">
         <a mat-list-item routerLink="/bms/dashboard" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-bar-chart-alt-2 me-2"></i><span>Executive Dashboard</span></a>
         <a mat-list-item routerLink="/bms/units" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-buildings me-2"></i><span>Business Units</span></a>
         <a mat-list-item routerLink="/bms/plans" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-calendar-check me-2"></i><span>Weekly Plans</span></a>
+        <a mat-list-item routerLink="/bms/my-tasks" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-task me-2"></i><span>My Tasks</span></a>
         <a mat-list-item routerLink="/bms/opportunities" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-briefcase me-2"></i><span>Opportunities &amp; Tenders</span></a>
         <a mat-list-item routerLink="/bms/products" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-package me-2"></i><span>Product Tracking</span></a>
         <a mat-list-item routerLink="/bms/meetings" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-calendar me-2"></i><span>Meetings &amp; Minutes</span></a>
@@ -314,7 +310,7 @@
         <a mat-list-item routerLink="/bms/procurement" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-cart me-2"></i><span>Procurement</span></a>
         <a mat-list-item routerLink="/bms/events" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-calendar-star me-2"></i><span>PR Events &amp; Protocol</span></a>
         <a mat-list-item routerLink="/bms/documents" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-folder-open me-2"></i><span>Document &amp; Brand Hub</span></a>
-        <a mat-list-item routerLink="/bms/directory" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-id-card me-2"></i><span>Employee Directory</span></a>
+        <a mat-list-item routerLink="/bms/employees" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-id-card me-2"></i><span>Employees</span></a>
         <a mat-list-item routerLink="/bms/access" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-shield-quarter me-2"></i><span>Access &amp; Roles</span></a>
         <a mat-list-item routerLink="/bms/reports" routerLinkActive="active"><i class="menu-icon tf-icons bx bx-file me-2"></i><span>Reports</span></a>
       </div>
