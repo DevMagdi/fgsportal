@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SecurityComponent } from './security.component';
 import { AccordionModule } from 'primeng/accordion';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('SecurityComponent', () => {
   let component: SecurityComponent;
@@ -9,7 +10,7 @@ describe('SecurityComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AccordionModule],
+      imports: [AccordionModule, NoopAnimationsModule],
       declarations: [ SecurityComponent ]
     })
     .compileComponents();

@@ -166,20 +166,44 @@ jobs:
           cat angular-test-output.txt
           if [ "$status" -ne 0 ]; then
             python3 - <<'PY'
+          import base64
+          import gzip
           import re
           from pathlib import Path
           text = Path('angular-test-output.txt').read_text(errors='replace')
           text = re.sub(r'\x1b\[[0-9;]*[A-Za-z]', '', text).replace('\r', '\n')
           lines = text.splitlines()
-          selected = []
+          blocks = []
           for index, line in enumerate(lines):
-              if ' FAILED' in line or 'NullInjectorError:' in line or 'Error:' in line or 'Expected ' in line or line.startswith('TOTAL:'):
-                  selected.extend(lines[index:index + (6 if ' FAILED' in line else 1)])
-          summary = '\n'.join(dict.fromkeys(selected))
-          Path('angular-failure-summary.txt').write_text(summary)
-          print(summary)
+              if ' FAILED' not in line or 'Executed ' in line or 'Chrome Headless' not in line:
+                  continue
+              block = [line]
+              for following in lines[index + 1:index + 15]:
+                  if 'Chrome Headless' in following:
+                      break
+                  if following.strip():
+                      block.append(following)
+              blocks.append('\n'.join(block))
+          blocks += [line for line in lines if line.startswith('TOTAL:')]
+          chunks = []
+          current = []
+          for block in blocks:
+              candidate = '\n\n'.join(current + [block])
+              encoded_size = len(base64.b64encode(gzip.compress(candidate.encode())))
+              if current and encoded_size > 3000:
+                  chunks.append('\n\n'.join(current))
+                  current = [block]
+              else:
+                  current.append(block)
+          if current:
+              chunks.append('\n\n'.join(current))
+          for number, chunk in enumerate(chunks, 1):
+              Path(f'angular-failure-summary-{number:02d}.txt').write_text(chunk)
+          print(f'Collected {len(blocks) - sum(line.startswith("TOTAL:") for line in blocks)} failing specs in {len(chunks)} diagnostic chunks.')
           PY
-            echo "::error::ANGULAR_FAILURES_BASE64=$(gzip -9 -c angular-failure-summary.txt | base64 -w0)"
+            for summary in angular-failure-summary-*.txt; do
+              echo "::error::$(basename "$summary")=$(gzip -9 -c "$summary" | base64 -w0)"
+            done
           fi
           exit "$status"
       - name: Production build
