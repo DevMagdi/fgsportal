@@ -188,8 +188,29 @@ class EmployeeController extends BmsController
 
         $companyId = $this->access->user()->company_id;
         $preview = [];
+        // Duplicates *inside the uploaded file* must be caught before commit:
+        // two rows sharing a username (or email) case-insensitively would make the
+        // second insert violate the unique index or silently overwrite a colleague.
+        $seenUsernames = [];
+        $seenEmails = [];
         foreach ($rows as $index => $row) {
-            $preview[] = $this->inspectImportRow((array) $row, $index + 1, $companyId);
+            $row = (array) $row;
+            $result = $this->inspectImportRow($row, $index + 1, $companyId);
+            $username = mb_strtolower(trim((string) ($row['username'] ?? '')));
+            $email = mb_strtolower(trim((string) ($row['email'] ?? '')));
+            if ($username !== '') {
+                if (isset($seenUsernames[$username])) {
+                    $result['errors'][] = 'username duplicated in this file (also on row '.$seenUsernames[$username].')';
+                    $result['status'] = 'duplicate_in_file';
+                } else { $seenUsernames[$username] = $index + 1; }
+            }
+            if ($email !== '') {
+                if (isset($seenEmails[$email])) {
+                    $result['errors'][] = 'email duplicated in this file (also on row '.$seenEmails[$email].')';
+                    $result['status'] = 'duplicate_in_file';
+                } else { $seenEmails[$email] = $index + 1; }
+            }
+            $preview[] = $result;
         }
         $valid = array_values(array_filter($preview, fn ($r) => empty($r['errors']) && $r['status'] === 'new'));
         $summary = [
@@ -197,16 +218,26 @@ class EmployeeController extends BmsController
             'valid' => count($valid),
             'invalid' => count($preview) - count($valid),
             'created' => 0,
-            'skipped' => count(array_filter($preview, fn ($r) => $r['status'] === 'existing')),
+            'skipped' => count(array_filter($preview, fn ($r) => in_array($r['status'], ['existing', 'duplicate_in_file'], true))),
+            'duplicate_in_file' => count(array_filter($preview, fn ($r) => $r['status'] === 'duplicate_in_file')),
         ];
 
         if ($dryRun) {
-            return $this->ok(['dry_run' => true, 'rows' => $preview, 'summary' => $summary], 'Import preview');
+            $public = array_map(function ($row) {
+                unset($row['attributes']); // never expose hashes or prepared payloads
+                return $row;
+            }, $preview);
+            return $this->ok(['dry_run' => true, 'rows' => $public, 'summary' => $summary], 'Import preview');
         }
 
         $created = 0;
         DB::transaction(function () use ($valid, &$created) {
             foreach ($valid as $row) {
+                // Re-check inside the transaction: a concurrent request could have
+                // created the same account between preview and commit.
+                $exists = User::whereRaw('LOWER(username) = ?', [mb_strtolower((string) $row['attributes']['username'])])
+                    ->orWhereRaw('LOWER(email) = ?', [mb_strtolower((string) $row['attributes']['email'])])->exists();
+                if ($exists) continue;
                 $detail = UserDetail::create(['hiringDate' => $row['attributes']['hiring_date'] ?? null]);
                 $attributes = $row['attributes'];
                 unset($attributes['hiring_date'], $attributes['business_units'], $attributes['manager_username']);
@@ -227,7 +258,8 @@ class EmployeeController extends BmsController
         });
         $summary['created'] = $created;
 
-        return $this->ok(['dry_run' => false, 'rows' => $preview, 'summary' => $summary], 'Import completed');
+        $public = array_map(function ($row) { unset($row['attributes']); return $row; }, $preview);
+        return $this->ok(['dry_run' => false, 'rows' => $public, 'summary' => $summary], 'Import completed');
     }
 
     /** Validate one import row without writing anything. */
@@ -272,6 +304,7 @@ class EmployeeController extends BmsController
 
         if ($existing) $result['status'] = 'existing';
 
+        // Passwords are hashed immediately and never echoed in the preview.
         $result['attributes'] = [
             'username' => $row['username'] ?? null, 'email' => $row['email'] ?? null,
             'firstname' => $row['firstname'] ?? null, 'lastname' => $row['lastname'] ?? null,

@@ -442,6 +442,123 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertTrue($events->every(fn ($row) => $row['type'] !== 'User'));
     }
 
+    public function test_P20_kpi_trends_are_isolated_per_unit_even_with_identical_names(): void
+    {
+        $alpha = $this->makeUnit();
+        $beta = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$alpha->id, $beta->id]);
+
+        foreach ([[$alpha, 10, 10], [$beta, 10, 5]] as [$unit, $target, $actual]) {
+            $this->postBms('reports/kpis', [
+                'business_unit_id' => $unit->id, 'name' => 'Revenue', 'target' => $target, 'actual' => $actual,
+                'frequency' => 'quarterly', 'period_start' => '2026-07-01', 'period_end' => '2026-09-30',
+            ], $director)->assertOk();
+        }
+
+        $data = $this->getBms('reports/kpis', $director)->assertOk()->json('data');
+        $this->assertCount(2, $data['kpis']);
+        $this->assertCount(2, $data['history'], 'Identically named KPIs in different units must not share a series.');
+        $byUnit = collect($data['history'])->keyBy('business_unit_id');
+        $this->assertSame('Revenue', $byUnit[$alpha->id]['name']);
+        $this->assertCount(1, $byUnit[$alpha->id]['points']);
+        $this->assertCount(1, $byUnit[$beta->id]['points']);
+        // A target of zero must not divide by zero and yields a null attainment.
+        $this->postBms('reports/kpis', [
+            'business_unit_id' => $alpha->id, 'name' => 'Zero target', 'target' => 0, 'actual' => 4,
+            'period_start' => '2026-07-01', 'period_end' => '2026-09-30',
+        ], $director)->assertOk();
+        $zero = collect($this->getBms('reports/kpis', $director)->json('data')['kpis'])->firstWhere('name', 'Zero target');
+        $this->assertNull($zero['attainment']);
+        $this->assertSame('no_target', $zero['status']);
+    }
+
+    public function test_P20_import_rejects_duplicates_inside_the_uploaded_file(): void
+    {
+        $unit = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $rows = [
+            ['username' => 'dup.user', 'email' => 'dup.one@example.test', 'firstname' => 'A', 'lastname' => 'One', 'password' => 'secret-pass', 'business_units' => $unit->name],
+            ['username' => 'DUP.USER', 'email' => 'dup.two@example.test', 'firstname' => 'B', 'lastname' => 'Two', 'password' => 'secret-pass', 'business_units' => $unit->name],
+            ['username' => 'other.user', 'email' => 'DUP.ONE@example.test', 'firstname' => 'C', 'lastname' => 'Three', 'password' => 'secret-pass', 'business_units' => $unit->name],
+        ];
+
+        $preview = $this->postBms('employees/import', ['rows' => $rows, 'dry_run' => true], $admin)->assertOk()->json('data');
+        $this->assertSame(1, $preview['summary']['valid']);
+        $this->assertSame(2, $preview['summary']['duplicate_in_file']);
+        $this->assertSame('duplicate_in_file', $preview['rows'][1]['status']);
+        $this->assertSame('duplicate_in_file', $preview['rows'][2]['status']);
+        $this->assertArrayNotHasKey('attributes', $preview['rows'][0], 'Preview must never echo prepared payloads or hashes.');
+
+        $commit = $this->postBms('employees/import', ['rows' => $rows, 'dry_run' => false], $admin)->assertOk()->json('data');
+        $this->assertSame(1, $commit['summary']['created']);
+        $this->assertSame(1, \App\Models\User::whereIn('username', ['dup.user', 'other.user'])->count());
+    }
+
+    public function test_P20_recent_activity_separates_ids_shared_across_model_types_and_handles_deleted_records(): void
+    {
+        $unit = $this->makeUnit();
+        $other = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $stranger = $this->makeUser(['username' => 'stranger']);
+        $stranger->businessUnits()->attach($other->id);
+
+        $mine = \App\Models\BMS\ProcurementRequest::create([
+            'business_unit_id' => $unit->id, 'item' => 'Mine', 'quantity' => 1, 'purpose' => 'p',
+            'status' => 'submitted', 'requested_by' => $admin->id,
+        ]);
+        $theirs = \App\Models\BMS\ProcurementRequest::create([
+            'business_unit_id' => $other->id, 'item' => 'Theirs', 'quantity' => 1, 'purpose' => 'p',
+            'status' => 'submitted', 'requested_by' => $stranger->id,
+        ]);
+
+        // Same numeric id, different model types: each keeps its own resolved unit.
+        \Illuminate\Support\Facades\DB::table('bms_audit_logs')->insert([
+            ['auditable_type' => \App\Models\BMS\ProcurementRequest::class, 'auditable_id' => $mine->id, 'event' => 'mine.event', 'user_id' => $admin->id, 'created_at' => now(), 'updated_at' => now()],
+            ['auditable_type' => \App\Models\BMS\ProcurementRequest::class, 'auditable_id' => $theirs->id, 'event' => 'theirs.event', 'user_id' => $stranger->id, 'created_at' => now(), 'updated_at' => now()],
+            ['auditable_type' => 'App\\Models\\BMS\\DeletedRecord', 'auditable_id' => 999999, 'event' => 'ghost.event', 'user_id' => $admin->id, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        $director = $this->actingAsRole('unit_director', [$unit->id]);
+        $scoped = collect($this->getBms('executive-dashboard', $director)->json('data')['recent_activity']);
+        $this->assertTrue($scoped->contains(fn ($row) => $row['event'] === 'mine.event'));
+        $this->assertFalse($scoped->contains(fn ($row) => $row['event'] === 'theirs.event'), 'Other units must never leak into recent activity.');
+        $this->assertFalse($scoped->contains(fn ($row) => $row['event'] === 'ghost.event'));
+
+        $global = collect($this->getBms('executive-dashboard', $admin)->json('data')['recent_activity']);
+        $this->assertTrue($global->contains(fn ($row) => $row['event'] === 'theirs.event'));
+        $this->assertFalse($global->contains(fn ($row) => $row['type'] === 'DeletedRecord'), 'Unsupported auditable types are never listed.');
+    }
+
+    public function test_P20_dashboard_summary_matches_the_widget_data_under_the_same_filters(): void
+    {
+        $alpha = $this->makeUnit();
+        $beta = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$alpha->id, $beta->id]);
+
+        foreach ([$alpha, $beta] as $unit) {
+            \App\Models\BMS\ProcurementRequest::create([
+                'business_unit_id' => $unit->id, 'item' => 'Item '.$unit->name, 'quantity' => 1,
+                'purpose' => 'p', 'status' => 'submitted', 'requested_by' => $director->id,
+            ]);
+            \App\Models\BMS\Meeting::create([
+                'business_unit_id' => $unit->id, 'title' => 'Sync '.$unit->name, 'starts_at' => now()->addDays(2),
+                'ends_at' => now()->addDays(2)->addHour(), 'status' => 'scheduled', 'created_by' => $director->id,
+            ]);
+        }
+
+        $all = $this->getBms('executive-dashboard', $director)->assertOk()->json('data');
+        $this->assertSame(2, $all['procurement']['pending']);
+        $this->assertSame($all['procurement']['pending'], $all['summary']['pending_procurement']);
+        $this->assertCount($all['summary']['upcoming_meetings'], $all['meetings']);
+        $this->assertTrue(collect($all['meetings'])->every(fn ($m) => in_array($m['business_unit_id'], [$alpha->id, $beta->id], true)));
+
+        $filtered = $this->getBms('executive-dashboard?business_unit_id='.$alpha->id, $director)->assertOk()->json('data');
+        $this->assertSame(1, $filtered['summary']['pending_procurement']);
+        $this->assertCount(1, $filtered['meetings']);
+        $this->assertSame($alpha->id, $filtered['meetings'][0]['business_unit_id']);
+        $this->assertCount(1, $filtered['unit_progress']);
+    }
+
     public function test_P17_unit_hierarchy_guards_and_safe_deletion(): void
     {
         $admin = $this->actingAsRole('system_admin');

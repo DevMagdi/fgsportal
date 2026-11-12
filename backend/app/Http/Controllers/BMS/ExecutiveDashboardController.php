@@ -104,17 +104,18 @@ class ExecutiveDashboardController extends BmsController
             // Only business records are listed; user/role/audit noise is excluded so
             // the widget cannot become a directory of other units' staff.
             if (!in_array($type, $allowed, true)) continue;
-            $unitId = null;
-            if (array_key_exists($log->auditable_id, $unitCache)) {
-                $unitId = $unitCache[$log->auditable_id.':'.$type] ?? null;
+            // Composite key: ids are only unique inside one model type.
+            $cacheKey = $type.':'.$log->auditable_id;
+            $unitId = array_key_exists($cacheKey, $unitCache) ? $unitCache[$cacheKey] : null;
+            if (!array_key_exists($cacheKey, $unitCache)) {
+                $model = $log->auditable; // may be null when the record was hard-deleted
+                if ($model) {
+                    $unitId = $model->business_unit_id ?? null;
+                    if ($unitId === null && method_exists($model, 'businessUnits')) $unitId = $model->businessUnits()->value('business_units.id');
+                    if ($unitId === null && method_exists($model, 'unit')) $unitId = optional($model->unit)->id;
+                }
+                $unitCache[$cacheKey] = $unitId;
             }
-            $model = $log->auditable; // may be null when the record was hard-deleted
-            if ($model) {
-                $unitId = $model->business_unit_id ?? null;
-                if ($unitId === null && method_exists($model, 'businessUnits')) $unitId = $model->businessUnits()->value('business_units.id');
-                if ($unitId === null && method_exists($model, 'unit')) $unitId = optional($model->unit)->id;
-            }
-            $unitCache[$log->auditable_id.':'.$type] = $unitId;
             if ($visibleUnits !== null) {
                 // Unknown scope is never disclosed; only records positively inside the scope are shown.
                 if ($unitId === null || !in_array((int) $unitId, $visibleUnits, true)) continue;

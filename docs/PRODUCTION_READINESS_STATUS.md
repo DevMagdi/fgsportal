@@ -1,6 +1,14 @@
 # BMS production-readiness delivery status
 
-> **2026-11-12 update (branch `arena/83fd2d35-fgsportal`).** Three defects found in the
+> **2026-11-12 update 2 (branch `arena/c5fbf220-fgsportal`).** PR #20 review findings fixed:
+> the deployed migration `000010` no longer gets extra columns (a new forward-only
+> `000011` repairs already-upgraded databases), KPI trends are isolated by unit + name,
+> employee import now detects duplicates *inside the uploaded file* and never echoes
+> prepared payloads, and the recent-activity cache key is consistent. Verified here:
+> 671 PHP files parse, Angular development **and** production builds pass, pure specs
+> 28/28. PHPUnit/MySQL/E2E still not executable → decision unchanged: **NO-GO**.
+>
+> **2026-11-12 update 1 (branch `arena/83fd2d35-fgsportal`).** Three defects found in the
 > PR #19 review are fixed (manager validation could never fail, dashboard procurement
 > count ignored its unit filter, recent-activity could expose out-of-scope records);
 > bulk employee import and a unit KPI register with trend data were added. Verified in
