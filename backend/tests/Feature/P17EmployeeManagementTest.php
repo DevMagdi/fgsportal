@@ -561,6 +561,10 @@ class P17EmployeeManagementTest extends BmsTestCase
 
     public function test_P21_monthly_report_products_are_limited_to_the_actors_units(): void
     {
+        // BmsTestCase runs BmsPhaseOneSeeder, which ships catalogue products (Kraken, Argus)
+        // with no unit link. Every "whole catalogue" expectation is measured from this baseline.
+        $baseline = \App\Models\Product::pluck('product_name')->all();
+
         $mine = $this->makeUnit();
         $theirs = $this->makeUnit();
         $director = $this->actingAsRole('unit_director', [$mine->id]);
@@ -578,12 +582,14 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertContains('Mine Only Product', $names);
         $this->assertContains('Shared Product', $names, 'A multi-unit product is visible when one of its units is authorised.');
         $this->assertNotContains('Theirs Only Product', $names, 'A restricted user must never see another unit\'s product.');
+        $this->assertEqualsCanonicalizing(['Mine Only Product', 'Shared Product'], $names, 'A restricted user sees exactly the products of the authorised units and nothing else.');
         $this->assertSame(count($names), $report['summary']['products']);
 
         // 2. Requesting an authorised unit still intersects with the scope.
         $filtered = $this->getBms('reports/monthly?business_unit_id='.$mine->id, $director)->assertOk()->json('data');
         $filteredNames = collect($filtered['products'])->pluck('product_name')->all();
         $this->assertContains('Mine Only Product', $filteredNames);
+        $this->assertContains('Shared Product', $filteredNames, 'A shared product stays visible through the authorised unit.');
         $this->assertNotContains('Theirs Only Product', $filteredNames);
 
         // 3. Requesting a unit outside the scope is refused, not silently widened.
@@ -595,7 +601,14 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertContains('Mine Only Product', $all);
         $this->assertContains('Theirs Only Product', $all);
         $this->assertContains('Shared Product', $all);
-        $this->assertSame(3, count($all));
+        // The catalogue is the seeded baseline plus the three fixtures above; the previous
+        // hard-coded total of 3 ignored the products seeded by BmsTestCase.
+        $this->assertEqualsCanonicalizing(
+            array_merge($baseline, ['Mine Only Product', 'Theirs Only Product', 'Shared Product']),
+            $all,
+            'An unrestricted actor sees the whole catalogue: nothing hidden, nothing extra.'
+        );
+        $this->assertSame(count($baseline) + 3, count($all));
     }
 
     public function test_P17_unit_hierarchy_guards_and_safe_deletion(): void

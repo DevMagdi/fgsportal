@@ -12,12 +12,15 @@ marked verified unless the command was executed here.
 | Angular development build | `npx ng build --configuration development` | **PASS** |
 | Angular production build | `npx ng build --configuration production` | **PASS** |
 | Pure TypeScript spec harness | `npm run test:node` | **PASS** — 28 passing, 0 failing |
-| Employee import / KPI register / manager-cycle tests | `P17EmployeeManagementTest` (22 tests) | **WRITTEN, NOT EXECUTED** (no PHP runtime) |
-| PHPUnit / Laravel feature tests | — | **NOT EXECUTED** — no PHP runtime and no Composer dependencies in this sandbox; they cannot be installed through the allowed network. |
+| Monthly report unit scope (PR #22) | `php artisan test --filter=test_P21_monthly_report_products_are_limited_to_the_actors_units` | **EXECUTED 12 Nov — PASS** — `Tests: 1 passed`, PHPUnit `OK (1 test, 17 assertions)` (see §1a) |
+| Employee import / KPI register / manager-cycle tests | `php artisan test --filter=P17EmployeeManagementTest` (23 tests) | **EXECUTED 12 Nov — 13 pass, 10 FAIL** (listed in §1a) |
+| PHPUnit / Laravel feature tests | `php artisan test` — native PHP 8.1.29, SQLite 3.40.1, PHPUnit 9.5.25 (`docs/TESTING.md`) | **EXECUTED 12 Nov — 126 tests, 917 assertions: 114 pass, 12 FAIL** (5 errors, 7 failures; listed in §1a) |
 | Karma component tests / E2E | — | **NOT EXECUTED** — no Chrome in the sandbox. |
 
-Consequence: every backend behaviour below is marked `implemented + syntax-checked`,
-never `test-verified`. The automated tests that cover them are written and will run in CI.
+Consequence: only the monthly-report unit scope (§1a) is `test-verified`. Every other backend
+behaviour below is still marked `implemented + syntax-checked`: the suite was first executed on
+12 November and 12 of its tests fail (§1a), so none of those items may be promoted until the
+failures are triaged.
 
 ## 1. BRD compliance matrix (current state)
 
@@ -53,13 +56,64 @@ executed here · **P** partially implemented · **G** gap · **?** blocked on a 
 | §6 | UX baseline (filters, empty/loading/error, RTL, exports) | **V** | new screens follow the shared SCSS + Arabic/English labels |
 | §7 | Server-side authorization everywhere | **I** | `bms.permission:*` on every route; unit scoping in directory/employees/lookups/certificates/photos/roles |
 | §8 | Non-destructive migrations, no destructive commands | **V** | new migrations only add columns/flags; **no** `migrate:fresh` executed |
-| §10 | Tests | **P** | 15 backend tests for this feature set written (`P17EmployeeManagementTest`), **not executed here**; pure specs 28/28 pass |
+| §10 | Tests | **P** | `P17EmployeeManagementTest` executed on 12 November: 13 of 23 pass, **10 fail** (§1a); pure specs 28/28 pass |
 
 ## 1a. Defect fixed after the PR #21 review (current pass)
 
 | Defect | Fix | Test |
 | --- | --- | --- |
 | `ReportController::monthly()` returned **every product** of every unit to unit-scoped users: the products query only applied the optional `business_unit_id` filter and never `visibleUnitIds()` | products now require at least one business unit inside the viewer's scope (`whereHas('businessUnits', … whereIn(…$ids))`); the requested unit still narrows the set and is separately authorised by the existing `authorizeUnit()` call, so a request can never widen the scope; `visibleUnitIds() === null` (unrestricted) keeps the previous behaviour | `test_P21_monthly_report_products_are_limited_to_the_actors_units` |
+
+### Verification of the PR #22 fix (executed 12 November 2026)
+
+Runtime: native PHP 8.1.29 (cli), SQLite 3.40.1 in-memory, Laravel 8.83.25, PHPUnit 9.5.25,
+Composer 2.8.10 with the locked dependencies (`docs/TESTING.md`). No migration or destructive
+database command was run; the tests build their own in-memory schema.
+
+| Step | Command | Actual result |
+| --- | --- | --- |
+| First execution, `BMS` head unchanged | `php artisan test --filter=test_P21_monthly_report_products_are_limited_to_the_actors_units` | **FAIL** — `Failed asserting that 5 is identical to 3.` at `P17EmployeeManagementTest.php:598` |
+| After correcting the test expectation | same command | **PASS** — `Tests: 1 passed`; `vendor/bin/phpunit --filter=…` → `OK (1 test, 17 assertions)` |
+| Mutation: scope clause removed from `ReportController::monthly()` | same command | **FAIL** (as required) — `Failed asserting that an array does not contain 'Theirs Only Product'.` |
+| Mutation: `authorizeUnit()` guard removed | same command | **FAIL** (as required) — `Expected response status code [403] but received 200.` |
+
+Root cause of the first failure: the test, not the controller. `BmsTestCase::setUp()` runs
+`BmsPhaseOneSeeder`, which seeds the catalogue products `Kraken` and `Argus` (no unit link), while
+the last assertion hard-coded a catalogue of exactly 3 products. The unrestricted administrator
+correctly received all 5. The expectation is now measured from the seeded baseline and tightened:
+the administrator must receive exactly `baseline + 3` products, the unit-scoped director exactly
+`Mine Only Product` and `Shared Product` (so seeded products without a unit link are not exposed
+either), and the shared product must stay visible when the authorised unit is requested. No
+assertion was removed or relaxed and `ReportController` is unchanged.
+
+| Scenario | Result |
+| --- | --- |
+| Restricted user cannot see a product that belongs only to unauthorised units | **PASS** |
+| Restricted user sees the products of the authorised units | **PASS** |
+| Shared product stays visible when at least one of its units is authorised | **PASS** |
+| Requesting an unauthorised unit returns HTTP 403 | **PASS** |
+| Unrestricted system administrator still receives every product | **PASS** |
+
+**Suite state on the same runtime** (`php artisan test`): 126 tests, 917 assertions — 114 pass,
+**12 fail**. Before the correction it was 113 pass / 13 fail; the only difference is the test above,
+so nothing regressed. The 12 failures below are identical on the unmodified `BMS` head, belong to
+other features and were deliberately **not** touched in this pass. They are open and must be
+triaged (application defect or stale test) before release:
+
+| Test | First error observed |
+| --- | --- |
+| `ModulesTableSeederTest` › only the core module is flagged as core | `bms must not be core` — `Failed asserting that true is false` |
+| `P16MeetingsTest` › p1 6 attendee diff cancels removed and invites only added | HTTP 500 on `PUT meetings/{id}`: `Method Illuminate\Support\Collection::intersectKeys does not exist` |
+| `P17EmployeeManagementTest` › p17 global and cross scope role assignments are refused for unit scoped actors | expected 403, received 200 (line 188) |
+| `P17EmployeeManagementTest` › p18 employee manager reporting line is stored and self reference rejected | `manager_id` is `null` (line 289) |
+| `P17EmployeeManagementTest` › p18 product metadata owner and phase reordering | `Undefined array key "description"` (line 305) |
+| `P17EmployeeManagementTest` › p18 dashboard reports pending procurement upcoming meetings and overdue tasks | `NOT NULL constraint failed: bms_procurement_requests.reference` |
+| `P17EmployeeManagementTest` › p19 manager assignment blocks cycles cross company and out of scope managers | `manager_id` is `null` (line 365) |
+| `P17EmployeeManagementTest` › p19 employee import preview is read only and reports duplicates | `summary.valid` is 0, expected 1 (line 402) |
+| `P17EmployeeManagementTest` › p19 recent activity never leaks other units records | `NOT NULL constraint failed: bms_procurement_requests.reference` |
+| `P17EmployeeManagementTest` › p20 import rejects duplicates inside the uploaded file | `summary.valid` is 0, expected 1 (line 486) |
+| `P17EmployeeManagementTest` › p20 recent activity separates ids shared across model types and handles deleted records | `NOT NULL constraint failed: bms_procurement_requests.reference` |
+| `P17EmployeeManagementTest` › p20 dashboard summary matches the widget data under the same filters | `NOT NULL constraint failed: bms_procurement_requests.reference` |
 
 ## 1b. Defects fixed after the PR #20 review (previous pass)
 
@@ -155,6 +209,7 @@ No data was deleted or rewritten; no destructive command was executed.
 ## 7. Production readiness statement
 
 **NO-GO.** Frontend development and production builds pass, the pure-spec suite passes,
-and all backend PHP parses, but the backend feature suite and the end-to-end scenarios
-were **not executed** in this environment, and the gaps in §3 remain. Treat the items
+and all backend PHP parses. The backend feature suite was executed on 12 November 2026
+(native PHP 8.1.29, SQLite): **12 of 126 tests fail** (§1a) and remain open; MySQL and the
+end-to-end scenarios were **not executed** in this environment, and the gaps in §3 remain. Treat the items
 marked **I** as "code complete, awaiting CI + UAT verification".
