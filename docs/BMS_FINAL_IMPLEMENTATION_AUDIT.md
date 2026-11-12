@@ -55,7 +55,13 @@ executed here · **P** partially implemented · **G** gap · **?** blocked on a 
 | §8 | Non-destructive migrations, no destructive commands | **V** | new migrations only add columns/flags; **no** `migrate:fresh` executed |
 | §10 | Tests | **P** | 15 backend tests for this feature set written (`P17EmployeeManagementTest`), **not executed here**; pure specs 28/28 pass |
 
-## 1b. Defects fixed after the PR #20 review (current pass)
+## 1a. Defect fixed after the PR #21 review (current pass)
+
+| Defect | Fix | Test |
+| --- | --- | --- |
+| `ReportController::monthly()` returned **every product** of every unit to unit-scoped users: the products query only applied the optional `business_unit_id` filter and never `visibleUnitIds()` | products now require at least one business unit inside the viewer's scope (`whereHas('businessUnits', … whereIn(…$ids))`); the requested unit still narrows the set and is separately authorised by the existing `authorizeUnit()` call, so a request can never widen the scope; `visibleUnitIds() === null` (unrestricted) keeps the previous behaviour | `test_P21_monthly_report_products_are_limited_to_the_actors_units` |
+
+## 1b. Defects fixed after the PR #20 review (previous pass)
 
 | Defect | Fix | Test |
 | --- | --- | --- |
