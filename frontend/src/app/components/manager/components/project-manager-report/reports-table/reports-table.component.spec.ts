@@ -22,6 +22,7 @@ describe('ReportsTableComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ReportsTableComponent);
     component = fixture.componentInstance;
+    component.reports = [];
     fixture.detectChanges();
   });
 
