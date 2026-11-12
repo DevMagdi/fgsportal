@@ -1,0 +1,14 @@
+<section class="bms-confirm-dialog">
+  <h2 mat-dialog-title class="bms-confirm-title">
+    <span class="bms-confirm-mark" [class.destructive]="data.destructive" aria-hidden="true">
+      <i class="bx" [ngClass]="data.destructive ? 'bx-error' : 'bx-help-circle'"></i>
+    </span>
+    <span>{{data.title}}</span>
+  </h2>
+  <div id="bms-confirm-message" mat-dialog-content class="bms-confirm-message">{{data.message}}</div>
+  <div mat-dialog-actions class="bms-confirm-actions">
+    <button type="button" mat-button mat-dialog-close="false" cdkFocusInitial>{{data.cancelLabel}}</button>
+    <button type="button" mat-flat-button [mat-dialog-close]="true"
+      [class.bms-confirm-danger]="data.destructive">{{data.confirmLabel}}</button>
+  </div>
+</section>

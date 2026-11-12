@@ -4,6 +4,7 @@ import { BmsApiService } from '../bms-api.service';
 import { BmsBaseComponent } from '../bms-base.component';
 import { BmsLanguageService } from '../bms-language.service';
 import { BmsExportService } from '../bms-export.service';
+import { BmsConfirmService } from '../bms-confirm.service';
 
 /**
  * Access & roles (BRD section 18): permission matrix, current assignments per
@@ -20,7 +21,7 @@ export class AccessComponent extends BmsBaseComponent implements OnInit {
   selectedEmployee: any = null;
   audit: any[] = [];
 
-  constructor(api: BmsApiService, lang: BmsLanguageService, private exporter: BmsExportService, private access: BmsAccessService) { super(api, lang); }
+  constructor(api: BmsApiService, lang: BmsLanguageService, private exporter: BmsExportService, private access: BmsAccessService, private confirmDialog: BmsConfirmService) { super(api, lang); }
 
   ngOnInit(): void { super.ngOnInit(); this.loadAudit(); }
 
@@ -53,11 +54,15 @@ export class AccessComponent extends BmsBaseComponent implements OnInit {
 
   assign(): void {
     if (!this.assignment.user_id || !this.assignment.role_id) { this.error = this.lang.t('validationError'); return; }
-    if (!confirm(this.lang.t('confirmAssign'))) return;
-    const body = { ...this.assignment, business_unit_id: this.assignment.business_unit_id || null };
-    this.api.post('roles/assign', body).subscribe({
-      next: (data: any) => { this.saved(); this.assignmentsByUser = { ...this.assignmentsByUser, [this.assignment.user_id]: data || [] }; this.loadAudit(); },
-      error: error => this.showError(error),
+    this.confirmDialog.confirm(this.lang.t('confirmAssign'), {
+      title: this.lang.t('assignRole'), confirmLabel: this.lang.t('assign'),
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      const body = { ...this.assignment, business_unit_id: this.assignment.business_unit_id || null };
+      this.api.post('roles/assign', body).subscribe({
+        next: (data: any) => { this.saved(); this.assignmentsByUser = { ...this.assignmentsByUser, [this.assignment.user_id]: data || [] }; this.loadAudit(); },
+        error: error => this.showError(error),
+      });
     });
   }
 
@@ -65,10 +70,14 @@ export class AccessComponent extends BmsBaseComponent implements OnInit {
     const target = assignment || this.assignment;
     const body = { user_id: target.user_id || this.selectedEmployee?.id, role_id: target.role_id, business_unit_id: target.business_unit_id || null };
     if (!body.user_id || !body.role_id) { this.error = this.lang.t('validationError'); return; }
-    if (!confirm(this.lang.t('confirmRevoke'))) return;
-    this.api.post('roles/revoke', body).subscribe({
-      next: (data: any) => { this.saved(); this.assignmentsByUser = { ...this.assignmentsByUser, [body.user_id]: data || [] }; this.loadAudit(); },
-      error: error => this.showError(error),
+    this.confirmDialog.confirm(this.lang.t('confirmRevoke'), {
+      title: this.lang.t('revoke'), confirmLabel: this.lang.t('revoke'), destructive: true,
+    }).subscribe(confirmed => {
+      if (!confirmed) return;
+      this.api.post('roles/revoke', body).subscribe({
+        next: (data: any) => { this.saved(); this.assignmentsByUser = { ...this.assignmentsByUser, [body.user_id]: data || [] }; this.loadAudit(); },
+        error: error => this.showError(error),
+      });
     });
   }
 

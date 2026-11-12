@@ -1,4 +1,6 @@
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
@@ -8,6 +10,9 @@ import { BmsExportService } from './bms-export.service';
 import { BmsLanguageService } from './bms-language.service';
 import { BmsPermissionGuard } from './bms-permission.guard';
 import { BmsShellComponent } from './bms-shell.component';
+import { BmsStateComponent } from './bms-state.component';
+import { BmsConfirmDialogComponent } from './bms-confirm-dialog.component';
+import { BmsConfirmService } from './bms-confirm.service';
 import { ExecutiveDashboardComponent } from './dashboard/executive-dashboard.component';
 import { BusinessUnitsComponent } from './units/business-units.component';
 import { WeeklyPlansComponent } from './plans/weekly-plans.component';
@@ -48,11 +53,11 @@ const routes: Routes = [{
 
 @NgModule({
   declarations: [
-    BmsShellComponent, ExecutiveDashboardComponent, BusinessUnitsComponent, WeeklyPlansComponent,
+    BmsShellComponent, BmsStateComponent, BmsConfirmDialogComponent, ExecutiveDashboardComponent, BusinessUnitsComponent, WeeklyPlansComponent,
     OpportunitiesComponent, ProductTrackingComponent, BmsCollectionComponent, MeetingsComponent,
     ReportsComponent, AccessComponent, EmployeeManagementComponent, MyTasksComponent, BmsNoAccessComponent,
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild(routes)],
-  providers: [BmsApiService, BmsLanguageService, BmsExportService, BmsAccessService],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, RouterModule.forChild(routes)],
+  providers: [BmsApiService, BmsLanguageService, BmsExportService, BmsAccessService, BmsConfirmService],
 })
 export class BmsModule {}

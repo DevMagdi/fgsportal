@@ -1,0 +1,10 @@
+<div class="bms-state" [ngClass]="'bms-state-' + kind" [attr.role]="kind === 'error' ? 'alert' : 'status'" [attr.aria-live]="kind === 'error' ? 'assertive' : 'polite'">
+  <span class="bms-state-icon" aria-hidden="true">
+    <span *ngIf="kind === 'loading'" class="bms-spinner"></span>
+    <i *ngIf="kind === 'empty'" class="bx bx-inbox"></i>
+    <i *ngIf="kind === 'error'" class="bx bx-error-circle"></i>
+    <i *ngIf="kind === 'success'" class="bx bx-check-circle"></i>
+  </span>
+  <span class="bms-state-message">{{message}}</span>
+  <button *ngIf="actionLabel" type="button" class="bms-state-action" (click)="activate()">{{actionLabel}}</button>
+</div>

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class BmsApiService {
   private readonly root = `${environment.newServerApi}/api/bms`;
   constructor(private http: HttpClient) {}
