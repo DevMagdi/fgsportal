@@ -4,7 +4,7 @@
 **Working branch:** `arena/e1389d1e-fgsportal` (session branch; kept in place)
 **Base:** `origin/BMS` at `891851bc85b2d2f274b811c9173d6268c8752795`
 **PR:** #26, open, base `BMS`; no merge performed.
-**Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`. **Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26` (CI 43302623366 failed; see test report).
+**Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`. **Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2` (CI 43318197656 failed; see test report).
 
 ## Summary / disposition
 
@@ -49,6 +49,8 @@ No Critical finding is claimed on available evidence. This audit did not approve
 - The dashboard browser evidence is mocked. It does not validate API/database integration or production records.
 - This is not a complete inventory of every legacy table, index, or deployed schema. See database readiness report for the bounded inventory and blockers.
 
-## Gate result
+## Latest candidate evidence and gate result
 
-**Phase 3.5: NOT PASSED.** The two high-severity scope/schema issues above require explicit contract decisions; full suites and a safe fresh-environment rehearsal must be completed before release readiness. PR #26 remains open and unmerged; Phase 4 was not started.
+CI 43318197656 on source SHA `15c8bf295ff3c44a171800b61bb5441ddca979c2` passed focused P16 attendee synchronization, persisted manager cross-company, core catalogue, and existing focused dashboard/access regressions. The full SQLite/MySQL suites still fail the two employee-import cases; Angular/Karma is 114/212 passed with 98 failures. Backend lint/static analysis and frontend production build passed. The locally available Node suite is 43/43, but local Karma cannot start without Chrome. No live API/database rehearsal was run.
+
+**Phase 3.5: NOT PASSED.** Shared-Product audit scope and Company–BusinessUnit ownership require explicit owner decisions; Angular failures, full-suite import failures, and safe fresh-environment rehearsal remain unresolved. PR #26 remains open and unmerged; Phase 4 was not started.

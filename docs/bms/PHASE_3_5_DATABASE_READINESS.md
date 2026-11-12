@@ -1,7 +1,7 @@
 # BMS Phase 3.5 — Database, migration and integration readiness
 
 **Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
-**Remediation source SHA:** record the exact tested SHA after candidate CI completes.
+**Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2` (CI 43318197656; failed).
 **Status:** Source audit and isolated test plan complete; fresh-install/deployed-schema rehearsal **BLOCKED / NOT PASSED**.
 
 ## Safety and scope
@@ -59,4 +59,4 @@ The backend PHPUnit feature tests issue requests through Laravel routes/middlewa
 
 ## Gate
 
-**Database and deployed-integration gate: BLOCKED / NOT PASSED.** No fresh install, deployed schema comparison, complete foreign-key/index inventory, or live local API + isolated DB dashboard rehearsal is claimed. Do not invent a Company-to-unit relationship, add a migration, or remove import scoping without the owner contract. CI engine-specific results are recorded in the test report.
+**Database and deployed-integration gate: BLOCKED / NOT PASSED.** No fresh install, deployed schema comparison, complete foreign-key/index inventory, or live local API + isolated DB dashboard rehearsal is claimed. CI 43318197656 still fails the two SQLite/MySQL employee-import cases; the Company-to-BusinessUnit contract remains unresolved. Do not invent a relationship, add a migration, or remove import scoping without the owner contract. Engine-specific results are in the test report.

@@ -1,7 +1,7 @@
 # BMS Phase 3.5 — Contract resolutions and owner decisions
 
 **Branch:** `arena/e1389d1e-fgsportal`; PR #26 remains open against `BMS`.  
-**Code validation:** remediation candidate CI is pending; record the tested source SHA and run in this document after completion.  
+**Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2`; latest CI [43318197656](https://github.com/DevMagdi/fgsportal/actions/runs/43318197656) failed.
 **Scope:** evidence-backed resolution only; no Phase 4 work.
 
 ## Confirmed contracts
@@ -79,4 +79,4 @@ No new visibility policy is implemented. Keep the existing behavior pending the 
 
 Repository CI specifies PHP 8.1, MySQL 8.0, SQLite, Node 20 and locked Composer/npm dependencies. The local checkout has no PHP, Composer vendor tree, MySQL service, Docker executable or Chrome binary. The frontend production build and Node suite can run after `npm ci`; Karma browser execution is blocked locally by absent Chrome. No fresh install or real local API/database rehearsal was attempted. See `PHASE_3_5_DATABASE_READINESS.md` for the isolated test plan and exact blocker status.
 
-**Current disposition:** contract decisions above are evidence-resolved where stated; Company-to-BusinessUnit and Product-event visibility remain blocked for owner input. Phase 3.5 remains **NOT PASSED** until required tests and integration/security gates are accepted or resolved. PR #26 stays open; Phase 4 does not start.
+**Current disposition:** contract decisions above are evidence-resolved where stated; Company-to-BusinessUnit and Product-event visibility remain blocked for owner input. CI 43318197656 still shows two import failures on both engines; focused meeting/manager/module regressions pass, but these results do not approve a tenant policy. Phase 3.5 remains **NOT PASSED** until required tests and integration/security gates are accepted or resolved. PR #26 stays open; Phase 4 does not start.

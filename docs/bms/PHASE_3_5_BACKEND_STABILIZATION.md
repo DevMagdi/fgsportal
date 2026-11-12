@@ -2,8 +2,8 @@
 
 **Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
 **Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`
-**Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26`
-**Latest CI:** 43302623366 — **failure**; details in the test report.
+**Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2`
+**Latest CI:** [43318197656](https://github.com/DevMagdi/fgsportal/actions/runs/43318197656) — **failure**; details in the test report.
 
 ## Confirmed root causes and bounded fixes
 
@@ -21,7 +21,7 @@
 - Evidence: `EmployeeController::store` calls `validatedManagerId` (which rejects self/cycles and checks company/unit visibility) and puts the result into `User::create`; the legacy `User::$fillable` excludes `manager_id`, so the ID was silently discarded. The `manager_id` migration exists and response serialization reads it.
 - Fix: after create, assign the validated ID directly only when the column exists in the filtered attribute set; this retains all previous validation and does not add `manager_id` to global `$fillable`. CI 43302623366 passed the selected focused regressions, but the full manager test fails during setup because it inserts `company_id=999` without a corresponding company. Thus this run does not verify the intended cross-company rejection scenario; the manager persistence change is not fully validated by that test.
 
-## Remaining backend failures / classification
+## Backend failures at earlier candidate (CI 43302623366; see latest candidate below)
 
 | Test | Latest known failure | Root cause / Phase relation | Decision |
 |---|---|---|---|
@@ -32,10 +32,14 @@
 
 CI 43302623366 completed on `054288d`: SQLite (150 tests, 1101 assertions) and MySQL (150 tests, 1098 assertions) each had 1 error and 4 failures. The shared error is the invalid-company fixture in the manager security test. Shared failures are the core-module expectation, meeting attendee update API misuse, and the two employee-import cases. Do not treat “pre-existing” as production acceptance.
 
-## Phase 3 regression list
+## Earlier Phase 3 regression evidence
 
-CI 43302623366 passed native PHP syntax, PHP lint/analysis, and the focused P22, P18 dashboard aggregate, P19 activity authorization, P20 activity missing/deleted, P20 dashboard summary and P1.1 regressions. Local PHP remains unavailable. No test exclusions were used.
+CI 43302623366 passed native PHP syntax, PHP lint/analysis, and focused P22, P18 dashboard aggregate, P19 activity authorization, P20 activity missing/deleted, P20 dashboard summary and P1.1 regressions. Latest focused results are listed below. Local PHP remains unavailable. No test exclusions were used.
+
+## Latest candidate (CI 43318197656; source SHA `15c8bf295ff3c44a171800b61bb5441ddca979c2`)
+
+Focused P16 meeting synchronization, persisted cross-company manager, BMS-core catalogue, P18/P19/P20/P22/P1.1 checks passed. Full SQLite (156 tests, 1161 assertions) and MySQL (156 tests, 1158 assertions) each failed only the two employee import cases. Lint/static analysis passed. The company/unit ownership contract remains unapproved; no import query/schema/auth change was made.
 
 ## Gate status
 
-Backend gate is **NOT PASSED**: full suites failed on CI 43302623366. PHP native validation is not available locally. The import schema/security decision and unrelated legacy failures remain unresolved. No database migration or auth semantic change was made.
+Backend gate is **NOT PASSED**: latest CI 43318197656 full suites still fail on the employee import preview and duplicate-upload cases. PHP native validation is not available locally. The import schema/security decision remains unresolved; no database migration or authorization semantic change was made.

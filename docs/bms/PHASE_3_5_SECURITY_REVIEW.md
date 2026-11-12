@@ -2,7 +2,8 @@
 
 **Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
 **Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`
-**Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26`
+**Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2`
+**Latest CI:** [43318197656](https://github.com/DevMagdi/fgsportal/actions/runs/43318197656) — failed.
 **Status:** Targeted code review; security gate **NOT PASSED** due unresolved shared-product audit-scope semantics and no live integration.
 
 ## Reviewed boundaries
@@ -17,7 +18,7 @@
 
 | Scenario | Evidence | Outcome / limits |
 |---|---|---|
-| Authorized selected business unit | CI 43302623366 focused P22 regression passed on latest tested SHA. | Selected-unit activity query regression has an automated check and passed in this run. |
+| Authorized selected business unit | CI 43318197656 focused P22 regression passed on source SHA `15c8bf2`. | Selected-unit activity query regression has an automated check and passed; this does not define shared-Product event visibility. |
 | Cross-unit activity | P19 test explicitly asserts another unit's event is absent; CI regression previously passed. | The test does not settle event visibility for one Product attached to multiple units. |
 | Global permissions | Static review: `visibleUnitIds()` returns null for configured global-scope roles; controller applies global scope and selected unit authorization. | No new global bypass was added. Full role matrix not exhaustively rerun in this session. |
 | Restricted dashboard permissions | Chromium mocked browser QA hid controls/panels for a restricted ability set. | Mocked UI evidence only; real endpoint authorization remains unverified. |
@@ -29,10 +30,10 @@
 
 1. **High — shared Product audit event scope is ambiguous.** An audit event does not store the unit in which the action occurred. Resolving scope from all current product-unit pivots may expose an event to another unit that shares the Product. The existing P22 and P19 assertions do not fully define the expected cross-unit behavior. This needs explicit security/product approval before any change.
 2. **High — company/unit schema contract unresolved.** Employee import conditionally queries `business_units.company_id`, but no such column was found in checked-in migrations. MySQL import tests return 500; reviewer output reports unknown `company_id`. Removing the predicate can weaken tenant boundaries; adding a column/migration invents ownership semantics. No change made; obtain schema and contract decision.
-3. **Medium — test suites are not green.** Failures include meeting attendee update and import error responses. The meeting bug appears unrelated legacy code; no workflow behavior was changed.
+3. **Medium — test suites are not green.** Latest CI 43318197656 still has two employee-import failures in both SQLite and MySQL; broad Angular/Karma failures also remain. The focused P16 attendee synchronization regression now passes; this does not resolve the separate shared-Product audit-visibility policy.
 
 The changes made in this stabilization candidate do **not** modify role abilities, global roles, unit-scope resolution, endpoints, or business workflows. They persist validated product metadata and manager IDs after existing validation; the date-only fix is presentation-only. No credentials or production data were accessed.
 
 ## Security gate
 
-**NOT PASSED.** Focused regression evidence is useful but not sufficient for production acceptance. CI 43302623366 results are recorded in the test report; still need a real isolated backend authorization matrix, explicit shared-product audit event policy, tenant/company-to-unit schema contract, and live integration against an isolated test database. No Phase 4 work started.
+**NOT PASSED.** Focused regression evidence is useful but not sufficient for production acceptance. Latest CI 43318197656 results are recorded in the test report; still need a real isolated backend authorization matrix, explicit shared-product audit event policy, tenant/company-to-unit schema contract, and live integration against an isolated test database. No Phase 4 work started.

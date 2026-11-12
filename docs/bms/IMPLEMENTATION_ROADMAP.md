@@ -1,6 +1,6 @@
 # BMS implementation roadmap after Phase 1 audit
 
-This roadmap records evidence-based work and dependencies. Phase 1 audit, Phase 2 shell, Phase 3 dashboard, and a bounded Phase 3.5 stabilization are in the active feature branch. Phase 3.5 fixes two validated persistence defects and a date-only parsing defect; complete CI, database provisioning, shared-unit security policy, and real integration remain open. Phase 4 and later are out of scope and require explicit approval.
+This roadmap records evidence-based work and dependencies. Phase 1 audit, Phase 2 shell, Phase 3 dashboard, and a bounded Phase 3.5 stabilization are in the active feature branch. Latest tested source SHA is `15c8bf295ff3c44a171800b61bb5441ddca979c2` (CI 43318197656 failed). Phase 3.5 remains NOT PASSED: broad Angular Karma failures, two unresolved employee-import failures, database provisioning, shared-unit security policy, and real integration remain open. Phase 4 and later are out of scope and require explicit approval.
 
 ## Phase 1 — Complete Product Audit & UX Foundation
 
@@ -102,15 +102,15 @@ Executed supported headless Chromium 153 with Puppeteer Core 25.17.0 against the
 
 ## Phase 3.5 — Engineering Stabilization (bounded; acceptance pending)
 
-**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`. **Latest tested SHA:** `054288d2016576721e5169027f0c7ee64d40ad26`; CI 43302623366 completed with failure. PR #26 remains open and unmerged.
+**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`. **Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2`; CI 43318197656 completed with failure. PR #26 remains open and unmerged.
 
 - [x] Verify branch, base commit `891851bc85b2d2f274b811c9173d6268c8752795`, PR state/base/head, changed files and review findings; no branch switch, merge or base mutation.
 - [x] Reproduce causes by source inspection for product metadata (model mass-assignment allowlist) and manager ID persistence (legacy User fillable list); patch by direct assignment after validation rather than widening global fillable rules.
 - [x] Fix double-escaped date-only regex; add regression and run Node specs in `America/Los_Angeles` (43/43 pass).
 - [x] Make backend validation steps cancellation-safe (`!cancelled()`); schedule frontend production build after dependency install even if Karma fails.
 - [x] Run local production Angular build (hash `dda2defb94f80af4`); `git diff --check` passes.
-- [x] Record CI 43302623366: native PHP syntax, focused backend regressions, PHP lint/analysis, frontend lint and production build pass; full SQLite/MySQL suites fail (each 150 tests, 1 error / 4 failures); Angular/Karma fails (212 executed, 77 pass / 135 fail). See the Phase 3.5 test report for categories and qualification.
-- [ ] Resolve or explicitly approve remaining backend module/meeting/import failures. Do not change legacy meeting or core-module semantics as part of dashboard stabilization.
+- [x] Record latest CI 43318197656: focused P16, persisted manager cross-company, module catalogue and existing dashboard/access regressions pass; SQLite/MySQL each fail two employee-import cases; Angular/Karma fails (212 executed, 114 pass / 98 fail); backend lint/analysis and frontend production build pass. See the Phase 3.5 test report for qualifications.
+- [ ] Resolve the two remaining backend employee-import failures after the Company–BusinessUnit contract is established; do not change import query/schema/auth beforehand. Focused meeting synchronization and core-module catalogue regressions now pass; do not broaden scope beyond their verified contracts.
 - [ ] Define company-to-business-unit tenant mapping before modifying employee import query/schema; no migration added.
 - [ ] Resolve shared Product recent-activity origin-unit policy before changing any audit disclosure behavior.
 - [ ] Complete a disposable fresh-install and migration rehearsal; locally blocked (no PHP/vendor/.env/isolated DB). No destructive command has been run.
