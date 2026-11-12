@@ -97,6 +97,14 @@ class RecruitmentController extends BmsController
             'work_degrees_id'=>'nullable|exists:work_degrees,id',
             'role_id'=>'nullable|exists:bms_roles,id',
         ]);
+        // A role grant during hire is still a role grant: apply the centralized
+        // policy (roles.manage + privilege-escalation + unit scope) exactly like
+        // roles/assign and employee creation. recruitment.manage alone must not
+        // mint roles — never mind global-scope or system_admin ones. Runs before
+        // any write so a refused grant leaves no partial account behind.
+        if(!empty($data['role_id'])){
+            $this->access->authorizeRoleChange(null,\App\Models\BMS\BmsRole::findOrFail((int)$data['role_id']),(int)$hiring->business_unit_id,'create');
+        }
         abort_if($hiring->onboarding()->exists(),422,'Onboarding tasks already exist for this hiring request.');
         $employee=DB::transaction(function()use($candidate,$hiring,$data){
             $detail=\App\Models\UserDetail::create(['hiringDate'=>$data['first_working_day']]);

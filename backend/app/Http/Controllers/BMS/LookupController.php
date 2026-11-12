@@ -68,16 +68,19 @@ class LookupController extends BmsController
             'business_unit_id' => 'nullable|exists:business_units,id',
         ]);
         $target = User::findOrFail($data['user_id']);
-        $this->authorizeAssignment($target, (int) $data['role_id'], $data['business_unit_id'] ?? null);
+        $role = BmsRole::findOrFail((int) $data['role_id']);
+        $unitId = ($data['business_unit_id'] ?? null) !== null ? (int) $data['business_unit_id'] : null;
+        $this->access->authorizeRoleChange($target, $role, $unitId, 'assign');
+
         $existing = $target->bmsRoles()->wherePivot('business_unit_id', $data['business_unit_id'] ?? null)
-            ->where('bms_roles.id', $data['role_id'])->exists();
+            ->where('bms_roles.id', $role->id)->exists();
         abort_if($existing, 422, 'This role is already assigned at that scope.');
         $target->bmsRoles()->syncWithoutDetaching([
-            $data['role_id'] => ['business_unit_id' => $data['business_unit_id'] ?? null],
+            $role->id => ['business_unit_id' => $data['business_unit_id'] ?? null],
         ]);
         $this->audit->record($target, 'role.assigned', [], $data);
 
-        return $this->ok($this->assignments($target), 'BMS role assigned');
+        return $this->writeResponse($target, 'BMS role assigned');
     }
 
     public function revokeRole(Request $request)
@@ -88,95 +91,120 @@ class LookupController extends BmsController
             'business_unit_id' => 'nullable|exists:business_units,id',
         ]);
         $target = User::findOrFail($data['user_id']);
-        $this->authorizeAssignment($target, (int) $data['role_id'], $data['business_unit_id'] ?? null);
+        $role = BmsRole::findOrFail((int) $data['role_id']);
+        $unitId = ($data['business_unit_id'] ?? null) !== null ? (int) $data['business_unit_id'] : null;
+        $this->access->authorizeRoleChange($target, $role, $unitId, 'revoke');
         abort_if($target->id === $this->access->user()->id && empty($data['business_unit_id']), 422, 'You cannot revoke your own global role.');
+
+        // Only the requested assignment scope is detached: unit-scoped rows keep
+        // their other units, and global rows are only touched when no unit is given.
         $relation = $target->bmsRoles();
-        if (empty($data['business_unit_id'])) $relation->wherePivotNull('business_unit_id');
-        else $relation->wherePivot('business_unit_id', $data['business_unit_id']);
-        $relation->detach($data['role_id']);
+        if ($unitId === null) $relation->wherePivotNull('business_unit_id');
+        else $relation->wherePivot('business_unit_id', $unitId);
+        $relation->detach($role->id);
         $this->audit->record($target, 'role.revoked', [], $data);
 
-        return $this->ok($this->assignments($target->fresh()), 'BMS role revoked');
+        return $this->writeResponse($target->fresh(), 'BMS role revoked');
     }
 
-    /** Every role assignment of one employee, for the Access & Roles screen. */
+    /**
+     * Every role assignment of one employee, for the Access & Roles screen.
+     *
+     * Unit-scoped viewers may only inspect employees inside their own scope
+     * (403 otherwise) and only see the assignments that belong to their own
+     * units — global assignments are not exposed to them. Global-scope
+     * viewers keep the full picture. Soft-deleted/unknown employees resolve
+     * to 404 through the route binding before this method runs.
+     */
     public function assignments(User $employee)
+    {
+        $this->authorizeAssignmentRead($employee);
+
+        return $this->ok($this->presentAssignments($employee));
+    }
+
+    /**
+     * Write responses keep the historical envelope this endpoint has always
+     * returned (the assignment list serialized through a nested response),
+     * but they never re-run the read guard: authorization already succeeded
+     * for the write itself, so a response builder must not be able to turn a
+     * committed assignment into a spurious 403.
+     */
+    private function writeResponse(User $employee, string $message)
+    {
+        return $this->ok($this->ok($this->presentAssignments($employee)), $message);
+    }
+
+    /** Read-side scope guard: unrelated employees are 403, never a partial leak. */
+    private function authorizeAssignmentRead(User $employee): void
+    {
+        $visible = $this->access->visibleUnitIds();
+        if ($visible !== null) {
+            $inScope = $employee->businessUnits()->whereIn('business_units.id', $visible)->exists();
+            abort_unless($inScope, 403, 'This employee is outside your assigned unit scope.');
+        }
+    }
+
+    /**
+     * Renders the assignment rows of one employee: unit-scoped viewers only
+     * receive rows from their own units (global rows stay hidden), while
+     * global-scope viewers receive everything.
+     */
+    private function presentAssignments(User $employee)
     {
         $visible = $this->access->visibleUnitIds();
         $pivots = \DB::table('bms_role_user')->where('user_id', $employee->id)->get();
         $roles = BmsRole::whereIn('id', $pivots->pluck('bms_role_id'))->get()->keyBy('id');
         $units = BusinessUnit::whereIn('id', $pivots->pluck('business_unit_id')->filter())->get()->keyBy('id');
 
-        return $this->ok($pivots->map(function ($pivot) use ($roles, $units, $visible) {
+        return $pivots->map(function ($pivot) use ($roles, $units, $visible) {
             $unitId = $pivot->business_unit_id;
             $role = $roles->get($pivot->bms_role_id);
-            $inScope = $visible === null || $unitId === null || in_array((int) $unitId, $visible, true);
+            if ($visible !== null) {
+                if ($unitId === null) return null; // global assignments stay hidden from unit-scoped viewers
+                if (!in_array((int) $unitId, $visible, true)) return null;
+            }
 
-            return $inScope ? [
+            return [
                 'role_id' => $pivot->bms_role_id,
                 'role' => $role->name ?? null,
                 'slug' => $role->slug ?? null,
                 'business_unit_id' => $unitId,
                 'business_unit' => $unitId ? ($units->get($unitId)->name ?? null) : null,
                 'scope' => $unitId ? 'unit' : 'global',
-            ] : null;
-        })->filter()->values());
-    }
-
-    /**
-     * Role assignment target/scope authorization.
-     *
-     * Route-level `roles.manage` is not enough: a unit director holding that
-     * ability must not be able to grant global roles, System Administrator, or
-     * roles scoped to units they cannot see.
-     */
-    private function authorizeAssignment(User $target, int $roleId, ?int $unitId): void
-    {
-        $actor = $this->access->user();
-        $isAdmin = in_array((int) $actor->sub_departments_id, config('bms.admin_sub_department_ids', [1, 4]), true);
-        abort_unless($this->access->can('roles.manage') || $isAdmin, 403, 'You cannot manage BMS roles.');
-
-        $role = BmsRole::findOrFail($roleId);
-        if ($role->slug === 'system_admin' && !$isAdmin) {
-            abort(403, 'Only Administration may grant or revoke the System Administrator role.');
-        }
-
-        $targetUnitIds = $target->businessUnits()->pluck('business_units.id')->all();
-        $visible = $this->access->visibleUnitIds();
-        if ($visible !== null) {
-            $targetInScope = in_array((int) $target->id, array_unique(array_merge($targetUnitIds, [$target->id])), true)
-                || array_intersect($targetUnitIds, $visible)
-                || (int) $target->id === (int) $actor->id;
-            abort_unless($targetInScope, 403, 'This employee is outside your assigned unit scope.');
-        }
-        if ($unitId !== null) {
-            $this->access->authorizeUnit($unitId);
-        } elseif ($visible !== null && !$isAdmin) {
-            abort(403, 'Global role assignments require global scope.');
-        }
+            ];
+        })->filter()->values();
     }
 
     /**
      * Audit history of role changes (BRD section 18). Only actors with
-     * roles.manage may read it, and only entries for employees inside their
-     * unit scope are returned.
+     * roles.manage may read it. Entries are scoped by the business unit the
+     * entry itself belongs to: unit-scoped viewers never see global entries
+     * or entries from other units, even when the employee also belongs to one
+     * of their units. Global viewers see everything. Deleted employees are
+     * rendered as "#id" without failing the request.
      */
     public function roleAudit(Request $request)
     {
         $entries = \App\Models\BMS\BmsAuditLog::with('user:id,username')
             ->whereIn('event', ['role.assigned', 'role.revoked'])
             ->latest()->limit(200)->get();
-        $targets = \App\Models\User::whereIn('id', $entries->pluck('auditable_id'))->get()->keyBy('id');
+
         $visible = $this->access->visibleUnitIds();
+        if ($visible !== null) {
+            $entries = $entries->filter(function ($entry) use ($visible) {
+                $unitId = ($entry->new_values ?: [])['business_unit_id'] ?? null;
+                return $unitId !== null && in_array((int) $unitId, $visible, true);
+            })->values();
+        }
+
+        // One query for every employee referenced by the scoped entries (no N+1).
+        $targets = \App\Models\User::whereIn('id', $entries->pluck('auditable_id'))->get()->keyBy('id');
         $roles = BmsRole::pluck('name', 'id');
         $units = BusinessUnit::pluck('name', 'id');
 
-        return $this->ok($entries->map(function ($entry) use ($targets, $visible, $roles, $units) {
+        return $this->ok($entries->map(function ($entry) use ($targets, $roles, $units) {
             $target = $targets->get($entry->auditable_id);
-            if ($visible !== null) {
-                $ids = $target ? $target->businessUnits()->pluck('business_units.id')->all() : [];
-                if (!array_intersect($ids, $visible)) return null;
-            }
             $values = $entry->new_values ?: [];
 
             return [
@@ -188,7 +216,7 @@ class LookupController extends BmsController
                 'business_unit' => $units->get($values['business_unit_id'] ?? null),
                 'user' => $entry->user->username ?? null,
             ];
-        })->filter()->values());
+        })->values());
     }
 
     private function currentAbilities(): array
