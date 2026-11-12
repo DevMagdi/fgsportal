@@ -133,6 +133,26 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
     });
   }
 
+  importOpen = false; importRows: any[] = []; importSummary: any = null; importFile: File | null = null;
+  downloadTemplate(): void { this.api.download('employees/import/template', 'bms-employee-import-template.csv', () => this.error = this.lang.t('error')); }
+  chooseImportFile(event: any): void { this.importFile = event.target.files?.[0] || null; }
+  previewImport(): void {
+    if (!this.importFile) { this.error = this.lang.t('validationError'); return; }
+    const form = new FormData(); form.append('file', this.importFile); form.append('dry_run', '1');
+    this.api.post<any>('employees/import', form).subscribe({
+      next: data => { this.importRows = data.rows || []; this.importSummary = data.summary; this.importOpen = true; },
+      error: error => this.showError(error),
+    });
+  }
+  confirmImport(): void {
+    if (!this.importFile || !this.importSummary?.valid) return;
+    if (!confirm(`${this.lang.t('confirmImport')} (${this.importSummary.valid})`)) return;
+    const form = new FormData(); form.append('file', this.importFile); form.append('dry_run', '0');
+    this.api.post<any>('employees/import', form).subscribe({
+      next: data => { this.saved(); this.importSummary = data.summary; this.importRows = data.rows || []; this.importFile = null; this.load(); },
+      error: error => this.showError(error),
+    });
+  }
   download(path: string, name: string): void { this.api.download(path, name, () => this.error = this.lang.t('error')); }
 
   expiryStatus(certificate: any): string {

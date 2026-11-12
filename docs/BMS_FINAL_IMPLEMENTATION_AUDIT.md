@@ -12,6 +12,7 @@ marked verified unless the command was executed here.
 | Angular development build | `npx ng build --configuration development` | **PASS** |
 | Angular production build | `npx ng build --configuration production` | **PASS** |
 | Pure TypeScript spec harness | `npm run test:node` | **PASS** — 28 passing, 0 failing |
+| Employee import / KPI register / manager-cycle tests | `P17EmployeeManagementTest` (18 tests) | **WRITTEN, NOT EXECUTED** (no PHP runtime) |
 | PHPUnit / Laravel feature tests | — | **NOT EXECUTED** — no PHP runtime and no Composer dependencies in this sandbox; they cannot be installed through the allowed network. |
 | Karma component tests / E2E | — | **NOT EXECUTED** — no Chrome in the sandbox. |
 
@@ -54,7 +55,15 @@ executed here · **P** partially implemented · **G** gap · **?** blocked on a 
 | §8 | Non-destructive migrations, no destructive commands | **V** | new migrations only add columns/flags; **no** `migrate:fresh` executed |
 | §10 | Tests | **P** | 15 backend tests for this feature set written (`P17EmployeeManagementTest`), **not executed here**; pure specs 28/28 pass |
 
-## 2. Implemented in this pass
+## 2. Defects fixed after PR #19 review (this pass)
+
+| Defect | Fix | Test |
+| --- | --- | --- |
+| `abort_if(… && false, 422)` — manager self-reference never enforced on create | `validatedManagerId()` used by both create and update: self-reference, existence, cross-company, out-of-scope manager and reporting-cycle detection; `null` clears the line | `test_P19_manager_assignment_blocks_cycles_cross_company_and_out_of_scope_managers` |
+| Dashboard procurement count ignored the `business_unit_id` filter (two different queries) | single scoped+filted query reused for the KPI, the payload and the summary | `test_P18_dashboard_…`, `test_P19_recent_activity_never_leaks_other_units_records` |
+| `recentActivity()` could leak other units' records and crashed logic on deleted models; unit lookup typed on the wrong key | whitelisted business model types, explicit null-safe resolution, per-type+id unit cache, scoped actors only see positively-in-scope rows, users/roles never listed | `test_P19_recent_activity_never_leaks_other_units_records` |
+
+## 3. Implemented in this pass
 
 1. Employee reporting line (`manager_id`) end-to-end: migration, model relations,
    create/update validation, self-reference rejection, API output, form field.
@@ -67,16 +76,27 @@ executed here · **P** partially implemented · **G** gap · **?** blocked on a 
    flag no longer ignores records that were never updated.
 5. Centralised configuration lookups (meeting types, task statuses, opportunity
    types, unit roots) and the meetings form now reads meeting types from the API.
-6. Tests: 3 new feature tests (manager line, product metadata + reordering,
-   dashboard widgets) added to the 12 from the previous pass.
+6. **Bulk employee import** (BRD §4.1): downloadable CSV template, two-phase
+   validate-then-commit, per-row errors, duplicate detection by username/email,
+   business-unit + manager validation inside the actor's scope, transaction-safe
+   writes, audit row per imported employee, `directory.manage` only.
+7. **Unit KPI register** (BRD §4.3/§5.3): `GET /bms/reports/kpis` with unit scope,
+   frequency filter, attainment (`null` when no target — never a fake 0), status
+   (`achieved`/`on_track`/`behind`/`no_target`) and per-KPI history series; new
+   "KPI register" tab with target-vs-actual, trend bars, inline edit and Excel export;
+   KPI columns `description`, `owner_id`, `frequency` added in the same reversible
+   migration.
+8. Tests: 6 new feature tests (manager line, product metadata + reordering,
+   dashboard widgets, manager cycles/cross-company, import preview + commit,
+   recent-activity scope) — 18 in total in `P17EmployeeManagementTest`.
 
 ## 3. Remaining gaps
 
 | Gap | Reason | Needed |
 | --- | --- | --- |
-| Bulk employee Excel import | time; needs a validated import contract | reuse the opportunity-import pattern |
+| Import template is CSV (the existing import convention), not `.xlsx` | no spreadsheet library in `composer.json`; CSV opens in Excel and is validated server-side | add `phpoffice/phpspreadsheet` if true `.xlsx` is required |
 | Editing departments / job titles from the BMS UI | those tables belong to the legacy admin module | decide ownership (BRD Q10) |
-| KPI trend chart & unit-KPI admin screen | UI work only, data model exists | next phase |
+| KPI annual summary separate from quarterly | register supports `frequency=annual`; no separate annual report endpoint | minor: filter the register |
 | Product dependencies / risk register | not defined in the BRD data model | business definition first |
 | Full re-verification of meetings / procurement / documents / events | out of scope of this pass | CI + UAT |
 | PHPUnit & E2E execution | no runtime/browser in this sandbox | CI with PHP 8.1 + MySQL 8 + Chrome |
@@ -93,11 +113,22 @@ BMS usage / ownership of configuration lists · Q11 hosting, residency, backups,
 | Migration | Change | Reversible |
 | --- | --- | --- |
 | `2026_11_12_000009_make_bms_a_core_capability` | `modules.is_core = 1` for `bms` | yes (flag only) |
-| `2026_11_12_000010_add_bms_admin_metadata` | `users.manager_id`, `products.description`, `products.owner_id`, `bms_unit_kpis.frequency` | yes (`down()` drops exactly those columns) |
+| `2026_11_12_000010_add_bms_admin_metadata` | `users.manager_id`, `products.description`, `products.owner_id`, `bms_unit_kpis.frequency`, `bms_unit_kpis.description`, `bms_unit_kpis.owner_id` | yes (`down()` drops exactly those columns) |
 
 No data was deleted or rewritten; no destructive command was executed.
 
-## 6. Production readiness statement
+## 6. Endpoint authorization summary (new endpoints in this pass)
+
+| Endpoint | Ability | Extra server-side check |
+| --- | --- | --- |
+| `POST /bms/products/{id}/phases/reorder` | `products.manage` | every phase id must belong to that product; unit-scoped actors must own one of its units |
+| `GET /bms/reports/kpis` | `reports.view` | units limited to `visibleUnitIds()` |
+| `GET /bms/employees/import/template` | `directory.manage` | — |
+| `POST /bms/employees/import` | `directory.manage` | unit + manager scope per row, duplicates never re-created, single transaction |
+| `POST /bms/employees` / `PUT /bms/employees/{id}` (manager) | `directory.manage` | manager exists, same company, within actor scope, no reporting cycle |
+| `GET /bms/executive-dashboard` (activity/procurement) | `dashboard.view` | unit scope on both the counts and the activity list |
+
+## 7. Production readiness statement
 
 **NO-GO.** Frontend development and production builds pass, the pure-spec suite passes,
 and all backend PHP parses, but the backend feature suite and the end-to-end scenarios
