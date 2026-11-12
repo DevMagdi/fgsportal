@@ -134,6 +134,12 @@ class EmployeeController extends BmsController
             $attributes = $this->onlyExistingColumns($attributes);
 
             $employee = User::create($attributes);
+            // manager_id is excluded from the legacy User fillable list. Persist
+            // this value only after the validatedManagerId scope/cycle checks above.
+            if (array_key_exists('manager_id', $attributes)) {
+                $employee->manager_id = $attributes['manager_id'];
+                $employee->save();
+            }
             $employee->businessUnits()->sync($data['business_unit_ids']);
             if (!empty($data['role_id'])) {
                 $employee->bmsRoles()->syncWithoutDetaching([

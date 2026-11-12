@@ -81,4 +81,11 @@ describe('Executive dashboard data helpers', () => {
     expect(dateLabel('not-a-date', 'en')).toBe('—');
     expect(dateLabel('2026-01-01T00:00:00Z', 'en')).not.toBe(dateLabel('2026-01-01T00:00:00Z', 'ar'));
   });
+
+  it('treats date-only KPI values as local calendar dates', () => {
+    const expectedLocalDate = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
+    }).format(new Date(2026, 0, 1));
+    expect(dateLabel('2026-01-01', 'en')).toBe(expectedLocalDate);
+  });
 });

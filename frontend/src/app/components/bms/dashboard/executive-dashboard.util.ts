@@ -149,7 +149,7 @@ export function numberLabel(value: unknown, language: 'en' | 'ar' = 'en'): strin
 export function dateLabel(value: unknown, language: 'en' | 'ar' = 'en', format: 'date' | 'time' | 'datetime' | 'month' = 'date'): string {
   if (value === null || value === undefined || value === '') return '—';
   const raw = String(value);
-  const date = value instanceof Date ? value : /^\\d{4}-\\d{2}-\\d{2}$/.test(raw)
+  const date = value instanceof Date ? value : /^\d{4}-\d{2}-\d{2}$/.test(raw)
     ? new Date(Number(raw.slice(0, 4)), Number(raw.slice(5, 7)) - 1, Number(raw.slice(8, 10)))
     : new Date(raw);
   if (!Number.isFinite(date.getTime())) return '—';
