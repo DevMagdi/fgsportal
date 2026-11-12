@@ -1,0 +1,105 @@
+name: Phase 3 final validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: PHP native lint and backend tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: bms_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, dom, curl, zip, pdo_sqlite, pdo_mysql, pcov
+          coverage: pcov
+      - name: Install backend dependencies and prepare SQLite environment
+        id: prepare
+        working-directory: backend
+        run: |
+          composer install --no-interaction --prefer-dist --ignore-platform-req=php
+          cp .env.example .env
+          php artisan key:generate
+          php artisan jwt:secret
+      - name: Native syntax check for every Phase 3 PHP change
+        id: php_lint
+        run: |
+          set -e
+          php -l backend/app/Http/Controllers/BMS/ExecutiveDashboardController.php
+          php -l backend/tests/Feature/P17EmployeeManagementTest.php
+      - name: Focused P22 selected-unit regression
+        id: p22
+        continue-on-error: true
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P17EmployeeManagementTest.php --filter test_P22_dashboard_recent_activity_respects_selected_unit_including_shared_products
+      - name: P18 dashboard aggregate regression
+        id: p18_dashboard
+        continue-on-error: true
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P17EmployeeManagementTest.php --filter test_P18_dashboard_reports_pending_procurement_upcoming_meetings_and_overdue_tasks
+      - name: P19 recent-activity authorization regression
+        id: p19_activity
+        continue-on-error: true
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P17EmployeeManagementTest.php --filter test_P19_recent_activity_never_leaks_other_units_records
+      - name: P20 recent-activity deleted and missing model regression
+        id: p20_activity
+        continue-on-error: true
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P17EmployeeManagementTest.php --filter test_P20_recent_activity_separates_ids_shared_across_model_types_and_handles_deleted_records
+      - name: P20 dashboard summary filter regression
+        id: p20_dashboard
+        continue-on-error: true
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P17EmployeeManagementTest.php --filter test_P20_dashboard_summary_matches_the_widget_data_under_the_same_filters
+      - name: P1.1 dashboard card regression
+        id: p11_dashboard
+        continue-on-error: true
+        working-directory: backend
+        run: vendor/bin/phpunit tests/Feature/P1Batch1Test.php --filter test_P1_1_dashboard_card_lists_employees_without_task_bodies
+      - name: Full backend PHPUnit suite (no exclusions)
+        id: full_suite
+        if: always() && steps.prepare.outcome == 'success'
+        working-directory: backend
+        run: vendor/bin/phpunit
+      - name: Publish exact step outcomes
+        if: always()
+        env:
+          PREPARE: ${{ steps.prepare.outcome }}
+          LINT: ${{ steps.php_lint.outcome }}
+          P22: ${{ steps.p22.outcome }}
+          P18: ${{ steps.p18_dashboard.outcome }}
+          P19: ${{ steps.p19_activity.outcome }}
+          P20_ACTIVITY: ${{ steps.p20_activity.outcome }}
+          P20_DASHBOARD: ${{ steps.p20_dashboard.outcome }}
+          P11: ${{ steps.p11_dashboard.outcome }}
+          FULL: ${{ steps.full_suite.outcome }}
+        run: |
+          {
+            echo '### Phase 3 backend validation outcomes'
+            echo '| Check | Outcome |'
+            echo '|---|---|'
+            echo "| Prepare dependencies | $PREPARE |"
+            echo "| PHP syntax lint | $LINT |"
+            echo "| P22 selected-unit | $P22 |"
+            echo "| P18 dashboard | $P18 |"
+            echo "| P19 activity authorization | $P19 |"
+            echo "| P20 activity missing/deleted models | $P20_ACTIVITY |"
+            echo "| P20 dashboard summary | $P20_DASHBOARD |"
+            echo "| P1.1 dashboard card | $P11 |"
+            echo "| Full backend PHPUnit | $FULL |"
+          } >> "$GITHUB_STEP_SUMMARY"
