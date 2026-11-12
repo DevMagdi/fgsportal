@@ -14,7 +14,21 @@
 | `php artisan test` / PHPUnit | **NOT RUN** — no PHP runtime, no `vendor/`, Composer downloads blocked in this sandbox |
 | Karma / E2E | **NOT RUN** — no Chrome |
 
-## Work completed in this pass
+## Work completed in this pass (branch `arena/83fd2d35-fgsportal`)
+
+* Fixed the PR #19 defects: manager validation (`&& false` made it unreachable) now
+  enforces self-reference, cycle, cross-company and scope rules on create **and**
+  update; the dashboard procurement count now reuses the same scoped+filted query it
+  displays; `recentActivity()` is whitelisted, null-safe and never returns records
+  outside the viewer's units.
+* Bulk employee import (CSV template → validated preview → single-transaction commit,
+  duplicate detection, per-row errors, audit per row) with the corresponding UI panel.
+* Unit KPI register (`GET /bms/reports/kpis`) with attainment (null, never a fake 0),
+  status, frequency and history series, plus a UI tab with trend bars, inline edit and
+  Excel export.
+* 6 additional feature tests (18 total in `P17EmployeeManagementTest`).
+
+## Work completed in the previous pass
 
 * Employee reporting line (`users.manager_id`) — migration, model relations, API,
   self-reference rejection, form field, directory display.
@@ -28,9 +42,10 @@
 
 ## Still open
 
-Bulk employee Excel import, UI for editing departments/job titles (ownership
-question), KPI trend/unit-KPI admin screen, product dependencies/risks (not in the
-BRD data model), CI execution of PHPUnit + E2E, and the business questions Q4–Q11.
+`.xlsx` import (CSV is supported and validated), UI for editing departments/job
+titles (ownership question), product dependencies/risks (not in the BRD data model),
+annual-report endpoint (the register supports `frequency=annual`), CI execution of
+PHPUnit + MySQL + E2E, and the business questions Q4–Q11.
 
 ## Earlier continuation notes
 

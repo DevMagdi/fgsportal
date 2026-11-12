@@ -69,7 +69,7 @@ class ExecutiveDashboardController extends BmsController
 
         return $this->ok([
             'generated_at'=>now(),'filters'=>$filters,'unit_progress'=>$unitProgress,
-            'procurement'=>['pending'=>\App\Models\BMS\ProcurementRequest::when($visibleUnits!==null,fn($q)=>$q->whereIn('business_unit_id',$visibleUnits))->where('status','submitted')->count()],
+            'procurement'=>['pending'=>$procurementPending],
             'meetings'=>$meetings,'recent_activity'=>$recent,
             'tenders'=>[
                 'total'=>$opportunities->where('type','tender')->count(),
@@ -91,19 +91,40 @@ class ExecutiveDashboardController extends BmsController
     /** Latest audited business events inside the viewer's scope (BRD §5.1). */
     private function recentActivity(?array $visibleUnits): array
     {
-        $query=\App\Models\BMS\BmsAuditLog::with('user:id,username')->latest()->limit(40);
-        return $query->get()->filter(function($log)use($visibleUnits){
-            if($visibleUnits===null)return true;
-            $model=$log->auditable;
-            // "Unit of a record" without exploding the query count: the record's
-            // own column first, then the relations an audit row can carry.
-            $unitId=$model->business_unit_id??null;
-            if($unitId===null&&method_exists($model,'businessUnits')&&!($model instanceof \App\Models\User))$unitId=$model->businessUnits()->value('business_units.id');
-            if($unitId===null&&method_exists($model,'unit'))$unitId=optional($model->unit)->id;
-            return $unitId===null||in_array((int)$unitId,$visibleUnits,true);
-        })->take(12)->map(fn($log)=>[
-            'event'=>$log->event,'at'=>$log->created_at,'by'=>$log->user->username??null,
-            'type'=>class_basename($log->auditable_type),'id'=>$log->auditable_id,
-        ])->values()->all();
+        $allowed = [
+            'BusinessUnit', 'UnitTask', 'Opportunity', 'Product', 'Meeting', 'Lead',
+            'ProcurementRequest', 'WeeklyPlan', 'SupportRequest', 'Recruitment', 'Event',
+            'TeamDocument', 'UnitKpi', 'ProductPhase',
+        ];
+        $logs = \App\Models\BMS\BmsAuditLog::with('user:id,username')->latest()->limit(120)->get();
+        $unitCache = [];
+        $rows = [];
+        foreach ($logs as $log) {
+            $type = class_basename($log->auditable_type);
+            // Only business records are listed; user/role/audit noise is excluded so
+            // the widget cannot become a directory of other units' staff.
+            if (!in_array($type, $allowed, true)) continue;
+            $unitId = null;
+            if (array_key_exists($log->auditable_id, $unitCache)) {
+                $unitId = $unitCache[$log->auditable_id.':'.$type] ?? null;
+            }
+            $model = $log->auditable; // may be null when the record was hard-deleted
+            if ($model) {
+                $unitId = $model->business_unit_id ?? null;
+                if ($unitId === null && method_exists($model, 'businessUnits')) $unitId = $model->businessUnits()->value('business_units.id');
+                if ($unitId === null && method_exists($model, 'unit')) $unitId = optional($model->unit)->id;
+            }
+            $unitCache[$log->auditable_id.':'.$type] = $unitId;
+            if ($visibleUnits !== null) {
+                // Unknown scope is never disclosed; only records positively inside the scope are shown.
+                if ($unitId === null || !in_array((int) $unitId, $visibleUnits, true)) continue;
+            }
+            $rows[] = [
+                'event' => $log->event, 'at' => $log->created_at, 'by' => $log->user->username ?? null,
+                'type' => $type, 'id' => $log->auditable_id,
+            ];
+            if (count($rows) >= 12) break;
+        }
+        return $rows;
     }
 }

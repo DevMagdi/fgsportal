@@ -1,5 +1,14 @@
 # BMS production-readiness delivery status
 
+> **2026-11-12 update (branch `arena/83fd2d35-fgsportal`).** Three defects found in the
+> PR #19 review are fixed (manager validation could never fail, dashboard procurement
+> count ignored its unit filter, recent-activity could expose out-of-scope records);
+> bulk employee import and a unit KPI register with trend data were added. Verified in
+> this environment: all 670 backend PHP files parse, Angular development **and**
+> production builds pass, and the pure-spec suite is 28/28. **PHPUnit, MySQL, coverage
+> and E2E were still not executable here** (no PHP runtime, no browser), so the decision
+> below is unchanged: **NO-GO**. Details: `docs/BMS_FINAL_IMPLEMENTATION_AUDIT.md`.
+
 ## Decision
 
 **NO-GO for production.** This is a verified partial delivery, not a claim that the complete BRD hardening checklist is finished. The current branch may be merged to retain tested work.

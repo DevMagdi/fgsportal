@@ -36,9 +36,42 @@ class ReportController extends BmsController
         $kpis=UnitKpi::with('unit')->where('business_unit_id',$unitId)->whereDate('period_start','>=',$start)->whereDate('period_end','<=',$end)->get()->map(function($kpi){$kpi->attainment=$kpi->target&&$kpi->target>0?round($kpi->actual/$kpi->target*100,1):null;return $kpi;});
         return $this->ok(['report_type'=>'90-day KPI report','unit'=>BusinessUnit::find($unitId),'period'=>['start'=>$start->toDateString(),'end'=>$end->toDateString()],'kpis'=>$kpis]);
     }
+    /** Unit KPI register with attainment and history (BRD §4.3 / §5.3). */
+    public function kpis(Request $request)
+    {
+        $data = $request->validate(['business_unit_id' => 'nullable|exists:business_units,id', 'frequency' => 'nullable|string|max:20']);
+        $unitId = $data['business_unit_id'] ?? null;
+        if ($unitId) $this->access->authorizeUnit((int) $unitId);
+        $ids = $this->access->visibleUnitIds();
+        $rows = UnitKpi::with('unit:id,name')
+            ->when($unitId, fn ($q) => $q->where('business_unit_id', $unitId))
+            ->when(!$unitId && $ids !== null, fn ($q) => $q->whereIn('business_unit_id', $ids))
+            ->when($data['frequency'] ?? null, fn ($q, $v) => $q->where('frequency', $v))
+            ->orderByDesc('period_start')->orderBy('name')->get()
+            ->map(function ($kpi) {
+                // Attainment stays null when the target is missing or zero: the UI
+                // must be able to tell "no data" apart from a real zero.
+                $kpi->attainment = ($kpi->target !== null && $kpi->target > 0)
+                    ? round($kpi->actual / $kpi->target * 100, 1) : null;
+                $kpi->status = $kpi->attainment === null ? 'no_target'
+                    : ($kpi->attainment >= 100 ? 'achieved' : ($kpi->attainment >= 80 ? 'on_track' : 'behind'));
+                return $kpi;
+            });
+        $history = UnitKpi::with('unit:id,name')
+            ->when($unitId, fn ($q) => $q->where('business_unit_id', $unitId))
+            ->when(!$unitId && $ids !== null, fn ($q) => $q->whereIn('business_unit_id', $ids))
+            ->orderBy('period_start')->get(['id', 'business_unit_id', 'name', 'target', 'actual', 'period_start', 'period_end'])
+            ->groupBy(fn ($kpi) => $kpi->name)
+            ->map(fn ($group) => $group->map(fn ($kpi) => [
+                'period_start' => $kpi->period_start, 'target' => $kpi->target, 'actual' => $kpi->actual,
+            ])->values());
+
+        return $this->ok(['kpis' => $rows, 'history' => $history, 'generated_at' => now()]);
+    }
+
     public function saveKpi(Request $request)
     {
-        $data=$request->validate(['business_unit_id'=>'required|exists:business_units,id','name'=>'required|string|max:200','target'=>'nullable|numeric','actual'=>'required|numeric','unit_label'=>'nullable|string|max:40','period_start'=>'required|date','period_end'=>'required|date|after_or_equal:period_start','id'=>'nullable|exists:bms_unit_kpis,id']);
+        $data=$request->validate(['business_unit_id'=>'required|exists:business_units,id','name'=>'required|string|max:200','target'=>'nullable|numeric','actual'=>'required|numeric','unit_label'=>'nullable|string|max:40','frequency'=>'nullable|string|max:20','description'=>'nullable|string|max:1000','owner_id'=>'nullable|exists:users,id','period_start'=>'required|date','period_end'=>'required|date|after_or_equal:period_start','id'=>'nullable|exists:bms_unit_kpis,id']);
         $this->access->authorizeUnit((int)$data['business_unit_id']);$id=$data['id']??null;unset($data['id']);$kpi=UnitKpi::updateOrCreate(['id'=>$id],$data+['updated_by'=>$this->access->user()->id]);
         $this->audit->record($kpi,'unit_kpi.saved',[],$kpi->toArray());return $this->ok($kpi,'KPI saved');
     }

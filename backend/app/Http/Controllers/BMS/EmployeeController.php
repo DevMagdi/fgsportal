@@ -110,7 +110,8 @@ class EmployeeController extends BmsController
             $this->authorizeRoleAssignment((int) $data['role_id'], $data['role_business_unit_id'] ?? null);
         }
 
-        $employee = DB::transaction(function () use ($data) {
+        $managerId = $this->validatedManagerId($data['manager_id'] ?? null);
+        $employee = DB::transaction(function () use ($data, $managerId) {
             $detail = UserDetail::create(['hiringDate' => $data['hiring_date'] ?? null]);
             $attributes = [
                 'username' => $data['username'],
@@ -125,10 +126,7 @@ class EmployeeController extends BmsController
                 'sub_departments_id' => $data['sub_departments_id'] ?? null,
                 'company_id' => $this->access->user()->company_id,
             ];
-            if (!empty($data['manager_id']) && \Schema::hasColumn('users', 'manager_id')) {
-                abort_if((int) $data['manager_id'] === (int) $this->access->user()->id && false, 422);
-                $attributes['manager_id'] = $data['manager_id'];
-            }
+            $attributes['manager_id'] = $managerId;
             // Legacy installations and the test schema do not all carry the
             // same optional columns; only write what this database really has.
             if (\Schema::hasColumn('users', 'mobileNumber')) $attributes['mobileNumber'] = $data['mobile_number'] ?? null;
@@ -153,6 +151,156 @@ class EmployeeController extends BmsController
         });
 
         return $this->ok($this->present($employee->fresh(['work_degrees_id_fun', 'businessUnits', 'bmsRoles', 'manager:id,username,firstname,lastname'])), 'Employee created', 201);
+    }
+
+    /** CSV template so administrators never have to guess the column names. */
+    public function importTemplate()
+    {
+        $this->access->authorize('directory.manage');
+        $headers = ['username', 'email', 'firstname', 'lastname', 'password', 'mobile_number',
+            'hiring_date', 'work_degrees_id', 'sub_departments_id', 'manager_username', 'business_units'];
+        $csv = implode(',', $headers)."\n";
+        $csv .= 'ahmed.ali,ahmed.ali@example.com,Ahmed,Ali,ChangeMe123,0500000000,2026-01-01,,,manager.user,Alpha Delta|Beta Unit'."\n";
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="bms-employee-import-template.csv"',
+        ]);
+    }
+
+    /**
+     * Bulk employee import (BRD §4.1). Two-phase by design:
+     * `dry_run=1` validates and returns a per-row preview, `dry_run=0` writes every
+     * valid row inside one transaction. Rows that fail are reported, never
+     * half-written, and duplicates are matched — never re-created.
+     */
+    public function import(Request $request)
+    {
+        $this->access->authorize('directory.manage');
+        $dryRun = $request->boolean('dry_run', true);
+        if ($request->hasFile('file')) {
+            $request->validate(['file' => 'required|file|mimes:csv,txt|max:5120']);
+            $rows = $this->csvRows($request->file('file')->getRealPath());
+        } else {
+            $request->validate(['rows' => 'required|array|min:1|max:500', 'rows.*' => 'array']);
+            $rows = array_values($request->input('rows'));
+        }
+
+        $companyId = $this->access->user()->company_id;
+        $preview = [];
+        foreach ($rows as $index => $row) {
+            $preview[] = $this->inspectImportRow((array) $row, $index + 1, $companyId);
+        }
+        $valid = array_values(array_filter($preview, fn ($r) => empty($r['errors']) && $r['status'] === 'new'));
+        $summary = [
+            'total' => count($preview),
+            'valid' => count($valid),
+            'invalid' => count($preview) - count($valid),
+            'created' => 0,
+            'skipped' => count(array_filter($preview, fn ($r) => $r['status'] === 'existing')),
+        ];
+
+        if ($dryRun) {
+            return $this->ok(['dry_run' => true, 'rows' => $preview, 'summary' => $summary], 'Import preview');
+        }
+
+        $created = 0;
+        DB::transaction(function () use ($valid, &$created) {
+            foreach ($valid as $row) {
+                $detail = UserDetail::create(['hiringDate' => $row['attributes']['hiring_date'] ?? null]);
+                $attributes = $row['attributes'];
+                unset($attributes['hiring_date'], $attributes['business_units'], $attributes['manager_username']);
+                $attributes['user_details_id'] = $detail->id;
+                $attributes['user_creator_id'] = $this->access->user()->id;
+                $attributes['company_id'] = $this->access->user()->company_id;
+                $attributes['active'] = true;
+                $employee = User::create($this->onlyExistingColumns($attributes));
+                $employee->businessUnits()->sync($row['unit_ids']);
+                $employee->manager_id = $row['manager_id'];
+                $employee->save();
+                $this->audit->record($employee, 'employee.imported', [], [
+                    'username' => $employee->username, 'row' => $row['row'],
+                    'business_unit_ids' => $row['unit_ids'], 'manager_id' => $row['manager_id'],
+                ]);
+                $created++;
+            }
+        });
+        $summary['created'] = $created;
+
+        return $this->ok(['dry_run' => false, 'rows' => $preview, 'summary' => $summary], 'Import completed');
+    }
+
+    /** Validate one import row without writing anything. */
+    private function inspectImportRow(array $row, int $rowNumber, $companyId): array
+    {
+        $result = ['row' => $rowNumber, 'username' => $row['username'] ?? null, 'status' => 'new', 'errors' => []];
+        foreach (['username', 'email', 'firstname', 'lastname', 'password'] as $required) {
+            if (empty($row[$required])) $result['errors'][] = $required.' is required';
+        }
+        if (!empty($row['email']) && !filter_var($row['email'], FILTER_VALIDATE_EMAIL)) $result['errors'][] = 'email is invalid';
+        if (!empty($row['password']) && strlen((string) $row['password']) < 8) $result['errors'][] = 'password must be at least 8 characters';
+        if (!empty($row['hiring_date']) && !strtotime((string) $row['hiring_date'])) $result['errors'][] = 'hiring_date is invalid';
+
+        $existing = null;
+        if (!empty($row['username'])) $existing = User::where('username', $row['username'])->first();
+        if (!$existing && !empty($row['email'])) $existing = User::where('email', $row['email'])->first();
+        if ($existing) {
+            $result['status'] = 'existing';
+            $this->authorizeEmployee($existing);
+        }
+
+        $unitIds = [];
+        foreach (preg_split('/[|,;]/', (string) ($row['business_units'] ?? '')) as $unitName) {
+            $unitName = trim($unitName);
+            if ($unitName === '') continue;
+            $unit = BusinessUnit::where('name', $unitName)
+                ->when($companyId, fn ($q) => $q->where('company_id', $companyId))->first();
+            if (!$unit) { $result['errors'][] = 'unknown business unit: '.$unitName; continue; }
+            $unitIds[] = $unit->id;
+        }
+        if (!$unitIds) $result['errors'][] = 'at least one business unit is required';
+        try { $this->authorizeUnits($unitIds); } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            $result['errors'][] = 'business unit outside your scope';
+        }
+
+        $managerId = null;
+        if (!empty($row['manager_username'])) {
+            $manager = User::where('username', $row['manager_username'])->first();
+            if (!$manager) $result['errors'][] = 'unknown manager: '.$row['manager_username'];
+            else { try { $managerId = $this->validatedManagerId($manager->id); } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $result['errors'][] = $e->getMessage(); } }
+        }
+
+        if ($existing) $result['status'] = 'existing';
+
+        $result['attributes'] = [
+            'username' => $row['username'] ?? null, 'email' => $row['email'] ?? null,
+            'firstname' => $row['firstname'] ?? null, 'lastname' => $row['lastname'] ?? null,
+            'password' => !empty($row['password']) ? Hash::make($row['password']) : null,
+            'mobileNumber' => $row['mobile_number'] ?? null,
+            'hiring_date' => $row['hiring_date'] ?? null,
+            'work_degrees_id' => ($row['work_degrees_id'] ?? null) ?: null,
+            'sub_departments_id' => ($row['sub_departments_id'] ?? null) ?: null,
+        ];
+        $result['business_units'] = $unitIds;
+        $result['unit_ids'] = $unitIds;
+        $result['manager_id'] = $managerId;
+
+        return $result;
+    }
+
+    private function csvRows(string $path): array
+    {
+        $handle = fopen($path, 'r');
+        $headers = fgetcsv($handle);
+        if (!$headers || count(array_filter($headers)) === 0) { fclose($handle); return []; }
+        $headers = array_map(fn ($h) => trim((string) $h), $headers);
+        $rows = [];
+        while (($values = fgetcsv($handle)) !== false) {
+            if (count($values) !== count($headers)) { $rows[] = ['username' => null, 'email' => '', 'firstname' => '', 'lastname' => '', 'password' => '']; continue; }
+            $rows[] = array_combine($headers, $values);
+        }
+        fclose($handle);
+        return $rows;
     }
 
     public function update(Request $request, User $employee)
@@ -189,9 +337,8 @@ class EmployeeController extends BmsController
                 'sub_departments_id' => $data['sub_departments_id'] ?? null,
             ], fn ($value) => $value !== null);
             if (array_key_exists('active', $data)) $attributes['active'] = (bool) $data['active'];
-            if (array_key_exists('manager_id', $data) && \Schema::hasColumn('users', 'manager_id')) {
-                abort_if((int) ($data['manager_id'] ?? 0) === (int) $employee->id, 422, 'An employee cannot be their own manager.');
-                $attributes['manager_id'] = $data['manager_id'];
+            if (array_key_exists('manager_id', $data)) {
+                $attributes['manager_id'] = $this->validatedManagerId($data['manager_id'], $employee);
             }
             if (!empty($data['password'])) $attributes['password'] = Hash::make($data['password']);
             if (array_key_exists('mobile_number', $data) && \Schema::hasColumn('users', 'mobileNumber')) {
@@ -260,6 +407,41 @@ class EmployeeController extends BmsController
         $visible = $this->access->visibleUnitIds();
         if ($visible === null) return;
         abort_unless(in_array($employee->id, [$this->access->user()->id], true) || array_intersect($ids, $visible), 403, 'This employee is outside your assigned unit scope.');
+    }
+
+    /**
+     * Validate a reporting line: the manager must exist in this company, must be
+     * visible to the actor, and the assignment must not close a reporting cycle.
+     * Returns the value that is safe to persist (null clears the reporting line).
+     */
+    private function validatedManagerId($managerId, ?User $employee = null): ?int
+    {
+        if ($managerId === null || $managerId === '' || !\Schema::hasColumn('users', 'manager_id')) {
+            return null;
+        }
+        $managerId = (int) $managerId;
+        abort_if($employee && $managerId === (int) $employee->id, 422, 'An employee cannot be their own manager.');
+        $manager = User::find($managerId);
+        abort_if(!$manager, 422, 'The selected manager does not exist.');
+        // Cross-company managers are never allowed, even for global admins.
+        abort_if($manager->company_id && $this->access->user()->company_id && (int) $manager->company_id !== (int) $this->access->user()->company_id, 422, 'The selected manager belongs to another company.');
+        // Unit-scoped actors may only point at people they can already see.
+        if (!$this->access->hasGlobalUnitScope()) {
+            $visible = $this->access->visibleUnitIds() ?? [];
+            $shared = $manager->businessUnits()->whereIn('business_units.id', $visible)->exists();
+            abort_unless($shared, 403, 'The selected manager is outside your business units.');
+        }
+        // Walk up the proposed manager's chain: hitting the employee is a cycle.
+        if ($employee) {
+            $cursor = $manager;
+            $seen = [];
+            while ($cursor && !isset($seen[$cursor->id])) {
+                abort_if((int) $cursor->id === (int) $employee->id, 422, 'That reporting line would create a cycle.');
+                $seen[$cursor->id] = true;
+                $cursor = $cursor->manager;
+            }
+        }
+        return $managerId;
     }
 
     private function onlyExistingColumns(array $attributes): array

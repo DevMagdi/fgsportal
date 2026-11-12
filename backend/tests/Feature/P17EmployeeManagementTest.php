@@ -348,6 +348,100 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertNotEmpty($dashboard['recent_activity']);
     }
 
+    public function test_P19_manager_assignment_blocks_cycles_cross_company_and_out_of_scope_managers(): void
+    {
+        $unit = $this->makeUnit();
+        $other = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+
+        $a = $this->postBms('employees', [
+            'username' => 'cycle.a', 'email' => 'a@example.test', 'firstname' => 'A', 'lastname' => 'One',
+            'password' => 'secret-pass', 'business_unit_ids' => [$unit->id],
+        ], $admin)->assertStatus(201)->json('data');
+        $b = $this->postBms('employees', [
+            'username' => 'cycle.b', 'email' => 'b@example.test', 'firstname' => 'B', 'lastname' => 'Two',
+            'password' => 'secret-pass', 'business_unit_ids' => [$unit->id], 'manager_id' => $a['id'],
+        ], $admin)->assertStatus(201)->json('data');
+        $this->assertSame($a['id'], $b['manager_id']);
+
+        // A -> B -> A must be refused, and so must self-management.
+        $this->putBms('employees/'.$a['id'], ['manager_id' => $b['id']], $admin)->assertStatus(422);
+        $this->putBms('employees/'.$a['id'], ['manager_id' => $a['id']], $admin)->assertStatus(422);
+        // Clearing the reporting line still works.
+        $this->putBms('employees/'.$b['id'], ['manager_id' => null], $admin)->assertOk();
+        $this->assertNull(\App\Models\User::findOrFail($b['id'])->manager_id);
+
+        // Cross-company managers are refused.
+        $outsider = $this->makeUser(['company_id' => 999]);
+        $this->putBms('employees/'.$a['id'], ['manager_id' => $outsider->id], $admin)->assertStatus(422);
+
+        // Unit-scoped actors may not attach a manager they cannot see.
+        $director = $this->actingAsRole('unit_director', [$unit->id]);
+        $hidden = $this->makeUser();
+        $hidden->businessUnits()->attach($other->id);
+        $this->putBms('employees/'.$a['id'], ['manager_id' => $hidden->id], $director)->assertStatus(403);
+    }
+
+    public function test_P19_employee_import_preview_is_read_only_and_reports_duplicates(): void
+    {
+        $unit = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $this->makeUser(['username' => 'already.here', 'email' => 'already@example.test']);
+
+        $rows = [
+            ['username' => 'import.one', 'email' => 'import.one@example.test', 'firstname' => 'New', 'lastname' => 'Hire',
+                'password' => 'secret-pass', 'business_units' => $unit->name],
+            ['username' => 'already.here', 'email' => 'import.two@example.test', 'firstname' => 'Old', 'lastname' => 'Hire',
+                'password' => 'secret-pass', 'business_units' => $unit->name],
+            ['username' => 'bad.row', 'email' => 'not-an-email', 'firstname' => '', 'lastname' => '',
+                'password' => 'short', 'business_units' => 'No Such Unit'],
+        ];
+
+        $preview = $this->postBms('employees/import', ['rows' => $rows, 'dry_run' => true], $admin)->assertOk()->json('data');
+        $this->assertSame(3, $preview['summary']['total']);
+        $this->assertSame(1, $preview['summary']['valid']);
+        $this->assertSame(1, $preview['summary']['skipped']);
+        $this->assertSame(0, $preview['summary']['created']);
+        $this->assertSame('existing', $preview['rows'][1]['status']);
+        $this->assertNotEmpty($preview['rows'][2]['errors']);
+        // Preview writes nothing.
+        $this->assertDatabaseMissing('users', ['username' => 'import.one']);
+
+        $result = $this->postBms('employees/import', ['rows' => $rows, 'dry_run' => false], $admin)->assertOk()->json('data');
+        $this->assertSame(1, $result['summary']['created']);
+        $this->assertDatabaseHas('users', ['username' => 'import.one']);
+        $this->assertDatabaseMissing('users', ['username' => 'bad.row']);
+        $this->assertDatabaseHas('bms_audit_logs', ['event' => 'employee.imported']);
+
+        // A non-administrator cannot import.
+        $employee = $this->actingAsRole('employee', [$unit->id]);
+        $this->postBms('employees/import', ['rows' => $rows], $employee)->assertForbidden();
+    }
+
+    public function test_P19_recent_activity_never_leaks_other_units_records(): void
+    {
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$mine->id]);
+        $otherDirector = $this->makeUser();
+        $otherDirector->businessUnits()->attach($theirs->id);
+
+        \App\Models\BMS\ProcurementRequest::create([
+            'business_unit_id' => $mine->id, 'item' => 'Visible item', 'quantity' => 1,
+            'purpose' => 'Mine', 'status' => 'submitted', 'requested_by' => $director->id,
+        ]);
+        \App\Models\BMS\ProcurementRequest::create([
+            'business_unit_id' => $theirs->id, 'item' => 'Secret item', 'quantity' => 1,
+            'purpose' => 'Theirs', 'status' => 'submitted', 'requested_by' => $otherDirector->id,
+        ]);
+
+        $data = $this->getBms('executive-dashboard', $director)->assertOk()->json('data');
+        $this->assertSame(1, $data['summary']['pending_procurement']);
+        $events = collect($data['recent_activity']);
+        $this->assertTrue($events->isNotEmpty());
+        $this->assertTrue($events->every(fn ($row) => $row['type'] !== 'User'));
+    }
+
     public function test_P17_unit_hierarchy_guards_and_safe_deletion(): void
     {
         $admin = $this->actingAsRole('system_admin');

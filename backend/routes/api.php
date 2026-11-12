@@ -1421,8 +1421,10 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::get('/directory', [\App\Http\Controllers\BMS\DirectoryController::class, 'index'])->middleware('bms.permission:directory.view');
     // Employee administration (BRD section 5) reuses the legacy users table.
     Route::get('/employees', [\App\Http\Controllers\BMS\EmployeeController::class, 'index'])->middleware('bms.permission:directory.view');
-    Route::get('/employees/{employee}', [\App\Http\Controllers\BMS\EmployeeController::class, 'show'])->middleware('bms.permission:directory.view');
     Route::post('/employees', [\App\Http\Controllers\BMS\EmployeeController::class, 'store'])->middleware('bms.permission:directory.manage');
+    Route::get('/employees/import/template', [\App\Http\Controllers\BMS\EmployeeController::class, 'importTemplate'])->middleware('bms.permission:directory.manage');
+    Route::get('/employees/{employee}', [\App\Http\Controllers\BMS\EmployeeController::class, 'show'])->middleware('bms.permission:directory.view');
+    Route::post('/employees/import', [\App\Http\Controllers\BMS\EmployeeController::class, 'import'])->middleware('bms.permission:directory.manage');
     Route::put('/employees/{employee}', [\App\Http\Controllers\BMS\EmployeeController::class, 'update'])->middleware('bms.permission:directory.manage');
     Route::post('/employees/{employee}/status', [\App\Http\Controllers\BMS\EmployeeController::class, 'status'])->middleware('bms.permission:directory.manage');
     Route::post('/employees/{employee}/photo', [\App\Http\Controllers\BMS\EmployeeController::class, 'uploadPhoto'])->middleware('bms.permission:directory.manage');
@@ -1432,6 +1434,7 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\BMS\DirectoryController::class, 'download'])->middleware('bms.permission:directory.view');
     Route::get('/reports/monthly', [\App\Http\Controllers\BMS\ReportController::class, 'monthly'])->middleware('bms.permission:reports.view');
     Route::get('/reports/quarterly', [\App\Http\Controllers\BMS\ReportController::class, 'quarterly'])->middleware('bms.permission:reports.view');
+    Route::get('/reports/kpis', [\App\Http\Controllers\BMS\ReportController::class, 'kpis'])->middleware('bms.permission:reports.view');
     Route::post('/reports/kpis', [\App\Http\Controllers\BMS\ReportController::class, 'saveKpi'])->middleware('bms.permission:reports.manage');
     Route::get('/reports/social', [\App\Http\Controllers\BMS\ReportController::class, 'social'])->middleware('bms.permission:reports.view');
     Route::post('/reports/social', [\App\Http\Controllers\BMS\ReportController::class, 'saveSocial'])->middleware('bms.permission:social.manage');
