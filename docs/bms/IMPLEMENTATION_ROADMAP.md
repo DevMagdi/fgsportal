@@ -1,6 +1,6 @@
 # BMS implementation roadmap after Phase 1 audit
 
-This roadmap records evidence-based work and dependencies. Phase 1 audit, Phase 2 shell, and Phase 3 dashboard implementation are in the active feature branch. Phase 3 focused backend and mocked-browser checks have run; full backend/Angular suites remain red and live backend/data verification is still outstanding. Phase 4 and later are out of scope and require explicit approval.
+This roadmap records evidence-based work and dependencies. Phase 1 audit, Phase 2 shell, Phase 3 dashboard, and a bounded Phase 3.5 stabilization are in the active feature branch. Phase 3.5 fixes two validated persistence defects and a date-only parsing defect; complete CI, database provisioning, shared-unit security policy, and real integration remain open. Phase 4 and later are out of scope and require explicit approval.
 
 ## Phase 1 — Complete Product Audit & UX Foundation
 
@@ -99,6 +99,24 @@ Executed supported headless Chromium 153 with Puppeteer Core 25.17.0 against the
 - [ ] Validate backend authorization/data behavior against a configured live backend/database. Mocked browser requests do not meet this requirement; production data and comprehensive WCAG/assistive-technology behavior remain unverified.
 
 **Phase 3 final gate is NOT PASSED; do not merge PR #26.** Phase 3 remains the stopping boundary. Do not begin Phase 4 or later without explicit user approval.
+
+## Phase 3.5 — Engineering Stabilization (bounded; acceptance pending)
+
+**Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145` (verified open PR #26 head). **Candidate source SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`; latest candidate CI run `43300908597` was still in progress at the time the stabilization reports were drafted. The final pushed commit may add report-only documentation after that source validation; outcomes must be updated from the completed run.
+
+- [x] Verify branch, base commit `891851bc85b2d2f274b811c9173d6268c8752795`, PR state/base/head, changed files and review findings; no branch switch, merge or base mutation.
+- [x] Reproduce causes by source inspection for product metadata (model mass-assignment allowlist) and manager ID persistence (legacy User fillable list); patch by direct assignment after validation rather than widening global fillable rules.
+- [x] Fix double-escaped date-only regex; add regression and run Node specs in `America/Los_Angeles` (43/43 pass).
+- [x] Make backend validation steps cancellation-safe (`!cancelled()`); schedule frontend production build after dependency install even if Karma fails.
+- [x] Run local production Angular build (hash `dda2defb94f80af4`); `git diff --check` passes.
+- [ ] Record candidate CI 43300908597 final native PHP lint, focused tests, complete SQLite/MySQL results, Karma results and CI production build.
+- [ ] Resolve or explicitly approve remaining backend module/meeting/import failures. Do not change legacy meeting or core-module semantics as part of dashboard stabilization.
+- [ ] Define company-to-business-unit tenant mapping before modifying employee import query/schema; no migration added.
+- [ ] Resolve shared Product recent-activity origin-unit policy before changing any audit disclosure behavior.
+- [ ] Complete a disposable fresh-install and migration rehearsal; locally blocked (no PHP/vendor/.env/isolated DB). No destructive command has been run.
+- [ ] Complete a real API + isolated database dashboard authorization/data check. Saved Chromium evidence is mocked only.
+
+See `PHASE_3_5_ENGINEERING_AUDIT.md`, `PHASE_3_5_BACKEND_STABILIZATION.md`, `PHASE_3_5_FRONTEND_STABILIZATION.md`, `PHASE_3_5_DATABASE_READINESS.md`, `PHASE_3_5_SECURITY_REVIEW.md` and `PHASE_3_5_TEST_REPORT.md` for findings and exact outcomes. **Phase 3.5 is NOT PASSED. Do not merge PR #26 or start Phase 4 without explicit approval.**
 
 ## Phase 4 — Organization & Access Management
 
