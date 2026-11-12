@@ -129,8 +129,12 @@ class ExecutiveDashboardController extends BmsController
                 $unitCache[$cacheKey] = array_values(array_unique($unitIds));
             }
             $unitIds = $unitCache[$cacheKey];
+            if (!$unitIds) {
+                // Never emit a record whose unit scope cannot be resolved, including for global viewers.
+                continue;
+            }
             if ($visibleUnits !== null && !array_intersect($unitIds, $visibleUnits)) {
-                // Unknown scope is never disclosed; only records positively inside the scope are shown.
+                // Restricted viewers only receive records positively inside their allowed unit scope.
                 continue;
             }
             if ($selectedUnitId !== null && !in_array($selectedUnitId, $unitIds, true)) {

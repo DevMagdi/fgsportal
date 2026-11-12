@@ -2,35 +2,54 @@
 
 **Date:** 2026-11-12 (UTC)
 **Branch:** `arena/e1389d1e-fgsportal`
-**Important:** frontend-only checks below are not live API/database validation. Backend/browser checks that could not run are explicitly listed.
+**Scope:** Phase 3 only. No checks were skipped or disabled. Browser API data below is explicitly mocked; it is not backend integration evidence.
 
 ## Completed checks
 
-| Command | Exit | Result |
-|---|---:|---|
-| `npm ci --legacy-peer-deps --no-audit --no-fund` (from `frontend/`) | 0 | Installed 1,481 lockfile packages. npm printed existing dependency deprecation notices. |
-| `npm run test:node` (from `frontend/`) | 0 | **42 passing, 0 failing.** Includes six dashboard helper specs plus existing BMS and portal pure-TypeScript suites. These tests use no live API or database. |
-| `npm run build -- --configuration development` (from `frontend/`) | 0 | Angular development build passed; final hash `67f41c6ad12bb34e`. Existing Autoprefixer and CommonJS/canvg warnings remain. |
-| `npm run build -- --configuration production` (from `frontend/`) | 0 | Angular production build passed; final hash `57782dc32e69d1b3`. Existing Autoprefixer, CSS-selector and canvg/CommonJS warnings remain. |
-| `git diff --check` (repository root; run with final `npm run test:node`) | 0 | No whitespace errors. |
-
-## Checks attempted but blocked/failed
-
 | Command / check | Exit | Result |
 |---|---:|---|
-| `npm test -- --watch=false --browsers ChromeHeadless` (from `frontend/`) | 1 | Karma compiled the browser bundle, then could not start Chrome: `No binary for ChromeHeadless browser on your platform. Please, set CHROME_BIN env variable.` |
-| `npm run lint` (from `frontend/`) | 1 | The Angular project has no configured `lint` target (`Cannot find "lint" target for the specified project.`). |
-| `php artisan test --filter=P22_dashboard_recent_activity_respects_selected_unit_including_shared_products` (from `backend/`) | 127 | Could not start: `/bin/bash: php: command not found`. PHP runtime and `backend/vendor` are absent; `backend/.env` is also absent. The backend regression test was not executed. |
-| Browser QA / screenshots | N/A | Checked for Chrome, Chromium, Firefox, Puppeteer and Playwright; none were available. No browser interaction/accessibility run and no final screenshots were captured. This is outstanding, not a pass. |
-| Live API / database verification | N/A | No configured backend environment or database connection was available. No production schema/data reconciliation was performed. |
+| `npm ci --legacy-peer-deps --no-audit --no-fund` (`frontend/`) | 0 | Installed 1,481 lockfile packages. npm reported existing dependency deprecation notices. |
+| `npm run test:node` (`frontend/`) | 0 | **42 passing, 0 failing.** Includes dashboard utility, BMS catalogue/navigation, module registry and permission-cache specs. No live API/database. |
+| `npm run build -- --configuration production` (`frontend/`) | 0 | Production Angular build passed. Build hash `ba668542072a6657`; existing Autoprefixer, CSS selector and CommonJS/canvg warnings remain. |
+| `npm test -- --watch=false --browsers=ChromeHeadless` with temporary Chromium 153 launcher (`frontend/`) | 1 | **211 executed: 76 passed, 135 failed.** All specs ran; none were skipped/filtered. Failure details include missing `HttpClient`, `MatSnackBar`, `Router` and `MessagingService` providers and a missing `formControl` directive in legacy component test modules. These are not reported as passing. |
+| `git diff --check` (repository root) | 0 | No whitespace errors at last check. |
+| Real Chromium UI smoke/interaction run, using Chromium 153 at 1440×1000, 768×1024, 390×844 | 0 | Dashboard rendered in Chromium with controlled, intercepted API responses. Checked populated, empty, loading, service-error, retry-success, Arabic/RTL, restricted-permission and filter-query states; saved genuine browser screenshots in `phase3-qa/`. No app page exception was observed in the successful run. The test intentionally intercepted API calls and is not live integration or a complete WCAG audit. |
 
-## Development iteration note
+## Phase 2 comparison
 
-The first development build exposed template `unknown` typing, an inferred `never[]`, and an ES2019-only `flatMap` use. These were corrected (typed row getters/segments and ES2015-compatible accumulation); the final development and production builds above both passed. This initial intermediate failure was resolved before the final build results.
+- **Angular:** Phase 2 baseline was 204 tests, 135 failures and 69 passes. This full local Phase 3 run executed 211 tests, with the same 135 failures and 76 passes: **seven more passes, no increase in the raw failure count**, and seven more specs executed. The matching 135-failure count is not a green suite; baseline-style provider/test-module errors remain.
+- **Backend:** Phase 2 baseline recorded 149 tests, 5 errors and 6 failures. Phase 3 CI previously exposed a PHP parse error in `P17EmployeeManagementTest.php` at line 570. The edited test file parses with a temporary `php-parser`, including the corrected fully-qualified model references; this is only a parser check, not native PHP lint or a PHPUnit result. Current backend counts cannot be compared because no PHP runtime or `backend/vendor` exists locally and no rerun against the edited source has completed.
 
-## Remaining validation before production acceptance
+## Backend checks not run
 
-1. Run the focused backend test and relevant existing dashboard/permission feature tests in the project-supported PHP environment.
-2. Exercise direct API requests for authorized and unauthorized unit scopes and reconcile selected unit/product/opportunity/week results against representative records; verify recent activity and shared-product behavior.
-3. Run Angular/Karma or equivalent browser tests plus real-browser English/Arabic desktop/mobile interaction and accessibility checks; capture final screenshots and check overflow at agreed viewports.
-4. Re-run `git diff --check` after the final edits. Do not interpret mocked/pure frontend results as a live integration pass.
+Native `php -l`, the focused P22 test, relevant dashboard/permission feature tests, and the full backend PHPUnit suite were attempted but could not start: `php` is not installed, `backend/vendor/bin/phpunit` is absent, and there is no configured `backend/.env`/database. The PHP parser syntax result must not be treated as native lint. Backend integration, database behavior and the new authorization regression remain unverified.
+
+## Chromium QA detail and evidence
+
+The temporary Chromium package could be launched after extracting its bundled Amazon Linux 2023 libraries. The Angular dev server compiled successfully. The QA harness supplied a test user and intercepted `/api/bms/*` responses; requests to the configured placeholder backend were not sent to a real server. It exercised the existing dashboard controls and captured the API query `business_unit_id=1&product_id=5&opportunity_id=7&week_start=2026-11-08`.
+
+- At **1440×1000**, **768×1024**, and **390×844**, document/body scroll widths equalled the viewport width (no horizontal overflow observed).
+- Arabic switch changed dashboard content to Arabic and its workspace direction to RTL; document root direction remained unchanged.
+- Populated and empty states rendered; a simulated 503 rendered the retry control; activating retry then returned populated data. A deliberately stalled dashboard request rendered the loading state.
+- With restricted abilities (`dashboard.view`, `plans.view` only), the dashboard showed no unit/product/opportunity filter controls, exports, opportunity/product/report/meeting content; only permitted task summary and recent-activity panel remained.
+- Basic landmarks, labeled filter controls, progressbar semantics and button/alert labels were inspected. This is a manual smoke check, not a comprehensive keyboard/screen-reader/WCAG conformance audit.
+- Browser console warnings/errors included external CDN integrity failures because external resources were stubbed under the sandbox network constraints, the configured placeholder Firebase websocket failure, and the two deliberate mocked 503 responses. Those harness/environment errors were not hidden or counted as application passes.
+
+Screenshots (genuine browser captures; test data is synthetic/mocked):
+
+- `phase3-qa/populated-desktop.png`
+- `phase3-qa/populated-tablet.png`
+- `phase3-qa/populated-mobile.png`
+- `phase3-qa/arabic-rtl-1440.png`
+- `phase3-qa/empty-1440.png`
+- `phase3-qa/loading-1440.png`
+- `phase3-qa/error-1440.png`
+- `phase3-qa/retry-1440.png`
+- `phase3-qa/restricted-mobile.png`
+
+## Remaining acceptance work
+
+1. Provide a supported PHP environment and run native lint, the focused P22 test, relevant dashboard/permission tests and full backend PHPUnit without skips; compare full results to Phase 2.
+2. Run the edited backend suite against its supported database configuration and validate Product/ProductPhase relationships plus unknown-scope activity behavior under both global and restricted roles.
+3. If acceptance requires real backend data, repeat browser/API checks against a configured backend and representative records; current browser screenshots demonstrate only frontend behavior with controlled fixtures.
+4. Re-run `git diff --check` after final documentation/source edits. Do not merge PR #26 or begin Phase 4 without explicit approval.

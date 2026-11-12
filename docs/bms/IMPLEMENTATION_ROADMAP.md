@@ -77,22 +77,24 @@ Executed supported headless Chromium 153 with Puppeteer Core 25.17.0 against the
 - No changes to backend permissions/data/migrations; focused Angular nav tests pass and no new frontend regressions.
 - Inspect diff; only Phase 2 scoped files changed.
 
-## Phase 3 — Executive Dashboard (implementation in progress; bounded scope documented)
+## Phase 3 — Executive Dashboard (implementation and frontend QA complete; backend verification pending)
 
 ### Scope and evidence
 - `PHASE_3_DASHBOARD_DATA_AUDIT.md` documents supported KPI formulas, source fields/API response, filters, permissions, limitations, and what is implementable. The deployed schema and representative live data were not verified.
 - The dashboard reuses the existing executive endpoint and validated unit/product/opportunity/week filters; no unsupported owner/status/date-range filter or new KPI source is invented.
 - UI includes permission-conditioned metrics/exports/report-derived history; synchronized API filters; loading, empty and retryable error states; English/Arabic locale and LTR/RTL; responsive cards/panels and accessible chart summaries.
 - A justified backend adjustment scopes recent-activity entries to the selected unit, including shared product-unit associations; a focused regression test was added. Endpoint route and permission are unchanged.
-- Implementation and test outcomes, including the missing PHP runtime and unavailable browser screenshot tooling, are recorded in `PHASE_3_IMPLEMENTATION_REPORT.md` and `PHASE_3_TEST_REPORT.md`.
+- Implementation and exact test outcomes are recorded in `PHASE_3_IMPLEMENTATION_REPORT.md` and `PHASE_3_TEST_REPORT.md`; real Chromium screenshots for desktop, tablet and mobile plus RTL/state/permission scenarios are in `phase3-qa/`. Browser API responses were intercepted synthetic fixtures, not live backend evidence.
 
 ### Acceptance / remaining verification
 - [x] Document KPI definition/source/filter/permission/limitations before implementation.
 - [x] Keep metrics tied to actual existing API aggregates and stored KPI history; do not combine unlike KPI series or currencies.
 - [x] Implement supported controls, states, permission visibility, responsive layout, localization, and accessible chart representation.
-- [x] Add pure helper regression specs and selected-unit recent-activity backend regression coverage.
-- [ ] Run backend tests, live API/database reconciliation, browser interaction/accessibility QA and capture final screenshots when runtimes/data/browser tooling are available.
-- [ ] Validate rendered no-overflow behavior at target desktop/mobile widths against representative data; no desktop no-scroll claim is made in the absence of browser QA/fixture.
+- [x] Add pure helper regression specs and selected-unit/shared-product/ProductPhase/procurement/missing-scope backend regression coverage (source-reviewed; execution remains pending).
+- [x] Run the complete Angular/Karma suite without exclusions: 211 executed, 76 passed, 135 failed; Phase 2 baseline was 204 / 69 / 135, so seven more passes and the same failure count. Run the 42 Node specs and production build successfully.
+- [x] Run Chromium UI smoke QA and capture genuine screenshots at 1440×1000, 768×1024 and 390×844; exercise locale/direction, populated/empty/loading/error/retry, supported filters, restricted permissions, export visibility, landmarks/labels and horizontal overflow with intercepted synthetic API fixtures.
+- [ ] Run native PHP lint, focused P22 plus relevant/full backend suites; reconcile results against Phase 2 backend baseline (149 tests, 5 errors, 6 failures). PHP and `backend/vendor` are missing in this checkout; parser-only validation does not satisfy this item.
+- [ ] Validate API authorization and data behavior against a configured backend/database. Browser mocks do not satisfy live integration verification.
 
 Phase 3 remains the stopping boundary. Do not begin Phase 4 or later without explicit user approval.
 
