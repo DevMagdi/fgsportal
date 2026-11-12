@@ -6,6 +6,7 @@ use App\Models\BMS\BmsAuditLog;
 use App\Models\BMS\BmsRole;
 use App\Models\BMS\BusinessUnit;
 use App\Models\User;
+use App\Services\BMS\BmsAccess;
 use Illuminate\Support\Facades\Hash;
 use Tests\BmsTestCase;
 
@@ -1189,5 +1190,162 @@ class P17EmployeeManagementTest extends BmsTestCase
         $ids = collect($this->getBms('audit/role-changes', $admin)->assertOk()->json('data'))->pluck('id');
         $expected = BmsAuditLog::whereIn('auditable_id', [$stranger->id])->pluck('id');
         $this->assertTrue($expected->every(fn ($id) => $ids->contains($id)), 'Global viewers see every role audit entry.');
+    }
+
+    // =====================================================================
+    // Phase 1 follow-up — the hire flow is also a role-grant path.
+    // RecruitmentController::hireNewEmployee used to attach role_id with
+    // only recruitment.manage + unit scope, letting a recruiter mint
+    // system_admin / global-scope roles. The centralized policy now guards
+    // it, and BusinessUnitController::syncDirectorRole() is pinned as a
+    // trusted, server-derived internal operation.
+    // =====================================================================
+
+    /** Builds a hiring request with a candidate whose interview has passed. */
+    private function readyCandidateFor(User $recruiter, BusinessUnit $unit, string $tag): array
+    {
+        $hiring = $this->postBms('recruitment', [
+            'business_unit_id' => $unit->id, 'job_title' => 'Analyst '.$tag, 'specification' => 'Excel',
+        ], $recruiter)->assertStatus(201)->json('data');
+        $candidate = \App\Models\BMS\Candidate::create([
+            'bms_hiring_request_id' => $hiring['id'], 'name' => 'Candidate '.$tag,
+            'email' => $tag.'@example.test', 'interview_decision' => 'pass', 'status' => 'selected',
+        ]);
+
+        return [$hiring, $candidate];
+    }
+
+    public function test_P17_role_security_recruiter_without_role_management_cannot_grant_roles(): void
+    {
+        // A recruiter holding recruitment.manage but NOT roles.manage (the
+        // seeded unit_director profile) must not attach any role at hire —
+        // while the role-less hire workflow keeps working.
+        $unit = $this->makeUnit();
+        $recruiter = $this->actingAsRole('unit_director', [$unit->id]);
+        [$hiring, $candidate] = $this->readyCandidateFor($recruiter, $unit, 'rec1');
+        $employeeRole = $this->role('employee');
+
+        $payload = [
+            'first_working_day' => '2026-12-01', 'username' => 'eve.rec1', 'email' => 'eve.rec1@example.test',
+            'firstname' => 'Eve', 'lastname' => 'Rec1', 'password' => 'secret-pass',
+        ];
+
+        // Any role — ordinary, system_admin, or global-scope — is refused
+        // before any account or onboarding row is written.
+        foreach ([$employeeRole->id, $this->role('system_admin')->id, $this->role('hr')->id] as $roleId) {
+            $this->postBms('candidates/'.$candidate->id.'/hire-new-employee',
+                $payload + ['role_id' => $roleId], $recruiter)->assertForbidden();
+        }
+        $this->assertDatabaseMissing('users', ['username' => 'eve.rec1']);
+        $this->assertSame(0, \App\Models\BMS\OnboardingItem::where('bms_hiring_request_id', $hiring['id'])->count());
+        $this->assertSame(0, BmsAuditLog::where('event', 'employee.created_from_hiring')->count());
+
+        // Legitimate recruitment workflow: hire without a role still succeeds.
+        $this->postBms('candidates/'.$candidate->id.'/hire-new-employee', $payload, $recruiter)
+            ->assertStatus(201);
+        $employee = User::where('username', 'eve.rec1')->firstOrFail();
+        $this->assertSame(0, $employee->bmsRoles()->count(), 'Role-less hire attaches nothing.');
+        $this->assertTrue($employee->businessUnits()->where('business_units.id', $unit->id)->exists());
+    }
+
+    public function test_P17_role_security_recruitment_hire_role_grants_follow_the_central_policy(): void
+    {
+        // An actor who holds BOTH recruitment.manage and roles.manage (but is
+        // still restricted: no "*", not Administration) passes the actor check
+        // yet is still bound by the escalation rules on the hire path.
+        $unit = $this->makeUnit();
+        $recruiter = $this->actingAsRole('hr'); // recruitment.manage + global view, no roles.manage
+        $roleManagerRole = BmsRole::updateOrCreate(['slug' => 'unit_roles_manager'], [
+            'name' => 'Unit roles manager', 'abilities' => ['roles.manage', 'directory.view'],
+        ]);
+        $recruiter->bmsRoles()->attach($roleManagerRole->id, ['business_unit_id' => null]);
+        [$hiring, $candidate] = $this->readyCandidateFor($recruiter, $unit, 'rec2');
+
+        $payload = [
+            'first_working_day' => '2026-12-01', 'username' => 'eve.rec2', 'email' => 'eve.rec2@example.test',
+            'firstname' => 'Eve', 'lastname' => 'Rec2', 'password' => 'secret-pass',
+        ];
+
+        // B. system_admin is Administration-only on every path.
+        $this->postBms('candidates/'.$candidate->id.'/hire-new-employee',
+            $payload + ['role_id' => $this->role('system_admin')->id], $recruiter)->assertForbidden();
+        // D. Global-scope and role-managing roles stay out of reach.
+        $this->postBms('candidates/'.$candidate->id.'/hire-new-employee',
+            $payload + ['role_id' => $this->role('hr')->id], $recruiter)->assertForbidden();
+        $this->postBms('candidates/'.$candidate->id.'/hire-new-employee',
+            $payload + ['role_id' => $roleManagerRole->id], $recruiter)->assertForbidden();
+
+        $this->assertDatabaseMissing('users', ['username' => 'eve.rec2']);
+        $this->assertSame(0, \App\Models\BMS\OnboardingItem::where('bms_hiring_request_id', $hiring['id'])->count());
+
+        // Positive: an ordinary unit-scoped role at the hiring unit is granted.
+        $this->postBms('candidates/'.$candidate->id.'/hire-new-employee',
+            $payload + ['role_id' => $this->role('employee')->id], $recruiter)->assertStatus(201);
+        $employee = User::where('username', 'eve.rec2')->firstOrFail();
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $employee->id, 'bms_role_id' => $this->role('employee')->id, 'business_unit_id' => $unit['id'],
+        ]);
+    }
+
+    public function test_P17_role_security_hire_existing_employee_never_attaches_roles(): void
+    {
+        // Option B (link an existing account) has no role_id in its validated
+        // contract: even a smuggled role_id in the payload cannot create a
+        // role assignment — only the hiring unit's membership is added.
+        $unit = $this->makeUnit();
+        $recruiter = $this->actingAsRole('hr');
+        [$hiring, $candidate] = $this->readyCandidateFor($recruiter, $unit, 'rec3');
+        $existing = $this->makeUser();
+
+        $this->postBms('candidates/'.$candidate->id.'/hire', [
+            'first_working_day' => '2026-12-01', 'employee_id' => $existing->id,
+            'role_id' => $this->role('system_admin')->id, // stripped by validation
+        ], $recruiter)->assertOk();
+
+        $this->assertSame(0, $existing->fresh()->bmsRoles()->count(), 'The existing-employee hire flow grants no roles.');
+        $this->assertTrue($existing->businessUnits()->where('business_units.id', $unit->id)->exists());
+    }
+
+    public function test_P17_role_security_director_role_sync_is_server_derived_and_unit_scoped(): void
+    {
+        // Evidence that BusinessUnitController::syncDirectorRole() is a
+        // trusted internal operation, not an externally controllable
+        // escalation path:
+        //  1. the role slug is fixed server-side (never a request field);
+        //  2. the endpoint requires units.manage (only "*" holders qualify
+        //     under the seeded role matrix) and authorizeUnit on update;
+        //  3. the granted role has neither global scope nor roles.manage.
+        $admin = $this->actingAsRole('system_admin');
+        $director = $this->makeUser();
+        $unit = $this->postBms('units', ['name' => 'Director Sync Unit', 'director_id' => $director->id], $admin)
+            ->assertCreated()->json('data');
+
+        $unitDirectorRole = $this->role('unit_director');
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $director->id, 'bms_role_id' => $unitDirectorRole->id, 'business_unit_id' => $unit['id'],
+        ]);
+
+        // The server-derived role carries neither global scope nor role-management power.
+        $this->assertNotContains('unit_director', BmsAccess::GLOBAL_SCOPE_ROLE_SLUGS);
+        $this->assertNotContains('*', $unitDirectorRole->abilities);
+        $this->assertNotContains('roles.manage', $unitDirectorRole->abilities);
+
+        // The director stays unit-scoped (not collapsed to global visibility)...
+        $visible = app(BmsAccess::class)->visibleUnitIds($director);
+        $this->assertNotNull($visible, 'unit_director must not confer global scope.');
+        $this->assertContains($unit['id'], $visible);
+
+        // ...and gains no role-management authority through the sync.
+        $this->postBms('roles/assign', [
+            'user_id' => $this->makeUser()->id, 'role_id' => $this->role('employee')->id, 'business_unit_id' => $unit['id'],
+        ], $director)->assertForbidden();
+
+        // Reassignment through the update endpoint behaves identically.
+        $newDirector = $this->makeUser();
+        $this->putBms('units/'.$unit['id'], ['name' => 'Director Sync Unit', 'director_id' => $newDirector->id], $admin)
+            ->assertOk();
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $newDirector->id, 'bms_role_id' => $unitDirectorRole->id, 'business_unit_id' => $unit['id'],
+        ]);
     }
 }
