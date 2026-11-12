@@ -2,6 +2,7 @@ import { FormsModule } from '@angular/forms';
 import { MatChipsModule } from '@angular/material/chips';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { AngularMaterialModule } from 'src/app/angular-material.module';
 import { ResStatus } from 'src/app/interfaces/res-status';
@@ -25,7 +26,7 @@ describe('CandidateManagementComponent', () => {
       of({ status: ResStatus.Success_But_Empty, data: [] })
     );
     await TestBed.configureTestingModule({
-      imports: [AngularMaterialModule, FormsModule, MatChipsModule, RouterTestingModule],
+      imports: [AngularMaterialModule, FormsModule, MatChipsModule, NoopAnimationsModule, RouterTestingModule],
       declarations: [CandidateManagementComponent],
       providers: [
         { provide: HrService, useValue: { getAllJobProfiles, getAllJobSkills } },

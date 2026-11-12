@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSortModule } from '@angular/material/sort';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 import { Department, User } from 'src/app/interfaces/user';
@@ -17,7 +18,7 @@ describe('OverDueTasksComponent', () => {
       of({ status: ResStatus.Success_But_Empty, data: [] })
     );
     await TestBed.configureTestingModule({
-      imports: [MatSortModule, RouterTestingModule],
+      imports: [MatSortModule, NoopAnimationsModule, RouterTestingModule],
       declarations: [OverDueTasksComponent],
       providers: [{ provide: DatabaseService, useValue: { getMyAdminOverDueTasks } }],
     }).compileComponents();

@@ -9,6 +9,7 @@ describe('ModuleService', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [ModuleService],

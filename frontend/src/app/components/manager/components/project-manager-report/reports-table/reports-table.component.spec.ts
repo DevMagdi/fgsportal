@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { ReportsTableComponent } from './reports-table.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -10,7 +11,7 @@ describe('ReportsTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatSnackBarModule, MatDialogModule],
+      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
       declarations: [ ReportsTableComponent ]
     })
     .compileComponents();

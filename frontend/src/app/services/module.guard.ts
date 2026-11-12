@@ -6,7 +6,7 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 import { ModuleService } from './module.service';
 
@@ -31,12 +31,9 @@ export class ModuleGuard implements CanActivate {
   ): Observable<boolean | UrlTree> {
     const requiredModule: string | undefined = route.data?.module;
 
-    if (!requiredModule) {
-      // No module requirement on this route.
-      return new Observable((observer) => {
-        observer.next(true);
-        observer.complete();
-      });
+    if (!requiredModule || requiredModule === 'core') {
+      // No module requirement and core are always available without an entitlement load.
+      return of(true);
     }
 
     return combineLatest([
