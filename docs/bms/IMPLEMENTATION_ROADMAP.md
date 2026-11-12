@@ -1,6 +1,6 @@
 # BMS implementation roadmap after Phase 1 audit
 
-This roadmap records evidence-based work and dependencies. Phase 1 audit and Phase 2 shell implementation are authorized and completed in this branch. Phase 3 remains unauthorized; do not begin it until the user gives explicit approval.
+This roadmap records evidence-based work and dependencies. Phase 1 audit, Phase 2 shell, and Phase 3 dashboard implementation are in the active feature branch. Phase 3 backend/live-data/browser verification remains constrained by missing runtime and browser dependencies; Phase 4 and later are out of scope and require explicit approval.
 
 ## Phase 1 — Complete Product Audit & UX Foundation
 
@@ -77,21 +77,24 @@ Executed supported headless Chromium 153 with Puppeteer Core 25.17.0 against the
 - No changes to backend permissions/data/migrations; focused Angular nav tests pass and no new frontend regressions.
 - Inspect diff; only Phase 2 scoped files changed.
 
-## Phase 3 — Executive Dashboard (requires separate explicit approval)
+## Phase 3 — Executive Dashboard (implementation in progress; bounded scope documented)
 
-### Scope and preconditions
-- Agree desktop viewport and KPI business definitions with stakeholders.
-- Validate source tables and aggregates against authorized representative records.
-- Review `ExecutiveDashboardController::index` filter behavior and permissions per data domain.
-- Add unified filter context and consistent widget semantics; do not add unsupported dates/status/owner filters.
-- Build compact KPI cards and charts only from verified values; show freshness, no-data and errors; responsive small-screen layout.
+### Scope and evidence
+- `PHASE_3_DASHBOARD_DATA_AUDIT.md` documents supported KPI formulas, source fields/API response, filters, permissions, limitations, and what is implementable. The deployed schema and representative live data were not verified.
+- The dashboard reuses the existing executive endpoint and validated unit/product/opportunity/week filters; no unsupported owner/status/date-range filter or new KPI source is invented.
+- UI includes permission-conditioned metrics/exports/report-derived history; synchronized API filters; loading, empty and retryable error states; English/Arabic locale and LTR/RTL; responsive cards/panels and accessible chart summaries.
+- A justified backend adjustment scopes recent-activity entries to the selected unit, including shared product-unit associations; a focused regression test was added. Endpoint route and permission are unchanged.
+- Implementation and test outcomes, including the missing PHP runtime and unavailable browser screenshot tooling, are recorded in `PHASE_3_IMPLEMENTATION_REPORT.md` and `PHASE_3_TEST_REPORT.md`.
 
-### Acceptance criteria
-- Agreed desktop viewport has no vertical dashboard scroll with the agreed representative data fixture.
-- Every KPI has documented definition/source/aggregation/filter/permission and test record reconciliation.
-- All supported widgets return consistent, explicit filter context; direct API calls respect scope.
-- Empty/error/loading states work; smaller screens adapt without horizontal page overflow.
-- Dashboard tests pass, including selected unit/product/opportunity/week and unauthorized cross-unit cases.
+### Acceptance / remaining verification
+- [x] Document KPI definition/source/filter/permission/limitations before implementation.
+- [x] Keep metrics tied to actual existing API aggregates and stored KPI history; do not combine unlike KPI series or currencies.
+- [x] Implement supported controls, states, permission visibility, responsive layout, localization, and accessible chart representation.
+- [x] Add pure helper regression specs and selected-unit recent-activity backend regression coverage.
+- [ ] Run backend tests, live API/database reconciliation, browser interaction/accessibility QA and capture final screenshots when runtimes/data/browser tooling are available.
+- [ ] Validate rendered no-overflow behavior at target desktop/mobile widths against representative data; no desktop no-scroll claim is made in the absence of browser QA/fixture.
+
+Phase 3 remains the stopping boundary. Do not begin Phase 4 or later without explicit user approval.
 
 ## Phase 4 — Organization & Access Management
 
@@ -151,4 +154,4 @@ Executed supported headless Chromium 153 with Puppeteer Core 25.17.0 against the
 
 ## Execution controls
 
-For each approved phase: inspect; checklist; small changes; focused tests; relevant regression; review `git diff`; confirm no unrelated files; update docs; report test output; stop for approval before next phase. Keep all work on the active Arena branch `arena/bce4bcc3-fgsportal`; it cannot be renamed/switched in this session. Do not commit to `BMS` or open a PR from another branch. Current branch restrictions and session instructions take precedence over the pasted request's “target branch BMS / create dedicated branch” text.
+For each approved phase: inspect; checklist; small changes; focused tests; relevant regression; review `git diff`; confirm no unrelated files; update docs; report test output; stop for approval before next phase. Keep all work on the active Arena branch `arena/e1389d1e-fgsportal`; do not switch or rename it. Phase 3 is not merged; pull request target is `BMS`.

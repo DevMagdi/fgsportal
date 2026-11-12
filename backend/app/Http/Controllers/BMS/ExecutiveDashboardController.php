@@ -65,7 +65,7 @@ class ExecutiveDashboardController extends BmsController
             ->when($filters['business_unit_id']??null,fn($q,$v)=>$q->where('business_unit_id',$v));
         $procurementPending=$procurementQuery->where('status','submitted')->count();
         $meetings=$meetingQuery->orderBy('starts_at')->limit(10)->get(['id','title','starts_at','ends_at','location','business_unit_id','status']);
-        $recent=$this->recentActivity($visibleUnits);
+        $recent=$this->recentActivity($visibleUnits, isset($filters['business_unit_id']) ? (int) $filters['business_unit_id'] : null);
 
         return $this->ok([
             'generated_at'=>now(),'filters'=>$filters,'unit_progress'=>$unitProgress,
@@ -89,7 +89,7 @@ class ExecutiveDashboardController extends BmsController
     }
 
     /** Latest audited business events inside the viewer's scope (BRD §5.1). */
-    private function recentActivity(?array $visibleUnits): array
+    private function recentActivity(?array $visibleUnits, ?int $selectedUnitId = null): array
     {
         $allowed = [
             'BusinessUnit', 'UnitTask', 'Opportunity', 'Product', 'Meeting', 'Lead',
@@ -106,19 +106,36 @@ class ExecutiveDashboardController extends BmsController
             if (!in_array($type, $allowed, true)) continue;
             // Composite key: ids are only unique inside one model type.
             $cacheKey = $type.':'.$log->auditable_id;
-            $unitId = array_key_exists($cacheKey, $unitCache) ? $unitCache[$cacheKey] : null;
             if (!array_key_exists($cacheKey, $unitCache)) {
                 $model = $log->auditable; // may be null when the record was hard-deleted
+                $unitIds = [];
                 if ($model) {
-                    $unitId = $model->business_unit_id ?? null;
-                    if ($unitId === null && method_exists($model, 'businessUnits')) $unitId = $model->businessUnits()->value('business_units.id');
-                    if ($unitId === null && method_exists($model, 'unit')) $unitId = optional($model->unit)->id;
+                    if ($type === 'BusinessUnit') {
+                        $unitIds[] = (int) $model->id;
+                    } elseif (!empty($model->business_unit_id)) {
+                        $unitIds[] = (int) $model->business_unit_id;
+                    } elseif (method_exists($model, 'businessUnits')) {
+                        $unitIds = $model->businessUnits()->pluck('business_units.id')->map(fn ($id) => (int) $id)->all();
+                    } elseif (method_exists($model, 'unit')) {
+                        $unitId = optional($model->unit)->id;
+                        if ($unitId !== null) $unitIds[] = (int) $unitId;
+                    } elseif (method_exists($model, 'product')) {
+                        $product = $model->product;
+                        if ($product && method_exists($product, 'businessUnits')) {
+                            $unitIds = $product->businessUnits()->pluck('business_units.id')->map(fn ($id) => (int) $id)->all();
+                        }
+                    }
                 }
-                $unitCache[$cacheKey] = $unitId;
+                $unitCache[$cacheKey] = array_values(array_unique($unitIds));
             }
-            if ($visibleUnits !== null) {
+            $unitIds = $unitCache[$cacheKey];
+            if ($visibleUnits !== null && !array_intersect($unitIds, $visibleUnits)) {
                 // Unknown scope is never disclosed; only records positively inside the scope are shown.
-                if ($unitId === null || !in_array((int) $unitId, $visibleUnits, true)) continue;
+                continue;
+            }
+            if ($selectedUnitId !== null && !in_array($selectedUnitId, $unitIds, true)) {
+                // Keep the recent-activity panel synchronized with the dashboard's unit filter.
+                continue;
             }
             $rows[] = [
                 'event' => $log->event, 'at' => $log->created_at, 'by' => $log->user->username ?? null,

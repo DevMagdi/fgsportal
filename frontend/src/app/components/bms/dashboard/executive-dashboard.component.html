@@ -1,17 +1,213 @@
-<div class="page-heading"><div><h1>{{lang.t('dashboard')}}</h1><p>{{data.generated_at | date:'medium'}}</p></div><div class="button-row"><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div></div>
-<div class="alert-box alert-error" *ngIf="error">{{error}}</div>
-<section class="bms-card"><h2>{{lang.t('filters')}}</h2><form [formGroup]="filters" (ngSubmit)="load()" class="filter-grid">
-<label>{{lang.t('unit')}}<select class="form-select" formControlName="business_unit_id"><option value="">{{lang.t('allUnits')}}</option><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
-<label>{{lang.t('product')}}<select class="form-select" formControlName="product_id"><option value="">{{lang.t('allProducts')}}</option><option *ngFor="let p of lookups.products" [value]="p.id">{{p.product_name}}</option></select></label>
-<label>{{lang.t('opportunity')}}<select class="form-select" formControlName="opportunity_id"><option value="">{{lang.t('allOpportunities')}}</option><option *ngFor="let o of lookups.opportunities" [value]="o.id">{{o.reference}} - {{o.title}}</option></select></label>
-<label>{{lang.t('weekStart')}}<input type="date" class="form-control" formControlName="week_start"></label><button class="btn-brand" [disabled]="loading">{{lang.t('apply')}}</button>
-</form></section>
-<div class="kpi-grid"><div class="kpi"><div class="value">{{data.summary.units || 0}}</div><div class="label">{{lang.t('units')}}</div></div><div class="kpi"><div class="value">{{data.summary.tasks || 0}}</div><div class="label">{{lang.t('tasks')}}</div></div><div class="kpi"><div class="value">{{data.tenders.submitted || 0}}</div><div class="label">{{lang.t('tender')}} · {{lang.t('submitted')}}</div></div><div class="kpi"><div class="value">{{data.tenders.delayed || 0}}</div><div class="label">{{lang.t('tender')}} · {{lang.t('delayed')}}</div></div><div class="kpi"><div class="value">{{data.tenders.no_update || 0}}</div><div class="label">{{lang.t('tender')}} · {{lang.t('noUpdate')}}</div></div><div class="kpi"><div class="value">{{data.summary.products || 0}}</div><div class="label">{{lang.t('products')}}</div></div></div>
-<div class="kpi-grid"><div class="kpi"><div class="value">{{data.summary.overdue_tasks || 0}}</div><div class="label">{{lang.t('overdueTasks')}}</div></div><div class="kpi"><div class="value">{{data.summary.blocked_tasks || 0}}</div><div class="label">{{lang.t('blocked')}}</div></div><div class="kpi"><div class="value">{{data.summary.pending_procurement || 0}}</div><div class="label">{{lang.t('pendingApprovals')}}</div></div><div class="kpi"><div class="value">{{data.summary.upcoming_meetings || 0}}</div><div class="label">{{lang.t('upcomingMeetings')}}</div></div></div>
-<div class="report-columns">
-  <section class="bms-card"><h2>{{lang.t('upcomingMeetings')}}</h2><div class="phase-list"><div class="phase-item" *ngFor="let m of data.meetings"><strong>{{m.title}}</strong><span class="small muted">{{m.starts_at | date:'medium'}} · {{m.unit?.name}}</span><p class="small">{{m.location}}</p></div><p class="muted small" *ngIf="!data.meetings?.length">{{lang.t('noData')}}</p></div></section>
-  <section class="bms-card"><h2>{{lang.t('recentActivity')}}</h2><div class="timeline"><div *ngFor="let a of data.recent_activity"><strong>{{a.event}}</strong><span>{{a.at | date:'medium'}} · {{a.by || '-'}}</span><small>{{a.type}} #{{a.id}}</small></div><p class="muted small" *ngIf="!data.recent_activity?.length">{{lang.t('noData')}}</p></div></section>
+<div class="dashboard-page" [attr.dir]="lang.direction">
+  <div class="page-heading dashboard-heading">
+    <div>
+      <h1>{{lang.t('dashboard')}}</h1>
+      <p *ngIf="data?.generated_at">{{lang.t('lastUpdated')}} · {{date(data.generated_at, 'datetime')}}</p>
+    </div>
+    <div class="button-row dashboard-export" *ngIf="showExports">
+      <button type="button" class="btn-soft" (click)="excel()" [disabled]="loading || !data">{{lang.t('exportExcel')}}</button>
+      <button type="button" class="btn-soft" (click)="pdf()" [disabled]="loading || !data">{{lang.t('exportPdf')}}</button>
+    </div>
+  </div>
+
+  <app-bms-state *ngIf="loadingLookups" kind="loading" [message]="lang.t('loadingDashboard')"></app-bms-state>
+  <app-bms-state *ngIf="lookupError" kind="error" [message]="lookupError"
+    [actionLabel]="lang.t('retry')" (action)="retry()"></app-bms-state>
+
+  <ng-container *ngIf="!loadingLookups && !lookupError">
+    <section class="dashboard-filter-card" *ngIf="showUnitFilter || showProductFilter || showOpportunityFilter || showPlanWeekFilter">
+      <form [formGroup]="filters" (ngSubmit)="load()" class="dashboard-filters">
+        <label *ngIf="showUnitFilter" for="dashboard-business-unit">
+          {{lang.t('unit')}}
+          <select id="dashboard-business-unit" class="form-select" formControlName="business_unit_id">
+            <option value="">{{lang.t('allUnits')}}</option>
+            <option *ngFor="let unit of lookups.units" [value]="unit.id">{{unit.name}}</option>
+          </select>
+        </label>
+        <label *ngIf="showProductFilter" for="dashboard-product">
+          {{lang.t('product')}}
+          <select id="dashboard-product" class="form-select" formControlName="product_id">
+            <option value="">{{lang.t('allProducts')}}</option>
+            <option *ngFor="let product of lookups.products" [value]="product.id">{{product.product_name}}</option>
+          </select>
+        </label>
+        <label *ngIf="showOpportunityFilter" for="dashboard-opportunity">
+          {{lang.t('opportunity')}}
+          <select id="dashboard-opportunity" class="form-select" formControlName="opportunity_id">
+            <option value="">{{lang.t('allOpportunities')}}</option>
+            <option *ngFor="let opportunity of lookups.opportunities" [value]="opportunity.id">{{opportunity.reference}} · {{opportunity.title}}</option>
+          </select>
+        </label>
+        <label *ngIf="showPlanWeekFilter" for="dashboard-week-start">
+          {{lang.t('planWeek')}}
+          <input id="dashboard-week-start" type="date" class="form-control" formControlName="week_start">
+        </label>
+        <div class="filter-actions">
+          <button type="submit" class="btn-brand" [disabled]="loading">{{lang.t('apply')}}</button>
+          <button *ngIf="hasFilters" type="button" class="btn-soft" (click)="clearFilters()" [disabled]="loading">{{lang.t('clearFilters')}}</button>
+        </div>
+      </form>
+      <p class="filter-scope">{{lang.t('dashboardFilterScope')}}</p>
+    </section>
+
+    <app-bms-state *ngIf="loading" kind="loading" [message]="lang.t('loadingDashboard')"></app-bms-state>
+    <app-bms-state *ngIf="!loading && error" kind="error" [message]="error"
+      [actionLabel]="lang.t('retry')" (action)="retry()"></app-bms-state>
+
+    <ng-container *ngIf="!loading && !error && data">
+      <section class="summary-grid" [attr.aria-label]="lang.t('executiveSummary')">
+        <article class="summary-card" *ngIf="showUnitData">
+          <span class="summary-icon" aria-hidden="true"><i class="bx bx-buildings"></i></span>
+          <span class="summary-value">{{number(data.summary?.units)}}</span>
+          <span class="summary-label">{{lang.t('businessUnits')}}</span>
+        </article>
+        <article class="summary-card" *ngIf="showTaskData">
+          <span class="summary-icon" aria-hidden="true"><i class="bx bx-task"></i></span>
+          <span class="summary-value">{{number(data.summary?.tasks)}}</span>
+          <span class="summary-label">{{lang.t('plannedTasks')}}</span>
+        </article>
+        <article class="summary-card" *ngIf="showTaskData">
+          <span class="summary-icon" aria-hidden="true"><i class="bx bx-check-circle"></i></span>
+          <span class="summary-value">{{number(data.summary?.achieved)}}</span>
+          <span class="summary-label">{{lang.t('achieved')}}</span>
+        </article>
+        <article class="summary-card" *ngIf="showOpportunityData">
+          <span class="summary-icon" aria-hidden="true"><i class="bx bx-briefcase"></i></span>
+          <span class="summary-value">{{number(data.summary?.opportunities)}}</span>
+          <span class="summary-label">{{lang.t('opportunities')}}</span>
+        </article>
+        <article class="summary-card" *ngIf="showProductData">
+          <span class="summary-icon" aria-hidden="true"><i class="bx bx-package"></i></span>
+          <span class="summary-value">{{number(data.summary?.products)}}</span>
+          <span class="summary-label">{{lang.t('products')}}</span>
+        </article>
+        <article class="summary-card" *ngIf="showOpportunityData">
+          <span class="summary-icon" aria-hidden="true"><i class="bx bx-file"></i></span>
+          <span class="summary-value">{{number(data.tenders?.total)}}</span>
+          <span class="summary-label">{{lang.t('tender')}} · {{lang.t('total')}}</span>
+        </article>
+        <article class="summary-card" *ngIf="showOpportunityData">
+          <span class="summary-icon" aria-hidden="true"><i class="bx bx-send"></i></span>
+          <span class="summary-value">{{number(data.tenders?.submitted)}}</span>
+          <span class="summary-label">{{lang.t('tender')}} · {{lang.t('submitted')}}</span>
+        </article>
+      </section>
+
+      <section class="exception-strip" [attr.aria-label]="lang.t('managementAttention')">
+        <div class="exception-item danger" *ngIf="showTaskData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.overdue_tasks)}}</span><small>{{lang.t('overdueTasks')}}</small>
+        </div>
+        <div class="exception-item warning" *ngIf="showTaskData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.blocked_tasks)}}</span><small>{{lang.t('tasksWithBlockers')}}</small>
+        </div>
+        <div class="exception-item danger" *ngIf="showOpportunityData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.delayed_opportunities)}}</span><small>{{lang.t('delayedOpportunities')}}</small>
+        </div>
+        <div class="exception-item warning" *ngIf="showOpportunityData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.stale_opportunities)}}</span><small>{{lang.t('staleOpportunities')}}</small>
+        </div>
+        <div class="exception-item danger" *ngIf="showOpportunityData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.tenders?.delayed)}}</span><small>{{lang.t('tender')}} · {{lang.t('delayed')}}</small>
+        </div>
+        <div class="exception-item warning" *ngIf="showOpportunityData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.tenders?.no_update)}}</span><small>{{lang.t('tender')}} · {{lang.t('noUpdate')}}</small>
+        </div>
+        <div class="exception-item warning" *ngIf="showProcurementData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.pending_procurement)}}</span><small>{{lang.t('pendingProcurement')}}</small>
+        </div>
+        <div class="exception-item neutral" *ngIf="showMeetingData">
+          <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.upcoming_meetings)}}</span><small>{{lang.t('upcomingMeetings')}}</small>
+        </div>
+      </section>
+
+      <section class="dashboard-panels" [class.with-trend]="showKpiTrend">
+        <article class="dashboard-panel" *ngIf="showTaskData && showUnitData">
+          <div class="panel-heading">
+            <div><h2>{{lang.t('unitPlanProgress')}}</h2><p>{{lang.t('progressForSelectedWeek')}}</p></div>
+          </div>
+          <app-bms-state *ngIf="!progressRows.length" kind="empty" [message]="lang.t('noUnitTaskData')"></app-bms-state>
+          <div class="progress-list" *ngIf="progressRows.length" role="list">
+            <div class="unit-progress-row" *ngFor="let row of progressRows; trackBy: trackById" role="listitem">
+              <div class="unit-progress-heading"><strong>{{row.name}}</strong><span>{{number(row.progress)}}%</span></div>
+              <div class="unit-progress-track" role="progressbar" [attr.aria-label]="row.name + ' ' + lang.t('progress')"
+                [attr.aria-valuenow]="row.barWidth" aria-valuemin="0" aria-valuemax="100">
+                <span [style.width.%]="row.barWidth"></span>
+              </div>
+              <small>{{number(row.total)}} {{lang.t('tasks')}}</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="dashboard-panel" *ngIf="showOpportunityData">
+          <div class="panel-heading"><div><h2>{{lang.t('opportunityPipeline')}}</h2><p>{{lang.t('currentStageDistribution')}}</p></div></div>
+          <app-bms-state *ngIf="!stageRows.length" kind="empty" [message]="lang.t('noOpportunityData')"></app-bms-state>
+          <div class="stage-list" *ngIf="stageRows.length" role="list">
+            <div class="stage-row" *ngFor="let stage of stageRows; trackBy: trackById" role="listitem">
+              <div class="stage-heading"><span>{{stage.label}}</span><strong>{{number(stage.count)}}</strong></div>
+              <div class="stage-track" role="img" [attr.aria-label]="stage.label + ': ' + number(stage.count)">
+                <span [style.width.%]="stage.percent"></span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="dashboard-panel trend-panel" *ngIf="showKpiTrend">
+          <div class="panel-heading"><div><h2>{{lang.t('unitKpiHistory')}}</h2><p>{{lang.t('unitKpiFilterNote')}}</p></div></div>
+          <label class="trend-select-label" *ngIf="trendSeries.length > 1" for="dashboard-kpi-series">{{lang.t('selectKpi')}}</label>
+          <select id="dashboard-kpi-series" class="form-select trend-select" *ngIf="trendSeries.length > 1"
+            [value]="selectedTrendKey" (change)="selectedTrendKey = $any($event.target).value">
+            <option *ngFor="let series of trendSeries" [value]="seriesKey(series)">{{seriesLabel(series)}}</option>
+          </select>
+          <app-bms-state *ngIf="loadingTrend" kind="loading" [message]="lang.t('loadingKpiHistory')"></app-bms-state>
+          <app-bms-state *ngIf="!loadingTrend && trendError" kind="error" [message]="trendError"
+            [actionLabel]="lang.t('retry')" (action)="retryKpiHistory()"></app-bms-state>
+          <ng-container *ngIf="!loadingTrend && !trendError">
+            <app-bms-state *ngIf="!selectedTrend" kind="empty" [message]="lang.t('noKpiHistory')"></app-bms-state>
+            <app-bms-state *ngIf="selectedTrend && !hasTrendLine" kind="empty" [message]="lang.t('needKpiHistory')"></app-bms-state>
+            <ng-container *ngIf="selectedTrend && hasTrendLine">
+              <strong class="trend-series-name">{{trendLabel}}</strong>
+              <svg class="trend-chart" viewBox="0 0 360 136" preserveAspectRatio="none" role="img"
+                [attr.aria-label]="lang.t('kpiTrendChart') + ': ' + trendLabel">
+                <title>{{lang.t('kpiTrendChart')}} — {{trendLabel}}</title>
+                <line *ngFor="let segment of trendTargetSegments" [attr.x1]="segment.x1" [attr.y1]="segment.y1"
+                  [attr.x2]="segment.x2" [attr.y2]="segment.y2" class="trend-target-line"></line>
+                <polyline [attr.points]="trendActualLine" class="trend-actual-line"></polyline>
+                <circle *ngFor="let point of trendPoints" [attr.cx]="point.x" [attr.cy]="point.actualY" r="3.5" class="trend-point">
+                  <title>{{point.label}} · {{lang.t('actual')}} {{number(point.actual)}}</title>
+                </circle>
+              </svg>
+              <div class="trend-date-labels"><span *ngFor="let point of trendPoints">{{date(point.label, 'month')}}</span></div>
+              <ul class="sr-only">
+                <li *ngFor="let point of trendPoints">{{date(point.label)}} · {{lang.t('actual')}} {{number(point.actual)}}<span *ngIf="point.target !== null"> · {{lang.t('target')}} {{number(point.target)}}</span></li>
+              </ul>
+              <div class="trend-legend"><span><i class="actual-key"></i>{{lang.t('actual')}}</span><span><i class="target-key"></i>{{lang.t('target')}}</span></div>
+            </ng-container>
+          </ng-container>
+        </article>
+      </section>
+
+      <section class="operations-panels">
+        <article class="dashboard-panel" *ngIf="showMeetingData">
+          <div class="panel-heading"><div><h2>{{lang.t('upcomingMeetings')}}</h2><p>{{lang.t('nextSevenDays')}}</p></div></div>
+          <app-bms-state *ngIf="!data.meetings?.length" kind="empty" [message]="lang.t('noUpcomingMeetings')"></app-bms-state>
+          <div class="meeting-list" *ngIf="data.meetings?.length">
+            <div class="meeting-row" *ngFor="let meeting of meetingRows | slice:0:3; trackBy: trackById">
+              <span class="meeting-date">{{date(meeting.starts_at, 'date')}}</span>
+              <div><strong>{{meeting.title}}</strong><small>{{date(meeting.starts_at, 'time')}} · {{meeting.unit?.name || lang.t('businessUnitUnassigned')}}</small></div>
+            </div>
+          </div>
+        </article>
+        <article class="dashboard-panel" *ngIf="showRecentActivity">
+          <div class="panel-heading"><div><h2>{{lang.t('recentActivity')}}</h2><p>{{lang.t('visibleScopeActivity')}}</p></div></div>
+          <app-bms-state *ngIf="!data.recent_activity?.length" kind="empty" [message]="lang.t('noRecentActivity')"></app-bms-state>
+          <div class="activity-list" *ngIf="data.recent_activity?.length">
+            <div class="activity-row" *ngFor="let activity of activityRows | slice:0:3; trackBy: trackById">
+              <span class="activity-marker" aria-hidden="true"></span>
+              <div><strong>{{activity.event}}</strong><small>{{date(activity.at, 'datetime')}} · {{activity.by || '—'}}</small></div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </ng-container>
+  </ng-container>
 </div>
-<section class="bms-card"><h2>{{lang.t('units')}} · {{lang.t('progress')}}</h2><div class="table-responsive"><table><thead><tr><th>{{lang.t('unit')}}</th><th>{{lang.t('director')}}</th><th>{{lang.t('total')}}</th><th>{{lang.t('achieved')}}</th><th>{{lang.t('inProgress')}}</th><th>{{lang.t('notDone')}}</th><th>{{lang.t('blockers')}}</th><th>{{lang.t('progress')}}</th></tr></thead><tbody><tr *ngFor="let u of data.unit_progress"><td>{{u.name}}</td><td>{{name(u.director)}}</td><td>{{u.total}}</td><td>{{u.achieved}}</td><td>{{u.in_progress}}</td><td>{{u.not_done}}</td><td>{{u.blocked}}</td><td><div class="progress"><div class="progress-bar" [style.width.%]="u.progress"></div></div><span class="small">{{u.progress}}%</span></td></tr></tbody></table></div></section>
-<section class="bms-card"><h2>{{lang.t('opportunities')}}</h2><div class="table-responsive"><table><thead><tr><th>{{lang.t('reference')}}</th><th>{{lang.t('title')}}</th><th>{{lang.t('client')}}</th><th>{{lang.t('unit')}}</th><th>{{lang.t('stage')}}</th><th>{{lang.t('decision')}}</th><th>{{lang.t('submissionDate')}}</th><th>{{lang.t('status')}}</th></tr></thead><tbody><tr *ngFor="let o of data.opportunities"><td>{{o.reference}}</td><td>{{o.title}}</td><td>{{o.client_name}}</td><td>{{o.unit?.name || '-'}}</td><td><span class="badge-status" [ngClass]="o.stage">{{lang.t(o.stage)}}</span></td><td>{{lang.t(o.go_no_go)}}</td><td>{{o.submission_date | date:'yyyy-MM-dd'}}</td><td><span *ngIf="o.is_delayed" class="badge-status not_done">{{lang.t('delayed')}}</span> <span *ngIf="o.has_no_update" class="badge-status no-update">{{lang.t('noUpdate')}}</span></td></tr></tbody></table></div></section>
-<section class="bms-card"><h2>{{lang.t('products')}}</h2><div class="table-responsive"><table><thead><tr><th>{{lang.t('product')}}</th><th>{{lang.t('units')}}</th><th>{{lang.t('currentPhase')}}</th><th>{{lang.t('blockers')}}</th><th>{{lang.t('dataNeeds')}}</th><th>{{lang.t('supportNeeds')}}</th></tr></thead><tbody><tr *ngFor="let p of data.products"><td>{{p.product_name}}</td><td><span *ngFor="let u of p.business_units" class="badge-status">{{u.name}}</span></td><td>{{p.current_phase?.name || '-'}} <span *ngIf="p.current_phase" class="badge-status" [ngClass]="p.current_phase.status">{{lang.t(p.current_phase.status)}}</span></td><td>{{p.current_phase?.blockers || '-'}}</td><td>{{p.current_phase?.data_needs || '-'}}</td><td>{{p.current_phase?.support_needs || '-'}}</td></tr></tbody></table></div></section>

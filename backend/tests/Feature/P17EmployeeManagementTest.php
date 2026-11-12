@@ -561,6 +561,44 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertCount(1, $filtered['unit_progress']);
     }
 
+    public function test_P22_dashboard_recent_activity_respects_selected_unit_including_shared_products(): void
+    {
+        $alpha = $this->makeUnit();
+        $beta = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$alpha->id, $beta->id]);
+
+        $sharedProduct = \\App\\Models\\Product::create(['product_name' => 'Shared dashboard product']);
+        $sharedProduct->businessUnits()->attach([$alpha->id, $beta->id]);
+        BmsAuditLog::create([
+            'auditable_type' => \\App\\Models\\Product::class,
+            'auditable_id' => $sharedProduct->id,
+            'event' => 'product.shared.updated',
+            'user_id' => $director->id,
+        ]);
+        BmsAuditLog::create([
+            'auditable_type' => BusinessUnit::class,
+            'auditable_id' => $alpha->id,
+            'event' => 'unit.alpha.updated',
+            'user_id' => $director->id,
+        ]);
+        BmsAuditLog::create([
+            'auditable_type' => BusinessUnit::class,
+            'auditable_id' => $beta->id,
+            'event' => 'unit.beta.updated',
+            'user_id' => $director->id,
+        ]);
+
+        $alphaActivity = collect($this->getBms('executive-dashboard?business_unit_id='.$alpha->id, $director)->assertOk()->json('data.recent_activity'));
+        $this->assertTrue($alphaActivity->contains(fn ($row) => $row['event'] === 'product.shared.updated'));
+        $this->assertTrue($alphaActivity->contains(fn ($row) => $row['event'] === 'unit.alpha.updated'));
+        $this->assertFalse($alphaActivity->contains(fn ($row) => $row['event'] === 'unit.beta.updated'));
+
+        $betaActivity = collect($this->getBms('executive-dashboard?business_unit_id='.$beta->id, $director)->assertOk()->json('data.recent_activity'));
+        $this->assertTrue($betaActivity->contains(fn ($row) => $row['event'] === 'product.shared.updated'));
+        $this->assertTrue($betaActivity->contains(fn ($row) => $row['event'] === 'unit.beta.updated'));
+        $this->assertFalse($betaActivity->contains(fn ($row) => $row['event'] === 'unit.alpha.updated'));
+    }
+
     public function test_P21_monthly_report_products_are_limited_to_the_actors_units(): void
     {
         // BmsTestCase runs BmsPhaseOneSeeder, which ships catalogue products (Kraken, Argus)

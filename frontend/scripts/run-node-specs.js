@@ -26,6 +26,7 @@ const FRONTEND_ROOT = path.resolve(__dirname, '..');
 const PURE_SPECS = [
   'src/app/components/bms/bms-catalog.spec.ts',
   'src/app/components/bms/bms-navigation.spec.ts',
+  'src/app/components/bms/dashboard/executive-dashboard.util.spec.ts',
   'src/app/pipes/max-length.pipe.spec.ts',
   'src/app/services/module-pages.registry.spec.ts',
   'src/app/services/user-perms.cache.spec.ts',
