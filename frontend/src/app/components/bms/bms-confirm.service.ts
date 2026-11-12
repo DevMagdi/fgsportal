@@ -28,6 +28,7 @@ export class BmsConfirmService {
     return this.dialog.open<BmsConfirmDialogComponent, BmsConfirmDialogData, boolean>(BmsConfirmDialogComponent, {
       data,
       panelClass: 'bms-dialog-panel',
+      ariaDescribedBy: 'bms-confirm-message',
       width: '440px',
       maxWidth: 'calc(100vw - 28px)',
       autoFocus: 'dialog',
