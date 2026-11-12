@@ -340,6 +340,10 @@ class P17EmployeeManagementTest extends BmsTestCase
         $plan = \App\Models\BMS\WeeklyPlan::create([
             'business_unit_id' => $unit->id, 'week_start' => '2026-11-08', 'status' => 'submitted', 'created_by' => $director->id,
         ]);
+        BmsAuditLog::create([
+            'auditable_type' => \App\Models\BMS\WeeklyPlan::class, 'auditable_id' => $plan->id,
+            'event' => 'weekly_plan.submitted', 'user_id' => $director->id,
+        ]);
         \App\Models\BMS\UnitTask::create([
             'weekly_plan_id' => $plan->id, 'business_unit_id' => $unit->id, 'owner_id' => $director->id,
             'title' => 'Late task', 'status' => 'in_progress', 'due_date' => now()->subDays(2),
@@ -350,7 +354,7 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertSame(1, $dashboard['summary']['upcoming_meetings']);
         $this->assertSame(1, $dashboard['summary']['overdue_tasks']);
         $this->assertSame('Weekly sync', $dashboard['meetings'][0]['title']);
-        $this->assertNotEmpty($dashboard['recent_activity']);
+        $this->assertTrue(collect($dashboard['recent_activity'])->contains(fn ($row) => $row['event'] === 'weekly_plan.submitted'));
     }
 
     public function test_P19_manager_assignment_blocks_cycles_cross_company_and_out_of_scope_managers(): void
@@ -431,19 +435,26 @@ class P17EmployeeManagementTest extends BmsTestCase
         $otherDirector = $this->makeUser();
         $otherDirector->businessUnits()->attach($theirs->id);
 
-        \App\Models\BMS\ProcurementRequest::create([
+        $visibleRequest = ProcurementRequest::create([
             'business_unit_id' => $mine->id, 'reference' => 'P19-ACTIVITY-MINE', 'item' => 'Visible item', 'quantity' => 1,
             'purpose' => 'Mine', 'status' => 'submitted', 'requested_by' => $director->id,
         ]);
-        \App\Models\BMS\ProcurementRequest::create([
+        $secretRequest = ProcurementRequest::create([
             'business_unit_id' => $theirs->id, 'reference' => 'P19-ACTIVITY-SECRET', 'item' => 'Secret item', 'quantity' => 1,
             'purpose' => 'Theirs', 'status' => 'submitted', 'requested_by' => $otherDirector->id,
         ]);
+        foreach ([[$visibleRequest, $director, 'visible.procurement'], [$secretRequest, $otherDirector, 'secret.procurement']] as [$request, $actor, $event]) {
+            BmsAuditLog::create([
+                'auditable_type' => ProcurementRequest::class, 'auditable_id' => $request->id,
+                'event' => $event, 'user_id' => $actor->id,
+            ]);
+        }
 
         $data = $this->getBms('executive-dashboard', $director)->assertOk()->json('data');
         $this->assertSame(1, $data['summary']['pending_procurement']);
         $events = collect($data['recent_activity']);
-        $this->assertTrue($events->isNotEmpty());
+        $this->assertTrue($events->contains(fn ($row) => $row['event'] === 'visible.procurement'));
+        $this->assertFalse($events->contains(fn ($row) => $row['event'] === 'secret.procurement'), 'Other-unit procurement activity must not leak.');
         $this->assertTrue($events->every(fn ($row) => $row['type'] !== 'User'));
     }
 
