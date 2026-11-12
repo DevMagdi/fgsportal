@@ -330,7 +330,7 @@ class P17EmployeeManagementTest extends BmsTestCase
         $unit = $this->makeUnit();
         $director = $this->actingAsRole('unit_director', [$unit->id]);
         \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $unit->id, 'item' => 'Laptops', 'quantity' => 2,
+            'business_unit_id' => $unit->id, 'reference' => 'P18-DASHBOARD', 'item' => 'Laptops', 'quantity' => 2,
             'purpose' => 'New hires', 'status' => 'submitted', 'requested_by' => $director->id,
         ]);
         \App\Models\BMS\Meeting::create([
@@ -432,11 +432,11 @@ class P17EmployeeManagementTest extends BmsTestCase
         $otherDirector->businessUnits()->attach($theirs->id);
 
         \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $mine->id, 'item' => 'Visible item', 'quantity' => 1,
+            'business_unit_id' => $mine->id, 'reference' => 'P19-ACTIVITY-MINE', 'item' => 'Visible item', 'quantity' => 1,
             'purpose' => 'Mine', 'status' => 'submitted', 'requested_by' => $director->id,
         ]);
         \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $theirs->id, 'item' => 'Secret item', 'quantity' => 1,
+            'business_unit_id' => $theirs->id, 'reference' => 'P19-ACTIVITY-SECRET', 'item' => 'Secret item', 'quantity' => 1,
             'purpose' => 'Theirs', 'status' => 'submitted', 'requested_by' => $otherDirector->id,
         ]);
 
@@ -508,11 +508,11 @@ class P17EmployeeManagementTest extends BmsTestCase
         $stranger->businessUnits()->attach($other->id);
 
         $mine = \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $unit->id, 'item' => 'Mine', 'quantity' => 1, 'purpose' => 'p',
+            'business_unit_id' => $unit->id, 'reference' => 'P20-MINE', 'item' => 'Mine', 'quantity' => 1, 'purpose' => 'p',
             'status' => 'submitted', 'requested_by' => $admin->id,
         ]);
         $theirs = \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $other->id, 'item' => 'Theirs', 'quantity' => 1, 'purpose' => 'p',
+            'business_unit_id' => $other->id, 'reference' => 'P20-THEIRS', 'item' => 'Theirs', 'quantity' => 1, 'purpose' => 'p',
             'status' => 'submitted', 'requested_by' => $stranger->id,
         ]);
 
@@ -545,7 +545,7 @@ class P17EmployeeManagementTest extends BmsTestCase
 
         foreach ([$alpha, $beta] as $unit) {
             \App\Models\BMS\ProcurementRequest::create([
-                'business_unit_id' => $unit->id, 'item' => 'Item '.$unit->name, 'quantity' => 1,
+                'business_unit_id' => $unit->id, 'reference' => 'P20-SUMMARY-'.$unit->id, 'item' => 'Item '.$unit->name, 'quantity' => 1,
                 'purpose' => 'p', 'status' => 'submitted', 'requested_by' => $director->id,
             ]);
             \App\Models\BMS\Meeting::create([
