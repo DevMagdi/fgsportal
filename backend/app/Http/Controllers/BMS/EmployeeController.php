@@ -493,24 +493,14 @@ class EmployeeController extends BmsController
 
     /**
      * Only global administrators may hand out global roles, and a unit manager
-     * may never assign a role beyond the units they can already see. Nobody can
-     * grant themselves a wider role.
+     * may never assign a role beyond the units they can already see. The full
+     * policy (including the Phase 1 privilege-escalation restrictions) is
+     * centralized in BmsAccess::authorizeRoleChange() so employee creation,
+     * role assignment and revocation cannot drift apart.
      */
     private function authorizeRoleAssignment(int $roleId, ?int $unitId): void
     {
-        $actor = $this->access->user();
-        $role = BmsRole::findOrFail($roleId);
-        $isAdmin = in_array((int) $actor->sub_departments_id, config('bms.admin_sub_department_ids', [1, 4]), true);
-        abort_unless($this->access->can('roles.manage') || $isAdmin, 403, 'You cannot assign BMS roles.');
-        if ($unitId !== null) {
-            $this->access->authorizeUnit($unitId);
-        }
-        if ($role->slug === 'system_admin' && !$isAdmin) {
-            abort(403, 'Only Administration may grant the System Administrator role.');
-        }
-        if ($unitId === null && !$this->access->hasGlobalUnitScope() && !$isAdmin) {
-            abort(403, 'Global role assignments require global scope.');
-        }
+        $this->access->authorizeRoleChange(null, BmsRole::findOrFail($roleId), $unitId, 'create');
     }
 
     private function present(User $user): array

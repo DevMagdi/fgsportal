@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\BMS\BmsAuditLog;
 use App\Models\BMS\BmsRole;
 use App\Models\BMS\BusinessUnit;
 use App\Models\User;
@@ -629,5 +630,564 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->deleteBms('units/'.$child->id, $admin)->assertStatus(422);
         $this->postBms('units/'.$child->id.'/status', ['is_active' => false], $admin)
             ->assertOk()->assertJsonPath('data.is_active', false);
+    }
+
+    // =====================================================================
+    // Phase 1 — role assignment / revocation authorization hardening.
+    // The original targetInScope check was tautological (the target id was
+    // merged into the array it was searched in), so unit-scoped managers
+    // could assign roles to any employee. These tests pin the whole policy.
+    // =====================================================================
+
+    private function role(string $slug): BmsRole
+    {
+        return BmsRole::where('slug', $slug)->firstOrFail();
+    }
+
+    private function memberOf(BusinessUnit $unit, array $attributes = []): User
+    {
+        $user = $this->makeUser($attributes);
+        $user->businessUnits()->attach($unit->id);
+
+        return $user;
+    }
+
+    private function auditCount(string $event): int
+    {
+        return BmsAuditLog::where('event', $event)->count();
+    }
+
+    public function test_P17_role_security_admin_assigns_unit_and_global_roles(): void
+    {
+        // Scenario 1: global administrator assigns a unit-level role to an eligible employee.
+        $unit = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $target = $this->memberOf($unit);
+
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $this->role('employee')->id, 'business_unit_id' => $unit->id,
+        ], $admin)->assertOk();
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('employee')->id, 'business_unit_id' => $unit->id,
+        ]);
+
+        // Scenario 2: global administrator assigns a legitimate global role.
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $this->role('hr')->id,
+        ], $admin)->assertOk();
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('hr')->id, 'business_unit_id' => null,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_manager_assigns_and_revokes_in_scope(): void
+    {
+        // Scenario 3: unit-scoped role manager assigns an allowed role inside their unit.
+        // Scenario 5: revocation of that authorized unit-level role succeeds.
+        $unit = $this->makeUnit();
+        $manager = $this->unitRoleManager([$unit->id]);
+        $target = $this->memberOf($unit);
+        $employeeRole = $this->role('employee');
+
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertOk();
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $unit->id,
+        ]);
+
+        $this->postBms('roles/revoke', [
+            'user_id' => $target->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertOk();
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $unit->id,
+        ]);
+    }
+
+    public function test_P17_role_security_multi_unit_employee_gets_role_in_authorized_unit(): void
+    {
+        // Scenario 4: an employee belonging to several units receives a role
+        // in one of the units the actor is authorized for.
+        $mine = $this->makeUnit();
+        $also = $this->makeUnit();
+        $manager = $this->unitRoleManager([$mine->id]);
+        $target = $this->makeUser();
+        $target->businessUnits()->attach([$mine->id, $also->id]);
+
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $this->role('employee')->id, 'business_unit_id' => $mine->id,
+        ], $manager)->assertOk();
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('employee')->id, 'business_unit_id' => $mine->id,
+        ]);
+    }
+
+    public function test_P17_role_security_scoped_changes_leave_other_assignments_untouched(): void
+    {
+        // Scenario 6: adding and revoking one scoped assignment never disturbs
+        // the employee's other (unit or global) assignments.
+        $unitA = $this->makeUnit();
+        $unitB = $this->makeUnit();
+        $manager = $this->unitRoleManager([$unitA->id]);
+        $target = $this->makeUser();
+        $target->businessUnits()->attach([$unitA->id, $unitB->id]);
+        $target->bmsRoles()->syncWithoutDetaching([
+            $this->role('unit_director')->id => ['business_unit_id' => $unitA->id],
+            $this->role('employee')->id => ['business_unit_id' => $unitB->id],
+            $this->role('hr')->id => ['business_unit_id' => null],
+        ]);
+
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $this->role('department_manager')->id, 'business_unit_id' => $unitA->id,
+        ], $manager)->assertOk();
+
+        $this->postBms('roles/revoke', [
+            'user_id' => $target->id, 'role_id' => $this->role('department_manager')->id, 'business_unit_id' => $unitA->id,
+        ], $manager)->assertOk();
+
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('unit_director')->id, 'business_unit_id' => $unitA->id,
+        ]);
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('employee')->id, 'business_unit_id' => $unitB->id,
+        ]);
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('hr')->id, 'business_unit_id' => null,
+        ]);
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('department_manager')->id,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_manager_cannot_target_unrelated_employees(): void
+    {
+        // Scenario 7: target belongs exclusively to an unrelated unit.
+        // Scenario 9: rejected even when the requested business_unit_id is
+        // the actor's own unit — the crafted payload must not bypass scope.
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $alsoTheirs = $this->makeUnit();
+        $manager = $this->unitRoleManager([$mine->id]);
+        $unrelated = $this->memberOf($theirs);
+        $multiUnrelated = $this->makeUser();
+        $multiUnrelated->businessUnits()->attach([$theirs->id, $alsoTheirs->id]);
+        $employeeRole = $this->role('employee');
+
+        $this->postBms('roles/assign', [
+            'user_id' => $unrelated->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ], $manager)->assertForbidden();
+
+        $this->postBms('roles/assign', [
+            'user_id' => $multiUnrelated->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $unrelated->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ]);
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $multiUnrelated->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_manager_cannot_target_employees_without_units(): void
+    {
+        // Scenario 8: no business-unit membership must not make a target
+        // automatically manageable, even when the actor's own unit is used.
+        $mine = $this->makeUnit();
+        $manager = $this->unitRoleManager([$mine->id]);
+        $drifter = $this->makeUser();
+        $employeeRole = $this->role('employee');
+
+        $this->postBms('roles/assign', [
+            'user_id' => $drifter->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $drifter->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_manager_cannot_assign_unrelated_units(): void
+    {
+        // Scenario 10: the requested unit itself is outside the actor's scope.
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $manager = $this->unitRoleManager([$mine->id]);
+        $theirMember = $this->memberOf($theirs);
+
+        $this->postBms('roles/assign', [
+            'user_id' => $theirMember->id, 'role_id' => $this->role('employee')->id, 'business_unit_id' => $theirs->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $theirMember->id, 'bms_role_id' => $this->role('employee')->id, 'business_unit_id' => $theirs->id,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_manager_cannot_create_global_assignments(): void
+    {
+        // Scenario 11: without business_unit_id the assignment is global and
+        // must be refused for a unit-scoped actor.
+        $unit = $this->makeUnit();
+        $manager = $this->unitRoleManager([$unit->id]);
+        $target = $this->memberOf($unit);
+        $employeeRole = $this->role('employee');
+
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $employeeRole->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => null,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_manager_cannot_revoke_global_roles(): void
+    {
+        // Scenario 12: unit-scoped actors may not revoke global assignments.
+        $unit = $this->makeUnit();
+        $manager = $this->unitRoleManager([$unit->id]);
+        $target = $this->memberOf($unit);
+        $hrRole = $this->role('hr');
+        $target->bmsRoles()->attach($hrRole->id, ['business_unit_id' => null]);
+
+        $this->postBms('roles/revoke', [
+            'user_id' => $target->id, 'role_id' => $hrRole->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $hrRole->id, 'business_unit_id' => null,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_manager_cannot_revoke_roles_from_other_units(): void
+    {
+        // Scenario 13: cross-unit revocation is rejected and the assignment survives.
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $manager = $this->unitRoleManager([$mine->id]);
+        $target = $this->memberOf($theirs);
+        $employeeRole = $this->role('employee');
+        $target->bmsRoles()->attach($employeeRole->id, ['business_unit_id' => $theirs->id]);
+
+        $this->postBms('roles/revoke', [
+            'user_id' => $target->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $theirs->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $theirs->id,
+        ]);
+    }
+
+    public function test_P17_role_security_unauthorized_employee_cannot_assign_or_revoke(): void
+    {
+        // Scenario 14: an employee without roles.manage can neither assign nor revoke.
+        $unit = $this->makeUnit();
+        $plain = $this->actingAsRole('employee', [$unit->id]);
+        $target = $this->memberOf($unit);
+        $employeeRole = $this->role('employee');
+        $target->bmsRoles()->attach($employeeRole->id, ['business_unit_id' => $unit->id]);
+
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $this->role('unit_director')->id, 'business_unit_id' => $unit->id,
+        ], $plain)->assertForbidden();
+
+        $this->postBms('roles/revoke', [
+            'user_id' => $target->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $unit->id,
+        ], $plain)->assertForbidden();
+
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $unit->id,
+        ]);
+    }
+
+    public function test_P17_role_security_non_admin_cannot_grant_or_revoke_system_admin(): void
+    {
+        // Scenario 15: non-administration cannot grant system_admin — at any scope.
+        // Scenario 16: non-administration cannot revoke system_admin either.
+        $unit = $this->makeUnit();
+        $manager = $this->unitRoleManager([$unit->id]);
+        $target = $this->memberOf($unit);
+        $adminRole = $this->role('system_admin');
+
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $adminRole->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $adminRole->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertForbidden();
+
+        // Seed a unit-scoped system_admin assignment, then try to revoke it.
+        $target->bmsRoles()->attach($adminRole->id, ['business_unit_id' => $unit->id]);
+        $this->postBms('roles/revoke', [
+            'user_id' => $target->id, 'role_id' => $adminRole->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertForbidden();
+        $this->assertDatabaseHas('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $adminRole->id, 'business_unit_id' => $unit->id,
+        ]);
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $adminRole->id, 'business_unit_id' => null,
+        ]);
+    }
+
+    public function test_P17_role_security_self_assignment_cannot_escalate_privileges(): void
+    {
+        // Scenario 17: self-targeting must not become a generic bypass.
+        $unit = $this->makeUnit();
+        $manager = $this->unitRoleManager([$unit->id]);
+
+        // Self-grant of system_admin (global or unit-scoped) is refused.
+        $this->postBms('roles/assign', [
+            'user_id' => $manager->id, 'role_id' => $this->role('system_admin')->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/assign', [
+            'user_id' => $manager->id, 'role_id' => $this->role('system_admin')->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertForbidden();
+
+        // Self-grant of a global-scope role is refused with or without a unit.
+        $this->postBms('roles/assign', [
+            'user_id' => $manager->id, 'role_id' => $this->role('hr')->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/assign', [
+            'user_id' => $manager->id, 'role_id' => $this->role('hr')->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $manager->id, 'bms_role_id' => $this->role('system_admin')->id,
+        ]);
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $manager->id, 'bms_role_id' => $this->role('hr')->id,
+        ]);
+
+        // Existing self-protection rule stays effective for global actors,
+        // and a unit-scoped actor never reaches it because scope comes first.
+        $admin = $this->actingAsRole('system_admin', [], ['sub_departments_id' => 1]);
+        $this->postBms('roles/revoke', [
+            'user_id' => $admin->id, 'role_id' => $this->role('system_admin')->id,
+        ], $admin)->assertStatus(422);
+
+        $this->postBms('roles/revoke', [
+            'user_id' => $manager->id, 'role_id' => $this->role('unit_roles_manager')->id,
+        ], $manager)->assertForbidden();
+    }
+
+    public function test_P17_role_security_privileged_role_grants_are_restricted(): void
+    {
+        // Scenario 18: the implemented policy (no hierarchy exists, so the
+        // safest defensible restriction applies) — a unit-scoped manager may
+        // not grant roles that confer global scope or role-management power.
+        $unit = $this->makeUnit();
+        $manager = $this->unitRoleManager([$unit->id]);
+        $target = $this->memberOf($unit);
+
+        // hr is a global-scope role: even attached to a unit it would widen
+        // the holder's visibleUnitIds() to the whole company.
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $this->role('hr')->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $this->role('executive')->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertForbidden();
+
+        // A role that itself carries roles.manage may not be minted either.
+        $roleManagerRole = BmsRole::updateOrCreate(['slug' => 'unit_roles_manager'], [
+            'name' => 'Unit roles manager', 'abilities' => ['roles.manage', 'directory.view'],
+        ]);
+        $this->postBms('roles/assign', [
+            'user_id' => $target->id, 'role_id' => $roleManagerRole->id, 'business_unit_id' => $unit->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('hr')->id, 'business_unit_id' => $unit->id,
+        ]);
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $this->role('executive')->id, 'business_unit_id' => $unit->id,
+        ]);
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $target->id, 'bms_role_id' => $roleManagerRole->id, 'business_unit_id' => $unit->id,
+        ]);
+    }
+
+    public function test_P17_role_security_invalid_or_deleted_targets_are_handled_safely(): void
+    {
+        // Scenario 19: invalid, missing or deleted target employees are safe.
+        // Scenario 20: invalid role and invalid unit get the validation response.
+        $unit = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $employeeRole = $this->role('employee');
+        $before = $this->auditCount('role.assigned');
+
+        $this->postBms('roles/assign', ['user_id' => 999999, 'role_id' => $employeeRole->id], $admin)
+            ->assertStatus(422);
+
+        $deleted = $this->memberOf($unit);
+        $deleted->delete();
+        $this->postBms('roles/assign', [
+            'user_id' => $deleted->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $unit->id,
+        ], $admin)->assertNotFound();
+
+        $alive = $this->memberOf($unit);
+        $this->postBms('roles/assign', [
+            'user_id' => $alive->id, 'role_id' => 999999, 'business_unit_id' => $unit->id,
+        ], $admin)->assertStatus(422);
+        $this->postBms('roles/assign', [
+            'user_id' => $alive->id, 'role_id' => $employeeRole->id, 'business_unit_id' => 999999,
+        ], $admin)->assertStatus(422);
+
+        // Route-bound reads of missing/deleted employees are 404, not a leak.
+        $this->getBms('employees/999999/roles', $admin)->assertNotFound();
+        $this->getBms('employees/'.$deleted->id.'/roles', $admin)->assertNotFound();
+
+        $this->assertSame($before, $this->auditCount('role.assigned'), 'Rejected requests must not be audited.');
+    }
+
+    public function test_P17_role_security_authorized_changes_write_exactly_one_audit_record(): void
+    {
+        // Scenario 21: one authorized assignment writes exactly one audit record.
+        // Scenario 22: one authorized revocation writes exactly one audit record.
+        $unit = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $target = $this->memberOf($unit);
+        $employeeRole = $this->role('employee');
+        $payload = ['user_id' => $target->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $unit->id];
+
+        $assignedBefore = $this->auditCount('role.assigned');
+        $revokedBefore = $this->auditCount('role.revoked');
+
+        $this->postBms('roles/assign', $payload, $admin)->assertOk();
+        $this->assertSame($assignedBefore + 1, $this->auditCount('role.assigned'));
+
+        $this->postBms('roles/revoke', $payload, $admin)->assertOk();
+        $this->assertSame($revokedBefore + 1, $this->auditCount('role.revoked'));
+        $this->assertSame($assignedBefore + 1, $this->auditCount('role.assigned'), 'Revocation must not add an assignment record.');
+    }
+
+    public function test_P17_role_security_unauthorized_changes_write_no_audit_record(): void
+    {
+        // Scenario 23: unauthorized assignments write no audit record.
+        // Scenario 24: unauthorized revocations write no audit record.
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $manager = $this->unitRoleManager([$mine->id]);
+        $outsider = $this->memberOf($theirs);
+        $member = $this->memberOf($mine);
+        $employeeRole = $this->role('employee');
+        $member->bmsRoles()->attach($employeeRole->id, ['business_unit_id' => $theirs->id]);
+
+        $assignedBefore = $this->auditCount('role.assigned');
+        $revokedBefore = $this->auditCount('role.revoked');
+
+        // Cross-unit target, unrelated unit, global grant, system_admin grant.
+        $this->postBms('roles/assign', [
+            'user_id' => $outsider->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/assign', [
+            'user_id' => $member->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $theirs->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/assign', [
+            'user_id' => $member->id, 'role_id' => $employeeRole->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/assign', [
+            'user_id' => $member->id, 'role_id' => $this->role('system_admin')->id, 'business_unit_id' => $mine->id,
+        ], $manager)->assertForbidden();
+
+        // Unauthorized revocations (global + cross-unit).
+        $this->postBms('roles/revoke', [
+            'user_id' => $member->id, 'role_id' => $this->role('hr')->id,
+        ], $manager)->assertForbidden();
+        $this->postBms('roles/revoke', [
+            'user_id' => $member->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $theirs->id,
+        ], $manager)->assertForbidden();
+
+        $this->assertSame($assignedBefore, $this->auditCount('role.assigned'));
+        $this->assertSame($revokedBefore, $this->auditCount('role.revoked'));
+        $this->assertDatabaseMissing('bms_role_user', [
+            'user_id' => $outsider->id, 'bms_role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ]);
+    }
+
+    public function test_P17_role_security_unit_managers_cannot_see_outsider_assignments_or_audit(): void
+    {
+        // Scenario 25: unit-scoped users cannot read unrelated employees' assignments.
+        // Scenario 26: unit-scoped users cannot read unrelated employees' audit entries,
+        // not even global entries for employees who are inside their units.
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $manager = $this->unitRoleManager([$mine->id]);
+        $employeeRole = $this->role('employee');
+
+        $member = $this->memberOf($mine, ['username' => 'audit.member']);
+        $stranger = $this->memberOf($theirs, ['username' => 'audit.stranger']);
+
+        // Out-of-scope employees: 403, and no unit-less employee either.
+        $drifter = $this->makeUser(['username' => 'audit.drifter']);
+        $this->getBms('employees/'.$stranger->id.'/roles', $manager)->assertForbidden();
+        $this->getBms('employees/'.$drifter->id.'/roles', $manager)->assertForbidden();
+
+        // Real assignment for the in-scope employee creates one audit entry.
+        $this->postBms('roles/assign', [
+            'user_id' => $member->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $mine->id,
+        ], $admin)->assertOk();
+        $memberEntry = BmsAuditLog::where('event', 'role.assigned')
+            ->where('auditable_id', $member->id)->latest('id')->firstOrFail();
+
+        // Directly seeded entries: another unit's change, and a global change.
+        $strangerEntry = BmsAuditLog::create([
+            'auditable_type' => User::class, 'auditable_id' => $stranger->id,
+            'event' => 'role.assigned', 'user_id' => $admin->id,
+            'new_values' => ['user_id' => $stranger->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $theirs->id],
+        ]);
+        $globalEntry = BmsAuditLog::create([
+            'auditable_type' => User::class, 'auditable_id' => $member->id,
+            'event' => 'role.assigned', 'user_id' => $admin->id,
+            'new_values' => ['user_id' => $member->id, 'role_id' => $employeeRole->id],
+        ]);
+
+        $visibleIds = collect($this->getBms('audit/role-changes', $manager)->assertOk()->json('data'))->pluck('id');
+        $this->assertTrue($visibleIds->contains($memberEntry->id), 'Own-unit audit entries stay visible.');
+        $this->assertFalse($visibleIds->contains($strangerEntry->id), 'Other units\' audit entries must not leak.');
+        $this->assertFalse($visibleIds->contains($globalEntry->id), 'Global role changes must not leak to unit-scoped viewers.');
+
+        // In-scope reads work, but global assignments stay hidden (F-rule).
+        $member->bmsRoles()->attach($this->role('hr')->id, ['business_unit_id' => null]);
+        $memberRows = $this->getBms('employees/'.$member->id.'/roles', $manager)->assertOk()->json('data');
+        $this->assertCount(1, $memberRows, 'Only the unit-scoped assignment is exposed to a unit manager.');
+        $this->assertSame('unit', $memberRows[0]['scope']);
+        $this->assertSame($mine->id, (int) $memberRows[0]['business_unit_id']);
+    }
+
+    public function test_P17_role_security_global_administrators_retain_full_visibility(): void
+    {
+        // Scenario 27: global administrators keep the intended global visibility.
+        $mine = $this->makeUnit();
+        $theirs = $this->makeUnit();
+        $admin = $this->actingAsRole('system_admin');
+        $employeeRole = $this->role('employee');
+
+        $stranger = $this->memberOf($theirs, ['username' => 'global.stranger']);
+        $stranger->bmsRoles()->attach($employeeRole->id, ['business_unit_id' => $theirs->id]);
+        $stranger->bmsRoles()->attach($this->role('hr')->id, ['business_unit_id' => null]);
+
+        // All assignments of an unrelated employee, including the global one.
+        $assignments = $this->getBms('employees/'.$stranger->id.'/roles', $admin)
+            ->assertOk()->json('data');
+        $this->assertCount(2, $assignments);
+        $this->assertEqualsCanonicalizing(['unit', 'global'], collect($assignments)->pluck('scope')->all());
+
+        // Audit entries from every unit and from global changes remain visible.
+        BmsAuditLog::create([
+            'auditable_type' => User::class, 'auditable_id' => $stranger->id,
+            'event' => 'role.assigned', 'user_id' => $admin->id,
+            'new_values' => ['user_id' => $stranger->id, 'role_id' => $employeeRole->id, 'business_unit_id' => $theirs->id],
+        ]);
+        BmsAuditLog::create([
+            'auditable_type' => User::class, 'auditable_id' => $stranger->id,
+            'event' => 'role.revoked', 'user_id' => $admin->id,
+            'new_values' => ['user_id' => $stranger->id, 'role_id' => $employeeRole->id],
+        ]);
+        $ids = collect($this->getBms('audit/role-changes', $admin)->assertOk()->json('data'))->pluck('id');
+        $expected = BmsAuditLog::whereIn('auditable_id', [$stranger->id])->pluck('id');
+        $this->assertTrue($expected->every(fn ($id) => $ids->contains($id)), 'Global viewers see every role audit entry.');
     }
 }
