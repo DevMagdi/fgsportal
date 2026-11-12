@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OverDueTasksComponent } from './over-due-tasks.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { DatabaseService } from 'src/app/services/database.service';
 
 describe('OverDueTasksComponent', () => {
   let component: OverDueTasksComponent;
@@ -10,7 +11,8 @@ describe('OverDueTasksComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      declarations: [ OverDueTasksComponent ]
+      declarations: [ OverDueTasksComponent ],
+      providers: [{ provide: DatabaseService, useValue: {} }]
     })
     .compileComponents();
   });

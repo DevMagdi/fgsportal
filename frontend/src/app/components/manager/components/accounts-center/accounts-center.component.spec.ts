@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AccountsCenterComponent } from './accounts-center.component';
+import { AccordionModule } from 'primeng/accordion';
 
 describe('AccountsCenterComponent', () => {
   let component: AccountsCenterComponent;
@@ -8,6 +9,7 @@ describe('AccountsCenterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [AccordionModule],
       declarations: [ AccountsCenterComponent ]
     })
     .compileComponents();

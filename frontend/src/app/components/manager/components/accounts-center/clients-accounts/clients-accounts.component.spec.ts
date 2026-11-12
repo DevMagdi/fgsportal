@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ClientsAccountsComponent } from './clients-accounts.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { AccordionModule } from 'primeng/accordion';
 
 describe('ClientsAccountsComponent', () => {
   let component: ClientsAccountsComponent;
@@ -9,7 +10,7 @@ describe('ClientsAccountsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
+      imports: [AccordionModule, HttpClientTestingModule],
       declarations: [ ClientsAccountsComponent ]
     })
     .compileComponents();

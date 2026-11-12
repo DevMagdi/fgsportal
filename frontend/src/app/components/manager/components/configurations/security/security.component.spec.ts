@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SecurityComponent } from './security.component';
+import { AccordionModule } from 'primeng/accordion';
 
 describe('SecurityComponent', () => {
   let component: SecurityComponent;
@@ -8,6 +9,7 @@ describe('SecurityComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [AccordionModule],
       declarations: [ SecurityComponent ]
     })
     .compileComponents();
