@@ -8,11 +8,11 @@ marked verified unless the command was executed here.
 
 | Check | Command | Result |
 | --- | --- | --- |
-| PHP syntax (all backend PHP) | `php-parser` over `backend/**/*.php` (670 files) | **PASS** — `PHP PARSE OK (670 files)` |
+| PHP syntax (all backend PHP) | `php-parser` over `backend/**/*.php` (671 files) | **PASS** — `PHP PARSE OK (671 files)` |
 | Angular development build | `npx ng build --configuration development` | **PASS** |
 | Angular production build | `npx ng build --configuration production` | **PASS** |
 | Pure TypeScript spec harness | `npm run test:node` | **PASS** — 28 passing, 0 failing |
-| Employee import / KPI register / manager-cycle tests | `P17EmployeeManagementTest` (18 tests) | **WRITTEN, NOT EXECUTED** (no PHP runtime) |
+| Employee import / KPI register / manager-cycle tests | `P17EmployeeManagementTest` (22 tests) | **WRITTEN, NOT EXECUTED** (no PHP runtime) |
 | PHPUnit / Laravel feature tests | — | **NOT EXECUTED** — no PHP runtime and no Composer dependencies in this sandbox; they cannot be installed through the allowed network. |
 | Karma component tests / E2E | — | **NOT EXECUTED** — no Chrome in the sandbox. |
 
@@ -55,7 +55,25 @@ executed here · **P** partially implemented · **G** gap · **?** blocked on a 
 | §8 | Non-destructive migrations, no destructive commands | **V** | new migrations only add columns/flags; **no** `migrate:fresh` executed |
 | §10 | Tests | **P** | 15 backend tests for this feature set written (`P17EmployeeManagementTest`), **not executed here**; pure specs 28/28 pass |
 
-## 2. Defects fixed after PR #19 review (this pass)
+## 1b. Defects fixed after the PR #20 review (current pass)
+
+| Defect | Fix | Test |
+| --- | --- | --- |
+| `000010` had been edited *after* deployment to add `bms_unit_kpis.description` / `.owner_id`; installations that already ran it never get those columns | `000010` reverted to its originally shipped column set; new forward-only `2026_11_12_000011_add_missing_bms_kpi_metadata` adds only the missing columns, guarded by `Schema::hasColumn`. Fresh installs and upgraded installs converge to the same schema; `down()` is a deliberate no-op so KPI metadata is never dropped | harness (`BmsTestCase`) applies both in sequence |
+| KPI history grouped by **name only**, so identically named KPIs in different units shared one trend line | history is grouped by `business_unit_id` + lower-cased name and returns `{business_unit_id, unit, name, points[]}`; the UI finds the series by the same composite identity and shows a per-point tooltip | `test_P20_kpi_trends_are_isolated_per_unit_even_with_identical_names` (incl. zero target → `null` attainment) |
+| Employee import ignored duplicates **inside the uploaded file** | case-insensitive username/email tracking per file, new `duplicate_in_file` status counted separately in the summary, commit re-checks `LOWER(username)/LOWER(email)` inside the transaction, preview never returns prepared attributes (no hashes) | `test_P20_import_rejects_duplicates_inside_the_uploaded_file` |
+| `recentActivity()` read the cache with one key shape and wrote it with another, so cached unit resolution never hit | single composite key `Type:id` used for read and write, resolution only on a miss | `test_P20_recent_activity_separates_ids_shared_across_model_types_and_handles_deleted_records` |
+| Dashboard summary/widget consistency was unverified | one scoped+filted query per widget, summary values derived from the same queries | `test_P20_dashboard_summary_matches_the_widget_data_under_the_same_filters` |
+
+Security review of this pass (server-side, executed by inspection — no runtime to exploit-test):
+file downloads (`DocumentController::download`, `RecruitmentController::downloadCv`) resolve a
+stored path on the private `local` disk with `abort_unless(...exists())` and never concatenate
+user input, so traversal is not reachable; uploads are MIME/size validated in the same
+controllers. All new routes carry `bms.permission:*`; every mutating action re-authorizes the
+target record. The remaining unverified item is the suspected unit-scope check in
+`LookupController::authorizeAssignment` (see "Unverified" below).
+
+## 2. Defects fixed after PR #19 review (previous pass)
 
 | Defect | Fix | Test |
 | --- | --- | --- |

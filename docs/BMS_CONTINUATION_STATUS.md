@@ -14,7 +14,22 @@
 | `php artisan test` / PHPUnit | **NOT RUN** — no PHP runtime, no `vendor/`, Composer downloads blocked in this sandbox |
 | Karma / E2E | **NOT RUN** — no Chrome |
 
-## Work completed in this pass (branch `arena/83fd2d35-fgsportal`)
+## Work completed in this pass (branch `arena/c5fbf220-fgsportal`)
+
+* Migration upgrade path repaired: `000010` is frozen at the schema it shipped with and the
+  new forward-only `000011` adds the missing KPI columns on databases that already ran
+  `000010` (guarded by `Schema::hasColumn`, no-op `down()`).
+* KPI trend history is now keyed by business unit **and** KPI name, so equally named KPIs in
+  different units never share a series; the UI resolves the same composite identity and
+  shows the underlying target/actual per point.
+* Employee import detects case-insensitive duplicates inside the uploaded file
+  (`duplicate_in_file` summary counter), revalidates uniqueness inside the commit
+  transaction, and the preview response no longer contains prepared attributes.
+* `recentActivity()` cache key fixed (composite `Type:id`, read and write consistent);
+  regression tests cover shared ids across model types, deleted records and unsupported types.
+* Dashboard summary/widget consistency regression test added.
+
+## Work completed in the previous pass (branch `arena/83fd2d35-fgsportal`)
 
 * Fixed the PR #19 defects: manager validation (`&& false` made it unreachable) now
   enforces self-reference, cycle, cross-company and scope rules on create **and**

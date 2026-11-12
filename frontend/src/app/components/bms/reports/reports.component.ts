@@ -7,7 +7,7 @@ import { BmsLanguageService } from '../bms-language.service';
 export class ReportsComponent extends BmsBaseComponent implements OnInit {
   tab:'monthly'|'quarterly'|'kpis'|'social'='monthly';monthly:any=null;quarterly:any=null;social:any=null;month=new Date().toISOString().slice(0,7);unitId='';
   kpi:any={business_unit_id:'',name:'',target:null,actual:0,unit_label:'',frequency:'monthly',description:'',period_start:'',period_end:''};
-  kpiRegister:any={kpis:[],history:{}};kpiFrequency='';
+  kpiRegister:any={kpis:[],history:[]};kpiFrequency='';
   metric:any={platform:'LinkedIn',followers:0,posts:0,engagement:0,period_start:'',period_end:''};
   constructor(api:BmsApiService,lang:BmsLanguageService,private exporter:BmsExportService){super(api,lang);}
   ngOnInit():void{super.ngOnInit();const end=new Date(),start=new Date();start.setMonth(start.getMonth()-6);this.metric.period_start=start.toISOString().slice(0,10);this.metric.period_end=end.toISOString().slice(0,10);this.kpi.period_end=this.metric.period_end;start.setDate(end.getDate()-89);this.kpi.period_start=start.toISOString().slice(0,10);this.loadMonthly();}
@@ -15,7 +15,8 @@ export class ReportsComponent extends BmsBaseComponent implements OnInit {
   loadMonthly():void{this.loading=true;this.api.get('reports/monthly',{month:this.month,business_unit_id:this.unitId}).subscribe({next:data=>{this.monthly=data;this.loading=false;},error:e=>this.showError(e)});}
   loadQuarterly():void{this.loading=true;this.api.get<any>('reports/quarterly',{business_unit_id:this.unitId,period_start:this.kpi.period_start,period_end:this.kpi.period_end}).subscribe({next:data=>{this.quarterly=data;if(!this.kpi.business_unit_id)this.kpi.business_unit_id=data.unit?.id||'';this.loading=false;},error:e=>this.showError(e)});}
   loadKpis():void{this.loading=true;this.api.get<any>('reports/kpis',{business_unit_id:this.unitId,frequency:this.kpiFrequency}).subscribe({next:data=>{this.kpiRegister=data;this.loading=false;},error:e=>this.showError(e)});}
-  trend(kpi:any):number[]{return (this.kpiRegister.history[kpi.name]||[]).map((h:any)=>h.actual===null?0:Number(h.actual));}
+  trend(kpi:any):number[]{const series=(this.kpiRegister.history||[]).find((h:any)=>h.business_unit_id===kpi.business_unit_id&&(h.name||'').trim().toLowerCase()===(kpi.name||'').trim().toLowerCase());if(!series)return[];const max=Math.max(...series.points.map((p:any)=>p.actual===null?0:Number(p.actual)),1);return series.points.map((p:any)=>p.actual===null?0:Math.round(Number(p.actual)/max*100));}
+  trendLabel(kpi:any):string{const series=(this.kpiRegister.history||[]).find((h:any)=>h.business_unit_id===kpi.business_unit_id&&(h.name||'').trim().toLowerCase()===(kpi.name||'').trim().toLowerCase());if(!series)return '';return series.points.map((p:any)=>`${p.period_start}: ${p.actual===null?'-':p.actual}/${p.target===null?'-':p.target}`).join(' | ');}
   loadSocial():void{this.loading=true;this.api.get('reports/social',{period_start:this.metric.period_start,period_end:this.metric.period_end}).subscribe({next:data=>{this.social=data;this.loading=false;},error:e=>this.showError(e)});}
   saveKpi():void{if(!this.kpi.business_unit_id||!this.kpi.name)return;this.api.post('reports/kpis',this.kpi).subscribe({next:()=>{this.saved();this.kpi.id=null;this.kpi.name='';this.loadKpis();this.loadQuarterly();},error:e=>this.showError(e)});}
   editKpi(row:any):void{this.kpi={id:row.id,business_unit_id:row.business_unit_id,name:row.name,target:row.target,actual:row.actual,unit_label:row.unit_label,frequency:row.frequency||'monthly',description:row.description||'',period_start:(row.period_start||'').slice(0,10),period_end:(row.period_end||'').slice(0,10)};}

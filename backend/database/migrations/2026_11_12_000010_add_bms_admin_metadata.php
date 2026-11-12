@@ -30,19 +30,13 @@ class AddBmsAdminMetadata extends Migration
                 }
             });
         }
-        if (Schema::hasTable('bms_unit_kpis')) {
+        if (Schema::hasTable('bms_unit_kpis') && !Schema::hasColumn('bms_unit_kpis', 'frequency')) {
             Schema::table('bms_unit_kpis', function (Blueprint $table) {
-                if (!Schema::hasColumn('bms_unit_kpis', 'frequency')) {
-                    $table->string('frequency', 20)->default('monthly')->after('unit_label');
-                }
-                if (!Schema::hasColumn('bms_unit_kpis', 'description')) {
-                    $table->text('description')->nullable()->after('name');
-                }
-                if (!Schema::hasColumn('bms_unit_kpis', 'owner_id')) {
-                    $table->foreignId('owner_id')->nullable()->after('frequency');
-                }
+                $table->string('frequency', 20)->default('monthly')->after('unit_label');
             });
         }
+        // `description` and `owner_id` are added by 000011 only: this migration has
+        // already been deployed on some installations and is never re-executed.
     }
 
     public function down()
@@ -50,7 +44,7 @@ class AddBmsAdminMetadata extends Migration
         foreach ([
             ['users', ['manager_id']],
             ['products', ['description', 'owner_id']],
-            ['bms_unit_kpis', ['frequency', 'description', 'owner_id']],
+            ['bms_unit_kpis', ['frequency']],
         ] as [$table, $columns]) {
             if (!Schema::hasTable($table)) continue;
             Schema::table($table, function (Blueprint $blueprint) use ($table, $columns) {

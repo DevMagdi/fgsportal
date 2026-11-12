@@ -57,14 +57,23 @@ class ReportController extends BmsController
                     : ($kpi->attainment >= 100 ? 'achieved' : ($kpi->attainment >= 80 ? 'on_track' : 'behind'));
                 return $kpi;
             });
+        // A trend series belongs to one KPI of one unit. Grouping by name alone
+        // merged identically named KPIs from different units into one line.
         $history = UnitKpi::with('unit:id,name')
             ->when($unitId, fn ($q) => $q->where('business_unit_id', $unitId))
             ->when(!$unitId && $ids !== null, fn ($q) => $q->whereIn('business_unit_id', $ids))
-            ->orderBy('period_start')->get(['id', 'business_unit_id', 'name', 'target', 'actual', 'period_start', 'period_end'])
-            ->groupBy(fn ($kpi) => $kpi->name)
-            ->map(fn ($group) => $group->map(fn ($kpi) => [
-                'period_start' => $kpi->period_start, 'target' => $kpi->target, 'actual' => $kpi->actual,
-            ])->values());
+            ->orderBy('period_start')->orderBy('id')
+            ->get(['id', 'business_unit_id', 'name', 'target', 'actual', 'period_start', 'period_end'])
+            ->groupBy(fn ($kpi) => $kpi->business_unit_id.'|'.mb_strtolower(trim((string) $kpi->name)))
+            ->map(fn ($group) => [
+                'business_unit_id' => $group->first()->business_unit_id,
+                'unit' => $group->first()->unit->name ?? null,
+                'name' => $group->first()->name,
+                'points' => $group->map(fn ($kpi) => [
+                    'period_start' => $kpi->period_start, 'period_end' => $kpi->period_end,
+                    'target' => $kpi->target, 'actual' => $kpi->actual,
+                ])->values(),
+            ])->values();
 
         return $this->ok(['kpis' => $rows, 'history' => $history, 'generated_at' => now()]);
     }
