@@ -77,7 +77,9 @@ describe('ModuleService', () => {
     const req = httpMock.expectOne(
       (r) => r.urlWithParams === `${environment.newServerApi}/api/company/modules?token=jwt-token`
     );
-    expect(req.request.params.get('token')).toBe('jwt-token');
+    expect(req.request.urlWithParams).toBe(
+      `${environment.newServerApi}/api/company/modules?token=jwt-token`
+    );
 
     req.flush({
       data: [
@@ -118,7 +120,9 @@ describe('ModuleService', () => {
     const req = httpMock.expectOne(
       (r) => r.urlWithParams === `${environment.newServerApi}/api/modules?token=jwt-token`
     );
-    expect(req.request.params.get('token')).toBe('jwt-token');
+    expect(req.request.urlWithParams).toBe(
+      `${environment.newServerApi}/api/modules?token=jwt-token`
+    );
 
     req.flush({
       data: [

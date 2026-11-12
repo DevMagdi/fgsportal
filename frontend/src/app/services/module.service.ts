@@ -86,7 +86,7 @@ export class ModuleService {
       .pipe(
         map((res) => {
           const modules: SystemModule[] = res?.data ?? [];
-          return modules.map((m) => m.slug);
+          return modules.filter((m) => m.is_enabled !== false).map((m) => m.slug);
         }),
         tap((slugs) => {
           this.setEnabledModules(slugs);
