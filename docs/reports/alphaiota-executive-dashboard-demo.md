@@ -36,9 +36,10 @@ The organization-level dashboard uses the existing `BmsAccess` global-scope beha
 - Frontend pure-TypeScript suite: **44 passed, 0 failed** (`npm run test:node`).
 - Production frontend build: **passed** (`npm run build -- --configuration production`). Existing dependency/CSS compatibility warnings were emitted; there were no Angular compilation errors.
 - `git diff --check`: **passed**.
-- Backend feature tests: **not run**. This environment has no PHP binary, Composer install/vendor directory, or backend `.env`; the source test is added but requires execution in a PHP-capable CI/test environment.
-- Browser/Karma component tests and visual screenshots: **not captured**. No browser binary or screenshot runtime is installed in this environment. No mock screenshot is substituted for a real API-backed screen.
-- No local production database was connected or queried. The test suite is written against the repository's existing in-memory BMS test harness; it is not evidence of production records.
+- Local backend feature tests: **not run** because this workspace has no PHP binary, Composer vendor directory, or backend `.env`. GitHub CI did execute the backend SQLite and MySQL suites (158 tests each); both jobs failed on two existing `P17EmployeeManagementTest` employee-import cases. The focused BMS regression steps, PHP syntax/lint, and static analysis completed successfully. The failure annotations point to the employee-import assertions, not this dashboard test file.
+- GitHub CI Angular/Karma: **failed** with 98 failures and 115 passes. The annotated failures are existing non-BMS component specs with missing TestBed providers (for example AngularFire options, `MatDialog`, `MatSnackBar`, or `Router`); no executive-dashboard component spec appears in the reported failures. Production build and local pure-TypeScript tests passed.
+- Visual screenshots: **not captured**. The local workspace has no browser/screenshot runtime; CI's headless test browser did not produce dashboard screenshots. No mock screenshot is substituted for a real API-backed screen.
+- No local production database was connected or queried. Backend CI uses the repository test harness and does not verify production records.
 
 ## Production blockers / decisions
 
