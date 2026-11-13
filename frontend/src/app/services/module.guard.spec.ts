@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ModuleGuard } from './module.guard';
 import { ModuleService } from './module.service';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ModuleGuard', () => {
   let guard: ModuleGuard;
@@ -15,7 +16,7 @@ describe('ModuleGuard', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [HttpClientTestingModule, RouterTestingModule],
       providers: [ModuleGuard, ModuleService],
     });
     guard = TestBed.inject(ModuleGuard);

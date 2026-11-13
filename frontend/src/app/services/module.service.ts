@@ -39,7 +39,7 @@ export class ModuleService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Fetch the full module catalogue (all six sellable modules, each with its
+   * Fetch the full module catalogue (all seven modules, each with its
    * `is_enabled` state for the current company). Used by the modules dashboard
    * so disabled modules can still be shown as dimmed cards.
    */
@@ -86,7 +86,7 @@ export class ModuleService {
       .pipe(
         map((res) => {
           const modules: SystemModule[] = res?.data ?? [];
-          return modules.map((m) => m.slug);
+          return modules.filter((m) => m.is_enabled !== false).map((m) => m.slug);
         }),
         tap((slugs) => {
           this.setEnabledModules(slugs);

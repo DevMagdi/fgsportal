@@ -5,6 +5,9 @@ namespace Tests\Feature;
 use App\Models\BMS\BmsAuditLog;
 use App\Models\BMS\BmsRole;
 use App\Models\BMS\BusinessUnit;
+use App\Models\BMS\ProductPhase;
+use App\Models\BMS\ProcurementRequest;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\BMS\BmsAccess;
 use Illuminate\Support\Facades\Hash;
@@ -279,7 +282,8 @@ class P17EmployeeManagementTest extends BmsTestCase
     {
         $unit = $this->makeUnit();
         $admin = $this->actingAsRole('system_admin');
-        $manager = $this->makeUser(['username' => 'boss']);
+        // Exercise the API's documented username fallback when the manager has no display name.
+        $manager = $this->makeUser(['username' => 'boss', 'firstname' => '', 'lastname' => '']);
         $manager->businessUnits()->attach($unit->id);
 
         $created = $this->postBms('employees', [
@@ -327,7 +331,7 @@ class P17EmployeeManagementTest extends BmsTestCase
         $unit = $this->makeUnit();
         $director = $this->actingAsRole('unit_director', [$unit->id]);
         \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $unit->id, 'item' => 'Laptops', 'quantity' => 2,
+            'business_unit_id' => $unit->id, 'reference' => 'P18-DASHBOARD', 'item' => 'Laptops', 'quantity' => 2,
             'purpose' => 'New hires', 'status' => 'submitted', 'requested_by' => $director->id,
         ]);
         \App\Models\BMS\Meeting::create([
@@ -336,6 +340,10 @@ class P17EmployeeManagementTest extends BmsTestCase
         ]);
         $plan = \App\Models\BMS\WeeklyPlan::create([
             'business_unit_id' => $unit->id, 'week_start' => '2026-11-08', 'status' => 'submitted', 'created_by' => $director->id,
+        ]);
+        BmsAuditLog::create([
+            'auditable_type' => \App\Models\BMS\WeeklyPlan::class, 'auditable_id' => $plan->id,
+            'event' => 'weekly_plan.submitted', 'user_id' => $director->id,
         ]);
         \App\Models\BMS\UnitTask::create([
             'weekly_plan_id' => $plan->id, 'business_unit_id' => $unit->id, 'owner_id' => $director->id,
@@ -347,7 +355,7 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertSame(1, $dashboard['summary']['upcoming_meetings']);
         $this->assertSame(1, $dashboard['summary']['overdue_tasks']);
         $this->assertSame('Weekly sync', $dashboard['meetings'][0]['title']);
-        $this->assertNotEmpty($dashboard['recent_activity']);
+        $this->assertTrue(collect($dashboard['recent_activity'])->contains(fn ($row) => $row['event'] === 'weekly_plan.submitted'));
     }
 
     public function test_P19_manager_assignment_blocks_cycles_cross_company_and_out_of_scope_managers(): void
@@ -365,6 +373,7 @@ class P17EmployeeManagementTest extends BmsTestCase
             'password' => 'secret-pass', 'business_unit_ids' => [$unit->id], 'manager_id' => $a['id'],
         ], $admin)->assertStatus(201)->json('data');
         $this->assertSame($a['id'], $b['manager_id']);
+        $this->assertSame($a['id'], \App\Models\User::findOrFail($b['id'])->manager_id);
 
         // A -> B -> A must be refused, and so must self-management.
         $this->putBms('employees/'.$a['id'], ['manager_id' => $b['id']], $admin)->assertStatus(422);
@@ -373,9 +382,16 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->putBms('employees/'.$b['id'], ['manager_id' => null], $admin)->assertOk();
         $this->assertNull(\App\Models\User::findOrFail($b['id'])->manager_id);
 
-        // Cross-company managers are refused.
-        $outsider = $this->makeUser(['company_id' => 999]);
+        // Cross-company managers are refused using two persisted tenant rows.
+        $otherCompany = \App\Models\Company::create([
+            'name' => 'Other Company',
+            'slug' => 'other-company',
+        ]);
+        $outsider = $this->makeUser(['company_id' => $otherCompany->id]);
+        $this->assertSame($this->company->id, (int) \App\Models\User::findOrFail($a['id'])->company_id);
+        $this->assertSame($otherCompany->id, (int) $outsider->company_id);
         $this->putBms('employees/'.$a['id'], ['manager_id' => $outsider->id], $admin)->assertStatus(422);
+        $this->assertNull(\App\Models\User::findOrFail($a['id'])->manager_id);
 
         // Unit-scoped actors may not attach a manager they cannot see.
         $director = $this->actingAsRole('unit_director', [$unit->id]);
@@ -428,19 +444,26 @@ class P17EmployeeManagementTest extends BmsTestCase
         $otherDirector = $this->makeUser();
         $otherDirector->businessUnits()->attach($theirs->id);
 
-        \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $mine->id, 'item' => 'Visible item', 'quantity' => 1,
+        $visibleRequest = ProcurementRequest::create([
+            'business_unit_id' => $mine->id, 'reference' => 'P19-ACTIVITY-MINE', 'item' => 'Visible item', 'quantity' => 1,
             'purpose' => 'Mine', 'status' => 'submitted', 'requested_by' => $director->id,
         ]);
-        \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $theirs->id, 'item' => 'Secret item', 'quantity' => 1,
+        $secretRequest = ProcurementRequest::create([
+            'business_unit_id' => $theirs->id, 'reference' => 'P19-ACTIVITY-SECRET', 'item' => 'Secret item', 'quantity' => 1,
             'purpose' => 'Theirs', 'status' => 'submitted', 'requested_by' => $otherDirector->id,
         ]);
+        foreach ([[$visibleRequest, $director, 'visible.procurement'], [$secretRequest, $otherDirector, 'secret.procurement']] as [$request, $actor, $event]) {
+            BmsAuditLog::create([
+                'auditable_type' => ProcurementRequest::class, 'auditable_id' => $request->id,
+                'event' => $event, 'user_id' => $actor->id,
+            ]);
+        }
 
         $data = $this->getBms('executive-dashboard', $director)->assertOk()->json('data');
         $this->assertSame(1, $data['summary']['pending_procurement']);
         $events = collect($data['recent_activity']);
-        $this->assertTrue($events->isNotEmpty());
+        $this->assertTrue($events->contains(fn ($row) => $row['event'] === 'visible.procurement'));
+        $this->assertFalse($events->contains(fn ($row) => $row['event'] === 'secret.procurement'), 'Other-unit procurement activity must not leak.');
         $this->assertTrue($events->every(fn ($row) => $row['type'] !== 'User'));
     }
 
@@ -505,11 +528,11 @@ class P17EmployeeManagementTest extends BmsTestCase
         $stranger->businessUnits()->attach($other->id);
 
         $mine = \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $unit->id, 'item' => 'Mine', 'quantity' => 1, 'purpose' => 'p',
+            'business_unit_id' => $unit->id, 'reference' => 'P20-MINE', 'item' => 'Mine', 'quantity' => 1, 'purpose' => 'p',
             'status' => 'submitted', 'requested_by' => $admin->id,
         ]);
         $theirs = \App\Models\BMS\ProcurementRequest::create([
-            'business_unit_id' => $other->id, 'item' => 'Theirs', 'quantity' => 1, 'purpose' => 'p',
+            'business_unit_id' => $other->id, 'reference' => 'P20-THEIRS', 'item' => 'Theirs', 'quantity' => 1, 'purpose' => 'p',
             'status' => 'submitted', 'requested_by' => $stranger->id,
         ]);
 
@@ -518,6 +541,7 @@ class P17EmployeeManagementTest extends BmsTestCase
             ['auditable_type' => \App\Models\BMS\ProcurementRequest::class, 'auditable_id' => $mine->id, 'event' => 'mine.event', 'user_id' => $admin->id, 'created_at' => now(), 'updated_at' => now()],
             ['auditable_type' => \App\Models\BMS\ProcurementRequest::class, 'auditable_id' => $theirs->id, 'event' => 'theirs.event', 'user_id' => $stranger->id, 'created_at' => now(), 'updated_at' => now()],
             ['auditable_type' => 'App\\Models\\BMS\\DeletedRecord', 'auditable_id' => 999999, 'event' => 'ghost.event', 'user_id' => $admin->id, 'created_at' => now(), 'updated_at' => now()],
+            ['auditable_type' => ProcurementRequest::class, 'auditable_id' => 999999, 'event' => 'missing.allowed.model.event', 'user_id' => $admin->id, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         $director = $this->actingAsRole('unit_director', [$unit->id]);
@@ -525,9 +549,11 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertTrue($scoped->contains(fn ($row) => $row['event'] === 'mine.event'));
         $this->assertFalse($scoped->contains(fn ($row) => $row['event'] === 'theirs.event'), 'Other units must never leak into recent activity.');
         $this->assertFalse($scoped->contains(fn ($row) => $row['event'] === 'ghost.event'));
+        $this->assertFalse($scoped->contains(fn ($row) => $row['event'] === 'missing.allowed.model.event'), 'Missing allowed models must not leak when unit scope cannot be resolved.');
 
         $global = collect($this->getBms('executive-dashboard', $admin)->json('data')['recent_activity']);
         $this->assertTrue($global->contains(fn ($row) => $row['event'] === 'theirs.event'));
+        $this->assertFalse($global->contains(fn ($row) => $row['event'] === 'missing.allowed.model.event'), 'Unknown unit scope must be omitted for global and restricted viewers.');
         $this->assertFalse($global->contains(fn ($row) => $row['type'] === 'DeletedRecord'), 'Unsupported auditable types are never listed.');
     }
 
@@ -539,7 +565,7 @@ class P17EmployeeManagementTest extends BmsTestCase
 
         foreach ([$alpha, $beta] as $unit) {
             \App\Models\BMS\ProcurementRequest::create([
-                'business_unit_id' => $unit->id, 'item' => 'Item '.$unit->name, 'quantity' => 1,
+                'business_unit_id' => $unit->id, 'reference' => 'P20-SUMMARY-'.$unit->id, 'item' => 'Item '.$unit->name, 'quantity' => 1,
                 'purpose' => 'p', 'status' => 'submitted', 'requested_by' => $director->id,
             ]);
             \App\Models\BMS\Meeting::create([
@@ -559,6 +585,78 @@ class P17EmployeeManagementTest extends BmsTestCase
         $this->assertCount(1, $filtered['meetings']);
         $this->assertSame($alpha->id, $filtered['meetings'][0]['business_unit_id']);
         $this->assertCount(1, $filtered['unit_progress']);
+    }
+
+    public function test_P22_dashboard_recent_activity_respects_selected_unit_including_shared_products(): void
+    {
+        $alpha = $this->makeUnit();
+        $beta = $this->makeUnit();
+        $director = $this->actingAsRole('unit_director', [$alpha->id, $beta->id]);
+
+        $sharedProduct = Product::create(['product_name' => 'Shared dashboard product']);
+        $sharedProduct->businessUnits()->attach([$alpha->id, $beta->id]);
+        BmsAuditLog::create([
+            'auditable_type' => Product::class,
+            'auditable_id' => $sharedProduct->id,
+            'event' => 'product.shared.updated',
+            'user_id' => $director->id,
+        ]);
+        $sharedPhase = ProductPhase::create([
+            'product_id' => $sharedProduct->id, 'name' => 'Shared product phase', 'sequence' => 1,
+            'status' => 'in_progress', 'updated_by' => $director->id,
+        ]);
+        BmsAuditLog::create([
+            'auditable_type' => ProductPhase::class,
+            'auditable_id' => $sharedPhase->id,
+            'event' => 'product_phase.shared.updated',
+            'user_id' => $director->id,
+        ]);
+        BmsAuditLog::create([
+            'auditable_type' => BusinessUnit::class,
+            'auditable_id' => $alpha->id,
+            'event' => 'unit.alpha.updated',
+            'user_id' => $director->id,
+        ]);
+        BmsAuditLog::create([
+            'auditable_type' => BusinessUnit::class,
+            'auditable_id' => $beta->id,
+            'event' => 'unit.beta.updated',
+            'user_id' => $director->id,
+        ]);
+        foreach ([$alpha, $beta] as $unit) {
+            $request = ProcurementRequest::create([
+                'business_unit_id' => $unit->id, 'reference' => 'P22-'.$unit->id, 'item' => 'Activity '.$unit->name, 'quantity' => 1,
+                'purpose' => 'Activity filter test', 'status' => 'submitted', 'requested_by' => $director->id,
+            ]);
+            BmsAuditLog::create([
+                'auditable_type' => ProcurementRequest::class,
+                'auditable_id' => $request->id,
+                'event' => 'procurement.unit.'.$unit->id,
+                'user_id' => $director->id,
+            ]);
+        }
+
+        $alphaActivity = collect($this->getBms('executive-dashboard?business_unit_id='.$alpha->id, $director)->assertOk()->json('data.recent_activity'));
+        $this->assertTrue($alphaActivity->contains(fn ($row) => $row['event'] === 'product.shared.updated'));
+        $this->assertTrue($alphaActivity->contains(fn ($row) => $row['event'] === 'product_phase.shared.updated'));
+        $this->assertTrue($alphaActivity->contains(fn ($row) => $row['event'] === 'unit.alpha.updated'));
+        $this->assertTrue($alphaActivity->contains(fn ($row) => $row['event'] === 'procurement.unit.'.$alpha->id));
+        $this->assertFalse($alphaActivity->contains(fn ($row) => $row['event'] === 'unit.beta.updated'));
+        $this->assertFalse($alphaActivity->contains(fn ($row) => $row['event'] === 'procurement.unit.'.$beta->id));
+
+        $betaActivity = collect($this->getBms('executive-dashboard?business_unit_id='.$beta->id, $director)->assertOk()->json('data.recent_activity'));
+        $this->assertTrue($betaActivity->contains(fn ($row) => $row['event'] === 'product.shared.updated'));
+        $this->assertTrue($betaActivity->contains(fn ($row) => $row['event'] === 'product_phase.shared.updated'));
+        $this->assertTrue($betaActivity->contains(fn ($row) => $row['event'] === 'unit.beta.updated'));
+        $this->assertTrue($betaActivity->contains(fn ($row) => $row['event'] === 'procurement.unit.'.$beta->id));
+        $this->assertFalse($betaActivity->contains(fn ($row) => $row['event'] === 'unit.alpha.updated'));
+        $this->assertFalse($betaActivity->contains(fn ($row) => $row['event'] === 'procurement.unit.'.$alpha->id));
+
+        $alphaOnly = $this->actingAsRole('unit_director', [$alpha->id]);
+        $this->getBms('executive-dashboard?business_unit_id='.$beta->id, $alphaOnly)->assertForbidden();
+        $alphaOnlyActivity = collect($this->getBms('executive-dashboard', $alphaOnly)->assertOk()->json('data.recent_activity'));
+        $this->assertFalse($alphaOnlyActivity->contains(fn ($row) => $row['event'] === 'unit.beta.updated'));
+        $this->assertFalse($alphaOnlyActivity->contains(fn ($row) => $row['event'] === 'procurement.unit.'.$beta->id));
     }
 
     public function test_P21_monthly_report_products_are_limited_to_the_actors_units(): void

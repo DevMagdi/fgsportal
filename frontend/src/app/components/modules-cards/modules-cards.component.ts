@@ -100,7 +100,7 @@ export class ModulesCardsComponent implements OnInit, OnDestroy {
 
   /**
    * Build exactly one card per known slug. Catalogue data (name/description/
-   * state) wins; shared presentation metadata fills any gap so all six cards
+   * state) wins; shared presentation metadata fills any gap so all seven cards
    * always render even if the catalogue request failed.
    */
   private buildCards(catalogue: SystemModule[]): ModuleCard[] {

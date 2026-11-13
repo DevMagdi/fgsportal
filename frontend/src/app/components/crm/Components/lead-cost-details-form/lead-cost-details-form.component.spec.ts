@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LeadCostDetailsFormComponent } from './lead-cost-details-form.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('LeadCostDetailsFormComponent', () => {
   let component: LeadCostDetailsFormComponent;
@@ -8,6 +9,7 @@ describe('LeadCostDetailsFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ LeadCostDetailsFormComponent ]
     })
     .compileComponents();

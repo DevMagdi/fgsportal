@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PendingVacationRequestsComponent } from './pending-vacation-requests.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('PendingVacationRequestsComponent', () => {
   let component: PendingVacationRequestsComponent;
@@ -8,6 +9,7 @@ describe('PendingVacationRequestsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [MatSnackBarModule],
       declarations: [ PendingVacationRequestsComponent ]
     })
     .compileComponents();

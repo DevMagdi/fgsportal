@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloneProjectComponent } from './clone-project.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('CloneProjectComponent', () => {
   let component: CloneProjectComponent;
@@ -8,6 +9,7 @@ describe('CloneProjectComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ CloneProjectComponent ]
     })
     .compileComponents();

@@ -8,21 +8,36 @@ import { UserPermissions } from '../interfaces/user-permissions';
  */
 describe('UserPermsCache', () => {
   let store: Record<string, string>;
+  let originalStorageDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
     store = {};
-    (globalThis as any).localStorage = {
-      getItem: (key: string) => (key in store ? store[key] : null),
-      setItem: (key: string, value: string) => {
-        store[key] = String(value);
+    originalStorageDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      enumerable: true,
+      writable: true,
+      value: {
+        getItem: (key: string) => (key in store ? store[key] : null),
+        setItem: (key: string, value: string) => {
+          store[key] = String(value);
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          store = {};
+        },
       },
-      removeItem: (key: string) => {
-        delete store[key];
-      },
-      clear: () => {
-        store = {};
-      },
-    };
+    });
+  });
+
+  afterEach(() => {
+    if (originalStorageDescriptor) {
+      Object.defineProperty(globalThis, 'localStorage', originalStorageDescriptor);
+    } else {
+      delete (globalThis as any).localStorage;
+    }
   });
 
   const perms = (userKey: string): UserPermissions[] => [

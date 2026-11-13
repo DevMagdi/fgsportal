@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ContractSupportCostComponent } from './contract-support-cost.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('ContractSupportCostComponent', () => {
   let component: ContractSupportCostComponent;
@@ -8,6 +9,7 @@ describe('ContractSupportCostComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ ContractSupportCostComponent ]
     })
     .compileComponents();

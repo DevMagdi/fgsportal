@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OpenToWorkComponent } from './open-to-work.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('OpenToWorkComponent', () => {
   let component: OpenToWorkComponent;
@@ -8,6 +9,7 @@ describe('OpenToWorkComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ OpenToWorkComponent ]
     })
     .compileComponents();

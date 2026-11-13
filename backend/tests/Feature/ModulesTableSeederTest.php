@@ -30,16 +30,30 @@ class ModulesTableSeederTest extends TestCase
         );
     }
 
-    public function test_only_the_core_module_is_flagged_as_core(): void
+    public function test_only_the_core_platform_and_bms_product_are_flagged_as_core(): void
     {
-        $this->assertTrue(Module::where('slug', 'core')->first()->is_core);
+        $this->assertTrue((bool) Module::where('slug', 'core')->firstOrFail()->is_core);
+        $this->assertTrue((bool) Module::where('slug', 'bms')->firstOrFail()->is_core);
 
-        $nonCore = Module::where('slug', '!=', 'core')->get();
-        $this->assertCount(6, $nonCore);
+        $nonCore = Module::whereNotIn('slug', ['core', 'bms'])->get();
+        $this->assertCount(5, $nonCore);
         foreach ($nonCore as $module) {
             $this->assertFalse((bool) $module->is_core, "{$module->slug} must not be core");
             $this->assertTrue((bool) $module->is_active, "{$module->slug} must be globally active");
         }
+    }
+
+    public function test_module_seeder_is_idempotent_and_preserves_unique_catalogue_rows(): void
+    {
+        $before = Module::orderBy('slug')->pluck('slug')->all();
+        $this->seed(\Database\Seeders\ModulesTableSeeder::class);
+        $after = Module::orderBy('slug')->pluck('slug')->all();
+
+        $this->assertSame($before, $after);
+        $slugs = Module::pluck('slug')->all();
+        $this->assertSame(7, count($slugs));
+        $this->assertCount(count($slugs), array_unique($slugs));
+        $this->assertTrue((bool) Module::where('slug', 'bms')->firstOrFail()->is_core);
     }
 
     public function test_default_company_is_seeded_with_every_module_enabled(): void

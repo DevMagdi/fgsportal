@@ -85,6 +85,95 @@ class P16MeetingsTest extends BmsTestCase
         $this->assertSame(0, (int) $meeting->fresh()->sequence);
     }
 
+    public function test_P1_6_attendee_diff_adds_only_the_new_attendee(): void
+    {
+        [$meeting, $director, $a, $b] = $this->createMeeting();
+        $c = $this->makeUser(['email' => 'c@example.test']);
+
+        $this->putBms('meetings/'.$meeting->id, ['attendees' => [
+            ['user_id' => $a->id], ['user_id' => $b->id],
+            ['external_name' => 'Guest', 'external_email' => 'guest@example.test'],
+            ['user_id' => $c->id],
+        ]], $director)->assertOk();
+
+        $this->assertSame(4, $meeting->attendees()->count());
+        $this->assertDatabaseHas('bms_meeting_attendees', ['bms_meeting_id' => $meeting->id, 'user_id' => $c->id]);
+        $this->assertSame(1, $this->mailsTo('c@example.test', 'invitation'));
+        $this->assertSame(0, $this->mailsTo('a@example.test', 'invitation'));
+        $this->assertSame(0, $this->mailsTo('b@example.test', 'invitation'));
+        $this->assertSame(0, $this->mailsTo('guest@example.test', 'invitation'));
+    }
+
+    public function test_P1_6_attendee_diff_removes_and_cancels_only_the_removed_attendee(): void
+    {
+        [$meeting, $director, $a, $b] = $this->createMeeting();
+
+        $this->putBms('meetings/'.$meeting->id, ['attendees' => [
+            ['user_id' => $a->id],
+            ['external_name' => 'Guest', 'external_email' => 'guest@example.test'],
+        ]], $director)->assertOk();
+
+        $this->assertSame(2, $meeting->attendees()->count());
+        $this->assertDatabaseMissing('bms_meeting_attendees', ['bms_meeting_id' => $meeting->id, 'user_id' => $b->id]);
+        $this->assertSame(1, $this->mailsTo('b@example.test', 'cancelled'));
+        $this->assertSame(0, $this->mailsTo('a@example.test', 'cancelled'));
+        $this->assertSame(0, $this->mailsTo('guest@example.test', 'cancelled'));
+    }
+
+    public function test_P1_6_unchanged_attendees_keep_rows_responses_and_timestamps_without_mail(): void
+    {
+        [$meeting, $director, $a, $b] = $this->createMeeting();
+        $attendees = $meeting->attendees()->get();
+        $rowIds = $attendees->pluck('id')->all();
+        $oldTimestamp = now()->subDay()->startOfSecond();
+        foreach ($attendees as $attendee) {
+            $attendee->response = $attendee->user_id === $a->id ? 'tentative' : 'pending';
+            $attendee->updated_at = $oldTimestamp;
+            $attendee->save();
+        }
+
+        $this->putBms('meetings/'.$meeting->id, ['attendees' => [
+            ['user_id' => $a->id], ['user_id' => $b->id],
+            ['external_name' => 'Guest', 'external_email' => 'guest@example.test'],
+        ]], $director)->assertOk();
+
+        $this->assertSame($rowIds, $meeting->attendees()->orderBy('id')->pluck('id')->all());
+        $this->assertSame('tentative', $meeting->attendees()->where('user_id', $a->id)->value('response'));
+        $kept = $meeting->attendees()->where('user_id', $a->id)->firstOrFail();
+        $this->assertSame($oldTimestamp->toDateTimeString(), $kept->updated_at->toDateTimeString());
+        $this->assertSame(0, $this->mailsTo('a@example.test', 'invitation'));
+        $this->assertSame(0, $this->mailsTo('b@example.test', 'invitation'));
+        $this->assertSame(0, $this->mailsTo('guest@example.test', 'invitation'));
+    }
+
+    public function test_P1_6_empty_attendee_list_removes_and_cancels_everyone(): void
+    {
+        [$meeting, $director, $a, $b] = $this->createMeeting();
+
+        $this->putBms('meetings/'.$meeting->id, ['attendees' => []], $director)->assertOk();
+
+        $this->assertSame(0, $meeting->attendees()->count());
+        $this->assertSame(1, $this->mailsTo('a@example.test', 'cancelled'));
+        $this->assertSame(1, $this->mailsTo('b@example.test', 'cancelled'));
+        $this->assertSame(1, $this->mailsTo('guest@example.test', 'cancelled'));
+    }
+
+    public function test_P1_6_duplicate_submitted_attendees_collapse_by_existing_identity_key(): void
+    {
+        [$meeting, $director] = $this->createMeeting();
+        $c = $this->makeUser(['email' => 'c@example.test']);
+
+        // The endpoint has no distinct rule; existing keyBy synchronization
+        // treats duplicate identity keys as one attendee, with the last row winning.
+        $this->putBms('meetings/'.$meeting->id, ['attendees' => [
+            ['user_id' => $c->id], ['user_id' => $c->id],
+        ]], $director)->assertOk();
+
+        $this->assertSame(1, $meeting->attendees()->count());
+        $this->assertSame(1, $meeting->attendees()->where('user_id', $c->id)->count());
+        $this->assertSame(1, $this->mailsTo('c@example.test', 'invitation'));
+    }
+
     public function test_P1_6_cancel_notifies_attendees_and_blocks_further_changes(): void
     {
         [$meeting, $director, $a] = $this->createMeeting();

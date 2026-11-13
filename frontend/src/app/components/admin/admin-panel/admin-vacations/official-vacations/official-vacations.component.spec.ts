@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OfficialVacationsComponent } from './official-vacations.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('OfficialVacationsComponent', () => {
   let component: OfficialVacationsComponent;
@@ -8,6 +9,7 @@ describe('OfficialVacationsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [MatSnackBarModule],
       declarations: [ OfficialVacationsComponent ]
     })
     .compileComponents();

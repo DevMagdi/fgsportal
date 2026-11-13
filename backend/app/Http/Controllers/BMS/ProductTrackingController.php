@@ -28,11 +28,12 @@ class ProductTrackingController extends BmsController
         $data['business_unit_ids']=$request->validate(['business_unit_ids'=>'required|array|min:1','business_unit_ids.*'=>'exists:business_units,id'])['business_unit_ids'];
         $this->authorizeUnits($data['business_unit_ids']);
         $product=DB::transaction(function()use($data){
-            $product=Product::create(array_filter([
-                'product_name'=>$data['product_name'],
-                'description'=>$data['description']??null,
-                'owner_id'=>$data['owner_id']??null,
-            ],fn($v)=>$v!==null));
+            $product=Product::create(['product_name'=>$data['product_name']]);
+            // These optional attributes are explicitly validated above. Assign them
+            // directly rather than widening the legacy model's global fillable list.
+            $product->description=$data['description']??null;
+            $product->owner_id=$data['owner_id']??null;
+            $product->save();
             $product->businessUnits()->sync($data['business_unit_ids']);
             $this->audit->record($product,'product.created',[],$product->toArray());
             return $product;
@@ -48,7 +49,9 @@ class ProductTrackingController extends BmsController
             $data['business_unit_ids']=$request->validate(['business_unit_ids'=>'sometimes|array|min:1','business_unit_ids.*'=>'exists:business_units,id'])['business_unit_ids'];
             $this->authorizeUnits($data['business_unit_ids']);
         }
-        $product->update(collect($data)->only(['product_name','description','owner_id'])->filter(fn($v)=>$v!==null)->all());
+        $changes=collect($data)->only(['product_name','description','owner_id'])->filter(fn($v)=>$v!==null)->all();
+        foreach($changes as $attribute=>$value)$product->{$attribute}=$value;
+        if($changes)$product->save();
         if (isset($data['business_unit_ids'])) $product->businessUnits()->sync($data['business_unit_ids']);
         $this->audit->record($product,'product.updated',[],$data);
         return $this->ok($product->load(['businessUnits','phases','currentPhase','minutes.meeting']));
@@ -92,6 +95,13 @@ class ProductTrackingController extends BmsController
         $owned=$product->phases()->pluck('id')->all();
         abort_unless(count(array_diff($data['phase_ids'],$owned))===0 && count(array_diff($owned,$data['phase_ids']))===0,422,'The new order must list every phase of this product exactly once.');
         DB::transaction(function()use($product,$data){
+            // A unique (product_id, sequence) index is enforced immediately by
+            // SQLite and MySQL. Move each row above the current range first so a
+            // valid permutation cannot collide with an occupied sequence mid-loop.
+            $offset=(int)$product->phases()->max('sequence');
+            foreach($data['phase_ids'] as $index=>$phaseId){
+                $product->phases()->whereKey($phaseId)->update(['sequence'=>$offset+$index+1,'updated_by'=>$this->access->user()->id]);
+            }
             foreach($data['phase_ids'] as $index=>$phaseId){
                 $product->phases()->whereKey($phaseId)->update(['sequence'=>$index+1,'updated_by'=>$this->access->user()->id]);
             }

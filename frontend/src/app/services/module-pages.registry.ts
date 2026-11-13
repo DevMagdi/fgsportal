@@ -44,7 +44,7 @@ export type PageCondition =
   | { kind: 'and'; all: PageCondition[] }
   | { kind: 'not'; of: PageCondition };
 
-/** Static presentation metadata for the six sellable modules. */
+/** Static presentation metadata for all seven catalogue modules. */
 export interface ModuleMeta {
   name: string;
   description: string;

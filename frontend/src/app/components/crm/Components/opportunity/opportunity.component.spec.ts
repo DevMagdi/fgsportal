@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OpportunityComponent } from './opportunity.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('OpportunityComponent', () => {
   let component: OpportunityComponent;
@@ -8,6 +9,7 @@ describe('OpportunityComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [ OpportunityComponent ]
     })
     .compileComponents();

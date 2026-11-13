@@ -35,14 +35,14 @@ describe('ModulesCardsComponent', () => {
   let router: Router;
 
   const catalogue = (enabledSlugs: string[]): SystemModule[] =>
-    ['core', 'crm', 'ticketing', 'projects', 'hr', 'admin'].map((slug, i) => ({
+    ['core', 'bms', 'crm', 'ticketing', 'projects', 'hr', 'admin'].map((slug, i) => ({
       id: i + 1,
       name: slug.toUpperCase(),
       slug,
       description: `${slug} description`,
-      is_core: slug === 'core',
+      is_core: slug === 'core' || slug === 'bms',
       is_active: true,
-      is_enabled: slug === 'core' || enabledSlugs.includes(slug),
+      is_enabled: slug === 'core' || slug === 'bms' || enabledSlugs.includes(slug),
     }));
 
   beforeEach(
@@ -74,7 +74,7 @@ describe('ModulesCardsComponent', () => {
     fixture.detectChanges();
 
     const cards = fixture.nativeElement.querySelectorAll('.module-card');
-    expect(cards.length).toBe(6);
+    expect(cards.length).toBe(7);
 
     const disabledCards = fixture.nativeElement.querySelectorAll(
       '.module-card--disabled'
@@ -124,6 +124,7 @@ describe('ModulesCardsComponent', () => {
 
     expect(component.cards.map((c) => c.slug)).toEqual([
       'core',
+      'bms',
       'crm',
       'ticketing',
       'projects',

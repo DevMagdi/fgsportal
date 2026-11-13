@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { ReportsTableComponent } from './reports-table.component';
+import { DatabaseService } from 'src/app/services/database.service';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 
 describe('ReportsTableComponent', () => {
   let component: ReportsTableComponent;
@@ -8,7 +12,9 @@ describe('ReportsTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ReportsTableComponent ]
+      imports: [HttpClientTestingModule, MatSnackBarModule, MatDialogModule],
+      declarations: [ ReportsTableComponent ],
+      providers: [{ provide: DatabaseService, useValue: {} }]
     })
     .compileComponents();
   });
@@ -16,6 +22,7 @@ describe('ReportsTableComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ReportsTableComponent);
     component = fixture.componentInstance;
+    component.reports = [];
     fixture.detectChanges();
   });
 
