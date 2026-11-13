@@ -5,6 +5,7 @@ import { BmsExportService } from '../bms-export.service';
 import { BmsLanguageService } from '../bms-language.service';
 import {
   dashboardQuery,
+  dashboardScope,
   dateLabel,
   hasDashboardFilters,
   hasNonUnitDashboardFilters,
@@ -113,6 +114,21 @@ export class ExecutiveDashboardComponent implements OnInit {
   get showMeetingData(): boolean { return this.can('meetings.view'); }
   get hasFilters(): boolean { return hasDashboardFilters(this.filters.value); }
   get showRecentActivity(): boolean { return !hasNonUnitDashboardFilters(this.appliedFilters); }
+  get scope(): { kind: 'organization' | 'unit'; label: string } {
+    return dashboardScope(this.appliedFilters.business_unit_id, this.lookups.units);
+  }
+  get isOrganizationView(): boolean { return this.scope.kind === 'organization'; }
+
+  openUnitDashboard(unitId: string | number): void {
+    // Unit options come from the permission-filtered lookup; the API still
+    // independently authorizes the selected id on every request.
+    this.filters.patchValue({ business_unit_id: String(unitId), product_id: '', opportunity_id: '', week_start: '' });
+    this.load();
+  }
+
+  isSelectedUnit(unitId: string | number): boolean {
+    return String(this.appliedFilters.business_unit_id || '') === String(unitId);
+  }
 
   get progressRows(): any[] { return unitProgressRows(this.data?.unit_progress || []); }
   get meetingRows(): any[] { return this.data?.meetings || []; }

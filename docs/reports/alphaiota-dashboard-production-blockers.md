@@ -1,0 +1,11 @@
+# Alphaiota dashboard demo — production blockers
+
+Status: this branch implements a scope-labeled organization/unit dashboard demo only. It is not a production sign-off.
+
+1. **Organization isolation is not modeled.** The database links users to tenant `companies`, while BMS `business_units` are separate. The existing global BMS scope can see all units; no company-to-unit ownership mapping was found. Do not treat the aggregate as an isolated company dashboard until the owner confirms and implements an authoritative mapping or equivalent existing contract.
+2. **Unit names/list require confirmation.** User-designated organization: `Alphaiota`; user-described units: `G`, `X`, `Omega`. Existing records instead contain root `Alpha Iota` and children `Alpha X`, `Alpha Gen`, `Alpha Omega`, `Alpha Delta`. The demo shows server-returned names and does not silently rename, alias, or omit records. Confirm whether `Alpha Delta` is outside the requested scope and whether `G` should be labelled `Alpha Gen`.
+3. **Backend verification is pending.** PHP, Composer dependencies, and a backend environment are absent in the workspace. `BmsExecutiveDashboardTest` was added but not run; execute it and the full relevant BMS suite in PHP-capable CI. The local build/test result is not a backend authorization certification.
+4. **Production-data verification is pending.** No production-like database/account was available. No destructive data actions were performed. The frontend uses the existing live API contract, but no claim is made that actual production API/database records were queried.
+5. **Visual evidence is pending.** The environment has no browser binary or screenshot runtime, so signed-in desktop/mobile and RTL/LTR screenshots could not be captured. Do not substitute generated/mock numbers or screenshots for real data evidence.
+6. **Approval presentation remains workflow-specific.** The dashboard's pending procurement item is the existing submitted/Finance-review count. Opportunity Go/No-Go is a separate workflow. There is no verified universal approval queue, so none is claimed.
+7. **Legacy projects cannot be reported per unit.** The inspected `projects` table/model has no Business Unit relation. No project distribution or ownership is fabricated.

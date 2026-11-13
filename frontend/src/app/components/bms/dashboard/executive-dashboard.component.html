@@ -2,6 +2,10 @@
   <div class="page-heading dashboard-heading">
     <div>
       <h1>{{lang.t('dashboard')}}</h1>
+      <div class="dashboard-context" [attr.aria-label]="lang.t(isOrganizationView ? 'organizationView' : 'unitView')">
+        <span class="dashboard-context-label">{{lang.t(isOrganizationView ? 'organizationView' : 'unitView')}}</span>
+        <strong>{{scope.label || lang.t('selectedUnit')}}</strong>
+      </div>
       <p *ngIf="data?.generated_at">{{lang.t('lastUpdated')}} · {{date(data.generated_at, 'datetime')}}</p>
     </div>
     <div class="button-row dashboard-export" *ngIf="showExports">
@@ -128,7 +132,13 @@
           <app-bms-state *ngIf="!progressRows.length" kind="empty" [message]="lang.t('noUnitTaskData')"></app-bms-state>
           <div class="progress-list" *ngIf="progressRows.length" role="list">
             <div class="unit-progress-row" *ngFor="let row of progressRows; trackBy: trackById" role="listitem">
-              <div class="unit-progress-heading"><strong>{{row.name}}</strong><span>{{number(row.progress)}}%</span></div>
+              <div class="unit-progress-heading">
+                <strong>{{row.name}}</strong>
+                <span>{{number(row.progress)}}%</span>
+                <button *ngIf="showUnitFilter && !isSelectedUnit(row.id)" type="button" class="unit-dashboard-link"
+                  (click)="openUnitDashboard(row.id)" [disabled]="loading"
+                  [attr.aria-label]="lang.t('openUnitDashboard') + ': ' + row.name">{{lang.t('openUnitDashboard')}}</button>
+              </div>
               <div class="unit-progress-track" role="progressbar" [attr.aria-label]="row.name + ' ' + lang.t('progress')"
                 [attr.aria-valuenow]="row.barWidth" aria-valuemin="0" aria-valuemax="100">
                 <span [style.width.%]="row.barWidth"></span>

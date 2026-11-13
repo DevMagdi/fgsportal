@@ -34,6 +34,24 @@ export interface TrendChartPoint extends KpiHistoryPoint {
   label: string;
 }
 
+export interface DashboardScope {
+  kind: 'organization' | 'unit';
+  label: string;
+}
+
+/** Describes the currently applied, server-authorized organization/unit view. */
+export function dashboardScope(
+  unitId: string | number | null | undefined,
+  units: Array<{ id: string | number; name: string }> = [],
+  organizationLabel = 'Alphaiota',
+): DashboardScope {
+  if (unitId === null || unitId === undefined || String(unitId).trim() === '') {
+    return { kind: 'organization', label: organizationLabel };
+  }
+  const selected = units.find(unit => String(unit.id) === String(unitId));
+  return { kind: 'unit', label: selected?.name || '' };
+}
+
 export function dashboardQuery(filters: DashboardFilterValues): Record<string, string | number> {
   const result: Record<string, string | number> = {};
   (['business_unit_id', 'product_id', 'opportunity_id', 'week_start'] as const).forEach(key => {

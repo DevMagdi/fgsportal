@@ -1,5 +1,6 @@
 import {
   dashboardQuery,
+  dashboardScope,
   dateLabel,
   hasDashboardFilters,
   hasNonUnitDashboardFilters,
@@ -13,6 +14,13 @@ import {
 } from './executive-dashboard.util';
 
 describe('Executive dashboard data helpers', () => {
+  it('labels organization and authorized unit views using lookup records, not invented unit names', () => {
+    const units = [{ id: 2, name: 'Alpha X' }, { id: 3, name: 'Alpha Gen' }];
+    expect(dashboardScope('', units)).toEqual({ kind: 'organization', label: 'Alphaiota' });
+    expect(dashboardScope(3, units)).toEqual({ kind: 'unit', label: 'Alpha Gen' });
+    expect(dashboardScope('999', units)).toEqual({ kind: 'unit', label: '' });
+  });
+
   it('omits blank filter values and preserves only supported API filters', () => {
     expect(dashboardQuery({ business_unit_id: '4', product_id: '', opportunity_id: null, week_start: '2026-11-08', unsupported: 'x' } as any))
       .toEqual({ business_unit_id: '4', week_start: '2026-11-08' });
