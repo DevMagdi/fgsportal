@@ -83,3 +83,17 @@
   .app-sidebar, .nav-entry, .nav-items a, .nav-chevron { transition: none; }
   .sidebar-spinner { animation-duration: 2s; }
 }
+
+/* Sharper navigation hierarchy with the existing role/permission-derived links intact. */
+.app-sidebar { box-shadow: 3px 0 22px rgba(24, 25, 42, .08); }
+.sidebar-brand { gap: 13px; padding-inline: 20px; }
+.sidebar-brand img { width: 36px; height: 36px; flex-basis: 36px; }
+.sidebar-wordmark { font-size: 16px; letter-spacing: -.015em; }
+.sidebar-section { margin-top: 18px; font-size: 10px; letter-spacing: .11em; }
+.nav-entry { min-height: 42px; border-radius: 10px; }
+.nav-entry, .nav-items a { transition-duration: var(--bms-motion-fast); }
+.nav-direct.active, .nav-group.is-current > .nav-entry { font-weight: 650; }
+.nav-items a { min-height: 38px; border-radius: 9px; }
+.nav-direct.active::before, .nav-items a.active::before { width: 3px; background: var(--shell-accent); }
+.sidebar-collapse { min-height: 48px; }
+@media (prefers-reduced-motion: reduce) { .app-sidebar, .nav-entry, .nav-items a, .nav-chevron { transition: none; } }

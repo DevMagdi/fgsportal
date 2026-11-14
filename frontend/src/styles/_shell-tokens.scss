@@ -1,21 +1,29 @@
-/*
- * Global design tokens used by the application shell and by BMS pages.
- *
- * Until Phase 1 the `--bms-*` tokens were declared on the BMS shell element
- * (`.bms-workspace`) and inherited by BMS pages. That shell no longer exists,
- * so the tokens live on :root — one definition for the whole application.
- * Phase 2 builds the full design system on top of this file.
- */
+/* Alphaiota Modern Enterprise Light tokens shared by the unified application shell and BMS. */
 :root {
+  color-scheme: light;
   --bms-ink: #202436;
+  --bms-ink-soft: #34394c;
   --bms-muted: #596579;
   --bms-primary: #45436e;
   --bms-primary-hover: #343254;
+  --bms-primary-soft: #f0eff7;
   --bms-accent: #247a70;
-  --bms-canvas: #f5f7fa;
+  --bms-accent-soft: #eaf5f2;
+  --bms-pink: #b8506f;
+  --bms-pink-soft: #fff1f5;
+  --bms-cyan: #087e8b;
+  --bms-cyan-soft: #e8f7f8;
+  --bms-sky: #376da8;
+  --bms-sky-soft: #edf5fd;
+  --bms-lavender: #7866a6;
+  --bms-lavender-soft: #f2eff9;
+  --bms-periwinkle: #5969a9;
+  --bms-periwinkle-soft: #eef0fb;
+  --bms-canvas: #f6f7fb;
   --bms-surface: #ffffff;
-  --bms-border: #dce2eb;
-  --bms-border-strong: #aeb8c8;
+  --bms-surface-raised: #ffffff;
+  --bms-border: #e1e4ed;
+  --bms-border-strong: #bdc4d2;
   --bms-focus: #2d6cdf;
   --bms-success: #176b48;
   --bms-success-bg: #edf8f1;
@@ -23,38 +31,55 @@
   --bms-warning-bg: #fff7e8;
   --bms-danger: #9b2c36;
   --bms-danger-bg: #fff4f3;
-  --bms-radius-sm: 7px;
-  --bms-radius-md: 11px;
-  --bms-radius-lg: 15px;
-  --bms-shadow-sm: 0 1px 3px rgba(26, 35, 54, .06);
-  --bms-shadow-md: 0 10px 30px rgba(26, 35, 54, .10);
+  --bms-info: #315d90;
+  --bms-info-bg: #edf5fd;
+  --bms-radius-xs: 6px;
+  --bms-radius-sm: 9px;
+  --bms-radius-md: 13px;
+  --bms-radius-lg: 18px;
+  --bms-radius-xl: 22px;
+  --bms-shadow-sm: 0 2px 8px rgba(26, 35, 54, .045);
+  --bms-shadow-md: 0 12px 32px rgba(26, 35, 54, .085);
+  --bms-shadow-focus: 0 0 0 3px rgba(45, 108, 223, .18);
+  --bms-space-1: 4px;
+  --bms-space-2: 8px;
+  --bms-space-3: 12px;
+  --bms-space-4: 16px;
+  --bms-space-5: 20px;
+  --bms-space-6: 24px;
+  --bms-space-8: 32px;
+  --bms-motion-fast: 140ms;
+  --bms-motion-normal: 200ms;
 
-  /* Application shell */
+  /* Application chrome */
   --shell-font: Inter, "Segoe UI", "Cairo", sans-serif;
-  --shell-sidebar-width: 264px;
-  --shell-sidebar-rail-width: 72px;
-  --shell-header-height: 64px;
-  --shell-sidebar-bg: #25233f;
-  --shell-sidebar-ink: #d3d2e3;
-  --shell-sidebar-muted: #9a98b8;
+  --shell-sidebar-width: 272px;
+  --shell-sidebar-rail-width: 76px;
+  --shell-header-height: 72px;
+  --shell-sidebar-bg: #292743;
+  --shell-sidebar-ink: #e2e1ec;
+  --shell-sidebar-muted: #aaa8c2;
   --shell-sidebar-border: rgba(255, 255, 255, .09);
-  --shell-sidebar-hover: rgba(255, 255, 255, .07);
-  --shell-sidebar-active: rgba(255, 255, 255, .12);
-  --shell-accent: #f498c1;
+  --shell-sidebar-hover: rgba(255, 255, 255, .075);
+  --shell-sidebar-active: rgba(255, 255, 255, .13);
+  --shell-accent: #8ed1c6;
 }
 
-/* Arabic shell chrome uses the Arabic typeface first. */
 [lang='ar'] { --shell-font: Cairo, "Segoe UI", sans-serif; }
 
-/*
- * Base typography of translated BMS content. The single content container of
- * the shell carries this class while a BMS page is displayed (it used to be
- * the root element of the BMS-only shell).
- */
 .bms-workspace {
   color: var(--bms-ink);
   font-family: Inter, "Segoe UI", "Cairo", sans-serif;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 .bms-workspace[lang='ar'] { font-family: Cairo, "Segoe UI", sans-serif; }
+.bms-workspace :where(button, input, select, textarea) { font: inherit; }
+.bms-workspace :where(button, a, input, select, textarea):focus-visible { outline: 3px solid var(--bms-focus); outline-offset: 2px; }
+.bms-workspace :where(.card, .mat-card) { border-color: var(--bms-border); border-radius: var(--bms-radius-md); box-shadow: var(--bms-shadow-sm); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --bms-motion-fast: 0ms; --bms-motion-normal: 0ms; }
+  .bms-workspace *, .bms-workspace *::before, .bms-workspace *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

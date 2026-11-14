@@ -15,3 +15,11 @@
 @media (max-width: 991.98px) { .app-content { padding: 16px 14px 28px; } }
 @media (max-width: 560px) { .app-content { padding: 14px 10px 24px; } }
 @media (prefers-reduced-motion: reduce) { .app-shell, .app-skip-link { transition: none; } }
+
+/* Modern shell surfaces; layout and navigation state remain unchanged. */
+.app-shell { background: var(--bms-canvas); }
+.app-content { padding: 28px 32px 40px; }
+.app-main-column { background: var(--bms-canvas); }
+.app-backdrop { background: rgba(24, 25, 42, .52); backdrop-filter: blur(2px); }
+@media (max-width: 991.98px) { .app-content { padding: 22px 20px 32px; } }
+@media (max-width: 560px) { .app-content { padding: 16px 12px 28px; } }
