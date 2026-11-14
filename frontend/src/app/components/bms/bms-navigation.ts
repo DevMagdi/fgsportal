@@ -1,3 +1,5 @@
+import { hasAbility } from './bms-abilities.util';
+
 export interface BmsNavigationLink {
   path: string;
   label: string;
@@ -19,6 +21,7 @@ export interface BmsNavigationGroup {
 export const BMS_NAVIGATION_GROUPS: BmsNavigationGroup[] = [
   {
     id: 'organization', label: 'grpOrganization', icon: 'bx-buildings', links: [
+      { path: 'organization', label: 'organization', ability: 'units.view', icon: 'bx-sitemap' },
       { path: 'units', label: 'units', ability: 'units.view', icon: 'bx-buildings' },
       { path: 'employees', label: 'employees', ability: 'directory.view', icon: 'bx-id-card' },
       { path: 'recruitment', label: 'recruitment', ability: 'recruitment.view', icon: 'bx-user-plus' },
@@ -90,7 +93,7 @@ export class BmsNavigationState {
   }
 
   visibleLinks(group: BmsNavigationGroup, abilities: string[]): BmsNavigationLink[] {
-    return group.links.filter(link => abilities.includes(link.ability));
+    return group.links.filter(link => hasAbility(abilities, link.ability));
   }
 
   private matches(url: string, path: string): boolean {

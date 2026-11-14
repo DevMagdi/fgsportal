@@ -52,6 +52,9 @@ abstract class BmsTestCase extends TestCase
             '2026_11_12_000009_make_bms_a_core_capability.php',
             '2026_11_12_000010_add_bms_admin_metadata.php',
             '2026_11_12_000011_add_missing_bms_kpi_metadata.php',
+            '2026_11_14_000012_create_bms_organization_structure.php',
+            '2026_11_14_000013_add_bms_organization_abilities.php',
+            '2026_11_14_000014_backfill_single_unit_primary_assignments.php',
         ] as $filename) {
             require_once base_path('database/migrations/'.$filename);
         }
@@ -65,8 +68,12 @@ abstract class BmsTestCase extends TestCase
         (new \MakeBmsACoreCapability())->up();
         (new \AddBmsAdminMetadata())->up();
         (new \AddMissingBmsKpiMetadata())->up();
+        (new \CreateBmsOrganizationStructure())->up();
+        (new \AddBmsOrganizationAbilities())->up();
+        (new \BackfillSingleUnitPrimaryAssignments())->up();
 
         (new BmsPhaseOneSeeder())->run();
+        (new \Database\Seeders\BmsOrganizationSeeder())->run();
         $this->enableBmsModule();
         Storage::fake('local');
     }
@@ -128,6 +135,13 @@ abstract class BmsTestCase extends TestCase
             $table->id();
             $table->string('product_name');
             $table->text('description')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+        // Minimal stand-in for the legacy `projects` table (Stage B1 links it to business units).
+        Schema::create('projects', function (Blueprint $table) {
+            $table->id();
+            $table->string('project_title');
             $table->timestamps();
             $table->softDeletes();
         });

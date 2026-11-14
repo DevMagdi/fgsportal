@@ -1,0 +1,92 @@
+<header class="app-header">
+  <button type="button" class="header-icon-button menu-toggle" *ngIf="mobile" (click)="menuToggle.emit()"
+    [attr.aria-label]="lang.t(menuOpen ? 'closeMenu' : 'menu')" aria-controls="app-sidebar" [attr.aria-expanded]="menuOpen">
+    <i class="bx" [ngClass]="menuOpen ? 'bx-x' : 'bx-menu'" aria-hidden="true"></i>
+  </button>
+
+  <div class="header-context">
+    <nav class="header-breadcrumbs" [attr.aria-label]="lang.t('breadcrumbs')">
+      <a routerLink="/bms/dashboard" [attr.aria-label]="lang.t('home')"><i class="bx bx-home-alt" aria-hidden="true"></i></a>
+      <ng-container *ngIf="groupLabel">
+        <i class="bx bx-chevron-right crumb-separator" aria-hidden="true"></i><span>{{lang.t(groupLabel)}}</span>
+      </ng-container>
+      <ng-container *ngIf="pageLabel && pageLabel !== groupLabel">
+        <i class="bx bx-chevron-right crumb-separator" aria-hidden="true"></i><span aria-current="page">{{lang.t(pageLabel)}}</span>
+      </ng-container>
+    </nav>
+    <!-- Not a heading: each page owns its own <h1>. -->
+    <p class="header-title">{{lang.t(pageLabel || groupLabel || 'appName')}}</p>
+  </div>
+
+  <div class="header-actions">
+    <div class="header-popover-anchor">
+      <button type="button" class="header-icon-button" (click)="toggleNotifications()" [attr.aria-label]="lang.t('notifications')"
+        [attr.aria-expanded]="showNotifications" aria-controls="app-notification-panel">
+        <i class="bx bx-bell" aria-hidden="true"></i>
+        <span class="header-badge" *ngIf="badgeCount > 0">{{badgeCount > 99 ? '99+' : badgeCount}}</span>
+      </button>
+
+      <section id="app-notification-panel" class="header-panel notification-panel" *ngIf="showNotifications" role="region"
+        [attr.aria-label]="lang.t('notifications')" aria-live="polite">
+        <div class="panel-heading">
+          <h2>{{lang.t('notifications')}}</h2>
+          <button type="button" class="panel-close" (click)="showNotifications = false" [attr.aria-label]="lang.t('close')">×</button>
+        </div>
+
+        <div class="panel-scroll">
+          <app-bms-state *ngIf="noticeSuccess" kind="success" [message]="noticeSuccess"></app-bms-state>
+
+          <button type="button" class="notification-item notification-link" *ngFor="let notify of latestLegacy"
+            (click)="openLegacy(notify)">
+            <span class="notification-time">{{getTime(notify.createdAt)}}</span>
+            <span class="notification-title"><strong>{{notify.senderName}}</strong> {{notify.title}}</span>
+            <span class="notification-body">{{notify.body}}</span>
+          </button>
+
+          <ng-container *ngIf="alerts.length || notifications.length || alertsError || notificationsError || alertsLoading || notificationsLoading">
+            <h3 class="panel-subheading">{{lang.t('bmsAlerts')}}</h3>
+            <app-bms-state *ngIf="alertsError" kind="error" [message]="alertsError" [actionLabel]="lang.t('retry')" (action)="loadAlerts()"></app-bms-state>
+            <app-bms-state *ngIf="notificationsError" kind="error" [message]="notificationsError" [actionLabel]="lang.t('retry')" (action)="loadNotifications()"></app-bms-state>
+            <app-bms-state *ngIf="alertsLoading || notificationsLoading" kind="loading" [message]="lang.t('loadingAlerts')"></app-bms-state>
+            <ng-container *ngIf="!alertsLoading && !notificationsLoading">
+              <article class="notification-item" *ngFor="let alert of alerts; trackBy: trackById">
+                <div class="notification-copy"><strong>{{alert.opportunity?.reference}}</strong><p>{{alert.message}}</p></div>
+                <button type="button" class="panel-link" (click)="read(alert)">{{lang.t('markRead')}}</button>
+              </article>
+              <article class="notification-item" *ngFor="let notification of notifications; trackBy: trackById">
+                <div class="notification-copy"><strong>{{notification.data?.title}}</strong><p>{{notification.data?.body}}</p></div>
+                <button type="button" class="panel-link" (click)="readNotification(notification)">{{lang.t('markRead')}}</button>
+              </article>
+            </ng-container>
+          </ng-container>
+
+          <app-bms-state *ngIf="!latestLegacy.length && !alerts.length && !notifications.length && !alertsError && !notificationsError && !alertsLoading && !notificationsLoading"
+            kind="empty" [message]="lang.t('noNotifications')"></app-bms-state>
+        </div>
+
+        <a routerLink="/notification" class="panel-footer-link" (click)="showNotifications = false">{{lang.t('seeMore')}}</a>
+      </section>
+    </div>
+
+    <button type="button" class="header-language" (click)="lang.toggle()" [attr.aria-label]="lang.t('switchLanguage')">
+      <i class="bx bx-globe" aria-hidden="true"></i><span *ngIf="!compact">{{lang.t('language')}}</span><span *ngIf="compact" class="header-language-code">{{lang.current === 'en' ? 'ع' : 'EN'}}</span>
+    </button>
+
+    <div class="header-popover-anchor">
+      <button type="button" class="header-user" (click)="toggleUserMenu()" [attr.aria-label]="lang.t('userMenu')"
+        [attr.aria-expanded]="showUserMenu" aria-haspopup="true" aria-controls="app-user-menu">
+        <img [src]="avatar" alt="" width="34" height="34">
+        <span class="header-user-copy" *ngIf="!compact"><strong>{{user.username}}</strong><small *ngIf="user.email && !mobile">{{user.email}}</small></span>
+        <i class="bx bx-chevron-down" *ngIf="!compact" aria-hidden="true"></i>
+      </button>
+      <div id="app-user-menu" class="header-panel user-menu" *ngIf="showUserMenu">
+        <a *ngIf="canViewProfile" [routerLink]="['/user', session.currentUserKey]" (click)="showUserMenu = false">
+          <i class="bx bx-user" aria-hidden="true"></i><span>{{lang.t('viewProfile')}}</span>
+        </a>
+        <button type="button" (click)="logout()">
+          <i class="bx bx-log-out" aria-hidden="true"></i><span>{{lang.t('signOut')}}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>

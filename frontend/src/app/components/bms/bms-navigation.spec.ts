@@ -41,7 +41,7 @@ describe('BMS six-category navigation', () => {
     expect(state.visibleLinks(organization, ['development.view']).map(link => link.path))
       .toEqual(['development']);
     expect(state.visibleLinks(organization, ['units.view', 'directory.view']).map(link => link.path))
-      .toEqual(['units', 'employees']);
+      .toEqual(['organization', 'units', 'employees']);
   });
 
   it('expands and collapses categories and follows the active route', () => {

@@ -12,7 +12,7 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
 import { SigninComponent } from './components/signin/signin.component';
 import { LogoutComponent } from './components/logout/logout.component';
-import { NavbarComponent } from './components/navbar/navbar.component';
+import { LayoutModule } from './layout/layout.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 // import { ManagerModule } from './components/manager/manager/manager.module';
@@ -72,7 +72,6 @@ import { ChartModule } from 'primeng/chart';
     AppComponent,
     SigninComponent,
     LogoutComponent,
-    NavbarComponent,
     ProjectDetailsComponent,
     SnackbarComponent,
     DialogComponent,
@@ -122,6 +121,7 @@ import { ChartModule } from 'primeng/chart';
 
     BrowserAnimationsModule,
     SharedComponentsModule,
+    LayoutModule,
     MenuModule,
     TooltipModule,
     ChartModule

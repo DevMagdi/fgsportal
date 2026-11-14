@@ -1,0 +1,122 @@
+<section class="org-panel" aria-labelledby="unit-teams-title">
+  <div class="org-panel-head">
+    <div>
+      <h2 id="unit-teams-title">{{ lang.t('teamsTitle') }} <span class="org-muted unit-count" *ngIf="state === 'ready'">({{ teams.length }})</span></h2>
+      <p>{{ lang.t('teamsHint') }}</p>
+    </div>
+    <button type="button" class="org-button org-button-primary" *ngIf="state === 'ready' && canManageUnit" (click)="create()">
+      <i class="bx bx-plus" aria-hidden="true"></i>{{ lang.t('teamsNew') }}
+    </button>
+  </div>
+
+  <div class="org-panel-body teams-body">
+    <div class="alert-box alert-success" role="status" *ngIf="notice">{{ notice }}</div>
+    <div class="alert-box alert-error" role="alert" *ngIf="error">{{ error }}</div>
+
+    <div class="teams-manager">
+      <div>
+        <span class="unit-card-label">{{ lang.t('teamsDevManager') }}</span>
+        <ng-container *ngIf="!managerEditing">
+          <app-bms-person *ngIf="developmentManager" [name]="name(developmentManager)" [detail]="developmentManager.email || ''"></app-bms-person>
+          <span class="org-muted" *ngIf="!developmentManager">{{ lang.t('teamsNoDevManager') }}</span>
+        </ng-container>
+        <div class="teams-manager-form" *ngIf="managerEditing">
+          <label class="org-sr-only" for="unit-dev-manager">{{ lang.t('teamsDevManager') }}</label>
+          <select id="unit-dev-manager" class="form-select" [ngModel]="managerChoice ?? ''" (ngModelChange)="chooseManager($event)" [ngModelOptions]="{ standalone: true }" aria-describedby="unit-dev-manager-hint">
+            <option value="">{{ lang.t('teamsNone') }}</option>
+            <option *ngFor="let person of candidates; trackBy: trackId" [value]="person.id">{{ name(person) }}</option>
+          </select>
+          <button type="button" class="org-button org-button-primary" (click)="saveManager()" [disabled]="managerSaving">{{ lang.t('teamsDevManagerSave') }}</button>
+          <button type="button" class="org-button" (click)="cancelManager()" [disabled]="managerSaving">{{ lang.t('teamsCancel') }}</button>
+        </div>
+        <small id="unit-dev-manager-hint" class="org-muted teams-manager-hint">{{ lang.t('teamsDevManagerHint') }}</small>
+      </div>
+      <button type="button" class="org-link" *ngIf="state === 'ready' && canManageUnit && !managerEditing" (click)="editManager()">{{ lang.t('teamsDevManagerChange') }}</button>
+    </div>
+
+    <app-bms-state *ngIf="state === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+    <app-bms-state *ngIf="state === 'error'" kind="error" [message]="lang.t('teamsLoadError')" [actionLabel]="lang.t('retry')" (action)="load()"></app-bms-state>
+    <app-bms-state *ngIf="state === 'ready' && !teams.length" kind="empty" [message]="lang.t('teamsEmpty')"></app-bms-state>
+
+    <ul class="teams-list" *ngIf="state === 'ready' && teams.length">
+      <li class="team-card" *ngFor="let team of teams; trackBy: trackId" [class.is-inactive]="!team.is_active">
+        <div class="team-card-head">
+          <div class="team-card-title">
+            <h3>{{ team.name }}</h3>
+            <span class="org-chip org-chip-muted" *ngIf="!team.is_active">{{ lang.t('teamsInactive') }}</span>
+          </div>
+          <div class="team-card-actions" *ngIf="team.can_manage || team.can_manage_members">
+            <button type="button" class="org-link" (click)="edit(team)" [attr.aria-label]="(team.can_manage ? lang.t('teamsEdit') : lang.t('teamsEditMembers')) + ' · ' + team.name">
+              {{ team.can_manage ? lang.t('teamsEdit') : lang.t('teamsEditMembers') }}
+            </button>
+            <button type="button" class="org-link org-link-danger" *ngIf="team.can_manage" (click)="remove(team)" [attr.aria-label]="lang.t('teamsDelete') + ' · ' + team.name">{{ lang.t('teamsDelete') }}</button>
+          </div>
+        </div>
+        <p class="team-card-description" *ngIf="team.description">{{ team.description }}</p>
+        <div class="team-card-grid">
+          <div>
+            <span class="unit-card-label">{{ lang.t('teamsLead') }}</span>
+            <app-bms-person *ngIf="team.lead" [name]="name(team.lead)" [detail]="team.lead.email || ''" [compact]="true"></app-bms-person>
+            <span class="org-muted" *ngIf="!team.lead">{{ lang.t('teamsNoLead') }}</span>
+          </div>
+          <div>
+            <span class="unit-card-label">{{ lang.t('teamsMembers') }} ({{ team.members_count }})</span>
+            <div class="org-chips" *ngIf="team.members.length">
+              <span class="org-chip org-chip-plain" *ngFor="let member of team.members; trackBy: trackId">{{ name(member) }}</span>
+            </div>
+            <span class="org-muted" *ngIf="!team.members.length">{{ lang.t('teamsNoMembers') }}</span>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<app-bms-side-panel [open]="panelOpen" [heading]="!editing ? lang.t('teamsNew') : (membersOnly ? lang.t('teamsEditMembers') : lang.t('teamsEdit'))"
+  [closeLabel]="lang.t('teamsClose')" (closed)="closePanel()">
+  <form class="org-form" (ngSubmit)="save()" novalidate>
+    <div class="alert-box alert-error" role="alert" *ngIf="formError">{{ formError }}</div>
+
+    <ng-container *ngIf="!membersOnly">
+      <label class="org-field">{{ lang.t('teamsName') }} *
+        <input class="form-control" name="team-name" maxlength="150" required [(ngModel)]="form.name"
+          [attr.aria-invalid]="nameMissing ? 'true' : null" [attr.aria-describedby]="nameMissing ? 'team-name-error' : null">
+        <small id="team-name-error" class="org-field-error" *ngIf="nameMissing">{{ lang.t('teamsNameRequired') }}</small>
+      </label>
+      <label class="org-field">{{ lang.t('teamsDescription') }}
+        <textarea class="form-control" name="team-description" rows="3" [(ngModel)]="form.description"></textarea>
+      </label>
+      <label class="org-field">{{ lang.t('teamsLead') }}
+        <select class="form-select" name="team-lead" [ngModel]="form.lead_id ?? ''" (ngModelChange)="setLead($event)" aria-describedby="team-lead-hint">
+          <option value="">{{ lang.t('teamsNone') }}</option>
+          <option *ngFor="let person of candidates; trackBy: trackId" [value]="person.id">{{ name(person) }}</option>
+        </select>
+        <small id="team-lead-hint" class="org-muted">{{ lang.t('teamsLeadHint') }}</small>
+      </label>
+    </ng-container>
+
+    <fieldset class="teams-members">
+      <legend>{{ lang.t('teamsMembers') }} ({{ form.user_ids.length }})</legend>
+      <small class="org-muted">{{ lang.t('teamsMembersHint') }}</small>
+      <p class="org-muted" *ngIf="!candidates.length">{{ lang.t('teamsNoCandidates') }}</p>
+      <ul class="teams-member-options" *ngIf="candidates.length">
+        <li *ngFor="let person of candidates; trackBy: trackId">
+          <label class="org-check">
+            <input type="checkbox" [checked]="isMember(person.id)" [disabled]="isLead(person.id)" (change)="toggleMember(person.id, $any($event.target).checked)">
+            <span>{{ name(person) }}</span>
+            <span class="org-chip" *ngIf="isLead(person.id)">{{ lang.t('teamsLeadBadge') }}</span>
+          </label>
+        </li>
+      </ul>
+    </fieldset>
+
+    <label class="org-check" *ngIf="!membersOnly">
+      <input type="checkbox" name="team-active" [(ngModel)]="form.is_active"><span>{{ lang.t('teamsActive') }}</span>
+    </label>
+
+    <div class="org-form-actions">
+      <button type="submit" class="org-button org-button-primary" [disabled]="saving">{{ saving ? lang.t('teamsSaving') : lang.t('teamsSave') }}</button>
+      <button type="button" class="org-button" (click)="closePanel()" [disabled]="saving">{{ lang.t('teamsCancel') }}</button>
+    </div>
+  </form>
+</app-bms-side-panel>

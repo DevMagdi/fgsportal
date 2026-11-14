@@ -1,9 +1,116 @@
-<div class="page-heading"><div><h1>{{lang.t('units')}}</h1><p>Alpha Iota · Alpha X · Alpha Gen · Alpha Omega · Alpha Delta</p></div><div class="button-row"><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div></div>
-<div class="alert-box alert-error" *ngIf="error">{{error}}</div><div class="alert-box alert-success" *ngIf="success">{{success}}</div>
-<section class="bms-card" *ngIf="can('units.manage')"><h2>{{editing ? lang.t('edit') : lang.t('create')}} · {{lang.t('unit')}}</h2><form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
-<label>{{lang.t('name')}}<input class="form-control" formControlName="name" required></label><label>{{lang.t('parent')}}<select class="form-select" formControlName="parent_id"><option value="">{{lang.t('none')}}</option><option *ngFor="let u of units" [value]="u.id" [disabled]="editing?.id===u.id">{{u.name}}</option></select></label><label>{{lang.t('director')}}<select class="form-select" formControlName="director_id"><option value="">{{lang.t('none')}}</option><option *ngFor="let u of lookups.users" [value]="u.id">{{name(u)}}</option></select></label><label>{{lang.t('members')}}<select multiple class="form-select" formControlName="user_ids"><option *ngFor="let u of lookups.users" [value]="u.id">{{name(u)}}</option></select></label><label class="wide">{{lang.t('services')}}<input class="form-control" formControlName="servicesText"></label><label class="wide">{{lang.t('description')}}<textarea class="form-control" formControlName="description" rows="3"></textarea></label><label class="wide">{{lang.t('keyMessages')}}<textarea class="form-control" formControlName="key_messages" rows="2"></textarea></label><label><input type="checkbox" formControlName="is_active"> {{lang.t('active')}}</label><div class="button-row"><button class="btn-brand" [disabled]="loading">{{lang.t('save')}}</button><button type="button" class="btn-soft" (click)="reset()">{{lang.t('cancel')}}</button></div>
-</form></section>
+<div class="org-page">
+  <header class="org-header">
+    <div>
+      <h1>{{ lang.t('units') }}</h1>
+      <p>{{ lang.t('orgStructureHint') }}</p>
+    </div>
+    <div class="org-actions">
+      <button type="button" class="org-button" (click)="excel()" [disabled]="!units.length"><i class="bx bx-spreadsheet" aria-hidden="true"></i>{{ lang.t('exportExcel') }}</button>
+      <button type="button" class="org-button" (click)="pdf()" [disabled]="!units.length"><i class="bx bxs-file-pdf" aria-hidden="true"></i>{{ lang.t('exportPdf') }}</button>
+      <button type="button" class="org-button org-button-primary" *ngIf="can('units.manage')" (click)="create()"><i class="bx bx-plus" aria-hidden="true"></i>{{ lang.t('orgNewUnit') }}</button>
+    </div>
+  </header>
 
-<section class="bms-card"><div class="table-responsive"><table><thead><tr><th>{{lang.t('name')}}</th><th>{{lang.t('parent')}}</th><th>{{lang.t('director')}}</th><th>{{lang.t('members')}}</th><th>{{lang.t('services')}}</th><th>{{lang.t('description')}}</th><th>{{lang.t('keyMessages')}}</th><th *ngIf="can('units.manage')">{{lang.t('actions')}}</th></tr></thead><tbody><tr *ngFor="let u of units"><td><strong>{{u.name}}</strong><br><span class="badge-status" [ngClass]="u.is_active?'achieved':'not_done'">{{u.is_active?lang.t('active'):'-'}}</span></td><td>{{u.parent?.name || '-'}}</td><td>{{name(u.director)}}</td><td><span *ngFor="let member of u.users" class="badge-status">{{name(member)}}</span></td><td>{{(u.services || []).join(', ') || '-'}}</td><td>{{u.description || '-'}}</td><td>{{u.key_messages || '-'}}</td><td *ngIf="can('units.manage')"><div class="button-row"><button class="btn-link" (click)="edit(u)">{{lang.t('edit')}}</button> <button class="btn-link" (click)="toggleStatus(u)">{{u.is_active?lang.t('deactivate'):lang.t('activate')}}</button> <button class="btn-link" (click)="remove(u)">{{lang.t('delete')}}</button></div></td></tr></tbody></table></div></section>
+  <div class="alert-box alert-error" role="alert" *ngIf="error && !panelOpen && !loadFailed">{{ error }}</div>
+  <div class="alert-box alert-success" role="status" *ngIf="success">{{ success }}</div>
 
-<ng-container *ngFor="let u of units"><section class="bms-card" *ngIf="u.minutes?.length"><h2>{{u.name}} · {{lang.t('linkedMeetings')}}</h2><div class="phase-item" *ngFor="let minute of u.minutes"><strong>{{minute.meeting?.title}}</strong><span>{{minute.meeting?.starts_at|date:'medium'}}</span><p>{{minute.decisions}}</p></div></section></ng-container>
+  <div class="org-filters" *ngIf="loaded && units.length">
+    <label class="org-field">
+      <span class="org-sr-only">{{ lang.t('orgSearchUnits') }}</span>
+      <input type="search" class="form-control" [(ngModel)]="search" [placeholder]="lang.t('orgSearchUnits')">
+    </label>
+    <label class="org-field">
+      <span class="org-sr-only">{{ lang.t('status') }}</span>
+      <select class="form-select" [(ngModel)]="status">
+        <option value="">{{ lang.t('orgAllStatuses') }}</option>
+        <option value="active">{{ lang.t('active') }}</option>
+        <option value="inactive">{{ lang.t('inactive') }}</option>
+      </select>
+    </label>
+  </div>
+
+  <app-bms-state *ngIf="loading && !loaded" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+  <app-bms-state *ngIf="loadFailed" kind="error" [message]="error || lang.t('orgUnitsLoadError')" [actionLabel]="lang.t('retry')" (action)="load()"></app-bms-state>
+  <app-bms-state *ngIf="loaded && !units.length" kind="empty" [message]="lang.t('orgNoUnits')"></app-bms-state>
+  <app-bms-state *ngIf="loaded && units.length && !visibleUnits.length" kind="empty" [message]="lang.t('orgNoMatch')"></app-bms-state>
+
+  <div class="unit-grid" *ngIf="loaded && visibleUnits.length">
+    <article class="unit-card" *ngFor="let unit of visibleUnits; trackBy: trackId" [class.is-inactive]="!unit.is_active">
+      <div class="unit-card-top">
+        <div>
+          <h2 class="unit-card-title"><a [routerLink]="['/bms/units', unit.id]">{{ unit.name }}</a></h2>
+          <p class="unit-card-parent">{{ unit.parent?.name ? lang.t('orgPartOf') + ' ' + unit.parent.name : lang.t('orgTopLevel') }}</p>
+        </div>
+        <span class="org-chip" [ngClass]="unit.is_active ? 'org-chip-success' : 'org-chip-muted'">{{ unit.is_active ? lang.t('active') : lang.t('inactive') }}</span>
+      </div>
+
+      <p class="unit-card-description" *ngIf="unit.description">{{ unit.description }}</p>
+
+      <div>
+        <span class="unit-card-label">{{ lang.t('orgDirector') }}</span>
+        <app-bms-person *ngIf="directorName(unit)" [name]="directorName(unit)" [detail]="unit.director?.email || ''"></app-bms-person>
+        <span class="org-muted" *ngIf="!directorName(unit)">{{ lang.t('orgNoDirector') }}</span>
+      </div>
+
+      <dl class="unit-card-facts">
+        <div><dt>{{ lang.t('orgHeadcount') }}</dt><dd>{{ headcount(unit) }}</dd></div>
+        <div><dt>{{ lang.t('orgSubUnits') }}</dt><dd>{{ childCount(unit) }}</dd></div>
+        <div *ngIf="can('products.view')"><dt>{{ lang.t('orgProducts') }}</dt><dd>{{ productsOf(unit).length }}</dd></div>
+      </dl>
+
+      <div class="org-chips" *ngIf="productsOf(unit).length">
+        <span class="org-chip org-chip-plain" *ngFor="let product of productsOf(unit); trackBy: trackId"><i class="bx bx-package" aria-hidden="true"></i>{{ product.product_name }}</span>
+      </div>
+
+      <div class="unit-card-actions" *ngIf="can('units.manage')">
+        <button type="button" class="org-link" (click)="edit(unit)">{{ lang.t('edit') }}</button>
+        <button type="button" class="org-link" (click)="toggleStatus(unit)">{{ unit.is_active ? lang.t('deactivate') : lang.t('activate') }}</button>
+        <button type="button" class="org-link org-link-danger" (click)="remove(unit)">{{ lang.t('delete') }}</button>
+      </div>
+    </article>
+  </div>
+</div>
+
+<app-bms-side-panel [open]="panelOpen" [heading]="editing ? lang.t('orgEditUnit') : lang.t('orgNewUnit')" [closeLabel]="lang.t('orgClose')" (closed)="closePanel()">
+  <form [formGroup]="form" (ngSubmit)="save()" class="org-form" novalidate>
+    <div class="alert-box alert-error" role="alert" *ngIf="error">{{ error }}</div>
+
+    <label class="org-field">{{ lang.t('name') }} *
+      <input class="form-control" formControlName="name" required [attr.aria-invalid]="nameMissing ? 'true' : null" [attr.aria-describedby]="nameMissing ? 'unit-name-error' : null">
+      <small id="unit-name-error" class="org-field-error" *ngIf="nameMissing">{{ lang.t('orgNameRequired') }}</small>
+    </label>
+    <label class="org-field">{{ lang.t('parent') }}
+      <select class="form-select" formControlName="parent_id">
+        <option value="">{{ lang.t('none') }}</option>
+        <option *ngFor="let u of units" [value]="u.id" [disabled]="editing?.id === u.id">{{ u.name }}</option>
+      </select>
+    </label>
+    <label class="org-field">{{ lang.t('director') }}
+      <select class="form-select" formControlName="director_id">
+        <option value="">{{ lang.t('none') }}</option>
+        <option *ngFor="let u of lookups.users" [value]="u.id">{{ name(u) }}</option>
+      </select>
+    </label>
+    <label class="org-field">{{ lang.t('members') }}
+      <select multiple size="7" class="form-select" formControlName="user_ids" aria-describedby="unit-members-hint">
+        <option *ngFor="let u of lookups.users" [value]="u.id">{{ name(u) }}</option>
+      </select>
+      <small id="unit-members-hint" class="org-muted">{{ lang.t('orgMembersHint') }}</small>
+    </label>
+    <label class="org-field">{{ lang.t('services') }}
+      <input class="form-control" formControlName="servicesText">
+    </label>
+    <label class="org-field">{{ lang.t('description') }}
+      <textarea class="form-control" formControlName="description" rows="3"></textarea>
+    </label>
+    <label class="org-field">{{ lang.t('keyMessages') }}
+      <textarea class="form-control" formControlName="key_messages" rows="2"></textarea>
+    </label>
+    <label class="org-check"><input type="checkbox" formControlName="is_active"> {{ lang.t('active') }}</label>
+
+    <div class="org-form-actions">
+      <button type="submit" class="org-button org-button-primary" [disabled]="saving">{{ lang.t('save') }}</button>
+      <button type="button" class="org-button" (click)="closePanel()">{{ lang.t('cancel') }}</button>
+    </div>
+  </form>
+</app-bms-side-panel>

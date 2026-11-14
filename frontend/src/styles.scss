@@ -15,6 +15,7 @@ $alphaiota-theme:mat.define-light-theme((color:(primary:$alphaiota-primary,accen
 /* You can add global styles to this file, and also import other style files */
 
 @import './app/colors';
+@import './styles/shell-tokens';
 
 html,
 body {

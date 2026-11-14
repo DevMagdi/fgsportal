@@ -1,0 +1,142 @@
+<div class="org-page">
+  <header class="org-header">
+    <div>
+      <h1>{{ lang.t('organization') }}</h1>
+      <p>{{ lang.t('orgSubtitle') }}</p>
+    </div>
+    <div class="org-actions">
+      <a class="org-button" routerLink="/bms/units"><i class="bx bx-buildings" aria-hidden="true"></i>{{ lang.t('orgManageUnits') }}</a>
+    </div>
+  </header>
+
+  <section class="org-stats" [attr.aria-label]="lang.t('organization')">
+    <app-bms-stat icon="bx-buildings" [label]="lang.t('orgUnitsTotal')" [value]="unitsState === 'ready' ? units.length : null"
+      [hint]="unitsState === 'ready' ? activeUnits + ' ' + lang.t('orgUnitsActive') : ''"></app-bms-stat>
+    <app-bms-stat icon="bx-group" [label]="lang.t('orgPeople')" [value]="unitsState === 'ready' ? peopleCount : null" [hint]="lang.t('orgPeopleHint')"></app-bms-stat>
+    <app-bms-stat icon="bx-git-branch" [label]="lang.t('orgMultiUnit')" [value]="unitsState === 'ready' ? multiUnitCount : null" [hint]="lang.t('orgMultiUnitHint')"></app-bms-stat>
+    <app-bms-stat *ngIf="can('products.view')" icon="bx-package" [label]="lang.t('orgProducts')" [value]="productsState === 'ready' ? products.length : null"></app-bms-stat>
+    <app-bms-stat icon="bx-sitemap" [label]="lang.t('orgDepartments')" [value]="lookupsState === 'ready' ? departments.length : null"></app-bms-stat>
+  </section>
+
+  <section class="org-panel" aria-labelledby="org-structure-title">
+    <div class="org-panel-head">
+      <div>
+        <h2 id="org-structure-title">{{ lang.t('orgStructure') }}</h2>
+        <p>{{ lang.t('orgStructureHint') }}</p>
+      </div>
+    </div>
+    <div class="org-panel-body">
+      <app-bms-state *ngIf="unitsState === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+      <app-bms-state *ngIf="unitsState === 'error'" kind="error" [message]="lang.t('orgUnitsLoadError')" [actionLabel]="lang.t('retry')" (action)="loadUnits()"></app-bms-state>
+      <app-bms-state *ngIf="unitsState === 'ready' && !rows.length" kind="empty" [message]="lang.t('orgNoUnits')"></app-bms-state>
+      <app-bms-state *ngIf="progressState === 'error'" kind="error" [message]="lang.t('orgProgressLoadError')" [actionLabel]="lang.t('retry')" (action)="loadProgress()"></app-bms-state>
+
+      <ng-container *ngIf="unitsState === 'ready' && rows.length">
+        <div class="org-row org-row-head" aria-hidden="true">
+          <span>{{ lang.t('unit') }}</span>
+          <span>{{ lang.t('orgDirector') }}</span>
+          <span>{{ lang.t('orgHeadcount') }}</span>
+          <span>{{ lang.t('orgProducts') }}</span>
+          <span>{{ lang.t('orgWeeklyProgress') }}</span>
+        </div>
+        <ul class="org-tree">
+          <li class="org-row" *ngFor="let node of rows; trackBy: trackNode">
+            <div class="org-unit" [class.is-child]="node.depth > 0" [style.--depth]="node.depth">
+              <span class="org-unit-icon" aria-hidden="true"><i class="bx" [ngClass]="node.depth === 0 ? 'bx-buildings' : 'bx-subdirectory-right'"></i></span>
+              <div class="org-unit-copy">
+                <a class="org-unit-name" [routerLink]="['/bms/units', node.unit.id]">{{ node.unit.name }}</a>
+                <span class="org-unit-meta">
+                  <span class="org-chip org-chip-muted" *ngIf="node.unit.is_active === false">{{ lang.t('inactive') }}</span>
+                  <ng-container *ngIf="childCount(node)">{{ childCount(node) }} {{ lang.t('orgSubUnits') }}</ng-container>
+                </span>
+              </div>
+            </div>
+            <div>
+              <span class="org-cell-label">{{ lang.t('orgDirector') }}</span>
+              <app-bms-person *ngIf="directorName(node.unit)" [name]="directorName(node.unit)" [compact]="true"></app-bms-person>
+              <span class="org-muted" *ngIf="!directorName(node.unit)">{{ lang.t('orgNoDirector') }}</span>
+            </div>
+            <div>
+              <span class="org-cell-label">{{ lang.t('orgHeadcount') }}</span>
+              <span class="org-count">{{ headcount(node.unit) }}</span>
+            </div>
+            <div>
+              <span class="org-cell-label">{{ lang.t('orgProducts') }}</span>
+              <ng-container *ngIf="can('products.view'); else noProductAccess">
+                <span class="org-muted" *ngIf="productsState === 'loading'">{{ lang.t('loading') }}</span>
+                <div class="org-chips" *ngIf="productsState === 'ready' && productsOf(node.unit).length">
+                  <span class="org-chip org-chip-plain" *ngFor="let product of productsOf(node.unit); trackBy: trackId">{{ product.product_name }}</span>
+                </div>
+                <span class="org-muted" *ngIf="productsState === 'ready' && !productsOf(node.unit).length">—</span>
+                <span class="org-muted" *ngIf="productsState === 'error'">—</span>
+              </ng-container>
+              <ng-template #noProductAccess><span class="org-muted">—</span></ng-template>
+            </div>
+            <div>
+              <span class="org-cell-label">{{ lang.t('orgWeeklyProgress') }}</span>
+              <ng-container *ngIf="progressState === 'ready' && progressOf(node.unit) as unitProgress; else noProgress">
+                <div class="org-progress" *ngIf="unitProgress.total; else noTasks">
+                  <span class="org-progress-track" role="progressbar" [attr.aria-valuenow]="unitProgress.progress" aria-valuemin="0" aria-valuemax="100"
+                    [attr.aria-label]="lang.t('orgWeeklyProgress') + ' · ' + node.unit.name">
+                    <span class="org-progress-fill" [style.width.%]="unitProgress.progress"></span>
+                  </span>
+                  <span class="org-progress-value">{{ unitProgress.progress }}%</span>
+                </div>
+                <ng-template #noTasks><span class="org-muted">{{ lang.t('orgNoPlanData') }}</span></ng-template>
+              </ng-container>
+              <ng-template #noProgress>
+                <span class="org-muted">{{ progressState === 'loading' ? lang.t('loading') : '—' }}</span>
+              </ng-template>
+            </div>
+          </li>
+        </ul>
+      </ng-container>
+    </div>
+  </section>
+
+  <div class="org-columns">
+    <section class="org-panel" aria-labelledby="org-central-title">
+      <div class="org-panel-head">
+        <div>
+          <h2 id="org-central-title">{{ lang.t('orgCentralTitle') }}</h2>
+          <p>{{ lang.t('orgCentralHint') }}</p>
+        </div>
+      </div>
+      <div class="org-panel-body">
+        <app-bms-state *ngIf="lookupsState === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+        <app-bms-state *ngIf="lookupsState === 'error'" kind="error" [message]="lang.t('error')" [actionLabel]="lang.t('retry')" (action)="loadLookups()"></app-bms-state>
+        <app-bms-state *ngIf="lookupsState === 'ready' && !departments.length" kind="empty" [message]="lang.t('orgNoDepartments')"></app-bms-state>
+        <ng-container *ngIf="lookupsState === 'ready' && departments.length">
+          <div class="org-chips" style="margin-bottom: 14px">
+            <span class="org-chip" *ngFor="let department of departments; trackBy: trackId"><i class="bx bx-sitemap" aria-hidden="true"></i>{{ department.department_name }}</span>
+          </div>
+          <p class="org-note"><i class="bx bx-info-circle" aria-hidden="true"></i><span>{{ lang.t('orgCentralMembership') }}</span></p>
+        </ng-container>
+      </div>
+    </section>
+
+    <section class="org-panel" aria-labelledby="org-products-title">
+      <div class="org-panel-head">
+        <h2 id="org-products-title">{{ lang.t('orgProductsByUnit') }}</h2>
+        <a class="org-link" routerLink="/bms/products" *ngIf="can('products.view')">{{ lang.t('orgManageProducts') }}</a>
+      </div>
+      <div class="org-panel-body">
+        <app-bms-state *ngIf="lookupsState === 'ready' && !can('products.view')" kind="empty" [message]="lang.t('orgNoProductPermission')"></app-bms-state>
+        <app-bms-state *ngIf="productsState === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+        <app-bms-state *ngIf="productsState === 'error'" kind="error" [message]="lang.t('orgProductsLoadError')" [actionLabel]="lang.t('retry')" (action)="loadProducts()"></app-bms-state>
+        <app-bms-state *ngIf="productsState === 'ready' && !products.length" kind="empty" [message]="lang.t('orgNoProducts')"></app-bms-state>
+        <ul class="org-product-list" *ngIf="productsState === 'ready' && products.length">
+          <li class="org-product" *ngFor="let product of products; trackBy: trackId">
+            <div>
+              <strong>{{ product.product_name }}</strong>
+              <small *ngIf="product.current_phase?.name">{{ lang.t('currentPhase') }}: {{ product.current_phase?.name }}<ng-container *ngIf="product.overall_progress !== null && product.overall_progress !== undefined"> · {{ product.overall_progress }}%</ng-container></small>
+            </div>
+            <div class="org-chips">
+              <a class="org-chip" *ngFor="let unit of product.business_units || []; trackBy: trackId" [routerLink]="['/bms/units', unit.id]">{{ unit.name }}</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>

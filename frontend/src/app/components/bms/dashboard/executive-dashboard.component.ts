@@ -1,3 +1,4 @@
+import { hasAbility } from '../bms-abilities.util';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { BmsApiService } from '../bms-api.service';
@@ -96,7 +97,7 @@ export class ExecutiveDashboardComponent implements OnInit {
   }
 
   can(ability: string): boolean {
-    return (this.lookups.can || []).includes(ability);
+    return hasAbility(this.lookups.can, ability);
   }
 
   get showUnitFilter(): boolean { return this.can('units.view') && this.lookups.units.length > 1; }

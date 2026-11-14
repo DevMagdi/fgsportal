@@ -20,7 +20,7 @@ const STORAGE_KEY = 'enabledModules';
  * Holds the modules enabled for the logged-in user's company.
  *
  * The list is fetched from the backend right after login / autoLogin and is
- * mirrored to localStorage so route guards and the navbar work synchronously
+ * mirrored to localStorage so route guards and the sidebar work synchronously
  * on a page refresh even before the HTTP response arrives.
  */
 @Injectable({ providedIn: 'root' })

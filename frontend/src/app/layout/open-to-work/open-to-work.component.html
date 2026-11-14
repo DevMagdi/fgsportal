@@ -1,0 +1,73 @@
+<div class="modal modal-top fade" id="openToWork" data-bs-backdrop="static" aria-hidden="true">
+  <div class="modal-dialog modal-top modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalCenter">
+          Open To Work
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-2">
+        <p-blockUI [blocked]="myOpenToWorkLoading">
+          <p-progressSpinner></p-progressSpinner>
+        </p-blockUI>
+        <table *ngIf="!myOpenToWorkLoading && myOpenToWork.length > 0" class="table table-hover">
+          <thead>
+            <th>From</th>
+            <th>To</th>
+            <th>Deactivate</th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let open of myOpenToWork">
+              <td>
+                {{ open.from_date_time | date : "medium" }}
+              </td>
+              <td>
+                {{ open.to_date_time | date : "medium" }}
+              </td>
+              <td>
+                <button (click)="deactivateOpenToWork(open)" class="btn openToWorkBTN">
+                  Deactivate
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <form *ngIf="!myOpenToWorkLoading && myOpenToWork.length == 0" [formGroup]="newOpenToWorkForm"
+          (ngSubmit)="createOpenToWork()" form class="example-form">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width w-100">
+                  <mat-label>From</mat-label>
+                  <input matInput type="datetime-local" id="Date" formControlName="from">
+                  <mat-error *ngIf="
+                      !newOpenToWorkForm.get('from')?.valid &&
+                      newOpenToWorkForm.get('from')?.touched
+                    " class="alert help-block">
+                    *From Date Required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width w-100">
+                  <mat-label>To</mat-label>
+                  <input matInput type="datetime-local" id="Date" formControlName="to">
+                  <mat-error *ngIf="
+                      !newOpenToWorkForm.get('to')?.valid &&
+                      newOpenToWorkForm.get('to')?.touched
+                    " class="alert help-block">
+                    *To Date Required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-md-12">
+                <button class="btn openToWorkBTN">Submit</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

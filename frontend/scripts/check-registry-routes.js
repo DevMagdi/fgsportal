@@ -25,7 +25,35 @@ const PREFIX_TO_FILE = {
   'admin-panel': 'src/app/components/admin/admin/admin-routing.module.ts',
   CRM: 'src/app/components/crm/crm-routing.module.ts',
   hr: 'src/app/components/hr/hr-routing.module.ts',
+  // The BMS workspace declares its child routes inside its feature module.
+  bms: 'src/app/components/bms/bms.module.ts',
 };
+
+// BMS builds one route per collection (`path: key` over BMS_COLLECTIONS), so those
+// paths never appear as string literals in the module and are read from the catalog.
+const BMS_MODULE_FILE = PREFIX_TO_FILE.bms;
+const BMS_CATALOG_FILE = 'src/app/components/bms/bms-catalog.ts';
+
+function bmsCollectionSegments() {
+  const moduleSource = fs.readFileSync(path.join(FRONTEND_ROOT, BMS_MODULE_FILE), 'utf8');
+  // Only trust the catalog while the module really maps its keys to routes.
+  if (!/Object\.keys\(BMS_COLLECTIONS\)\.map\(\s*key\s*=>\s*\(\{\s*path:\s*key\b/.test(moduleSource)) {
+    return [];
+  }
+  const catalog = fs.readFileSync(path.join(FRONTEND_ROOT, BMS_CATALOG_FILE), 'utf8');
+  const start = catalog.indexOf('export const BMS_COLLECTIONS');
+  if (start < 0) {
+    return [];
+  }
+  const keys = [];
+  const entry = /^\s*([A-Za-z][\w-]*)\s*:\s*\{\s*key\s*:\s*'([^']+)'/gm;
+  entry.lastIndex = start;
+  let match;
+  while ((match = entry.exec(catalog)) !== null) {
+    keys.push(match[1]);
+  }
+  return keys;
+}
 
 const TOP_LEVEL_FILE = 'src/app/app-routing.module.ts';
 
@@ -86,6 +114,9 @@ function declaredSegments(fileRel) {
         segments.add(segment);
       }
     });
+  }
+  if (fileRel === BMS_MODULE_FILE) {
+    bmsCollectionSegments().forEach((segment) => segments.add(segment));
   }
   return segments;
 }

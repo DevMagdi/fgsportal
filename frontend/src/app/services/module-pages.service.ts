@@ -44,7 +44,7 @@ export class ModulePagesService {
     const department = user?.department;
     const position = user?.accPosition;
 
-    // Same computation as NavbarComponent.ngOnInit.
+    // Same computation as ShellSessionService (formerly NavbarComponent.ngOnInit).
     const isManager =
       department === '1' || (department === '2' && position === '5');
     const isAdmin = department === '4';

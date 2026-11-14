@@ -11,7 +11,7 @@ class BusinessUnitController extends BmsController
 {
     public function index()
     {
-        $query = BusinessUnit::with(['parent', 'director:id,username,firstname,lastname,email', 'users:id,username,firstname,lastname,email', 'minutes.meeting']);
+        $query = BusinessUnit::with(['parent', 'director:id,username,firstname,lastname,email', 'developmentManager:id,username,firstname,lastname,email', 'users:id,username,firstname,lastname,email', 'minutes.meeting']);
         $visibleUnits = $this->access->visibleUnitIds();
         if ($visibleUnits !== null) $query->whereIn('id', $visibleUnits);
 
@@ -35,8 +35,10 @@ class BusinessUnitController extends BmsController
         $this->access->authorizeUnit($unit->id);
 
         return $this->ok($unit->load([
-            'parent', 'children', 'director', 'users', 'weeklyPlans.tasks', 'minutes.meeting',
-        ])->setAttribute('headcount', $unit->users()->whereNull('deleted_at')->count()));
+            'parent', 'children', 'director', 'developmentManager:id,username,firstname,lastname,email', 'users', 'weeklyPlans.tasks', 'minutes.meeting',
+        ])->setAttribute('headcount', $unit->users()->whereNull('deleted_at')->count())
+            // Stage B2: whether this account manages the teams and the development manager of this unit.
+            ->setAttribute('can_manage_teams', app(\App\Services\BMS\TeamStructure::class)->canManageUnit((int) $unit->id)));
     }
 
     public function update(Request $request, BusinessUnit $unit)
@@ -49,8 +51,18 @@ class BusinessUnitController extends BmsController
         $data['slug'] = Str::slug($data['name']);
         $old = $unit->only(array_keys($data));
         $unit->update($data);
-        if ($request->has('user_ids')) $unit->users()->sync($request->input('user_ids', []));
+        $detached = [];
+        if ($request->has('user_ids')) {
+            $changes = $unit->users()->sync($request->input('user_ids', []));
+            $detached = array_map('intval', $changes['detached'] ?? []);
+        }
         $this->syncDirectorRole($unit);
+        // A primary assignment must reference an actual membership (Stage B1): employees removed
+        // from this unit lose a primary assignment that pointed at it. Runs after the director
+        // has been re-added as a member, so a director is not affected.
+        app(\App\Services\BMS\PrimaryAssignment::class)->clearOrphans($detached);
+        // Stage B2: they also leave this unit's teams and stop being team lead / development manager here.
+        app(\App\Services\BMS\TeamStructure::class)->releaseOrphans($detached);
         $this->audit->record($unit, 'unit.updated', $old, $unit->only(array_keys($data)));
 
         return $this->ok($unit->load(['parent', 'director', 'users']));
@@ -123,6 +135,7 @@ class BusinessUnitController extends BmsController
             'product assignments' => \DB::table('product_business_unit')->where('business_unit_id', $unit->id)->exists(),
             'meetings' => \App\Models\BMS\Meeting::where('business_unit_id', $unit->id)->exists(),
             'member assignments' => $unit->users()->exists(),
+            'teams' => \App\Models\BMS\Team::where('business_unit_id', $unit->id)->exists(),
             'certificates' => \App\Models\BMS\EmployeeCertificate::where('business_unit_id', $unit->id)->exists(),
         ];
 

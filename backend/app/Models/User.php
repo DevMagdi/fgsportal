@@ -102,6 +102,58 @@ class User extends Authenticatable implements JWTSubject
             ->withPivot('business_unit_id')->withTimestamps();
     }
 
+    /*
+     * Organization structure (Stage B1). One user record, several independent
+     * relationships: unit membership (businessUnits), team membership, central
+     * department membership, the reporting line (manager) and project
+     * assignments (project_teams) never replace one another.
+     */
+
+    /** Teams the employee is a member of. */
+    public function teams()
+    {
+        return $this->belongsToMany(\App\Models\BMS\Team::class, 'bms_team_user', 'user_id', 'team_id')->withTimestamps();
+    }
+
+    /** Teams the employee leads. */
+    public function ledTeams()
+    {
+        return $this->hasMany(\App\Models\BMS\Team::class, 'lead_id');
+    }
+
+    /** Business units whose development manager is this employee. */
+    public function developmentManagedUnits()
+    {
+        return $this->hasMany(\App\Models\BMS\BusinessUnit::class, 'development_manager_id');
+    }
+
+    /** Central departments the employee is a member of. */
+    public function centralDepartments()
+    {
+        return $this->belongsToMany(\App\Models\BMS\CentralDepartment::class, 'bms_central_department_user', 'user_id', 'central_department_id')->withTimestamps();
+    }
+
+    /** Central departments the employee heads. */
+    public function headedCentralDepartments()
+    {
+        return $this->hasMany(\App\Models\BMS\CentralDepartment::class, 'head_id');
+    }
+
+    /**
+     * Primary organizational assignment: a business unit OR a central
+     * department, never both, and always one the employee is a member of.
+     * Written only through App\Services\BMS\PrimaryAssignment.
+     */
+    public function primaryBusinessUnit()
+    {
+        return $this->belongsTo(\App\Models\BMS\BusinessUnit::class, 'primary_business_unit_id');
+    }
+
+    public function primaryCentralDepartment()
+    {
+        return $this->belongsTo(\App\Models\BMS\CentralDepartment::class, 'primary_central_department_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

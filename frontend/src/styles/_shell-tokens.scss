@@ -1,0 +1,60 @@
+/*
+ * Global design tokens used by the application shell and by BMS pages.
+ *
+ * Until Phase 1 the `--bms-*` tokens were declared on the BMS shell element
+ * (`.bms-workspace`) and inherited by BMS pages. That shell no longer exists,
+ * so the tokens live on :root — one definition for the whole application.
+ * Phase 2 builds the full design system on top of this file.
+ */
+:root {
+  --bms-ink: #202436;
+  --bms-muted: #596579;
+  --bms-primary: #45436e;
+  --bms-primary-hover: #343254;
+  --bms-accent: #247a70;
+  --bms-canvas: #f5f7fa;
+  --bms-surface: #ffffff;
+  --bms-border: #dce2eb;
+  --bms-border-strong: #aeb8c8;
+  --bms-focus: #2d6cdf;
+  --bms-success: #176b48;
+  --bms-success-bg: #edf8f1;
+  --bms-warning: #80520b;
+  --bms-warning-bg: #fff7e8;
+  --bms-danger: #9b2c36;
+  --bms-danger-bg: #fff4f3;
+  --bms-radius-sm: 7px;
+  --bms-radius-md: 11px;
+  --bms-radius-lg: 15px;
+  --bms-shadow-sm: 0 1px 3px rgba(26, 35, 54, .06);
+  --bms-shadow-md: 0 10px 30px rgba(26, 35, 54, .10);
+
+  /* Application shell */
+  --shell-font: Inter, "Segoe UI", "Cairo", sans-serif;
+  --shell-sidebar-width: 264px;
+  --shell-sidebar-rail-width: 72px;
+  --shell-header-height: 64px;
+  --shell-sidebar-bg: #25233f;
+  --shell-sidebar-ink: #d3d2e3;
+  --shell-sidebar-muted: #9a98b8;
+  --shell-sidebar-border: rgba(255, 255, 255, .09);
+  --shell-sidebar-hover: rgba(255, 255, 255, .07);
+  --shell-sidebar-active: rgba(255, 255, 255, .12);
+  --shell-accent: #f498c1;
+}
+
+/* Arabic shell chrome uses the Arabic typeface first. */
+[lang='ar'] { --shell-font: Cairo, "Segoe UI", sans-serif; }
+
+/*
+ * Base typography of translated BMS content. The single content container of
+ * the shell carries this class while a BMS page is displayed (it used to be
+ * the root element of the BMS-only shell).
+ */
+.bms-workspace {
+  color: var(--bms-ink);
+  font-family: Inter, "Segoe UI", "Cairo", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bms-workspace[lang='ar'] { font-family: Cairo, "Segoe UI", sans-serif; }

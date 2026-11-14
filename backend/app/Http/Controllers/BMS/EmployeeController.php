@@ -404,6 +404,10 @@ class EmployeeController extends BmsController
             }
             if (isset($data['business_unit_ids'])) {
                 $employee->businessUnits()->sync($data['business_unit_ids']);
+                // A primary assignment must reference an actual membership (Stage B1).
+                app(\App\Services\BMS\PrimaryAssignment::class)->clearOrphans([$employee->id]);
+                // Stage B2: leaving a unit also means leaving its teams and lead / development-manager duties.
+                app(\App\Services\BMS\TeamStructure::class)->releaseOrphans([$employee->id]);
             }
             $this->audit->record($employee, 'employee.updated', $old, $employee->fresh()->only(array_keys($old + [
                 'username' => null, 'email' => null, 'firstname' => null, 'lastname' => null, 'active' => null,

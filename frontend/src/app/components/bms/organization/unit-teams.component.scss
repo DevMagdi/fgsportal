@@ -1,0 +1,29 @@
+.unit-count { font-weight: 500; font-size: 14px; }
+.unit-card-label { color: var(--bms-muted); font-size: 11.5px; margin-bottom: 4px; display: block; }
+.teams-body { display: flex; flex-direction: column; gap: 16px; }
+
+.teams-manager { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--bms-border); border-radius: var(--bms-radius-sm); background: var(--bms-canvas); }
+.teams-manager-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.teams-manager-form .form-select { min-width: 220px; width: auto; }
+.teams-manager-hint { display: block; margin-top: 6px; font-size: 12px; }
+
+.teams-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.team-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--bms-border); border-radius: var(--bms-radius-lg); background: var(--bms-surface); min-width: 0; }
+.team-card.is-inactive { background: #fafbfc; }
+.team-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.team-card-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.team-card-title h3 { margin: 0; font-size: 15.5px; font-weight: 700; overflow-wrap: anywhere; }
+.team-card-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.team-card-description { margin: 0; color: var(--bms-muted); font-size: 13px; overflow-wrap: anywhere; }
+.team-card-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+
+.teams-members { margin: 0; padding: 0; border: 0; min-width: 0; }
+.teams-members legend { float: none; width: auto; margin: 0 0 2px; padding: 0; font-size: 13px; font-weight: 600; color: var(--bms-ink); }
+.teams-member-options { display: flex; flex-direction: column; gap: 2px; max-height: 280px; overflow-y: auto; margin: 8px 0 0; padding: 6px 10px; list-style: none; border: 1px solid var(--bms-border); border-radius: var(--bms-radius-sm); }
+.teams-member-options .org-check { padding: 5px 0; cursor: pointer; }
+.teams-member-options input:disabled + span { color: var(--bms-muted); }
+
+@media (max-width: 640px) {
+  .teams-list { grid-template-columns: minmax(0, 1fr); }
+  .teams-manager-form .form-select { min-width: 0; width: 100%; }
+}

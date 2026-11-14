@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CompaniesTableSeeder::class,
             CompanyModulesTableSeeder::class,
             BmsPhaseOneSeeder::class,
+            BmsOrganizationSeeder::class,
         ]);
     }
 }

@@ -1,0 +1,25 @@
+<div class="app-shell" [class.is-rail]="collapsed && !mobile" [class.is-mobile]="mobile" [attr.lang]="lang.current" [dir]="direction">
+  <a class="app-skip-link" href="#app-main" (click)="$event.preventDefault(); main.focus()">{{lang.t('skipToContent')}}</a>
+
+  <button *ngIf="mobile && menuOpen" type="button" class="app-backdrop" [attr.aria-label]="lang.t('closeMenu')"
+    (click)="closeMenu()"></button>
+
+  <app-sidebar [groups]="groups" [activeGroupId]="activeGroupId" [activeItemId]="activeItemId" [counters]="session.counters"
+    [collapsed]="collapsed" [mobile]="mobile" [mobileOpen]="menuOpen" [abilitiesLoading]="abilitiesLoading"
+    [abilitiesFailed]="abilitiesFailed" [showOpenToWork]="showOpenToWork" (navigated)="closeMenu()"
+    (collapsedChange)="setCollapsed($event)" (retryAbilities)="refreshAbilities()" (openToWork)="openToWork()"></app-sidebar>
+
+  <div class="app-main-column">
+    <app-header [groupLabel]="groupLabel" [pageLabel]="pageLabel" [mobile]="mobile" [compact]="compact" [menuOpen]="menuOpen"
+      (menuToggle)="toggleMenu()"></app-header>
+
+    <!-- The single content container. Untranslated legacy pages stay LTR inside an RTL shell. -->
+    <main #main id="app-main" class="app-content" tabindex="-1" [class.bms-workspace]="translatedContent"
+      [attr.dir]="translatedContent ? direction : 'ltr'" [attr.lang]="translatedContent ? lang.current : 'en'">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <app-announcement-dialog></app-announcement-dialog>
+  <app-open-to-work></app-open-to-work>
+</div>
