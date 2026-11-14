@@ -291,11 +291,18 @@ class AuthController extends Controller
            'accPosition'=>$user->work_degrees_id,
            'department'=>$department_id,
            'refreshRequired'=>(int)$user->refreshRequired,
-           'token'=>$user->token,
            'need_paper'=>(int) optional($user->user_details_id_fun)->need_paper,
            'full_information'=>(int) optional($user->user_details_id_fun)->full_information,
            'change_password'=>(int) optional($user->user_details_id_fun)->change_password,
        ];
+
+       // Only the authenticated owner may receive the stored JWT. Lists and
+       // profile/edit responses for other users must never serialize it.
+       $authenticatedUser = Auth::guard('user_api')->user();
+       if ($authenticatedUser && $authenticatedUser->is($user)) {
+           $castUser['token'] = $user->token;
+       }
+
        return $castUser;
    }
    public function NewPasswordUser(Request  $request){
