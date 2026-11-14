@@ -229,6 +229,7 @@ class F4aTokenExposureTest extends BmsTestCase
             ['password' => 'attacker-password'],
             ['active' => false],
             ['company_id' => $this->company->id + 1],
+            ['user_details_id' => 999],
             ['sub_departments_id' => 4],
             ['branches_id' => 999],
             ['refreshRequired' => true],
@@ -264,6 +265,12 @@ class F4aTokenExposureTest extends BmsTestCase
             'user_id' => $user->id,
             'address' => 'attacker-controlled address',
         ], $this->jwtHeaders($user))->assertStatus(403);
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'self-transport-token',
+            'user_id' => $user->id,
+            'permissions' => ['administrator'],
+        ], $this->jwtHeaders($user))->assertStatus(422);
 
         $this->assertDatabaseHas('users', ['id' => $user->id, 'firstname' => 'Original']);
     }
