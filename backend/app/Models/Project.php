@@ -51,4 +51,15 @@ class Project extends Model
     {
         return $this->belongsTo(Partner::class,'partner_id');
     }
+
+    /**
+     * Business units this project is linked to (Stage B1). A project may involve
+     * several units; the pivot's `is_lead` marks the leading one. The link is
+     * informational: it does not grant access to the project.
+     */
+    public function businessUnits()
+    {
+        return $this->belongsToMany(\App\Models\BMS\BusinessUnit::class, 'bms_project_business_unit', 'project_id', 'business_unit_id')
+            ->withPivot('is_lead')->withTimestamps();
+    }
 }

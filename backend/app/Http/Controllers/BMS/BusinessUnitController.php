@@ -49,8 +49,16 @@ class BusinessUnitController extends BmsController
         $data['slug'] = Str::slug($data['name']);
         $old = $unit->only(array_keys($data));
         $unit->update($data);
-        if ($request->has('user_ids')) $unit->users()->sync($request->input('user_ids', []));
+        $detached = [];
+        if ($request->has('user_ids')) {
+            $changes = $unit->users()->sync($request->input('user_ids', []));
+            $detached = array_map('intval', $changes['detached'] ?? []);
+        }
         $this->syncDirectorRole($unit);
+        // A primary assignment must reference an actual membership (Stage B1): employees removed
+        // from this unit lose a primary assignment that pointed at it. Runs after the director
+        // has been re-added as a member, so a director is not affected.
+        app(\App\Services\BMS\PrimaryAssignment::class)->clearOrphans($detached);
         $this->audit->record($unit, 'unit.updated', $old, $unit->only(array_keys($data)));
 
         return $this->ok($unit->load(['parent', 'director', 'users']));
