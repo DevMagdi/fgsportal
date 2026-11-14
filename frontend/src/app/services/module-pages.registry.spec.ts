@@ -64,7 +64,7 @@ describe('module-pages registry', () => {
     ]);
   });
 
-  // Every active routerLink declared in navbar.component.html (excluding pure
+  // Every active routerLink declared in the retired navbar.component.html (now layout/navigation/nav.registry.ts) (excluding pure
   // application chrome: brand, the modules dashboard itself, notifications and
   // the current-user profile) must be reachable as a module overview card,
   // and every registry route must be a real sidebar link.

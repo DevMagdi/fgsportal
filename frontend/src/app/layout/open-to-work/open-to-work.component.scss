@@ -1,0 +1,4 @@
+@import '../../colors';
+
+.openToWorkBTN { border-color: #fff; color: #fff; background-color: $mainThemeColor; }
+.openToWorkBTN:hover { background-color: $mainThemeColor; color: #fff; }

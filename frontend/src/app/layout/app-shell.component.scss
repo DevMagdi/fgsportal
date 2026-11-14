@@ -1,0 +1,17 @@
+:host { display: block; }
+
+.app-shell { display: grid; grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr); min-height: 100vh; background: var(--bms-canvas); transition: grid-template-columns .18s ease; }
+.app-shell.is-rail { grid-template-columns: var(--shell-sidebar-rail-width) minmax(0, 1fr); }
+.app-shell.is-mobile { grid-template-columns: minmax(0, 1fr); }
+
+.app-main-column { display: flex; flex-direction: column; min-width: 0; min-height: 100vh; }
+.app-content { flex: 1 1 auto; min-width: 0; padding: 20px 24px 32px; outline: none; }
+
+.app-backdrop { position: fixed; inset: 0; z-index: 35; border: 0; background: rgba(21, 28, 43, .45); cursor: pointer; }
+
+.app-skip-link { position: absolute; inset-inline-start: 12px; top: -48px; z-index: 60; padding: 8px 14px; border-radius: 8px; background: var(--bms-primary); color: #fff; font-family: var(--shell-font); font-size: 13px; font-weight: 600; text-decoration: none; transition: top .15s ease; }
+.app-skip-link:focus { top: 10px; }
+
+@media (max-width: 991.98px) { .app-content { padding: 16px 14px 28px; } }
+@media (max-width: 560px) { .app-content { padding: 14px 10px 24px; } }
+@media (prefers-reduced-motion: reduce) { .app-shell, .app-skip-link { transition: none; } }

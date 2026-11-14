@@ -3,6 +3,7 @@ import { Router, UrlTree } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { BmsApiService } from './bms-api.service';
+import { hasAbility } from './bms-abilities.util';
 
 /**
  * Loads and caches the signed-in user's BMS abilities so navigation never
@@ -30,6 +31,12 @@ export class BmsAccessService {
   ];
 
   private can$ = new BehaviorSubject<string[] | null>(null);
+  private failed$ = new BehaviorSubject<boolean>(false);
+
+  /** Abilities for the global navigation: `null` until the first load settles. */
+  readonly abilities$: Observable<string[] | null> = this.can$.asObservable();
+  /** True when the last abilities request failed (the sidebar offers a retry). */
+  readonly loadFailed$: Observable<boolean> = this.failed$.asObservable();
 
   constructor(private api: BmsApiService) {}
 
@@ -39,16 +46,36 @@ export class BmsAccessService {
     }
     return this.api.get<any>('lookups').pipe(
       map(data => (data?.can || []) as string[]),
-      tap(can => this.can$.next(can)),
+      tap(can => { this.failed$.next(false); this.can$.next(can); }),
       catchError(() => {
+        this.failed$.next(true);
         this.can$.next([]);
         return of([] as string[]);
       })
     );
   }
 
+  /**
+   * Re-read the abilities from the server without blanking the current ones,
+   * so the global sidebar never flashes empty. Called by the application shell
+   * when a session starts and whenever the user enters the BMS workspace (the
+   * retired BMS shell reloaded them at the same moments). A failed refresh
+   * keeps the last known abilities; with none known it publishes an empty list.
+   */
+  refresh(): Observable<string[]> {
+    return this.api.get<any>('lookups').pipe(
+      map(data => (data?.can || []) as string[]),
+      tap(can => { this.failed$.next(false); this.can$.next(can); }),
+      catchError(() => {
+        this.failed$.next(true);
+        if (this.can$.value === null) this.can$.next([]);
+        return of(this.can$.value || []);
+      })
+    );
+  }
+
   can(ability: string): boolean {
-    return (this.can$.value || []).includes(ability);
+    return hasAbility(this.can$.value, ability);
   }
 
   /** First page the user may open, or the access screen when nothing matches. */
@@ -59,13 +86,14 @@ export class BmsAccessService {
 
   /** Refresh after a role change / re-login. */
   reset(): void {
+    this.failed$.next(false);
     this.can$.next(null);
   }
 
   guard(ability: string | undefined, router: Router): Observable<boolean | UrlTree> {
     return this.abilities().pipe(
       map(can => {
-        if (!ability || can.includes(ability)) {
+        if (!ability || hasAbility(can, ability)) {
           return true;
         }
         const target = this.firstLanding();

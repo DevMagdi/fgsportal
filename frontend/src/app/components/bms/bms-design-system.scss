@@ -1,33 +1,4 @@
-/* BMS-only design tokens. Scope every token to the BMS workspace; legacy pages keep their existing theme. */
-.bms-workspace {
-  --bms-ink: #202436;
-  --bms-muted: #596579;
-  --bms-primary: #45436e;
-  --bms-primary-hover: #343254;
-  --bms-accent: #247a70;
-  --bms-canvas: #f5f7fa;
-  --bms-surface: #ffffff;
-  --bms-border: #dce2eb;
-  --bms-border-strong: #aeb8c8;
-  --bms-focus: #2d6cdf;
-  --bms-success: #176b48;
-  --bms-success-bg: #edf8f1;
-  --bms-warning: #80520b;
-  --bms-warning-bg: #fff7e8;
-  --bms-danger: #9b2c36;
-  --bms-danger-bg: #fff4f3;
-  --bms-radius-sm: 7px;
-  --bms-radius-md: 11px;
-  --bms-radius-lg: 15px;
-  --bms-shadow-sm: 0 1px 3px rgba(26, 35, 54, .06);
-  --bms-shadow-md: 0 10px 30px rgba(26, 35, 54, .10);
-  color: var(--bms-ink);
-  background: var(--bms-canvas);
-  font-family: Inter, "Segoe UI", "Cairo", sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-}
-.bms-workspace[lang='ar'] { font-family: Cairo, "Segoe UI", sans-serif; }
+/* BMS page primitives. Design tokens (--bms-*) are global: see src/styles/_shell-tokens.scss. */
 
 /* Shared BMS page primitives: cards, headings, buttons, fields, tables, states. */
 .page-heading { align-items: center; margin-bottom: 18px; }

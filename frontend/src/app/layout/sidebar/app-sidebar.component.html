@@ -1,0 +1,67 @@
+<aside id="app-sidebar" class="app-sidebar" [class.is-rail]="rail" [class.is-mobile]="mobile" [class.is-open]="mobileOpen"
+  [attr.aria-hidden]="mobile && !mobileOpen ? 'true' : null" [attr.inert]="mobile && !mobileOpen ? '' : null">
+  <a routerLink="/bms/dashboard" class="sidebar-brand" (click)="navigated.emit()" [attr.aria-label]="lang.t('appName')">
+    <img src="assets/img/alphaiota-logo.png" alt="">
+    <span class="sidebar-wordmark" *ngIf="!rail">Alphaiota<small>{{lang.t('bms')}}</small></span>
+  </a>
+
+  <button *ngIf="showOpenToWork" type="button" class="sidebar-action" data-bs-toggle="modal" data-bs-target="#openToWork"
+    (click)="openToWork.emit()" [attr.title]="rail ? lang.t('openToWork') : null" [attr.aria-label]="lang.t('openToWork')">
+    <i class="bx bx-user-check" aria-hidden="true"></i><span *ngIf="!rail">{{lang.t('openToWork')}}</span>
+  </button>
+
+  <nav class="sidebar-nav" [attr.aria-label]="lang.t('primaryNavigation')">
+    <div class="sidebar-note" *ngIf="abilitiesLoading && !rail" role="status">
+      <span class="sidebar-spinner" aria-hidden="true"></span><span>{{lang.t('loadingNavigation')}}</span>
+    </div>
+    <div class="sidebar-note sidebar-note-error" *ngIf="abilitiesFailed && !rail" role="alert">
+      <span>{{lang.t('navigationLoadError')}}</span>
+      <button type="button" (click)="retryAbilities.emit()">{{lang.t('retry')}}</button>
+    </div>
+
+    <ng-container *ngFor="let group of groups; let index = index; trackBy: trackGroup">
+      <ng-container *ngIf="startsSection(index)">
+        <p class="sidebar-section" *ngIf="!rail">{{lang.t(sectionLabel(group))}}</p>
+        <hr class="sidebar-divider" *ngIf="rail && index > 0">
+      </ng-container>
+
+      <!-- A group with a single destination is rendered as a direct link. -->
+      <a *ngIf="group.items.length === 1; else multi" class="nav-entry nav-direct" [routerLink]="group.items[0].route"
+        [class.active]="group.items[0].id === activeItemId" [attr.aria-current]="group.items[0].id === activeItemId ? 'page' : null"
+        [attr.title]="rail ? lang.t(group.items[0].label) : null" (click)="navigated.emit()">
+        <i class="bx nav-icon" [ngClass]="group.icon" aria-hidden="true"></i>
+        <span class="nav-label" *ngIf="!rail">{{lang.t(group.items[0].label)}}</span>
+        <span class="nav-badge" *ngIf="badge(group.items[0].badge) > 0">{{badge(group.items[0].badge)}}</span>
+      </a>
+
+      <ng-template #multi>
+        <section class="nav-group" [class.is-current]="group.id === activeGroupId" [class.is-expanded]="isExpanded(group) && !rail">
+          <button type="button" class="nav-entry nav-group-toggle" [attr.aria-expanded]="rail ? null : isExpanded(group)"
+            [attr.aria-controls]="rail ? null : 'app-nav-' + group.id" [attr.title]="rail ? lang.t(group.label) : null"
+            [attr.aria-label]="rail ? lang.t(group.label) : null" (click)="toggle(group)">
+            <i class="bx nav-icon" [ngClass]="group.icon" aria-hidden="true"></i>
+            <span class="nav-label" *ngIf="!rail">{{lang.t(group.label)}}</span>
+            <span class="nav-badge" *ngIf="badge(group.badge) > 0">{{badge(group.badge)}}</span>
+            <i class="bx bx-chevron-down nav-chevron" *ngIf="!rail" aria-hidden="true"></i>
+          </button>
+          <ul class="nav-items" *ngIf="isExpanded(group) && !rail" [id]="'app-nav-' + group.id">
+            <li *ngFor="let item of group.items; trackBy: trackItem">
+              <a [routerLink]="item.route" [class.active]="item.id === activeItemId"
+                [attr.aria-current]="item.id === activeItemId ? 'page' : null" (click)="navigated.emit()">
+                <i class="bx nav-item-icon" [ngClass]="item.icon" aria-hidden="true"></i>
+                <span class="nav-label">{{lang.t(item.label)}}</span>
+                <span class="nav-badge" *ngIf="badge(item.badge) > 0">{{badge(item.badge)}}</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </ng-template>
+    </ng-container>
+  </nav>
+
+  <button *ngIf="!mobile" type="button" class="sidebar-collapse" (click)="collapsedChange.emit(!collapsed)"
+    [attr.aria-label]="lang.t(collapsed ? 'expandSidebar' : 'collapseSidebar')" [attr.aria-pressed]="collapsed">
+    <i class="bx sidebar-collapse-icon" [ngClass]="collapsed ? 'bx-chevrons-right' : 'bx-chevrons-left'" aria-hidden="true"></i>
+    <span *ngIf="!rail">{{lang.t('collapseSidebar')}}</span>
+  </button>
+</aside>

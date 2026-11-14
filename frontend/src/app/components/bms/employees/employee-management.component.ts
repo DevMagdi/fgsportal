@@ -1,20 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BmsApiService } from '../bms-api.service';
 import { BmsBaseComponent } from '../bms-base.component';
 import { BmsExportService } from '../bms-export.service';
 import { BmsConfirmService } from '../bms-confirm.service';
 import { BmsLanguageService } from '../bms-language.service';
+import { unitNameById } from '../organization/organization.util';
 
 /**
  * Employee management (BRD section 5): directory with search + unit/title/
  * status filters, create/edit, activation, photo, certificates and roles.
  * The backend re-checks every permission; this screen only mirrors it.
  */
-@Component({ selector: 'app-employee-management', templateUrl: './employee-management.component.html', styleUrls: ['../bms-shared.scss'] })
-export class EmployeeManagementComponent extends BmsBaseComponent implements OnInit {
+@Component({ selector: 'app-employee-management', templateUrl: './employee-management.component.html', styleUrls: ['../bms-shared.scss'], styles: ['.unit-link{text-decoration:none}.unit-link:hover{text-decoration:underline}.directory-footer{align-items:center;margin:14px 0 0}.directory-footer p{margin:0}'] })
+export class EmployeeManagementComponent extends BmsBaseComponent implements OnInit, OnDestroy {
   employees: any[] = [];
   meta: any = { total: 0 };
+  page = 1;
+  private routeSub?: Subscription;
+  private unitFromLink = false;
   roles: any[] = [];
   selection: any = null;
   editing: any = null;
@@ -23,7 +29,7 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
   certificate: any = { name: '', issuer: '', issued_at: '', expires_at: '', business_unit_id: '' };
   certificateFile: File | null = null;
 
-  constructor(api: BmsApiService, lang: BmsLanguageService, private fb: FormBuilder, private exporter: BmsExportService, private confirmDialog: BmsConfirmService) {
+  constructor(api: BmsApiService, lang: BmsLanguageService, private fb: FormBuilder, private exporter: BmsExportService, private confirmDialog: BmsConfirmService, private route: ActivatedRoute) {
     super(api, lang);
     this.form = fb.group({
       firstname: ['', Validators.required], lastname: ['', Validators.required],
@@ -35,14 +41,50 @@ export class EmployeeManagementComponent extends BmsBaseComponent implements OnI
     });
   }
 
-  ngOnInit(): void { super.ngOnInit(); this.load(); }
+  ngOnInit(): void {
+    super.ngOnInit();
+    // A unit page links here with ?business_unit_id= so the directory opens on that unit.
+    // The parameter is followed, not read once: opening "Employees" from the sidebar afterwards
+    // reuses this component, and must drop the unit filter that the link applied.
+    this.routeSub = this.route.queryParamMap.subscribe(params => {
+      const unit = params.get('business_unit_id');
+      if (unit && /^\d+$/.test(unit)) {
+        this.filters.business_unit_id = unit;
+        this.unitFromLink = true;
+      } else if (this.unitFromLink) {
+        this.filters.business_unit_id = '';
+        this.unitFromLink = false;
+      }
+      this.applyFilters();
+    });
+  }
+
+  ngOnDestroy(): void { this.routeSub?.unsubscribe(); }
+
+  /** Filters changed: start again from the first page. */
+  applyFilters(): void { this.page = 1; this.load(); }
+  goToPage(page: number): void {
+    if (page < 1 || page > this.lastPage || page === this.page) return;
+    this.page = page;
+    this.load();
+  }
+  get lastPage(): number { return Number(this.meta?.last_page) || 1; }
+  /** Name of the unit a role is scoped to; an unscoped role applies to the whole organization. */
+  roleScope(role: any): string {
+    if (!role?.business_unit_id) return this.lang.t('globalRole');
+    // A role can point at a unit this account cannot see, or one that was deleted: say so instead of printing an id.
+    const known = (this.lookups.units || []).some((unit: any) => unit.id === role.business_unit_id);
+    return known ? unitNameById(this.lookups.units, role.business_unit_id) : this.lang.t('orgUnitUnavailable');
+  }
+  trackId(_index: number, item: any): number { return item.id; }
 
   load(): void {
     this.loading = true;
-    this.api.get<any>('employees', this.cleanFilters()).subscribe({
+    this.api.get<any>('employees', { ...this.cleanFilters(), page: this.page }).subscribe({
       next: result => {
         this.employees = result.data || [];
         this.meta = result.meta || { total: this.employees.length };
+        this.page = Number(this.meta.current_page) || 1;
         this.roles = this.lookups.roles || [];
         if (this.selection) this.selection = this.employees.find(item => item.id === this.selection.id) || this.selection;
         this.loading = false;

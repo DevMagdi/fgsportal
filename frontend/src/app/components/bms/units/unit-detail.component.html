@@ -1,0 +1,234 @@
+<div class="org-page">
+  <nav class="unit-crumbs" [attr.aria-label]="lang.t('orgBackToUnits')">
+    <a class="org-link" routerLink="/bms/organization">{{ lang.t('organization') }}</a>
+    <span aria-hidden="true">/</span>
+    <a class="org-link" routerLink="/bms/units">{{ lang.t('orgBackToUnits') }}</a>
+    <ng-container *ngIf="unit?.parent">
+      <span aria-hidden="true">/</span>
+      <a class="org-link" [routerLink]="['/bms/units', unit.parent.id]">{{ unit.parent.name }}</a>
+    </ng-container>
+    <ng-container *ngIf="unit">
+      <span aria-hidden="true">/</span>
+      <span class="unit-crumb-current" aria-current="page">{{ unit.name }}</span>
+    </ng-container>
+  </nav>
+
+  <app-bms-state *ngIf="unitState === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+  <app-bms-state *ngIf="unitState === 'error'" kind="error" [message]="lang.t('orgUnitNotFound')" [actionLabel]="lang.t('retry')" (action)="loadAll()"></app-bms-state>
+
+  <ng-container *ngIf="unitState === 'ready' && unit">
+    <header class="org-header">
+      <div>
+        <h1>{{ unit.name }}
+          <span class="org-chip unit-status" [ngClass]="unit.is_active ? 'org-chip-success' : 'org-chip-muted'">{{ unit.is_active ? lang.t('active') : lang.t('inactive') }}</span>
+        </h1>
+        <p>{{ unit.parent?.name ? lang.t('orgPartOf') + ' ' + unit.parent.name : lang.t('orgTopLevel') }}</p>
+      </div>
+    </header>
+
+    <section class="org-stats" [attr.aria-label]="unit.name">
+      <app-bms-stat icon="bx-group" [label]="lang.t('orgHeadcount')" [value]="headcount"></app-bms-stat>
+      <app-bms-stat icon="bx-buildings" [label]="lang.t('orgSubUnits')" [value]="(unit.children || []).length"></app-bms-stat>
+      <app-bms-stat *ngIf="can('products.view')" icon="bx-package" [label]="lang.t('orgProductsTitle')" [value]="productsState === 'ready' ? products.length : null"></app-bms-stat>
+      <app-bms-stat *ngIf="can('directory.view')" icon="bx-git-branch" [label]="lang.t('orgReportingTitle')" [value]="employeesState === 'ready' ? linked : null"
+        [hint]="lang.t('orgReportingStatHint')"></app-bms-stat>
+    </section>
+
+    <div class="unit-columns">
+      <section class="org-panel" aria-labelledby="unit-about-title">
+        <div class="org-panel-head"><h2 id="unit-about-title">{{ lang.t('orgAbout') }}</h2></div>
+        <div class="org-panel-body unit-stack">
+          <p class="unit-text" *ngIf="unit.description">{{ unit.description }}</p>
+          <p class="org-muted" *ngIf="!unit.description">{{ lang.t('orgNoDescription') }}</p>
+          <div *ngIf="unit.services?.length">
+            <span class="unit-card-label">{{ lang.t('orgServices') }}</span>
+            <div class="org-chips"><span class="org-chip org-chip-plain" *ngFor="let service of unit.services">{{ service }}</span></div>
+          </div>
+          <div *ngIf="unit.key_messages">
+            <span class="unit-card-label">{{ lang.t('keyMessages') }}</span>
+            <p class="unit-text">{{ unit.key_messages }}</p>
+          </div>
+          <div *ngIf="unit.children?.length">
+            <span class="unit-card-label">{{ lang.t('orgSubUnits') }}</span>
+            <div class="org-chips">
+              <a class="org-chip" *ngFor="let child of unit.children; trackBy: trackId" [routerLink]="['/bms/units', child.id]">{{ child.name }}</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="org-panel" aria-labelledby="unit-management-title">
+        <div class="org-panel-head"><h2 id="unit-management-title">{{ lang.t('orgManagement') }}</h2></div>
+        <div class="org-panel-body unit-stack">
+          <div>
+            <span class="unit-card-label">{{ lang.t('orgDirector') }}</span>
+            <app-bms-person *ngIf="directorName" [name]="directorName" [detail]="unit.director?.email || ''"></app-bms-person>
+            <span class="org-muted" *ngIf="!directorName">{{ lang.t('orgNoDirector') }}</span>
+          </div>
+          <div *ngIf="can('directory.view')">
+            <span class="unit-card-label">{{ lang.t('orgUnitRoles') }}</span>
+            <span class="org-muted" *ngIf="employeesState === 'loading'">{{ lang.t('loading') }}</span>
+            <span class="org-muted" *ngIf="employeesState === 'ready' && !unitRoles.length">{{ lang.t('orgNoUnitRoles') }}</span>
+            <ul class="unit-list" *ngIf="employeesState === 'ready' && unitRoles.length">
+              <li *ngFor="let row of unitRoles; trackBy: trackRole">
+                <app-bms-person [name]="row.employee.name" [detail]="row.employee.job_title || ''" [compact]="true"></app-bms-person>
+                <div class="org-chips"><span class="org-chip" *ngFor="let role of row.roles">{{ role }}</span></div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="org-panel" aria-labelledby="unit-people-title">
+      <div class="org-panel-head">
+        <h2 id="unit-people-title">{{ lang.t('orgPeopleTitle') }} <span class="org-muted unit-count">({{ headcount }})</span></h2>
+        <a class="org-link" *ngIf="can('directory.view')" routerLink="/bms/employees" [queryParams]="{ business_unit_id: unitId }">{{ lang.t('orgManagePeople') }}</a>
+      </div>
+      <div class="org-panel-body">
+        <app-bms-state *ngIf="employeesState === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+        <app-bms-state *ngIf="employeesState === 'error'" kind="error" [message]="lang.t('orgPeopleLoadError')" [actionLabel]="lang.t('retry')" (action)="loadEmployees()"></app-bms-state>
+
+        <!-- Full directory rows -->
+        <ng-container *ngIf="employeesState === 'ready'">
+          <app-bms-state *ngIf="!employees.length" kind="empty" [message]="lang.t('orgNoMembers')"></app-bms-state>
+          <ul class="unit-people" *ngIf="employees.length">
+            <li class="unit-member" *ngFor="let employee of employees; trackBy: trackId" [class.is-inactive]="employee.active === false">
+              <app-bms-person [name]="employee.name" [detail]="employee.job_title || employee.email || ''"></app-bms-person>
+              <div class="org-chips">
+                <span class="org-chip" *ngFor="let role of rolesIn(employee)">{{ role }}</span>
+                <span class="org-chip org-chip-muted" *ngIf="employee.active === false">{{ lang.t('inactive') }}</span>
+              </div>
+              <small class="org-muted" *ngIf="employee.manager">{{ lang.t('orgReportsTo') }}: {{ employee.manager }}</small>
+              <small class="org-muted" *ngIf="otherUnits(employee).length">{{ lang.t('orgSharedWith') }}:
+                <ng-container *ngFor="let other of otherUnits(employee); let last = last">{{ other.name }}<ng-container *ngIf="!last">, </ng-container></ng-container>
+              </small>
+            </li>
+          </ul>
+        </ng-container>
+
+        <!-- Without directory access: names from the unit record only -->
+        <ng-container *ngIf="abilitiesLoaded && !can('directory.view')">
+          <p class="org-note unit-gap"><i class="bx bx-info-circle" aria-hidden="true"></i><span>{{ lang.t('orgNoDirectoryPermission') }}</span></p>
+          <app-bms-state *ngIf="!basicMembers.length" kind="empty" [message]="lang.t('orgNoMembers')"></app-bms-state>
+          <ul class="unit-people" *ngIf="basicMembers.length">
+            <li class="unit-member" *ngFor="let person of basicMembers; trackBy: trackId">
+              <app-bms-person [name]="memberName(person)" [detail]="person.email || ''"></app-bms-person>
+            </li>
+          </ul>
+        </ng-container>
+      </div>
+    </section>
+
+    <section class="org-panel" aria-labelledby="unit-reporting-title" *ngIf="can('directory.view')">
+      <div class="org-panel-head">
+        <div>
+          <h2 id="unit-reporting-title">{{ lang.t('orgReportingTitle') }}</h2>
+          <p>{{ lang.t('orgReportingHint') }}</p>
+        </div>
+      </div>
+      <div class="org-panel-body">
+        <app-bms-state *ngIf="employeesState === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+        <app-bms-state *ngIf="employeesState === 'error'" kind="error" [message]="lang.t('orgPeopleLoadError')" [actionLabel]="lang.t('retry')" (action)="loadEmployees()"></app-bms-state>
+        <ng-container *ngIf="employeesState === 'ready'">
+          <app-bms-state *ngIf="!lines.length" kind="empty" [message]="lang.t('orgNoReporting')"></app-bms-state>
+          <ul class="unit-lines" *ngIf="lines.length">
+            <li class="unit-line" *ngFor="let node of lines; trackBy: trackNode" [class.is-root]="node.depth === 0" [style.--depth]="node.depth">
+              <app-bms-person [name]="node.employee.name" [detail]="node.employee.job_title || ''" [compact]="node.depth > 0"></app-bms-person>
+              <span class="unit-line-meta">
+                <span class="org-chip" *ngFor="let role of rolesIn(node.employee)">{{ role }}</span>
+                <span class="org-chip org-chip-plain" *ngIf="node.reports.length">{{ lang.t('orgDirectReports') }}: {{ node.reports.length }}</span>
+                <small class="org-muted" *ngIf="outsideManager(node.employee)">{{ lang.t('orgReportsTo') }}: {{ outsideManager(node.employee) }} ({{ lang.t('orgOutsideUnit') }})</small>
+              </span>
+            </li>
+          </ul>
+          <div class="unit-unattached" *ngIf="lines.length && unattached.length">
+            <span class="unit-card-label">{{ lang.t('orgUnattached') }} ({{ unattached.length }})</span>
+            <div class="org-chips">
+              <span class="org-chip org-chip-plain" *ngFor="let employee of unattached; trackBy: trackId">{{ employee.name }}</span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </section>
+
+    <div class="unit-columns">
+      <section class="org-panel" aria-labelledby="unit-products-title">
+        <div class="org-panel-head">
+          <h2 id="unit-products-title">{{ lang.t('orgProductsTitle') }}</h2>
+          <a class="org-link" *ngIf="can('products.view')" routerLink="/bms/products">{{ lang.t('orgManageProducts') }}</a>
+        </div>
+        <div class="org-panel-body">
+          <app-bms-state *ngIf="abilitiesLoaded && !can('products.view')" kind="empty" [message]="lang.t('orgNoProductPermission')"></app-bms-state>
+          <app-bms-state *ngIf="productsState === 'loading'" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+          <app-bms-state *ngIf="productsState === 'error'" kind="error" [message]="lang.t('orgProductsLoadError')" [actionLabel]="lang.t('retry')" (action)="loadProducts()"></app-bms-state>
+          <app-bms-state *ngIf="productsState === 'ready' && !products.length" kind="empty" [message]="lang.t('orgNoUnitProducts')"></app-bms-state>
+          <ul class="unit-list" *ngIf="productsState === 'ready' && products.length">
+            <li class="unit-product" *ngFor="let product of products; trackBy: trackId">
+              <div class="unit-product-head">
+                <strong>{{ product.product_name }}</strong>
+                <span class="org-chip org-chip-plain" *ngIf="product.current_phase?.name">{{ product.current_phase?.name }}</span>
+              </div>
+              <div class="org-progress" *ngIf="product.overall_progress !== null && product.overall_progress !== undefined">
+                <span class="org-progress-track" role="progressbar" [attr.aria-valuenow]="product.overall_progress" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="product.product_name">
+                  <span class="org-progress-fill" [style.width.%]="product.overall_progress"></span>
+                </span>
+                <span class="org-progress-value">{{ product.overall_progress }}%</span>
+              </div>
+              <small class="org-muted" *ngIf="otherUnits(product).length">{{ lang.t('orgSharedWith') }}:
+                <ng-container *ngFor="let other of otherUnits(product); let last = last">{{ other.name }}<ng-container *ngIf="!last">, </ng-container></ng-container>
+              </small>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="org-panel" aria-labelledby="unit-plans-title">
+        <div class="org-panel-head">
+          <h2 id="unit-plans-title">{{ lang.t('orgPlansTitle') }}</h2>
+          <a class="org-link" *ngIf="can('plans.view')" routerLink="/bms/plans">{{ lang.t('orgOpenPlans') }}</a>
+        </div>
+        <div class="org-panel-body">
+          <app-bms-state *ngIf="!plans.length" kind="empty" [message]="lang.t('orgNoPlans')"></app-bms-state>
+          <ul class="unit-list" *ngIf="plans.length">
+            <li class="unit-product" *ngFor="let plan of plans; trackBy: trackId">
+              <div class="unit-product-head">
+                <strong>{{ lang.t('orgWeekOf') }} {{ plan.week_start | date: 'mediumDate' }}</strong>
+                <span class="org-muted">{{ (plan.tasks || []).length }} {{ lang.t('orgTasks') }}</span>
+              </div>
+              <div class="org-progress" *ngIf="planProgress(plan) !== null">
+                <span class="org-progress-track" role="progressbar" [attr.aria-valuenow]="planProgress(plan)" aria-valuemin="0" aria-valuemax="100"
+                  [attr.aria-label]="lang.t('orgWeekOf') + ' ' + (plan.week_start | date: 'mediumDate')">
+                  <span class="org-progress-fill" [style.width.%]="planProgress(plan)"></span>
+                </span>
+                <span class="org-progress-value">{{ planProgress(plan) }}%</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <section class="org-panel" aria-labelledby="unit-meetings-title" *ngIf="minutes.length">
+      <div class="org-panel-head"><h2 id="unit-meetings-title">{{ lang.t('orgMeetingsTitle') }}</h2></div>
+      <div class="org-panel-body">
+        <ul class="unit-list">
+          <li class="unit-product" *ngFor="let minute of minutes; trackBy: trackId">
+            <div class="unit-product-head">
+              <strong>{{ minute.meeting?.title || '-' }}</strong>
+              <span class="org-muted" *ngIf="minute.meeting?.starts_at">{{ minute.meeting?.starts_at | date: 'medium' }}</span>
+            </div>
+            <p class="unit-text" *ngIf="minute.decisions">{{ minute.decisions }}</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="org-panel" aria-labelledby="unit-projects-title">
+      <div class="org-panel-head"><h2 id="unit-projects-title">{{ lang.t('orgProjectsTitle') }}</h2></div>
+      <div class="org-panel-body">
+        <p class="org-note"><i class="bx bx-info-circle" aria-hidden="true"></i><span>{{ lang.t('orgProjectsPending') }}</span></p>
+      </div>
+    </section>
+  </ng-container>
+</div>

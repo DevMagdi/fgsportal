@@ -1,13 +1,20 @@
 
-<div *ngIf="loggedIn">
+<!--
+  Signed in: every page renders inside the single application shell (one sidebar, one header, one outlet).
+
+  The two states share one *ngIf / else on purpose. Each holds a primary <router-outlet>, and the router
+  keeps a single registration for it: the outgoing outlet must be destroyed before the incoming one is
+  created, otherwise the outgoing outlet's teardown clears the registration of the new one and pages stop
+  rendering after sign-in or sign-out until the browser is reloaded.
+-->
+<div *ngIf="loggedIn; else signedOut">
     <alphaiota-loading></alphaiota-loading>
-    <app-navbar></app-navbar>
+    <app-shell></app-shell>
 </div>
 
-<!-- <app-signin *ngIf="!loggedIn"></app-signin> -->
-<div class="main" *ngIf="!loggedIn">
-    <alphaiota-loading></alphaiota-loading>
-    <router-outlet></router-outlet>
-</div>
-
-<!-- {{ message | async | json }} -->
+<ng-template #signedOut>
+    <div class="main">
+        <alphaiota-loading></alphaiota-loading>
+        <router-outlet></router-outlet>
+    </div>
+</ng-template>

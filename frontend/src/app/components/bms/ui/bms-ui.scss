@@ -1,0 +1,25 @@
+:host { display: block; min-width: 0; }
+
+.bms-person { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.bms-person-avatar {
+  flex: 0 0 auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  background: #ecebf5; color: var(--bms-primary); font-size: 13px; font-weight: 700; letter-spacing: .02em;
+}
+.bms-person-copy { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.bms-person-name { color: var(--bms-ink); font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bms-person-detail { color: var(--bms-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bms-person-compact .bms-person-avatar { width: 28px; height: 28px; font-size: 11px; }
+.bms-person-compact .bms-person-name { font-size: 13px; }
+
+.bms-stat {
+  display: flex; align-items: center; gap: 14px; height: 100%; padding: 16px 18px; background: var(--bms-surface);
+  border: 1px solid var(--bms-border); border-radius: var(--bms-radius-lg); box-shadow: var(--bms-shadow-sm);
+}
+.bms-stat-icon {
+  flex: 0 0 auto; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px;
+  background: #ecebf5; color: var(--bms-primary); font-size: 22px;
+}
+.bms-stat-copy { display: flex; flex-direction: column; min-width: 0; }
+.bms-stat-value { color: var(--bms-ink); font-size: 26px; font-weight: 700; line-height: 1.15; }
+.bms-stat-label { color: var(--bms-muted); font-size: 13px; }
+.bms-stat-hint { color: var(--bms-muted); font-size: 11.5px; margin-top: 2px; }

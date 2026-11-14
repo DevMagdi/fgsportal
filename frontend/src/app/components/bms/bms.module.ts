@@ -4,17 +4,16 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
-import { BmsAccessService } from './bms-access.service';
-import { BmsApiService } from './bms-api.service';
 import { BmsExportService } from './bms-export.service';
-import { BmsLanguageService } from './bms-language.service';
 import { BmsPermissionGuard } from './bms-permission.guard';
-import { BmsShellComponent } from './bms-shell.component';
-import { BmsStateComponent } from './bms-state.component';
+import { BmsStateModule } from './bms-state.module';
 import { BmsConfirmDialogComponent } from './bms-confirm-dialog.component';
 import { BmsConfirmService } from './bms-confirm.service';
 import { ExecutiveDashboardComponent } from './dashboard/executive-dashboard.component';
 import { BusinessUnitsComponent } from './units/business-units.component';
+import { UnitDetailComponent } from './units/unit-detail.component';
+import { OrganizationOverviewComponent } from './organization/organization-overview.component';
+import { BmsUiModule } from './ui/bms-ui.module';
 import { WeeklyPlansComponent } from './plans/weekly-plans.component';
 import { OpportunitiesComponent } from './opportunities/opportunities.component';
 import { ProductTrackingComponent } from './products/product-tracking.component';
@@ -27,13 +26,21 @@ import { BmsNoAccessComponent } from './no-access/bms-no-access.component';
 import { BMS_COLLECTIONS } from './bms-catalog';
 import { AccessComponent } from './access/access.component';
 
-/** Every screen declares the ability it needs; the guard enforces it. */
+/**
+ * Every screen declares the ability it needs; the guard enforces it.
+ *
+ * The parent route is component-less: BMS pages render directly inside the
+ * single application shell (`AppShellComponent`), which owns the only sidebar
+ * and header. There is no BMS-specific shell any more.
+ */
 const routes: Routes = [{
-  path: '', component: BmsShellComponent, children: [
+  path: '', children: [
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     { path: 'no-access', component: BmsNoAccessComponent },
     { path: 'dashboard', component: ExecutiveDashboardComponent, data: { ability: 'dashboard.view' }, canActivate: [BmsPermissionGuard] },
+    { path: 'organization', component: OrganizationOverviewComponent, data: { ability: 'units.view' }, canActivate: [BmsPermissionGuard] },
     { path: 'units', component: BusinessUnitsComponent, data: { ability: 'units.view' }, canActivate: [BmsPermissionGuard] },
+    { path: 'units/:id', component: UnitDetailComponent, data: { ability: 'units.view' }, canActivate: [BmsPermissionGuard] },
     { path: 'plans', component: WeeklyPlansComponent, data: { ability: 'plans.view' }, canActivate: [BmsPermissionGuard] },
     { path: 'my-tasks', component: MyTasksComponent, data: { ability: 'plans.view' }, canActivate: [BmsPermissionGuard] },
     { path: 'opportunities', component: OpportunitiesComponent, data: { ability: 'opportunities.view' }, canActivate: [BmsPermissionGuard] },
@@ -53,11 +60,13 @@ const routes: Routes = [{
 
 @NgModule({
   declarations: [
-    BmsShellComponent, BmsStateComponent, BmsConfirmDialogComponent, ExecutiveDashboardComponent, BusinessUnitsComponent, WeeklyPlansComponent,
+    BmsConfirmDialogComponent, ExecutiveDashboardComponent, BusinessUnitsComponent, WeeklyPlansComponent,
     OpportunitiesComponent, ProductTrackingComponent, BmsCollectionComponent, MeetingsComponent,
     ReportsComponent, AccessComponent, EmployeeManagementComponent, MyTasksComponent, BmsNoAccessComponent,
+    OrganizationOverviewComponent, UnitDetailComponent,
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, RouterModule.forChild(routes)],
-  providers: [BmsApiService, BmsLanguageService, BmsExportService, BmsAccessService, BmsConfirmService],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, BmsStateModule, BmsUiModule, RouterModule.forChild(routes)],
+  // BmsApiService, BmsAccessService and BmsLanguageService are root singletons shared with the application shell.
+  providers: [BmsExportService, BmsConfirmService],
 })
 export class BmsModule {}

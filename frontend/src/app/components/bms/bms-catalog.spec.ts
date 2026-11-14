@@ -5,7 +5,7 @@ import * as path from 'path';
 
 describe('BMS BRD catalogue',()=>{
   it('exposes the core platform and every BRD workflow exactly once',()=>{
-    expect(BMS_MODULE_KEYS.length).toBe(16);
+    expect(BMS_MODULE_KEYS.length).toBe(17);
     expect(new Set(BMS_MODULE_KEYS).size).toBe(BMS_MODULE_KEYS.length);
     ['dashboard','plans','my-tasks','opportunities','products','meetings','leads','recruitment','procurement','events','documents','employees','reports'].forEach(key=>expect(BMS_MODULE_KEYS).toContain(key));
   });
