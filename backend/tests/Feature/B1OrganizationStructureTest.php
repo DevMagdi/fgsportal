@@ -121,31 +121,86 @@ class B1OrganizationStructureTest extends BmsTestCase
                 $declared[] = implode('|', [$table, $column, $references, strtoupper($onDelete)]);
             }
         }
-        $actual = [];
-        foreach ($created as $table) {
-            foreach (DB::select("PRAGMA foreign_key_list('{$table}')") as $key) {
-                $this->assertSame('id', $key->to);
-                $actual[] = implode('|', [$table, $key->from, $key->table, strtoupper($key->on_delete)]);
+        $mysql = DB::connection()->getDriverName() === 'mysql';
+        if ($mysql) {
+            // MySQL builds every declared key, including the three on pre-existing tables.
+            $declared = [];
+            foreach (\CreateBmsOrganizationStructure::FOREIGN_KEYS as [$table, $column, $references, $onDelete]) {
+                $declared[] = implode('|', [$table, $column, $references, strtoupper($onDelete)]);
             }
+            $columns = array_unique(array_map(fn ($key) => $key[0].'.'.$key[1], \CreateBmsOrganizationStructure::FOREIGN_KEYS));
+            $actual = [];
+            $rows = DB::select(
+                'SELECT k.TABLE_NAME AS table_name, k.COLUMN_NAME AS column_name, k.REFERENCED_TABLE_NAME AS referenced_table,
+                        k.REFERENCED_COLUMN_NAME AS referenced_column, r.DELETE_RULE AS delete_rule
+                   FROM information_schema.KEY_COLUMN_USAGE k
+                   JOIN information_schema.REFERENTIAL_CONSTRAINTS r
+                     ON r.CONSTRAINT_SCHEMA = k.CONSTRAINT_SCHEMA AND r.CONSTRAINT_NAME = k.CONSTRAINT_NAME AND r.TABLE_NAME = k.TABLE_NAME
+                  WHERE k.TABLE_SCHEMA = DATABASE() AND k.REFERENCED_TABLE_NAME IS NOT NULL'
+            );
+            foreach ($rows as $key) {
+                if (!in_array($key->table_name.'.'.$key->column_name, $columns, true)) continue;
+                $this->assertSame('id', $key->referenced_column);
+                $actual[] = implode('|', [$key->table_name, $key->column_name, $key->referenced_table, strtoupper($key->delete_rule)]);
+            }
+            // Exactly one key per declared column: nothing missing, nothing duplicated.
+            sort($actual);
+            sort($declared);
+            $this->assertSame($declared, $actual);
+            $this->assertCount(13, $declared);
+        } else {
+            $actual = [];
+            foreach ($created as $table) {
+                foreach (DB::select("PRAGMA foreign_key_list('{$table}')") as $key) {
+                    $this->assertSame('id', $key->to);
+                    $actual[] = implode('|', [$table, $key->from, $key->table, strtoupper($key->on_delete)]);
+                }
+            }
+            $this->assertEqualsCanonicalizing($actual, $declared);
+            // The three keys on pre-existing tables are the ones SQLite cannot build.
+            $this->assertCount(10, $declared);
         }
-        $this->assertEqualsCanonicalizing($actual, $declared);
         $this->assertCount(13, \CreateBmsOrganizationStructure::FOREIGN_KEYS);
-        // The three keys on pre-existing tables are the ones SQLite cannot build.
-        $this->assertCount(10, $declared);
 
         $declaredIndexes = [];
         foreach (\CreateBmsOrganizationStructure::UNIQUE_INDEXES as [$table, $columns, $name]) {
             $declaredIndexes[] = $table.'|'.$name.'|'.implode(',', $columns);
         }
         $actualIndexes = [];
-        foreach ($created as $table) {
-            foreach (DB::select("PRAGMA index_list('{$table}')") as $index) {
-                if (!$index->unique || $index->origin !== 'c') continue;
-                $columns = array_map(fn ($column) => $column->name, DB::select("PRAGMA index_info('{$index->name}')"));
-                $actualIndexes[] = $table.'|'.$index->name.'|'.implode(',', $columns);
+        if ($mysql) {
+            $placeholders = implode(',', array_fill(0, count($created), '?'));
+            $rows = DB::select(
+                "SELECT TABLE_NAME AS table_name, INDEX_NAME AS index_name, COLUMN_NAME AS column_name
+                   FROM information_schema.STATISTICS
+                  WHERE TABLE_SCHEMA = DATABASE() AND NON_UNIQUE = 0 AND INDEX_NAME <> 'PRIMARY' AND TABLE_NAME IN ({$placeholders})
+                  ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX",
+                $created
+            );
+            $grouped = [];
+            foreach ($rows as $row) $grouped[$row->table_name.'|'.$row->index_name][] = $row->column_name;
+            foreach ($grouped as $key => $columns) $actualIndexes[] = $key.'|'.implode(',', $columns);
+        } else {
+            foreach ($created as $table) {
+                foreach (DB::select("PRAGMA index_list('{$table}')") as $index) {
+                    if (!$index->unique || $index->origin !== 'c') continue;
+                    $columns = array_map(fn ($column) => $column->name, DB::select("PRAGMA index_info('{$index->name}')"));
+                    $actualIndexes[] = $table.'|'.$index->name.'|'.implode(',', $columns);
+                }
             }
         }
         $this->assertEqualsCanonicalizing($actualIndexes, $declaredIndexes);
+    }
+
+    /**
+     * Compares audit payloads strictly, ignoring key order: MySQL JSON columns
+     * do not preserve the order in which object keys were written.
+     */
+    private function assertSamePayload(array $expected, ?array $actual, string $message = ''): void
+    {
+        $actual = $actual ?? [];
+        ksort($expected);
+        ksort($actual);
+        $this->assertSame($expected, $actual, $message);
     }
 
     /* ----------------------------------------------------------- relationships */
@@ -804,9 +859,9 @@ class B1OrganizationStructureTest extends BmsTestCase
         $service->assign($user, null);
         $logs = BmsAuditLog::where('auditable_type', User::class)->where('auditable_id', $created->id)->orderBy('id')->get();
         $this->assertSame(['employee.primary_assignment_set', 'employee.primary_assignment_cleared'], $logs->pluck('event')->all());
-        $this->assertSame(['type' => null, 'id' => null], $logs[0]->old_values ?: ['type' => null, 'id' => null]);
-        $this->assertSame(['type' => 'business_unit', 'id' => $unit->id], $logs[0]->new_values);
-        $this->assertSame(['type' => 'business_unit', 'id' => $unit->id], $logs[1]->old_values);
+        $this->assertSamePayload(['type' => null, 'id' => null], $logs[0]->old_values ?: ['type' => null, 'id' => null]);
+        $this->assertSamePayload(['type' => 'business_unit', 'id' => $unit->id], $logs[0]->new_values);
+        $this->assertSamePayload(['type' => 'business_unit', 'id' => $unit->id], $logs[1]->old_values);
     }
 
     public function test_B1_assignment_is_atomic_and_works_from_the_stored_row(): void
@@ -850,7 +905,7 @@ class B1OrganizationStructureTest extends BmsTestCase
         $service->assign(User::findOrFail($user->id), PrimaryAssignment::TYPE_UNIT, $unit->id);
         $service->assign($stale, PrimaryAssignment::TYPE_UNIT, $other->id);
         $last = BmsAuditLog::where('auditable_id', $user->id)->where('event', 'employee.primary_assignment_set')->orderByDesc('id')->firstOrFail();
-        $this->assertSame(['type' => 'business_unit', 'id' => $unit->id], $last->old_values, 'the audit trail records the stored previous value, not the stale one');
+        $this->assertSamePayload(['type' => 'business_unit', 'id' => $unit->id], $last->old_values, 'the audit trail records the stored previous value, not the stale one');
         $this->assertSame($other->id, (int) $user->fresh()->primary_business_unit_id);
 
         // A stale model that already "has" the value does not hide a real change either.
