@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { BMS_EXTRA_LABELS } from './bms-translations';
 import { SHELL_LABELS } from '../../layout/shell-translations';
 import { ORGANIZATION_LABELS } from './organization/organization-translations';
+import { TEAMS_LABELS } from './organization/teams-translations';
 
 /**
  * Application-wide language state. It is a root singleton so the global shell
@@ -15,7 +16,7 @@ export class BmsLanguageService {
     ar: { bms:'إدارة الأعمال', dashboard:'لوحة الإدارة التنفيذية', units:'وحدات الأعمال', plans:'الخطط الأسبوعية', opportunities:'الفرص والمناقصات', products:'متابعة المنتجات', language:'English', filters:'عوامل التصفية', allUnits:'كل الوحدات', allProducts:'كل المنتجات', allOpportunities:'كل الفرص', apply:'تطبيق التصفية', exportExcel:'تصدير Excel', exportPdf:'تصدير PDF', unit:'الوحدة', product:'المنتج', opportunity:'الفرصة', director:'المدير', progress:'نسبة الإنجاز', achieved:'مُنجز', inProgress:'قيد التنفيذ', notDone:'لم يتم', blockers:'المعوقات', submitted:'تم التقديم', delayed:'متأخر', noUpdate:'بدون تحديث', total:'الإجمالي', tasks:'المهام', status:'الحالة', actions:'الإجراءات', save:'حفظ', cancel:'إلغاء', edit:'تعديل', delete:'حذف', create:'إنشاء', name:'الاسم', description:'الوصف', services:'الخدمات (مفصولة بفواصل)', members:'الأعضاء', parent:'الوحدة الأم', active:'نشطة', weekStart:'بداية الأسبوع (الأحد)', objectives:'الأهداف', nextWeek:'خطة الأسبوع القادم', newPlan:'خطة أسبوعية جديدة', selectPlan:'اختر خطة أسبوعية', submitPlan:'اعتماد وإنشاء تقرير الأحد', report:'تقرير الأحد', title:'العنوان', owner:'المسؤول', dueDate:'تاريخ الاستحقاق', addTask:'إضافة مهمة', supportRequests:'طلبات الدعم', department:'القسم', details:'التفاصيل', addSupport:'طلب دعم', response:'الرد', client:'العميل', reference:'الرقم المرجعي', type:'النوع', tender:'مناقصة', stage:'المرحلة', value:'القيمة', currency:'العملة', submissionDate:'تاريخ التقديم', closeDate:'تاريخ الإغلاق المتوقع', register:'تسجيل فرصة', importExcel:'استيراد متابعة Excel', decision:'قرار Alpha Delta', reason:'السبب', go:'موافقة', noGo:'عدم موافقة', decide:'تسجيل القرار', history:'سجل المراحل', currentPhase:'المرحلة الحالية', addProduct:'إضافة منتج', phases:'المراحل', phase:'المرحلة', sequence:'الترتيب', dataNeeds:'البيانات المطلوبة', supportNeeds:'الدعم المطلوب', addPhase:'إضافة مرحلة', none:'لا يوجد', loading:'جارٍ التحميل…', error:'تعذر إكمال الطلب', saved:'تم الحفظ بنجاح', confirmDelete:'هل تريد حذف هذا العنصر؟', search:'بحث', qualification:'التأهيل', proposal:'العرض', negotiation:'التفاوض', won:'فائزة', lost:'خاسرة', pending:'معلق', notStarted:'لم تبدأ', completed:'مكتملة', blocked:'متعطلة', draft:'مسودة', resolved:'تم الحل', rejected:'مرفوض' }
   };
   constructor() {
-    [BMS_EXTRA_LABELS, SHELL_LABELS, ORGANIZATION_LABELS].forEach(extra => Object.keys(extra).forEach(language => Object.assign(this.labels[language], extra[language])));
+    [BMS_EXTRA_LABELS, SHELL_LABELS, ORGANIZATION_LABELS, TEAMS_LABELS].forEach(extra => Object.keys(extra).forEach(language => Object.assign(this.labels[language], extra[language])));
   }
   language$ = new BehaviorSubject<'en'|'ar'>((localStorage.getItem('bms-language') as 'en'|'ar') || 'en');
   get current(): 'en'|'ar' { return this.language$.value; }

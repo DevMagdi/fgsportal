@@ -13,6 +13,7 @@ import { ExecutiveDashboardComponent } from './dashboard/executive-dashboard.com
 import { BusinessUnitsComponent } from './units/business-units.component';
 import { UnitDetailComponent } from './units/unit-detail.component';
 import { OrganizationOverviewComponent } from './organization/organization-overview.component';
+import { UnitTeamsComponent } from './organization/unit-teams.component';
 import { BmsUiModule } from './ui/bms-ui.module';
 import { WeeklyPlansComponent } from './plans/weekly-plans.component';
 import { OpportunitiesComponent } from './opportunities/opportunities.component';
@@ -63,7 +64,7 @@ const routes: Routes = [{
     BmsConfirmDialogComponent, ExecutiveDashboardComponent, BusinessUnitsComponent, WeeklyPlansComponent,
     OpportunitiesComponent, ProductTrackingComponent, BmsCollectionComponent, MeetingsComponent,
     ReportsComponent, AccessComponent, EmployeeManagementComponent, MyTasksComponent, BmsNoAccessComponent,
-    OrganizationOverviewComponent, UnitDetailComponent,
+    OrganizationOverviewComponent, UnitDetailComponent, UnitTeamsComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, BmsStateModule, BmsUiModule, RouterModule.forChild(routes)],
   // BmsApiService, BmsAccessService and BmsLanguageService are root singletons shared with the application shell.

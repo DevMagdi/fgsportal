@@ -21,7 +21,8 @@ interface UnitRoleRow { employee: OrgEmployee; roles: string[]; }
  *   employees?business_unit_id=    -> directory.view
  *   products?business_unit_id=     -> products.view
  * Reporting lines come from each person's `manager_id`. They are shown as
- * reporting lines, never as teams: the system has no team records.
+ * reporting lines, never as teams. Teams and the development manager are a
+ * separate panel (app-unit-teams, teams.view), with their own endpoints.
  */
 @Component({
   selector: 'app-unit-detail',

@@ -80,6 +80,9 @@
       </section>
     </div>
 
+    <app-unit-teams *ngIf="abilitiesLoaded && can('teams.view')" [unitId]="unitId" [abilities]="abilities" [members]="basicMembers" [canManage]="!!unit.can_manage_teams"
+      [developmentManager]="unit.development_manager || null" (developmentManagerChange)="unit.development_manager = $event; unit.development_manager_id = $event?.id || null"></app-unit-teams>
+
     <section class="org-panel" aria-labelledby="unit-people-title">
       <div class="org-panel-head">
         <h2 id="unit-people-title">{{ lang.t('orgPeopleTitle') }} <span class="org-muted unit-count">({{ headcount }})</span></h2>
