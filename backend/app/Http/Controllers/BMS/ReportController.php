@@ -87,8 +87,19 @@ class ReportController extends BmsController
     public function saveKpi(Request $request)
     {
         $data=$request->validate(['business_unit_id'=>'required|exists:business_units,id','name'=>'required|string|max:200','target'=>'nullable|numeric','actual'=>'required|numeric','unit_label'=>'nullable|string|max:40','frequency'=>'nullable|string|max:20','description'=>'nullable|string|max:1000','owner_id'=>'nullable|exists:users,id','period_start'=>'required|date','period_end'=>'required|date|after_or_equal:period_start','id'=>'nullable|exists:bms_unit_kpis,id']);
-        $this->access->authorizeUnit((int)$data['business_unit_id']);$id=$data['id']??null;unset($data['id']);$kpi=UnitKpi::updateOrCreate(['id'=>$id],$data+['updated_by'=>$this->access->user()->id]);
-        $this->audit->record($kpi,'unit_kpi.saved',[],$kpi->toArray());return $this->ok($kpi,'KPI saved');
+        $id = $data['id'] ?? null;
+        if ($id !== null) {
+            // Authorize the persisted owner unit before trusting the payload's
+            // unit or writing anything; otherwise an own-unit payload could
+            // overwrite another unit's KPI by submitting its ID.
+            $existingKpi = UnitKpi::findOrFail($id);
+            $this->access->authorizeUnit((int) $existingKpi->business_unit_id);
+        }
+        $this->access->authorizeUnit((int) $data['business_unit_id']);
+        unset($data['id']);
+        $kpi = UnitKpi::updateOrCreate(['id' => $id], $data + ['updated_by' => $this->access->user()->id]);
+        $this->audit->record($kpi, 'unit_kpi.saved', [], $kpi->toArray());
+        return $this->ok($kpi, 'KPI saved');
     }
     public function social(Request $request)
     {
