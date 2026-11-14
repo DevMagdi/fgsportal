@@ -50,12 +50,12 @@ No backend source, API, database, authorization, dependency manifest, or lockfil
 
 ## Verification, screenshots, and local instructions
 
-- `git diff --check` is run before the PR update.
-- Current local build attempt: `cd frontend && npm run build -- --configuration production` → blocked before compilation: `ng: not found`.
-- Current node-spec attempt: `cd frontend && npm run test:node` → blocked because `typescript` cannot be resolved. The new utility specs therefore remain unexecuted here.
-- The checkout has no `frontend/node_modules`, globally available Angular CLI/TypeScript, or Chromium/Chrome executable. Dependencies were not installed and no browser screenshots are claimed.
-- The known pre-change CI run `43613515199` failed in Angular tests, full SQLite coverage, and MySQL 8 tests. Failed-log retrieval returned EOF; this is not validation of the current PR contents.
-- **Local verification when the repository-approved dependencies and browser are available:** from `frontend`, run `npm run build -- --configuration production`, `npm run test:node`, then `npm test -- --watch=false --browsers=ChromeHeadless`. Run the app with `npm start -- --host 0.0.0.0`, sign in using a test account that has `dashboard.view` plus the relevant unit/task/opportunity/report/meeting abilities, then open `/bms/dashboard`. Verify actual data, filters, permission-limited panels, and no-data/error states at 1440×1000 desktop, 768×1024 tablet, and 390×844 mobile viewports. Validate English LTR and Arabic RTL charts/legends in a real browser; capture populated, empty, and RTL screenshots for review. Do not use generated fixtures as proof of production data correctness.
+- `git diff --check` passed; Angular template tag structure is balanced; the implementation report has no trailing whitespace.
+- Local build attempt: `cd frontend && npm run build -- --configuration production` → blocked before compilation: `ng: not found`.
+- Local node-spec attempt: `cd frontend && npm run test:node` → blocked because `typescript` cannot be resolved. The new utility specs therefore remain unexecuted locally.
+- Fresh PR CI run `43633746527` on commit `ca9fb6f51a9bca46ee0fc294d849d210acd752ec`: frontend lint and production build **passed**; Angular tests **failed**. Backend targeted regressions, lint and analysis **passed**; full SQLite coverage and MySQL 8 **failed**. GitHub Actions failed-log retrieval returned EOF for both jobs, so exact failure diagnostics and whether the new specs are among the Angular failures could not be confirmed. CI is red; do not treat it as acceptance.
+- The checkout has no `frontend/node_modules`, globally available Angular CLI/TypeScript, or Chromium/Chrome executable. Dependencies were not installed; no browser screenshots are claimed.
+- **Local/browser verification when repository-approved dependencies and a browser are available:** from `frontend`, run `npm run build -- --configuration production`, `npm run test:node`, then `npm test -- --watch=false --browsers=ChromeHeadless`. Run with `npm start -- --host 0.0.0.0`, sign in with a test account that has `dashboard.view` plus relevant unit/task/opportunity/report/meeting abilities, and open `/bms/dashboard`. Verify actual data, filters, permission-limited panels, and no-data/error states at 1440×1000 desktop, 768×1024 tablet, and 390×844 mobile. Validate English LTR and Arabic RTL charts/legends; capture populated, empty, and RTL screenshots for review. Do not use generated fixtures as proof of production data correctness.
 
 ## Separate unresolved security finding — unchanged
 
@@ -63,7 +63,7 @@ No backend source, API, database, authorization, dependency manifest, or lockfil
 
 ## Remaining limitations
 
-- No compilation, Angular/node spec execution, in-browser layout/RTL test, screenshot, or live API verification was possible in this environment. Fresh CI and browser review are required before acceptance/merge.
+- Local compilation and Angular/node spec execution were unavailable; CI production build passed but Angular tests failed. No in-browser layout/RTL test, screenshot, or live API verification was possible. Fresh green CI and browser review are required before acceptance/merge.
 - Chart axis direction, font rendering, mobile canvas sizing, tooltips and resize behavior are implemented in configuration/styles but remain visually unverified here.
 - Full WCAG review remains outstanding. Existing endpoint filter semantics continue to vary across dashboard domains; filter scope disclosures and existing behavior are preserved.
 - Legacy-wide styles were not removed because safe non-use could not be established.
@@ -71,4 +71,4 @@ No backend source, API, database, authorization, dependency manifest, or lockfil
 
 ## PR status
 
-Update the existing PR #30 targeting `BMS`; do not create a second PR and do not merge automatically.
+The existing PR #30 targets `BMS` and has been updated with the implementation. It remains unmerged; do not create a second PR or merge automatically.
