@@ -133,15 +133,15 @@ class F4aTokenExposureTest extends BmsTestCase
 
     public function test_edit_responses_do_not_return_another_users_stored_token(): void
     {
-        $viewer = $this->makeUser(['token' => 'edit-viewer-token']);
+        // sub-department 4 belongs to departments_id 1 in the shared fixture,
+        // matching the established legacy Management authorization check.
+        $manager = $this->makeUser(['token' => 'edit-manager-token', 'sub_departments_id' => 4]);
         $target = $this->makeUser(['token' => 'edit-target-token']);
 
-        // A read-only edit isolates response exposure from the separately
-        // reported, still-unapproved mass-assignment behavior of EditUser.
         $response = $this->postJson('/api/users/EditUser', [
-            'token' => 'edit-viewer-token',
+            'token' => 'edit-manager-token',
             'user_id' => $target->id,
-        ], $this->jwtHeaders($viewer))->assertStatus(201);
+        ], $this->jwtHeaders($manager))->assertStatus(201);
 
         $this->assertSame((string) $target->id, $response->json('data.key'));
         $this->assertArrayNotHasKey('token', $response->json('data'));
@@ -149,13 +149,184 @@ class F4aTokenExposureTest extends BmsTestCase
         $this->assertDatabaseHas('users', ['id' => $target->id, 'token' => 'edit-target-token']);
 
         $response = $this->postJson('/api/users/EditUser', [
-            'token' => 'edit-viewer-token',
+            'token' => 'edit-manager-token',
             'user_id' => $target->id,
             'firstname' => 'Updated',
-        ], $this->jwtHeaders($viewer))->assertStatus(201);
+        ], $this->jwtHeaders($manager))->assertStatus(201);
 
         $this->assertArrayNotHasKey('token', $response->json('data'));
-        $this->assertDatabaseHas('users', ['id' => $target->id, 'firstname' => 'Updated']);
+        $this->assertStringNotContainsString('edit-target-token', $response->getContent());
+        $this->assertDatabaseHas('users', [
+            'id' => $target->id,
+            'firstname' => 'Updated',
+            'token' => 'edit-target-token',
+        ]);
+    }
+
+    public function test_edit_requires_authentication(): void
+    {
+        $target = $this->makeUser(['firstname' => 'Original']);
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'untrusted-transport-token',
+            'user_id' => $target->id,
+            'firstname' => 'Changed',
+        ])->assertStatus(402);
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'firstname' => 'Original']);
+    }
+
+    public function test_regular_user_can_edit_only_own_allowlisted_profile_fields(): void
+    {
+        $user = $this->makeUser(['firstname' => 'Before', 'token' => 'self-stored-token']);
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'self-stored-token',
+            'user_id' => $user->id,
+            'firstname' => 'After',
+            'gender' => 'Other',
+        ], $this->jwtHeaders($user))->assertStatus(201);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'firstname' => 'After',
+            'gender' => 'Other',
+            'token' => 'self-stored-token',
+        ]);
+    }
+
+    public function test_regular_user_cannot_edit_another_users_profile(): void
+    {
+        $actor = $this->makeUser(['firstname' => 'Actor']);
+        $target = $this->makeUser(['firstname' => 'Target', 'token' => 'target-token']);
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'attacker-supplied-token',
+            'user_id' => $target->id,
+            'firstname' => 'Compromised',
+        ], $this->jwtHeaders($actor))->assertStatus(403);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $target->id,
+            'firstname' => 'Target',
+            'token' => 'target-token',
+        ]);
+    }
+
+    public function test_edit_rejects_password_status_and_organization_changes_without_writes(): void
+    {
+        $user = $this->makeUser([
+            'firstname' => 'Original',
+            'password' => Hash::make('original-password'),
+            'token' => 'stored-owner-token',
+            'active' => true,
+            'company_id' => $this->company->id,
+            'sub_departments_id' => 2,
+        ]);
+        $originalPasswordHash = $user->password;
+
+        foreach ([
+            ['password' => 'attacker-password'],
+            ['active' => false],
+            ['company_id' => $this->company->id + 1],
+            ['sub_departments_id' => 4],
+            ['branches_id' => 999],
+            ['refreshRequired' => true],
+            ['canAddPreviousReports' => true],
+        ] as $forbiddenChange) {
+            $this->postJson('/api/users/EditUser', array_merge([
+                'token' => 'attacker-supplied-token',
+                'user_id' => $user->id,
+            ], $forbiddenChange), $this->jwtHeaders($user))->assertStatus(403);
+
+            $fresh = $user->fresh();
+            $this->assertSame('stored-owner-token', $fresh->token);
+            $this->assertSame($originalPasswordHash, $fresh->password);
+            $this->assertSame('Original', $fresh->firstname);
+            $this->assertTrue((bool) $fresh->active);
+            $this->assertSame(2, (int) $fresh->sub_departments_id);
+            $this->assertSame((int) $this->company->id, (int) $fresh->company_id);
+        }
+    }
+
+    public function test_edit_rejects_unknown_and_user_detail_fields_without_writes(): void
+    {
+        $user = $this->makeUser(['firstname' => 'Original']);
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'self-transport-token',
+            'user_id' => $user->id,
+            'photoURL' => 'https://example.test/avatar.png',
+        ], $this->jwtHeaders($user))->assertStatus(422);
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'self-transport-token',
+            'user_id' => $user->id,
+            'address' => 'attacker-controlled address',
+        ], $this->jwtHeaders($user))->assertStatus(403);
+
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'firstname' => 'Original']);
+    }
+
+    public function test_management_can_update_legacy_account_role_fields(): void
+    {
+        $manager = $this->makeUser(['sub_departments_id' => 4]);
+        $target = $this->makeUser(['sub_departments_id' => 2]);
+        $degreeId = DB::table('work_degrees')->insertGetId(['name' => 'Engineer']);
+
+        $response = $this->postJson('/api/users/EditUser', [
+            'token' => 'manager-transport-token',
+            'user_id' => $target->id,
+            'sub_departments_id' => 3,
+            'work_degrees_id' => $degreeId,
+        ], $this->jwtHeaders($manager))->assertStatus(201);
+
+        $this->assertSame((string) $target->id, $response->json('data.key'));
+        $this->assertDatabaseHas('users', [
+            'id' => $target->id,
+            'sub_departments_id' => 3,
+            'work_degrees_id' => $degreeId,
+        ]);
+    }
+
+    public function test_management_cannot_assign_an_account_role_to_itself(): void
+    {
+        $manager = $this->makeUser(['sub_departments_id' => 4]);
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'manager-transport-token',
+            'user_id' => $manager->id,
+            'sub_departments_id' => 2,
+        ], $this->jwtHeaders($manager))->assertStatus(403);
+
+        $this->assertDatabaseHas('users', ['id' => $manager->id, 'sub_departments_id' => 4]);
+    }
+
+    public function test_management_still_cannot_change_password_status_or_stored_token_here(): void
+    {
+        $manager = $this->makeUser(['sub_departments_id' => 4]);
+        $target = $this->makeUser([
+            'sub_departments_id' => 2,
+            'password' => Hash::make('target-password'),
+            'token' => 'target-token-sentinel',
+            'active' => true,
+        ]);
+        $passwordHash = $target->password;
+
+        $this->postJson('/api/users/EditUser', [
+            'token' => 'submitted-token-must-not-be-written',
+            'user_id' => $target->id,
+            'password' => 'replacement-password',
+            'active' => false,
+        ], $this->jwtHeaders($manager))->assertStatus(403);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $target->id,
+            'password' => $passwordHash,
+            'token' => 'target-token-sentinel',
+            'active' => true,
+            'sub_departments_id' => 2,
+        ]);
     }
 
     public function test_legacy_profile_response_does_not_expose_a_stored_token(): void

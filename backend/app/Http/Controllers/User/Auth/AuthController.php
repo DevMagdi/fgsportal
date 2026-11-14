@@ -20,6 +20,7 @@ use App\Models\UserOpenToWork;
  use App\Http\Controllers\ApiMessage\MessageController;
 
 use App\Http\Controllers\ResponseTrait\ResponseApi;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 use App\Mail\WelcomeMail;
@@ -142,51 +143,89 @@ class AuthController extends Controller
         }
 
     
-    public function EditUser(Request $request){
-        try{
-              $validator = Validator::make($request->all(), [
-                  'token' => 'required|string',
-                  'user_id'=> 'required|numeric|exists:users,id'
-              ]);
-              if ($validator->fails()) {
-      
-                  return ResponseApi::validatorErrorResponseApi($validator->errors()->toArray(),"Validator Errors",400);
-              }
-              if(!empty($request->username)||!empty($request->firstname)||!empty($request->lastname)||!empty($request->email)||
-              !empty($request->gender)||!empty($request->mobileNumber)||!empty($request->active)||!empty($request->work_degrees_id)||
-              !empty($request->refreshRequired)||!empty($request->branches_id)||!empty($request->sub_departments_id)){
-                $get_user=User::where('id',$request->user_id)->first();
-                if(!empty($get_user->id)){
-                    $get_user->update(
-                        $request->all()
-                    );
-                }
-              }
-              if(!empty($request->emergancyPhoneNumber)||!empty($request->emergancyPhoneNumberName)||!empty($request->emergancyPhoneNumberRelation)
-              ||!empty($request->socialSecureityNumber)||!empty($request->graduation_year)||!empty($request->university)||!empty($request->need_paper)
-              ||!empty($request->full_information)||
-              !empty($request->address)||!empty($request->birthDate)||!empty($request->hiringDate)||!empty($request->contractStartDate)||
-              !empty($request->contractEndDate)||!empty($request->maritalStatus)||!empty($request->certificate)){
-                $get_user_data=User::where('id',$request->user_id)->first();
-                $get_user_details=UserDetail::where('id',$get_user_data->user_details_id)->first();
-                if(!empty($get_user_details->id)){
-                    $get_user_details->update(
-                        $request->all()
-                    );
-                }
-              }
-              $get_user_data=User::where('id',$request->user_id)->first();
+    public function EditUser(Request $request)
+    {
+        $actor = Auth::guard('user_api')->user();
+        if (!$actor) {
+            return ResponseApi::unauthorizedResponseApi(['message' => 'Unauthenticated'], 'Unauthenticated', 401);
+        }
 
-              $array_reponse = $this->castUserData($get_user_data);
-              
-                  return ResponseApi::badMethodErrorResponse($array_reponse,"Updated Sucess",201);
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string', // Legacy transport field; it is never persisted.
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+        if ($validator->fails()) {
+            return ResponseApi::validatorErrorResponseApi($validator->errors()->toArray(), 'Validator Errors', 422);
+        }
 
-              
-          }catch(\Exception $e){
-              return ResponseApi::badMethodErrorResponse(["message"=>"Server Error"],"server Error",500);
-  
-          }
-      }
+        $target = User::findOrFail($request->input('user_id'));
+        $isSelf = (int) $actor->id === (int) $target->id;
+        $isManagement = (int) optional($actor->sub_departments_id_fun)->departments_id === 1;
+
+        // These are the only user columns supported by the legacy Edit Account
+        // UI. Account role/position edits are reserved for the same Management
+        // department gate used by that UI and by existing legacy controllers.
+        $profileFields = ['username', 'firstname', 'lastname', 'email', 'gender', 'mobileNumber'];
+        $managementFields = ['sub_departments_id', 'work_degrees_id'];
+        $transportFields = ['token', 'user_id'];
+        $privilegedFields = [
+            'password', 'active', 'refreshRequired', 'company_id', 'user_details_id',
+            'user_creator_id', 'firebasekey', 'branches_id', 'canAddPreviousReports',
+            'canAddPreviousReportsDate', 'open_to_work',
+            'emergancyPhoneNumber', 'emergancyPhoneNumberName', 'emergancyPhoneNumberRelation',
+            'socialSecureityNumber', 'address', 'birthDate', 'hiringDate', 'contractStartDate',
+            'contractEndDate', 'maritalStatus', 'certificate', 'graduation_year', 'university',
+            'need_paper', 'full_information', 'change_password',
+        ];
+
+        if (!$isSelf && !$isManagement) {
+            return ResponseApi::unauthorizedResponseApi(['message' => 'Forbidden'], 'Forbidden', 403);
+        }
+
+        $submittedFields = array_diff(array_keys($request->all()), $transportFields);
+        foreach ($submittedFields as $field) {
+            if (in_array($field, $privilegedFields, true)) {
+                return ResponseApi::unauthorizedResponseApi(['message' => 'Field is not editable through this endpoint'], 'Forbidden', 403);
+            }
+            if (!in_array($field, $profileFields, true) && !in_array($field, $managementFields, true)) {
+                return ResponseApi::validatorErrorResponseApi(['fields' => [$field => ['Unknown or unsupported field']]], 'Validator Errors', 422);
+            }
+            if (in_array($field, $managementFields, true) && (!$isManagement || $isSelf)) {
+                return ResponseApi::unauthorizedResponseApi(['message' => 'Management authorization required for another account'], 'Forbidden', 403);
+            }
+        }
+
+        $rules = [
+            'username' => 'sometimes|nullable|string|max:255|unique:users,username,' . $target->id,
+            'firstname' => 'sometimes|nullable|string|max:255',
+            'lastname' => 'sometimes|nullable|string|max:255',
+            'email' => 'sometimes|nullable|email|max:255|unique:users,email,' . $target->id,
+            'gender' => 'sometimes|nullable|string|max:50',
+            'mobileNumber' => 'sometimes|nullable|string|max:50',
+            'sub_departments_id' => 'sometimes|nullable|integer|exists:sub_departments,id',
+            'work_degrees_id' => 'sometimes|nullable|integer|exists:work_degrees,id',
+        ];
+        $fieldValidator = Validator::make($request->only(array_merge($profileFields, $managementFields)), $rules);
+        if ($fieldValidator->fails()) {
+            return ResponseApi::validatorErrorResponseApi($fieldValidator->errors()->toArray(), 'Validator Errors', 422);
+        }
+
+        $updates = $fieldValidator->validated();
+        if ($updates) {
+            DB::transaction(function () use ($target, $updates): void {
+                // Explicitly update only validated, allowlisted fields. In
+                // particular, never mass-assign request data or raw passwords.
+                $target->update($updates);
+            });
+        }
+
+        return ResponseApi::badMethodErrorResponse(
+            $this->castUserData($target->fresh()),
+            'Updated Sucess',
+            201
+        );
+    }
+
     public function UserRefreshed(Request $request){
         try{
               $validator = Validator::make($request->all(), [
