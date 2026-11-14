@@ -1360,6 +1360,18 @@ Route::prefix('bms')->middleware(['cors','jwt.verify','module:bms'])->group(func
     Route::delete('/units/{unit}', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'destroy'])->middleware('bms.permission:units.manage');
     Route::post('/units/{unit}/status', [\App\Http\Controllers\BMS\BusinessUnitController::class, 'status'])->middleware('bms.permission:units.manage');
 
+    // Stage B2 — teams inside a business unit, their lead and members, and the unit's development manager.
+    // The controller additionally requires the granting role to apply to the team's unit (TeamStructure).
+    Route::put('/units/{unit}/development-manager', [\App\Http\Controllers\BMS\TeamController::class, 'developmentManager'])->middleware('bms.permission:teams.manage');
+    Route::get('/teams', [\App\Http\Controllers\BMS\TeamController::class, 'index'])->middleware('bms.permission:teams.view');
+    Route::post('/teams', [\App\Http\Controllers\BMS\TeamController::class, 'store'])->middleware('bms.permission:teams.manage');
+    Route::get('/teams/{team}', [\App\Http\Controllers\BMS\TeamController::class, 'show'])->middleware('bms.permission:teams.view');
+    Route::put('/teams/{team}', [\App\Http\Controllers\BMS\TeamController::class, 'update'])->middleware('bms.permission:teams.manage');
+    Route::delete('/teams/{team}', [\App\Http\Controllers\BMS\TeamController::class, 'destroy'])->middleware('bms.permission:teams.manage');
+    Route::put('/teams/{team}/lead', [\App\Http\Controllers\BMS\TeamController::class, 'lead'])->middleware('bms.permission:teams.manage');
+    // Members: unit team managers, or the team's own lead (teams.manage_own) — decided in the controller.
+    Route::put('/teams/{team}/members', [\App\Http\Controllers\BMS\TeamController::class, 'members'])->middleware('bms.permission:teams.view');
+
     Route::get('/weekly-plans', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'index'])->middleware('bms.permission:plans.view');
     Route::post('/weekly-plans', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'store'])->middleware('bms.permission:plans.manage');
     Route::get('/weekly-plans/{plan}', [\App\Http\Controllers\BMS\WeeklyPlanController::class, 'show'])->middleware('bms.permission:plans.view');
