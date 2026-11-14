@@ -3,11 +3,13 @@ import {
   dateLabel,
   hasDashboardFilters,
   hasNonUnitDashboardFilters,
+  kpiAchievement,
   kpiSeriesKey,
   kpiSeriesLabel,
   latestKpiSeriesKey,
   numberLabel,
   opportunityStages,
+  taskStatusRows,
   trendChartPoints,
   unitProgressRows,
 } from './executive-dashboard.util';
@@ -33,6 +35,26 @@ describe('Executive dashboard data helpers', () => {
       { id: 2, name: 'Beta', total: 3, progress: 73, barWidth: 73 },
       { id: 4, name: 'Outlier', total: 1, progress: 120, barWidth: 100 },
     ]);
+  });
+
+  it('builds task-status distribution from unit rollups and keeps any unclassified remainder explicit', () => {
+    expect(taskStatusRows([
+      { total: 5, achieved: 2, in_progress: 1, not_done: 1 },
+      { total: 3, achieved: 1, in_progress: 1, not_done: 1 },
+      { total: 0, achieved: 0, in_progress: 0, not_done: 0 },
+    ], key => key)).toEqual([
+      { key: 'achieved', label: 'achieved', count: 3, percent: 37.5 },
+      { key: 'inProgress', label: 'inProgress', count: 2, percent: 25 },
+      { key: 'notDone', label: 'notDone', count: 2, percent: 25 },
+      { key: 'other', label: 'other', count: 1, percent: 12.5 },
+    ]);
+    expect(taskStatusRows([{ total: 0 }])).toEqual([]);
+  });
+
+  it('calculates KPI attainment only for a positive stored target and clamps only the display width', () => {
+    expect(kpiAchievement(125, 100)).toEqual({ actual: 125, target: 100, attainment: 125, barWidth: 100 });
+    expect(kpiAchievement(4, null)).toEqual({ actual: 4, target: null, attainment: null, barWidth: 0 });
+    expect(kpiAchievement(4, 0).attainment).toBeNull();
   });
 
   it('groups actual opportunity records by their current stage without creating empty stages', () => {

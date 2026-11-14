@@ -2,66 +2,73 @@
 
 **Branch:** `arena/f93c3d81-fgsportal`
 **Base / PR target:** `BMS` at `92c83cb0d25433c63dccf72f08719c8ab69eda9d`
-**Scope:** Frontend design tokens, shared BMS state styling, unified shell presentation, and executive dashboard visual treatment. No API, backend, authorization, schema, migration, business-logic, route, or dependency changes.
+**Scope:** Shared front-end design system, unified shell, and executive dashboard. No backend/API/schema/migration/authorization/business-logic changes and no package/version changes.
 
-## Delivered
+## Implementation
 
-- Established reusable application/BMS tokens in `frontend/src/styles/_shell-tokens.scss`: indigo primary `#45436E`, restrained teal `#247A70`, pink, cyan, sky, lavender and periwinkle accents, semantic colors, surface/border/radius/shadow/spacing/motion scales, and focus color. Accent use is limited to decorative/semantic treatments; text colors remain dark enough for readability on light surfaces.
-- Refined the existing single app shell, sticky header, breadcrumb chrome, role-derived sidebar, active navigation states and mobile drawer through scoped stylesheet overrides. Existing route registrations, permission-derived navigation, role visibility, menu handlers, notification/profile interactions, and mobile state wiring were not changed.
-- Reworked existing executive dashboard presentation for readable responsive KPI cards, filters, attention indicators, progress and pipeline charts, KPI trend, operations panels, empty/error/loading states, and small screens. No dashboard data or request logic was changed.
-- Updated the shared BMS loading/error/success/empty state presentation to use shared tokens and accessible contrast/focus treatments. Added reduced-motion handling in the token layer and affected motion styles.
-- Preserved Arabic/English behavior: the shell's existing `lang`/`dir` and BMS direction binding are untouched; dashboard layout uses logical inline spacing and existing localized labels/formatters.
-- The official asset `frontend/src/assets/img/alphaiota-logo.png` was not changed or re-encoded. Its checked-in PNG header confirms 400×400 RGB (opaque) dimensions. Existing display remains contained within a square image element; no CSS masking, cropping, recoloring, filtering, or redraw was introduced.
+- Added a shared light palette/token scale in `frontend/src/styles/_shell-tokens.scss`: indigo `#45436E`, restrained teal `#247A70`, supporting pink/cyan/sky/lavender/periwinkle accents, semantic states, surfaces, borders, radii, shadows, spacing, focus and motion tokens.
+- Refined the existing single application shell, responsive content spacing, header/breadcrumbs, role-derived sidebar, and BMS loading/error/empty states. Consolidated the shell styling into its base rules rather than layering redundant override blocks. Navigation routes, permission-derived visibility, notification/profile controls, menu events and mobile drawer state are unchanged.
+- Reworked the executive dashboard structure into an overview (existing API summary/attention data), analytics grid and operations panels. KPI hierarchy and chart/legend layout are now explicit and responsive across desktop/tablet/mobile.
+- Added Angular feature-module use of the already-installed PrimeNG `ChartModule`/Chart.js dependency. No dependency was added or upgraded. Language changes rebuild chart labels/options; chart configuration supports RTL tooltip text and reverse horizontal/time axes where appropriate.
+- Added task-status distribution and KPI attainment presentation using actual API response data and a helper test suite. No hardcoded values or fabricated visualization records were introduced.
+- Kept the original Alphaiota PNG byte-for-byte untouched. Its checked-in dimensions are 400×400 RGB (opaque); the image remains an unmasked, contained square asset.
 
-## Dashboard visualization data and permission sources
+## Dashboard elements and actual data sources
 
-All existing API contracts, view permissions and filters were retained. The redesign changes styling only and does not add computed business metrics or fixture values.
-
-| UI element | Existing source / derivation | Existing access and filter behavior |
+| Dashboard element | Actual source and calculation | Access/filter behavior |
 |---|---|---|
-| Summary cards (units, tasks, achieved, opportunities, products, tender count/submitted) | `GET /api/bms/executive-dashboard`: `summary.*`, `tenders.*` | Endpoint remains gated by `dashboard.view`; unit/task, opportunity, and product visibility continues to follow existing `lookups.can` abilities. Uses the API counts as provided; no money totals are rendered. |
-| Attention indicators (overdue/blocked tasks, delayed/stale opportunities, delayed/no-update tenders, pending procurement, upcoming meetings) | Same endpoint's `summary.*` and `tenders.*` | Each indicator remains conditionally visible under existing task/opportunity/procurement/meeting permission checks. |
-| Unit plan progress bars | `unit_progress[]` from executive dashboard; existing helper sorts units with tasks and clamps only the displayed bar width | Unit/task permission checks; existing business-unit, product-linked-unit, and exact plan-week filters as supported by the endpoint. Displayed percentage remains API-reported. |
-| Opportunity stage distribution | `opportunities[]` grouped by each returned record's current `stage` using existing `opportunityStages` helper | `opportunities.view`; existing unit/product/opportunity filters and endpoint scope. This is a record count, not a value/forecast sum. |
-| KPI history line and target segments | `GET /api/bms/reports/kpis` → stored `history[].points[]` actual/target/period records; existing chart helper orders and plots returned points | Requested only when existing `reports.view` ability is present; unit selection forwarded. Series stay separate; insufficient/missing real points produce existing empty state. No values synthesized. |
-| Upcoming meetings list | `meetings[]` from executive dashboard response | `meetings.view`; endpoint's supported meeting/unit scope and rolling seven-day response. |
-| Recent activity list | `recent_activity[]` from executive dashboard response | Existing feed visibility behavior is preserved; it is hidden under existing non-unit filters where the endpoint cannot accurately apply those filters. |
-| Filter options | `GET /api/bms/lookups` permission-filtered `units`, `products`, and `opportunities` | Existing visibility gates, ability checks, filter names and endpoint semantics retained. |
-| Excel/PDF export | Existing export service and dashboard response builders | Existing `dashboard.export` permission gate retained. |
+| Summary KPI cards | `GET /api/bms/executive-dashboard` response `summary.*` and `tenders.*` | `dashboard.view` endpoint; existing `lookups.can` gates for task/unit/opportunity/product panels. No currency totals. |
+| Attention indicators | Same response: overdue/blocked task counts, delayed/stale opportunity counts, tender counts, pending procurement and upcoming meetings | Existing ability gates retained. Values are server-provided counts. |
+| Unit performance bars | Response `unit_progress[]`: API-reported average `progress`, `total`; existing helper excludes zero-task units and clamps only the visual fill | Requires existing `plans.view` and `units.view` display gates. Existing business unit/product/plan-week query behavior retained. |
+| Task-status doughnut + legend | Response `unit_progress[]`: sums of `total`, `achieved`, `in_progress`, and `not_done`. Any difference between total and these known statuses is surfaced as “Other” (not silently dropped), using actual response counts. | Same task/unit visibility gates; unit/product/plan-week scope comes from the existing dashboard response. This is derived from the returned rollups, not a new endpoint. |
+| Opportunity pipeline horizontal bars | Response `opportunities[]`, grouped by current `stage`; count and share are derived from those returned records. | Existing `opportunities.view` gate and existing API unit/product/opportunity filters. No opportunity value/forecast totals. |
+| KPI latest achievement indicator | Latest actual/target point in selected `reports/kpis` history series. Attainment is actual ÷ target × 100 only for a positive stored target; display fill alone is capped at 100%. | Requested only with `reports.view`; API request remains filtered by the existing selected business unit. Missing/zero target produces no attainment meter. |
+| KPI actual/target trend line | `GET /api/bms/reports/kpis` → stored `history[].points[]` actual/target/period data. Null target points remain gaps. | `reports.view` only; series remain distinct by unit and KPI; existing insufficient-history and retry states retained. |
+| Upcoming meetings | Response `meetings[]` | Existing `meetings.view` gate and endpoint rolling seven-day/unit behavior. |
+| Recent activity | Response `recent_activity[]` | Existing visibility behavior retained; omitted under non-unit filters where the endpoint cannot accurately apply them. |
+| Filter options and exports | `GET /api/bms/lookups`; existing BMS export service/data builders | Existing abilities (`units.view`, `products.view`, `opportunities.view`, `plans.view`, `dashboard.export`) and supported filters unchanged. |
 
-The API contracts remain the authoritative data definition. The existing Phase 3 audit documents detailed filter/domain limitations in `PHASE_3_DASHBOARD_DATA_AUDIT.md`; this visual Stage 1 does not broaden or reinterpret them.
+No new business metric or API contract has been introduced. The Phase 3 dashboard audit remains the detailed reference for filter semantics and endpoint limitations.
 
-## Exact changed files
+## Exact changed files in this PR
 
-1. `frontend/src/styles/_shell-tokens.scss` — shared palette, semantic colors, spacing, surface, motion, and typography tokens.
-2. `frontend/src/app/layout/app-shell.component.scss` — shell surface and responsive content spacing refinements.
-3. `frontend/src/app/layout/header/app-header.component.scss` — refined header/breadcrumb/control surfaces and compact/mobile treatment.
-4. `frontend/src/app/layout/sidebar/app-sidebar.component.scss` — refined nav hierarchy and selected/current state styling.
-5. `frontend/src/app/components/bms/dashboard/executive-dashboard.component.scss` — responsive dashboard cards, indicators, panels, charts, controls, and reduced-motion behavior.
-6. `frontend/src/app/components/bms/bms-state.component.scss` — shared loading, error, success, empty and retry styles.
-7. `docs/bms/PHASE_4_STAGE_1_IMPLEMENTATION.md` — implementation, data-source, verification and limitation record.
+1. `frontend/src/styles/_shell-tokens.scss` — shared design tokens.
+2. `frontend/src/app/layout/app-shell.component.scss` — consolidated shell/responsive styles.
+3. `frontend/src/app/layout/header/app-header.component.scss` — consolidated header/breadcrumb styles.
+4. `frontend/src/app/layout/sidebar/app-sidebar.component.scss` — consolidated sidebar/nav styles.
+5. `frontend/src/app/components/bms/bms-state.component.scss` — shared state component presentation.
+6. `frontend/src/app/components/bms/bms.module.ts` — imports existing PrimeNG chart module into the lazy BMS module.
+7. `frontend/src/app/components/bms/dashboard/executive-dashboard.component.html` — dashboard hierarchy, charts, status legend, KPI achievement, accessibility descriptions.
+8. `frontend/src/app/components/bms/dashboard/executive-dashboard.component.ts` — data-to-chart bindings, RTL/locale options, language updates and subscription cleanup.
+9. `frontend/src/app/components/bms/dashboard/executive-dashboard.component.scss` — page/dashboard grid, charts, responsive layouts and reduced-motion styling.
+10. `frontend/src/app/components/bms/dashboard/executive-dashboard.util.ts` — status distribution and guarded KPI-attainment helpers.
+11. `frontend/src/app/components/bms/dashboard/executive-dashboard.util.spec.ts` — helper coverage for status rollups and attainment edge cases.
+12. `frontend/src/app/components/bms/bms-translations.ts` — English/Arabic task-status chart title.
+13. `docs/bms/PHASE_4_STAGE_1_IMPLEMENTATION.md` — this implementation, data-source and verification record.
 
-No TypeScript, template, translation, package manifest/lockfile, backend, API, database, authorization, or test files were changed.
+No backend source, API, database, authorization, dependency manifest, or lockfile changed.
 
-## Verification and screenshots
+## Verification, screenshots, and local instructions
 
-- `git diff --check` passed for the tracked source patch. The new report was scanned separately and has no trailing whitespace.
-- Local frontend build and Node tests could not be run in this checkout because `frontend/node_modules` is absent (`ng: not found`; Node-spec runner cannot resolve `typescript`). Dependencies were not installed and package versions were not changed.
-- The most recent known GitHub Actions run before these edits (`43613515199`) was failed: frontend lint and production build passed, Angular tests failed; backend targeted regressions/lint/analysis passed, with full SQLite coverage and MySQL 8 tests failing. Failed-log retrieval returned EOF, so unavailable test diagnostics are not asserted here. This pre-change CI run is not validation of this Stage 1 patch.
-- No running browser preview or screenshot capture was available in this environment; no screenshot is claimed. A visual smoke pass should be completed with installed frontend dependencies and real browser access before merge.
+- `git diff --check` is run before the PR update.
+- Current local build attempt: `cd frontend && npm run build -- --configuration production` → blocked before compilation: `ng: not found`.
+- Current node-spec attempt: `cd frontend && npm run test:node` → blocked because `typescript` cannot be resolved. The new utility specs therefore remain unexecuted here.
+- The checkout has no `frontend/node_modules`, globally available Angular CLI/TypeScript, or Chromium/Chrome executable. Dependencies were not installed and no browser screenshots are claimed.
+- The known pre-change CI run `43613515199` failed in Angular tests, full SQLite coverage, and MySQL 8 tests. Failed-log retrieval returned EOF; this is not validation of the current PR contents.
+- **Local verification when the repository-approved dependencies and browser are available:** from `frontend`, run `npm run build -- --configuration production`, `npm run test:node`, then `npm test -- --watch=false --browsers=ChromeHeadless`. Run the app with `npm start -- --host 0.0.0.0`, sign in using a test account that has `dashboard.view` plus the relevant unit/task/opportunity/report/meeting abilities, then open `/bms/dashboard`. Verify actual data, filters, permission-limited panels, and no-data/error states at 1440×1000 desktop, 768×1024 tablet, and 390×844 mobile viewports. Validate English LTR and Arabic RTL charts/legends in a real browser; capture populated, empty, and RTL screenshots for review. Do not use generated fixtures as proof of production data correctness.
 
-## Separate unresolved security finding — not changed in Stage 1
+## Separate unresolved security finding — unchanged
 
-`backend/app/Http/Controllers/User/Auth/AuthController.php::EditUser` has an unresolved Management organizational-scope finding. The Management check is based on the actor's department (`sub_departments_id_fun.departments_id === 1`); the endpoint permits certain edits to another user's profile/account-role fields without an explicit company/branch/business-unit relationship check. Existing F4a field-restriction coverage does not establish organizational ownership boundaries. Track and remediate separately after policy owners define intended scope. This Stage 1 makes no authorization or backend change and does not infer a tenant/unit ownership rule.
+`backend/app/Http/Controllers/User/Auth/AuthController.php::EditUser` has an unresolved Management organizational-scope finding. Management status is based on the actor department (`sub_departments_id_fun.departments_id === 1`); the endpoint permits certain edits to another user profile/account-role fields without an explicit company/branch/business-unit relationship check. Existing F4a field-restriction coverage does not establish ownership boundaries. Track and remediate separately after policy owners define intended organizational scope. No authorization change or ownership rule was introduced here.
 
-## Known limitations / remaining technical debt
+## Remaining limitations
 
-- No local compile, unit test, Angular/Karma run, screenshot, or browser/RTL visual verification for this patch due missing dependencies/browser setup. Existing failed CI remains visible and must be reconciled with a fresh CI run.
-- Production API/data quality and the deployed schema were not live-verified in this environment. Existing endpoint filter semantics remain mixed across dashboard domains; do not imply every filter applies to every panel.
-- The dashboard's existing chart implementation is native SVG/CSS and was not replaced with a chart dependency. Full accessibility/WCAG review remains outstanding.
-- Existing legacy-wide theme styles and old design-system artifacts were intentionally not removed: their usage was not proven obsolete, and Phase 4 Stage 1 must not disrupt legacy modules.
-- Security finding above requires separate explicit organizational-scope policy and remediation.
+- No compilation, Angular/node spec execution, in-browser layout/RTL test, screenshot, or live API verification was possible in this environment. Fresh CI and browser review are required before acceptance/merge.
+- Chart axis direction, font rendering, mobile canvas sizing, tooltips and resize behavior are implemented in configuration/styles but remain visually unverified here.
+- Full WCAG review remains outstanding. Existing endpoint filter semantics continue to vary across dashboard domains; filter scope disclosures and existing behavior are preserved.
+- Legacy-wide styles were not removed because safe non-use could not be established.
+- Management organizational-scope finding requires separate policy and remediation.
 
-## Review status
+## PR status
 
-Implementation is isolated on the current branch. Create a reviewable pull request targeting `BMS` only after final branch review and fresh validation; do not merge automatically.
+Update the existing PR #30 targeting `BMS`; do not create a second PR and do not merge automatically.

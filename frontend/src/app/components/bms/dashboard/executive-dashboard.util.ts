@@ -20,6 +20,20 @@ export interface OpportunityStageRow {
   percent: number;
 }
 
+export interface TaskStatusRow {
+  key: string;
+  label: string;
+  count: number;
+  percent: number;
+}
+
+export interface KpiAchievement {
+  actual: number | null;
+  target: number | null;
+  attainment: number | null;
+  barWidth: number;
+}
+
 export interface KpiHistoryPoint {
   period_start: string;
   period_end?: string;
@@ -63,6 +77,39 @@ export function unitProgressRows(rows: any[] = []): UnitProgressRow[] {
       barWidth: Math.max(0, Math.min(100, Number(row.progress))),
     }))
     .sort((a, b) => a.progress - b.progress || a.name.localeCompare(b.name));
+}
+
+export function taskStatusRows(rows: any[] = [], translate: (key: string) => string = key => key): TaskStatusRow[] {
+  const total = rows.reduce((sum, row) => sum + nonNegative(row?.total), 0);
+  if (!total) return [];
+
+  const statuses = [
+    { key: 'achieved', field: 'achieved' },
+    { key: 'inProgress', field: 'in_progress' },
+    { key: 'notDone', field: 'not_done' },
+  ];
+  const known = statuses.map(status => ({
+    key: status.key,
+    label: translate(status.key),
+    count: rows.reduce((sum, row) => sum + nonNegative(row?.[status.field]), 0),
+  }));
+  const classified = known.reduce((sum, status) => sum + status.count, 0);
+  const other = Math.max(0, total - classified);
+  if (other > 0) known.push({ key: 'other', label: translate('other'), count: other });
+
+  return known.map(status => ({ ...status, percent: total ? status.count / total * 100 : 0 }));
+}
+
+export function kpiAchievement(actualValue: unknown, targetValue: unknown): KpiAchievement {
+  const actual = finite(actualValue);
+  const target = finite(targetValue);
+  const attainment = actual !== null && target !== null && target > 0 ? actual / target * 100 : null;
+  return {
+    actual,
+    target,
+    attainment,
+    barWidth: attainment === null ? 0 : Math.max(0, Math.min(100, attainment)),
+  };
 }
 
 export function opportunityStages(opportunities: any[] = [], translate: (key: string) => string = key => key): OpportunityStageRow[] {
@@ -162,6 +209,11 @@ export function dateLabel(value: unknown, language: 'en' | 'ar' = 'en', format: 
         ? { month: 'short', year: 'numeric' }
         : { year: 'numeric', month: 'short', day: 'numeric' };
   return new Intl.DateTimeFormat(locale, options).format(date);
+}
+
+function nonNegative(value: unknown): number {
+  const parsed = finite(value);
+  return parsed === null ? 0 : Math.max(0, parsed);
 }
 
 function finite(value: unknown): number | null {
