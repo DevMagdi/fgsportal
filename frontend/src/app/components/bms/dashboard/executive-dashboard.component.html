@@ -93,7 +93,9 @@
         </article>
       </section>
 
-      <section class="exception-strip" [attr.aria-label]="lang.t('managementAttention')">
+      <section class="attention-block" [attr.aria-label]="lang.t('managementAttention')">
+        <h2 class="attention-title">{{lang.t('managementAttention')}}</h2>
+        <div class="exception-strip">
         <div class="exception-item danger" *ngIf="showTaskData">
           <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.overdue_tasks)}}</span><small>{{lang.t('overdueTasks')}}</small>
         </div>
@@ -118,12 +120,14 @@
         <div class="exception-item neutral" *ngIf="showMeetingData">
           <span class="exception-dot" aria-hidden="true"></span><span>{{number(data.summary?.upcoming_meetings)}}</span><small>{{lang.t('upcomingMeetings')}}</small>
         </div>
+        </div>
       </section>
 
-      <section class="dashboard-panels" [class.with-trend]="showKpiTrend">
-        <article class="dashboard-panel" *ngIf="showTaskData && showUnitData">
+      <section class="dashboard-panels analytics-grid">
+        <article class="dashboard-panel unit-performance-panel" *ngIf="showTaskData && showUnitData">
           <div class="panel-heading">
             <div><h2>{{lang.t('unitPlanProgress')}}</h2><p>{{lang.t('progressForSelectedWeek')}}</p></div>
+            <span class="panel-kicker" *ngIf="progressRows.length">{{number(progressRows.length)}} {{lang.t('units')}}</span>
           </div>
           <app-bms-state *ngIf="!progressRows.length" kind="empty" [message]="lang.t('noUnitTaskData')"></app-bms-state>
           <div class="progress-list" *ngIf="progressRows.length" role="list">
@@ -138,24 +142,48 @@
           </div>
         </article>
 
-        <article class="dashboard-panel" *ngIf="showOpportunityData">
-          <div class="panel-heading"><div><h2>{{lang.t('opportunityPipeline')}}</h2><p>{{lang.t('currentStageDistribution')}}</p></div></div>
-          <app-bms-state *ngIf="!stageRows.length" kind="empty" [message]="lang.t('noOpportunityData')"></app-bms-state>
-          <div class="stage-list" *ngIf="stageRows.length" role="list">
-            <div class="stage-row" *ngFor="let stage of stageRows; trackBy: trackById" role="listitem">
-              <div class="stage-heading"><span>{{stage.label}}</span><strong>{{number(stage.count)}}</strong></div>
-              <div class="stage-track" role="img" [attr.aria-label]="stage.label + ': ' + number(stage.count)">
-                <span [style.width.%]="stage.percent"></span>
-              </div>
-            </div>
+        <article class="dashboard-panel task-status-panel" *ngIf="showTaskData && showUnitData">
+          <div class="panel-heading">
+            <div><h2>{{lang.t('taskStatusDistribution')}}</h2><p>{{lang.t('plannedTasks')}} · {{lang.t('progressForSelectedWeek')}}</p></div>
           </div>
+          <app-bms-state *ngIf="!taskStatusTotal" kind="empty" [message]="lang.t('noUnitTaskData')"></app-bms-state>
+          <ng-container *ngIf="taskStatusTotal">
+            <div class="task-donut-shell">
+              <div class="chart-visual task-donut-visual" role="img" [attr.aria-label]="taskStatusChartLabel">
+                <p-chart type="doughnut" styleClass="chart-canvas" [data]="taskStatusChartData" [options]="taskStatusChartOptions"></p-chart>
+              </div>
+              <div class="task-donut-center" aria-hidden="true"><strong>{{number(taskStatusTotal)}}</strong><span>{{lang.t('tasks')}}</span></div>
+            </div>
+            <ul class="status-legend" [attr.dir]="lang.direction">
+              <li *ngFor="let status of taskStatusData; trackBy: trackById">
+                <i class="status-swatch" [ngClass]="'status-' + status.key" aria-hidden="true"></i>
+                <span>{{status.label}}</span><strong>{{number(status.count)}}</strong><small>{{number(status.percent)}}%</small>
+              </li>
+            </ul>
+          </ng-container>
+        </article>
+
+        <article class="dashboard-panel opportunity-panel" *ngIf="showOpportunityData">
+          <div class="panel-heading">
+            <div><h2>{{lang.t('opportunityPipeline')}}</h2><p>{{lang.t('currentStageDistribution')}}</p></div>
+            <span class="panel-kicker" *ngIf="stageRows.length">{{number(data.summary?.opportunities)}}</span>
+          </div>
+          <app-bms-state *ngIf="!stageRows.length" kind="empty" [message]="lang.t('noOpportunityData')"></app-bms-state>
+          <ng-container *ngIf="stageRows.length">
+            <div class="chart-visual opportunity-chart-visual" role="img" [attr.aria-label]="opportunityChartLabel">
+              <p-chart type="bar" styleClass="chart-canvas" [data]="opportunityChartData" [options]="opportunityChartOptions"></p-chart>
+            </div>
+            <ul class="sr-only">
+              <li *ngFor="let stage of stageRows; trackBy: trackById">{{stage.label}} · {{number(stage.count)}} · {{number(stage.percent)}}%</li>
+            </ul>
+          </ng-container>
         </article>
 
         <article class="dashboard-panel trend-panel" *ngIf="showKpiTrend">
           <div class="panel-heading"><div><h2>{{lang.t('unitKpiHistory')}}</h2><p>{{lang.t('unitKpiFilterNote')}}</p></div></div>
           <label class="trend-select-label" *ngIf="trendSeries.length > 1" for="dashboard-kpi-series">{{lang.t('selectKpi')}}</label>
           <select id="dashboard-kpi-series" class="form-select trend-select" *ngIf="trendSeries.length > 1"
-            [value]="selectedTrendKey" (change)="selectedTrendKey = $any($event.target).value">
+            [value]="selectedTrendKey" (change)="selectTrend($any($event.target).value)">
             <option *ngFor="let series of trendSeries" [value]="seriesKey(series)">{{seriesLabel(series)}}</option>
           </select>
           <app-bms-state *ngIf="loadingTrend" kind="loading" [message]="lang.t('loadingKpiHistory')"></app-bms-state>
@@ -163,24 +191,33 @@
             [actionLabel]="lang.t('retry')" (action)="retryKpiHistory()"></app-bms-state>
           <ng-container *ngIf="!loadingTrend && !trendError">
             <app-bms-state *ngIf="!selectedTrend" kind="empty" [message]="lang.t('noKpiHistory')"></app-bms-state>
-            <app-bms-state *ngIf="selectedTrend && !hasTrendLine" kind="empty" [message]="lang.t('needKpiHistory')"></app-bms-state>
-            <ng-container *ngIf="selectedTrend && hasTrendLine">
+            <ng-container *ngIf="selectedTrend">
               <strong class="trend-series-name">{{trendLabel}}</strong>
-              <svg class="trend-chart" viewBox="0 0 360 136" preserveAspectRatio="none" role="img"
-                [attr.aria-label]="lang.t('kpiTrendChart') + ': ' + trendLabel">
-                <title>{{lang.t('kpiTrendChart')}} — {{trendLabel}}</title>
-                <line *ngFor="let segment of trendTargetSegments" [attr.x1]="segment.x1" [attr.y1]="segment.y1"
-                  [attr.x2]="segment.x2" [attr.y2]="segment.y2" class="trend-target-line"></line>
-                <polyline [attr.points]="trendActualLine" class="trend-actual-line"></polyline>
-                <circle *ngFor="let point of trendPoints" [attr.cx]="point.x" [attr.cy]="point.actualY" r="3.5" class="trend-point">
-                  <title>{{point.label}} · {{lang.t('actual')}} {{number(point.actual)}}</title>
-                </circle>
-              </svg>
-              <div class="trend-date-labels"><span *ngFor="let point of trendPoints">{{date(point.label, 'month')}}</span></div>
-              <ul class="sr-only">
-                <li *ngFor="let point of trendPoints">{{date(point.label)}} · {{lang.t('actual')}} {{number(point.actual)}}<span *ngIf="point.target !== null"> · {{lang.t('target')}} {{number(point.target)}}</span></li>
-              </ul>
-              <div class="trend-legend"><span><i class="actual-key"></i>{{lang.t('actual')}}</span><span><i class="target-key"></i>{{lang.t('target')}}</span></div>
+              <div class="kpi-achievement" *ngIf="trendPoints.length">
+                <div class="achievement-summary">
+                  <span><small>{{lang.t('attainment')}}</small><strong>{{kpiAchievementValue.attainment === null ? '—' : number(kpiAchievementValue.attainment) + '%'}}</strong></span>
+                  <span class="achievement-values"><small>{{lang.t('actual')}} / {{lang.t('target')}}</small><b>{{number(kpiAchievementValue.actual)}} / {{number(kpiAchievementValue.target)}}</b></span>
+                </div>
+                <div *ngIf="kpiAchievementValue.attainment !== null" class="achievement-track" role="progressbar" [attr.aria-label]="lang.t('attainment')"
+                  [attr.aria-valuenow]="kpiAchievementValue.barWidth" aria-valuemin="0" aria-valuemax="100">
+                  <span [style.width.%]="kpiAchievementValue.barWidth"></span>
+                </div>
+                <small *ngIf="kpiAchievementValue.attainment === null" class="no-target-note">{{lang.t('no_target')}}</small>
+              </div>
+              <app-bms-state *ngIf="!trendPoints.length" kind="empty" [message]="lang.t('noKpiHistory')"></app-bms-state>
+              <app-bms-state *ngIf="trendPoints.length && !hasTrendLine" kind="empty" [message]="lang.t('needKpiHistory')"></app-bms-state>
+              <ng-container *ngIf="hasTrendLine">
+                <div class="chart-visual kpi-chart-visual" role="img" [attr.aria-label]="lang.t('kpiTrendChart') + ': ' + trendLabel">
+                  <p-chart type="line" styleClass="chart-canvas" [data]="kpiChartData" [options]="kpiChartOptions"></p-chart>
+                </div>
+                <div class="trend-legend" [attr.dir]="lang.direction">
+                  <span><i class="actual-key"></i>{{lang.t('actual')}}</span>
+                  <span><i class="target-key"></i>{{lang.t('target')}}</span>
+                </div>
+                <ul class="sr-only">
+                  <li *ngFor="let point of trendPoints">{{date(point.label)}} · {{lang.t('actual')}} {{number(point.actual)}}<span *ngIf="point.target !== null"> · {{lang.t('target')}} {{number(point.target)}}</span></li>
+                </ul>
+              </ng-container>
             </ng-container>
           </ng-container>
         </article>

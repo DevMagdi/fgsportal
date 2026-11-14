@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+import { ChartModule } from 'primeng/chart';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
@@ -66,7 +67,7 @@ const routes: Routes = [{
     ReportsComponent, AccessComponent, EmployeeManagementComponent, MyTasksComponent, BmsNoAccessComponent,
     OrganizationOverviewComponent, UnitDetailComponent, UnitTeamsComponent,
   ],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, BmsStateModule, BmsUiModule, RouterModule.forChild(routes)],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, ChartModule, BmsStateModule, BmsUiModule, RouterModule.forChild(routes)],
   // BmsApiService, BmsAccessService and BmsLanguageService are root singletons shared with the application shell.
   providers: [BmsExportService, BmsConfirmService],
 })
