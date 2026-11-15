@@ -10,7 +10,7 @@ export function RecruitmentPage() {
   const { t, lang } = useI18n();
   return <CollectionPage kind="recruitment" queryName="recruitment" queryFn={() => api.recruitment()} title="recruitment" eyebrow="grpOrganization" icon={UserPlus} subtitle={{ en: 'Follow hiring requests, candidates, and onboarding in one place.', ar: 'تابع طلبات التوظيف والمرشحين والتهيئة في مكان واحد.' }} recordName={(h) => h.job_title} searchText={(h) => `${h.job_title} ${h.specification ?? ''} ${h.unit?.name ?? ''}`} getStatus={(h) => h.status} getUnit={(h) => h.unit?.name}
     columns={(open) => [
-      { key: 'job', label: t('jobTitle'), render: (h) => <div><button onClick={() => open(h)} className="text-start font-semibold text-slate-800 hover:text-brand-600">{h.job_title}</button><p className="mt-1 max-w-[280px] truncate text-xs text-slate-400">{h.specification}</p></div> },
+      { key: 'job', label: t('jobTitle'), render: (h) => <div><button onClick={() => open(h)} className="text-start font-semibold text-slate-800 hover:underline">{h.job_title}</button><p className="mt-1 max-w-[280px] truncate text-xs text-slate-400">{h.specification}</p></div> },
       { key: 'unit', label: t('unit'), render: (h) => h.unit?.name ?? '—' },
       { key: 'requester', label: t('owner'), render: (h) => displayName(h.requester) },
       { key: 'candidates', label: t('candidates'), render: (h) => h.candidates?.length ?? 0 },

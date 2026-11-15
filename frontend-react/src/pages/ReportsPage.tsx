@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import palette from '../brand.json';
 import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n, type MsgKey } from '../i18n';
@@ -37,7 +38,7 @@ export function ReportsPage() {
           ))}
         </div>
         {tab !== 'social' && (
-          <select value={unit} onChange={(e) => setUnit(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm">
+          <select aria-label={t('unit')} value={unit} onChange={(e) => setUnit(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm">
             <option value="">{t('allUnits')}</option>
             {lookups?.units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
@@ -62,14 +63,14 @@ export function ReportsPage() {
             </div>
             <Card>
               <CardHeader title={t('unitProgress')} subtitle={`${monthly.data.period.start} → ${monthly.data.period.end}`} />
-              <div className="h-[280px] px-2 py-4">
+              <div dir="ltr" className="h-[220px] px-2 py-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthly.data.units.map((u) => ({ name: u.unit.name, progress: u.average_progress, tasks: u.tasks_total }))}>
-                    <CartesianGrid stroke="#eef2f7" vertical={false} />
+                    <CartesianGrid stroke={palette.skin} strokeOpacity={0.5} vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} />
                     <YAxis domain={[0, 100]} tickLine={false} axisLine={false} />
                     <Tooltip />
-                    <Bar dataKey="progress" name={t('progress')} fill="#4f46e5" radius={[6, 6, 0, 0]} barSize={22} />
+                    <Bar dataKey="progress" name={t('progress')} fill={palette.indigo} radius={[6, 6, 0, 0]} barSize={22} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -84,15 +85,15 @@ export function ReportsPage() {
             {kpis.data.history[0] && (
               <Card>
                 <CardHeader title={kpis.data.history[0].name} subtitle={kpis.data.history[0].unit ?? undefined} />
-                <div className="h-[220px] px-2 py-4">
+                <div dir="ltr" className="h-[220px] px-2 py-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={kpis.data.history[0].points.map((p) => ({ ...p, period: String(p.period_start).slice(0, 7) }))}>
-                      <CartesianGrid stroke="#eef2f7" vertical={false} />
+                      <CartesianGrid stroke={palette.skin} strokeOpacity={0.5} vertical={false} />
                       <XAxis dataKey="period" tickLine={false} axisLine={false} />
                       <YAxis tickLine={false} axisLine={false} />
                       <Tooltip />
-                      <Line type="monotone" dataKey="actual" name={t('actual')} stroke="#4f46e5" strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="target" name={t('target')} stroke="#94a3b8" strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
+                      <Line type="monotone" dataKey="actual" name={t('actual')} stroke={palette.indigo} strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="target" name={t('target')} stroke={palette.violet} strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -100,15 +101,15 @@ export function ReportsPage() {
             )}
             <Card>
               {kpis.data.kpis.length === 0 ? <EmptyState /> : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
-                      <th className="px-5 py-2.5 font-medium">{t('kpis')}</th>
-                      <th className="px-5 py-2.5 font-medium">{t('unit')}</th>
-                      <th className="px-5 py-2.5 font-medium">{t('actual')}</th>
-                      <th className="px-5 py-2.5 font-medium">{t('target')}</th>
-                      <th className="px-5 py-2.5 font-medium">{t('attainment')}</th>
-                      <th className="px-5 py-2.5 font-medium">{t('status')}</th>
+                <div role="region" tabIndex={0} aria-label={t('reports')} className="max-h-[min(55vh,32rem)] overflow-auto"><table className="w-full min-w-[650px] text-sm">
+                  <thead className="sticky top-0 z-10 bg-slate-50">
+                    <tr className="border-b border-slate-100 text-start text-[11px] uppercase tracking-wide text-slate-400">
+                      <th className="px-5 py-2.5 text-start font-medium">{t('kpis')}</th>
+                      <th className="px-5 py-2.5 text-start font-medium">{t('unit')}</th>
+                      <th className="px-5 py-2.5 text-start font-medium">{t('actual')}</th>
+                      <th className="px-5 py-2.5 text-start font-medium">{t('target')}</th>
+                      <th className="px-5 py-2.5 text-start font-medium">{t('attainment')}</th>
+                      <th className="px-5 py-2.5 text-start font-medium">{t('status')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -123,7 +124,7 @@ export function ReportsPage() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               )}
             </Card>
           </div>
@@ -146,13 +147,13 @@ export function ReportsPage() {
               ))}
             </div>
             <Card>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
-                    <th className="px-5 py-2.5 font-medium">{t('platform')}</th>
-                    <th className="px-5 py-2.5 font-medium">{t('followers')}</th>
-                    <th className="px-5 py-2.5 font-medium">{t('posts')}</th>
-                    <th className="px-5 py-2.5 font-medium">{t('engagement')}</th>
+              <div role="region" tabIndex={0} aria-label={t('reports')} className="max-h-[min(55vh,32rem)] overflow-auto"><table className="w-full min-w-[650px] text-sm">
+                <thead className="sticky top-0 z-10 bg-slate-50">
+                  <tr className="border-b border-slate-100 text-start text-[11px] uppercase tracking-wide text-slate-400">
+                    <th className="px-5 py-2.5 text-start font-medium">{t('platform')}</th>
+                    <th className="px-5 py-2.5 text-start font-medium">{t('followers')}</th>
+                    <th className="px-5 py-2.5 text-start font-medium">{t('posts')}</th>
+                    <th className="px-5 py-2.5 text-start font-medium">{t('engagement')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -165,7 +166,7 @@ export function ReportsPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </Card>
           </div>
         ) : <EmptyState />

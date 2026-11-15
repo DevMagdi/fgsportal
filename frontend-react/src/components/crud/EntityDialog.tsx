@@ -225,8 +225,8 @@ export function EntityDialog<K extends EntityKind>({ kind, record, defaults, onC
   const title = isEdit ? `${t('edit')} ${t(config.singular).toLocaleLowerCase()}` : t(config.createLabel);
   return <Modal open onClose={onClose} title={title} description={config.steps ? (step === 1 ? t('titleDetails') : t('moreDetails')) : t('titleDetails')} size="lg" busy={busy}>
     <form onSubmit={(event) => void submit(event)} className="flex min-h-0 flex-1 flex-col" noValidate>
-      <div className="overflow-y-auto px-6 py-6 sm:px-7">
-        {config.steps && <div className="mb-6 flex items-center gap-3">
+      <div className="overflow-y-auto px-5 py-4 sm:px-6">
+        {config.steps && <div className="mb-4 flex items-center gap-3">
           {[1, 2].map((number) => <div key={number} className="flex flex-1 items-center gap-2"><span className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-semibold', step >= number ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-400')}>{step > number ? <Check size={14} /> : number}</span><span className={cn('text-xs font-medium', step >= number ? 'text-slate-700' : 'text-slate-400')}>{number === 1 ? t('basicDetails') : t('additionalDetails')}</span>{number === 1 && <div className="ms-1 h-px flex-1 bg-slate-200" />}</div>)}
         </div>}
         <div className="grid gap-4 sm:grid-cols-2">{visibleFields.map((field) => {
@@ -257,13 +257,13 @@ export function EntityDialog<K extends EntityKind>({ kind, record, defaults, onC
             return <div key={guest.key} className="grid items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/60 p-3 sm:grid-cols-[1fr_1fr_auto]">
               <FormField htmlFor={nameId} label={t('guestName')} error={nameError}><TextInput id={nameId} value={guest.name} disabled={busy} aria-invalid={Boolean(nameError)} aria-describedby={nameError ? `${nameId}-error` : undefined} onChange={(event) => update({ name: event.target.value })} /></FormField>
               <FormField htmlFor={emailId} label={t('guestEmail')} error={emailError}><TextInput id={emailId} type="email" value={guest.email} disabled={busy} aria-invalid={Boolean(emailError)} aria-describedby={emailError ? `${emailId}-error` : undefined} onChange={(event) => update({ email: event.target.value })} /></FormField>
-              <button type="button" disabled={busy} aria-label={`${t('removeGuest')}: ${guest.name || guest.email}`} onClick={() => setGuests((current) => current.filter((item) => item.key !== guest.key))} className="mt-1 rounded-lg p-2 text-slate-400 hover:bg-white hover:text-rose-600 sm:mt-6"><Trash2 size={16} /></button>
+              <button type="button" disabled={busy} aria-label={`${t('removeGuest')}: ${guest.name || guest.email}`} onClick={() => setGuests((current) => current.filter((item) => item.key !== guest.key))} className="mt-1 rounded-lg p-2 text-slate-400 hover:bg-white hover:text-brand-600 sm:mt-6"><Trash2 size={16} /></button>
             </div>;
           })}
         </section>}
-        {serverError && <div role="alert" className="mt-5 rounded-lg border border-rose-100 bg-rose-50 px-3 py-2.5 text-sm text-rose-700">{serverError}</div>}
+        {serverError && <div role="alert" className="mt-5 rounded-lg border border-pink/40 bg-pink/20 px-3 py-2.5 text-sm text-brand-700">{serverError}</div>}
       </div>
-      <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/70 px-6 py-4 sm:px-7">
+      <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/70 px-5 py-3 sm:px-6">
         <div>{config.steps && step > 1 && <Button type="button" variant="ghost" onClick={() => setStep(1)} disabled={busy}>{dir === 'rtl' ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}{t('back')}</Button>}</div>
         <div className="flex gap-2"><Button type="button" variant="secondary" onClick={onClose} disabled={busy}>{t('cancel')}</Button><Button type="submit" disabled={busy || (kind === 'teams' && Boolean(teamUnitId) && teamUnit.isFetching)}>{busy ? (isEdit ? t('saving') : t('creating')) : config.steps && step === 1 ? <>{t('continue')}{dir === 'rtl' ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}</> : isEdit ? t('saveChanges') : t('create')}</Button></div>
       </div>

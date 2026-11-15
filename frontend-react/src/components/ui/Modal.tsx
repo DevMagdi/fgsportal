@@ -59,8 +59,8 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
           transition={{ duration: 0.18 }}
           className={cn('relative flex max-h-[min(90vh,900px)] w-full flex-col overflow-hidden bg-white shadow-2xl outline-none', drawer ? 'h-full max-h-full max-w-[560px] rounded-none' : 'rounded-2xl', !drawer && (size === 'lg' ? 'max-w-2xl' : 'max-w-lg'))}
         >
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 sm:px-7">
-            <div><h2 id={titleId} className="text-lg font-semibold tracking-tight text-slate-900">{title}</h2>{description && <p id={descriptionId} className="mt-1 text-sm text-slate-500">{description}</p>}</div>
+          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+            <div><h2 id={titleId} className="text-base font-semibold tracking-tight text-slate-900">{title}</h2>{description && <p id={descriptionId} className="mt-1 text-sm text-slate-500">{description}</p>}</div>
             <button type="button" onClick={onClose} disabled={busy} aria-label={t('closeDialog')} className="-me-1 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"><X size={18} /></button>
           </div>
           {children}

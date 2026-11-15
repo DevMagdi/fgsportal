@@ -1,5 +1,7 @@
 # BMS Phase 3.5 — Engineering audit
 
+> **Historical audit:** This report describes a previous source snapshot and test environment, not the current React UI or a current release decision. Its backend risks and decisions are retained for context; [the complete original](https://github.com/DevMagdi/fgsportal/blob/72953827d23608af32201d03065ef85f08fc5b85/docs/bms/PHASE_3_5_ENGINEERING_AUDIT.md) remains in Git history. Verify the present code and deployment before acting.
+
 **Audit base / starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
 **Working branch:** `arena/e1389d1e-fgsportal` (session branch; kept in place)
 **Base:** `origin/BMS` at `891851bc85b2d2f274b811c9173d6268c8752795`
@@ -51,6 +53,6 @@ No Critical finding is claimed on available evidence. This audit did not approve
 
 ## Latest candidate evidence and gate result
 
-CI 43318197656 on source SHA `15c8bf295ff3c44a171800b61bb5441ddca979c2` passed focused P16 attendee synchronization, persisted manager cross-company, core catalogue, and existing focused dashboard/access regressions. The full SQLite/MySQL suites still fail the two employee-import cases; Angular/Karma is 114/212 passed with 98 failures. Backend lint/static analysis and frontend production build passed. The locally available Node suite is 43/43, but local Karma cannot start without Chrome. No live API/database rehearsal was run.
+CI 43318197656 on source SHA `15c8bf295ff3c44a171800b61bb5441ddca979c2` passed focused P16 attendee synchronization, persisted manager cross-company, core catalogue, and existing focused dashboard/access regressions. The full SQLite/MySQL suites still fail the two employee-import cases; The retired UI suite had 114/212 passing with 98 failures. Backend lint/static analysis and frontend production build passed. The locally available Node suite is 43/43, but local Karma cannot start without Chrome. No live API/database rehearsal was run.
 
-**Phase 3.5: NOT PASSED.** Shared-Product audit scope and Company–BusinessUnit ownership require explicit owner decisions; Angular failures, full-suite import failures, and safe fresh-environment rehearsal remain unresolved. PR #26 remains open and unmerged; Phase 4 was not started.
+**Phase 3.5: NOT PASSED.** Shared-Product audit scope and Company–BusinessUnit ownership require explicit owner decisions; The historical UI failures, full-suite import failures, and safe fresh-environment rehearsal remained unresolved. PR #26 remains open and unmerged; Phase 4 was not started.

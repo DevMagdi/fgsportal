@@ -1,5 +1,7 @@
 # BMS Phase 3.5 — Database, migration and integration readiness
 
+> **Historical audit:** This report describes a previous source snapshot and test environment, not the current React UI or a current release decision. Its backend risks and decisions are retained for context; [the complete original](https://github.com/DevMagdi/fgsportal/blob/72953827d23608af32201d03065ef85f08fc5b85/docs/bms/PHASE_3_5_DATABASE_READINESS.md) remains in Git history. Verify the present code and deployment before acting.
+
 **Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
 **Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2` (CI 43318197656; failed).
 **Status:** Source audit and isolated test plan complete; fresh-install/deployed-schema rehearsal **BLOCKED / NOT PASSED**.
@@ -26,7 +28,7 @@ This is not an exhaustive inventory of all legacy tables, deployed foreign keys,
 
 - PHP **8.1** with `mbstring`, `dom`, `curl`, `zip`, `pdo_sqlite`, `pdo_mysql` and Composer dependencies from `backend/composer.lock` (matches `.github/workflows/ci.yml`).
 - MySQL **8.0** for engine-specific integration and an in-memory SQLite connection for the SQLite suite.
-- Node **20** and npm dependencies from `frontend/package-lock.json` for CI parity. No Angular or dependency upgrade is part of this work.
+- The UI environment in that historical run was separate; use the current frontend setup and checks from the repository README.
 
 ### Environment variable names (values must remain private)
 
@@ -55,7 +57,7 @@ The backend PHPUnit feature tests issue requests through Laravel routes/middlewa
 
 ## Local execution result
 
-**Fresh install and local API/database rehearsal: NOT EXECUTED / BLOCKED.** Local environment has no PHP executable, Composer vendor tree/PHPUnit, MySQL service, Docker executable, `.env`, or Chrome binary. `npm ci --legacy-peer-deps --no-audit --no-fund` succeeds; Node tests and production Angular build can run. Karma can compile its browser bundle but cannot start Chrome locally. No DB connection was configured or attempted.
+**Fresh install and local API/database rehearsal: NOT EXECUTED / BLOCKED.** Local environment has no PHP executable, Composer vendor tree/PHPUnit, MySQL service, Docker executable, `.env`, or Chrome binary. The retired client checks are documented in the original snapshot. No DB connection was configured or attempted.
 
 ## Gate
 

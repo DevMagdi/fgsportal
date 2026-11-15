@@ -54,7 +54,7 @@ export function OrganizationPage() {
             <Card className="p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <Link to={`/units/${current.id}`} className="text-lg font-semibold text-slate-900 hover:text-brand-700">{current.name}</Link>
+                  <Link to={`/units/${current.id}`} className="text-lg font-semibold text-slate-900 hover:underline">{current.name}</Link>
                   <p className="mt-1 text-sm text-slate-500">{current.description || '—'}</p>
                 </div>
                 <Badge tone={current.is_active ? 'success' : 'neutral'}>{current.is_active ? t('active') : t('inactive')}</Badge>
@@ -76,7 +76,7 @@ export function OrganizationPage() {
                         <div className="text-sm font-medium text-slate-800">{tm.name}</div>
                         <div className="text-xs text-slate-400">{tm.description}</div>
                       </div>
-                      <div className="flex items-center gap-2"><Badge>{tm.members_count ?? tm.members?.length ?? 0} {t('members')}</Badge>{manager.canManage && (api.demo || tm.can_manage === true) && <><button onClick={() => manager.openEdit(tm)} aria-label={`${t('edit')} ${tm.name}`} className="rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-brand-600"><Pencil size={15} /></button><button onClick={() => manager.openDelete(tm, tm.name)} aria-label={`${t('remove')} ${tm.name}`} className="rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-rose-600"><Trash2 size={15} /></button></>}</div>
+                      <div className="flex items-center gap-2"><Badge>{tm.members_count ?? tm.members?.length ?? 0} {t('members')}</Badge>{manager.canManage && (api.demo || tm.can_manage === true) && <><button onClick={() => manager.openEdit(tm)} aria-label={`${t('edit')} ${tm.name}`} className="rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-brand-600"><Pencil size={15} /></button><button onClick={() => manager.openDelete(tm, tm.name)} aria-label={`${t('remove')} ${tm.name}`} className="rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-brand-600"><Trash2 size={15} /></button></>}</div>
                     </div>
                     <div className="mt-2 text-xs text-slate-500">{t('teamLead')}: {displayName(tm.lead)}</div>
                   </li>

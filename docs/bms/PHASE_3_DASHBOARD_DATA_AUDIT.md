@@ -1,16 +1,18 @@
 # Phase 3 — Executive Dashboard Data Audit
 
+> **Historical audit:** This report describes a previous source snapshot and test environment, not the current React UI or a current release decision. Its backend risks and decisions are retained for context; [the complete original](https://github.com/DevMagdi/fgsportal/blob/72953827d23608af32201d03065ef85f08fc5b85/docs/bms/PHASE_3_DASHBOARD_DATA_AUDIT.md) remains in Git history. Verify the present code and deployment before acting.
+
 **Audit date:** 2026-11-12
 **Scope:** Existing BMS Executive Dashboard frontend, current API/controller behavior, authorization, migrations/models/tests, and installed visualization tooling. This audit was completed before Phase 3 implementation.
 
 ## Audit evidence and limits
 
-- Frontend: `frontend/src/app/components/bms/dashboard/executive-dashboard.component.{ts,html}`; shared design tokens/primitives in `bms-design-system.scss`, `bms-shared.scss`, and `bms-state.component.*`; `BmsApiService` response/filter mapping.
+- The client implementation reviewed at the time has since been retired; its original details remain in the linked snapshot.
 - API: `GET /api/bms/executive-dashboard` → `ExecutiveDashboardController@index`, protected by `bms.permission:dashboard.view` (`backend/routes/api.php:1462`). Shared option data comes from `GET /api/bms/lookups` / `LookupController@index`. Historical unit KPI data is available from `GET /api/bms/reports/kpis`, protected by `bms.permission:reports.view` (`routes/api.php:1437`).
 - Authorization: `BmsAccess::visibleUnitIds()` returns `null` for global-scope roles and an explicit unit-ID list otherwise; selected unit filters call `authorizeUnit`. Opportunity results include records in visible units or owned by the current user. The UI must not broaden these existing rules.
 - Schema evidence: repository migrations and Eloquent models, including `2026_11_11_000001_create_bms_phase_one_tables.php`, `2026_11_11_000002_complete_bms_brd_tables.php`, `2026_11_12_000007_add_bms_completion_columns.php`, `000010_add_bms_admin_metadata.php`, and `000011_add_missing_bms_kpi_metadata.php`. **No live database/schema connection was available** (`backend/.env`, `backend/vendor`, and PHP runtime are absent), so deployed schema/data were not independently verified.
 - Existing backend coverage includes `P17EmployeeManagementTest::test_P18_dashboard_reports_pending_procurement_upcoming_meetings_and_overdue_tasks`, `test_P20_dashboard_summary_matches_the_widget_data_under_the_same_filters`, recent-activity scope tests, and Phase 1 dashboard card tests. These establish some filter/aggregation behavior but do not run in this checkout without PHP/Composer dependencies.
-- `chart.js` 3.7.1 is already declared in `frontend/package.json`, but no BMS or project Angular chart integration was found. Phase 3 can use scoped SVG/CSS visualizations and avoid adding or loading a new chart framework.
+- The historical chart-library assessment applies only to the retired client; see the current React implementation for today’s dependencies.
 
 ## Existing API contract and supported filters
 

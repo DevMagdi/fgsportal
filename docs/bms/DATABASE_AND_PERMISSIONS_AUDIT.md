@@ -1,5 +1,7 @@
 # Database, authentication, and authorization audit
 
+> **Historical audit:** This report describes a previous source snapshot and test environment, not the current React UI or a current release decision. Its backend risks and decisions are retained for context; [the complete original](https://github.com/DevMagdi/fgsportal/blob/72953827d23608af32201d03065ef85f08fc5b85/docs/bms/DATABASE_AND_PERMISSIONS_AUDIT.md) remains in Git history. Verify the present code and deployment before acting.
+
 **Audit basis:** source at `11d6b1e3394e4f31aa97340b732a6470382343e7`, branch `arena/bce4bcc3-fgsportal`. No database connection, dump, production environment, or runtime dependencies were available. Statements about live schema/records are therefore explicitly **UNVERIFIED**.
 
 ## 1. Database evidence and limits
@@ -44,11 +46,10 @@ These are source definitions only. Actual foreign-key enforcement/indexes on exi
 
 ## 2. Authentication and entitlement path
 
-1. Angular `AuthApiService` authenticates against `/api/users/login` and persists the returned user/token state; JWT handling is in `backend/config/auth.php` and `JwtMiddleware` (`backend/app/Http/Middleware/JwtMiddleware.php`).
-2. BMS lazy entry is `/bms` in `frontend/src/app/app-routing.module.ts`, guarded by `AuthGuardService`. `bms.module.ts` individual routes add `BmsPermissionGuard` with ability metadata.
-3. BMS HTTP requests are built by `frontend/src/app/components/bms/bms-api.service.ts` as `${environment.newServerApi}/api/bms/...` with bearer JWT from local storage.
-4. Laravel `backend/routes/api.php` groups `/bms` under `cors`, `jwt.verify`, and `module:bms`. Each business route adds `bms.permission:<ability>`, except explicitly enumerated auth-only routes in `BmsRouteSafetyTest`.
-5. `BmsPermission` calls `BmsAccess::authorize`; `BmsAccess::can` checks seeded role ability arrays, with a legacy Administration/Management special rule for `roles.manage`.
+1. The audited client authenticated against `/api/users/login`; JWT handling is in `backend/config/auth.php` and `JwtMiddleware` (`backend/app/Http/Middleware/JwtMiddleware.php`).
+2. Details of the retired client and its guards are retained in the original historical record; they do not describe the current UI.
+3. Laravel `backend/routes/api.php` groups `/bms` under `cors`, `jwt.verify`, and `module:bms`. Each business route adds `bms.permission:<ability>`, except explicitly enumerated auth-only routes in `BmsRouteSafetyTest`.
+4. `BmsPermission` calls `BmsAccess::authorize`; `BmsAccess::can` checks seeded role ability arrays, with a legacy Administration/Management special rule for `roles.manage`.
 
 `BmsRouteSafetyTest::test_A3_every_bms_route_has_authentication_entitlement_and_permission` asserts middleware presence on every BMS route. The test exists but was not executed here.
 

@@ -18,10 +18,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return <ToastContext.Provider value={{ success: (message) => push(message, 'success'), error: (message) => push(message, 'error') }}>
     {children}
     <div className="pointer-events-none fixed bottom-5 end-5 z-[100] flex w-[min(360px,calc(100vw-40px))] flex-col gap-2" aria-live="polite" aria-atomic="false">
-      <AnimatePresence>{items.map((toast) => <motion.div key={toast.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} role={toast.tone === 'error' ? 'alert' : 'status'} className="pointer-events-auto flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-lift">
-        {toast.tone === 'success' ? <CheckCircle2 className="mt-0.5 shrink-0 text-teal-600" size={17} /> : <AlertCircle className="mt-0.5 shrink-0 text-rose-600" size={17} />}
-        <span className={cn('flex-1 leading-5', toast.tone === 'error' ? 'text-rose-800' : 'text-slate-700')}>{toast.message}</span>
-        <button onClick={() => remove(toast.id)} aria-label={t('dismiss')} className="text-slate-400 hover:text-slate-700"><X size={15} /></button>
+      <AnimatePresence>{items.map((toast) => <motion.div key={toast.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} role={toast.tone === 'error' ? 'alert' : 'status'} className="pointer-events-none flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-lift">
+        {toast.tone === 'success' ? <CheckCircle2 className="mt-0.5 shrink-0 text-brand-600" size={17} /> : <AlertCircle className="mt-0.5 shrink-0 text-brand-600" size={17} />}
+        <span className={cn('flex-1 leading-5', toast.tone === 'error' ? 'text-brand-800' : 'text-slate-700')}>{toast.message}</span>
+        <button onClick={() => remove(toast.id)} aria-label={t('dismiss')} className="pointer-events-auto text-slate-400 hover:text-slate-700"><X size={15} /></button>
       </motion.div>)}</AnimatePresence>
     </div>
   </ToastContext.Provider>;

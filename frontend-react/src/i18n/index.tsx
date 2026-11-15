@@ -4,10 +4,10 @@ export type Lang = 'en' | 'ar';
 
 const dict = {
   en: {
-    appName: 'BMS',
-    appFull: 'Business Management Solutions',
+    appName: 'Alphaiota BMS',
+    appFull: 'Alphaiota BMS',
     signIn: 'Sign in',
-    signInSub: 'Use your FGS account to continue.',
+    signInSub: 'Use your Alphaiota BMS account to continue.',
     identifier: 'Username or email',
     password: 'Password',
     signingIn: 'Signing in…',
@@ -444,10 +444,10 @@ const dict = {
 
   },
   ar: {
-    appName: 'BMS',
-    appFull: 'حلول إدارة الأعمال',
+    appName: 'Alphaiota BMS',
+    appFull: 'Alphaiota BMS',
     signIn: 'تسجيل الدخول',
-    signInSub: 'استخدم حساب FGS للمتابعة.',
+    signInSub: 'استخدم حساب Alphaiota BMS للمتابعة.',
     identifier: 'اسم المستخدم أو البريد',
     password: 'كلمة المرور',
     signingIn: 'جارٍ الدخول…',

@@ -40,9 +40,9 @@ export function CollectionPage<K extends EntityKind>({ kind, queryName, queryFn,
   if (query.isLoading) return <LoadingState />;
   if (query.isError) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
   const items = query.data ?? [];
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
     {!hideHeader && <PageHeader eyebrow={t(eyebrow)} title={t(title)} subtitle={subtitle[lang]} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t(ENTITY_CONFIG[kind].createLabel)}</Button>} />}
-    {!hideHeader && <div className="flex items-center gap-4 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 via-white to-white px-5 py-4"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm"><Icon size={20} /></span><div><div className="text-sm font-semibold text-slate-800">{items.length} {t('records')}</div><div className="mt-1 text-xs text-slate-400">{subtitle[lang]}</div></div></div>}
+    {!hideHeader && <div className="flex items-center gap-3 rounded-xl border border-brand-100 bg-gradient-to-r from-brand-50/80 via-white to-white px-4 py-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm"><Icon size={20} /></span><div><div className="text-sm font-semibold text-slate-800">{items.length} {t('records')}</div><div className="mt-1 text-xs text-slate-400">{subtitle[lang]}</div></div></div>}
     {hideHeader && manager.canManage && <div className="flex justify-end"><Button size="sm" onClick={() => manager.openCreate()}><Plus size={14} />{t(ENTITY_CONFIG[kind].createLabel)}</Button></div>}
     <DataTable items={items} columns={columns(setDetail)} title={t('allRecords')} getSearchText={searchText} getStatus={getStatus} getUnit={getUnit}
       onCreate={manager.canManage ? () => manager.openCreate() : undefined} createLabel={t(ENTITY_CONFIG[kind].createLabel)}

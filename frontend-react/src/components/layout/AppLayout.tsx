@@ -7,11 +7,11 @@ import { LoadingState } from '../ui/States';
 export function AppLayout() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex min-h-full bg-[#f7f8fc]">
+    <div className="flex min-h-full bg-surface">
       <Sidebar open={open} onClose={() => setOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onMenu={() => setOpen(true)} />
-        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-7 sm:px-6 lg:px-8 lg:py-8">
+        <Topbar onMenu={() => setOpen(true)} menuOpen={open} />
+        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-5 sm:px-6 lg:px-7 lg:py-5">
           <Suspense fallback={<LoadingState />}><Outlet /></Suspense>
         </main>
       </div>

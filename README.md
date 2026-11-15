@@ -1,144 +1,58 @@
-# FGS Connect — Modular Multi-Client Portal
+# Alphaiota BMS
 
-FGS Connect is a business portal (Angular 13 frontend + Laravel 8 backend)
-organised as a **core platform with optional, sellable modules** that can be
-enabled or disabled per client company.
+Alphaiota BMS is a bilingual business-management workspace backed by the existing Laravel API. **`frontend-react/` is the official and only UI source of truth.** It provides the executive dashboard, business-unit and employee views, opportunities, plans, operations and reports, with English and Arabic (RTL), JWT authentication and permission-aware navigation.
 
-- **Core module** — Users, Authentication & Permissions (always enabled).
-- Optional modules — **CRM**, **Ticketing & Support**, **Projects**, **HR**,
-  **Administration**.
+## Repository
 
-A client may buy any combination, e.g. *Core + CRM* only; every other API
-surface is then inaccessible for that client, and on the modules dashboard the
-unpurchased modules remain visible as dimmed, locked cards rather than being
-removed.
-
-## Repository structure
-
-```
-fgsportal/
-├── backend/                      # Laravel 8 API (all server code)
-├── frontend/                     # Angular 13 application (source of truth for the UI)
-├── docs/MODULES.md               # Module catalogue & provisioning guide
-├── MODULARIZATION_PLAN.md        # Architecture decisions & analysis
-└── README.md
+```text
+frontend-react/   React 18, TypeScript, Vite and Tailwind application
+backend/          Laravel 8 API, migrations and tests
+docs/             Backend documentation and pointers to historical audits
+scripts/          Backend test-environment helper
 ```
 
-Committed production Angular bundles, the legacy `FrontEndApiTest/` hosting
-folder and the partial root `system/` copy have been removed; build output is
-generated locally or by CI and is never committed.
+## Frontend
 
-## How the module system works
+Use Node.js 20 or 22 and npm; CI uses Node 20.
 
-1. The `modules` table is the catalogue; `company_modules` stores each company's
-   entitlements; `users.company_id` links users to their company.
-2. The backend `module` middleware (`App\Http\Middleware\CheckModule`) blocks
-   requests to controllers belonging to disabled modules with **HTTP 403**.
-   Controller → module mapping lives in `config/modules.php`.
-3. After login the frontend fetches `GET /api/company/modules`, hides disabled
-   menu entries and guards every lazy route with `ModuleGuard`. The **Modules
-   dashboard** at `/modules` additionally renders all six modules as cards:
-   enabled modules open normally, while disabled modules stay visible but are
-   dimmed with a lock badge and route to `/module-disabled?module=<slug>` when
-   clicked — they are never fully hidden.
-4. Clicking an enabled module card opens its **feature landing page**
-   (`/modules/:slug`): one card per sidebar section of that module (Insights,
-   Reports, Projects, Tickets, …) with the same routes and the same
-   permission/department visibility rules, declared in
-   `frontend/src/app/services/module-pages.registry.ts`. Each feature card
-   navigates to its real page; the route guards still enforce access.
-5. The default/legacy company is seeded with **all** modules enabled, so existing
-   deployments keep working unchanged.
+```bash
+cd frontend-react
+npm ci
 
-See [`docs/MODULES.md`](docs/MODULES.md) for the full module list and client
-provisioning steps, and [`MODULARIZATION_PLAN.md`](MODULARIZATION_PLAN.md) for
-the architecture analysis.
+# Browser-local demo: any username and a password of at least 4 characters
+VITE_DEMO_MODE=true npm run dev -- --host 0.0.0.0
 
-## Backend setup (Laravel 8, `backend`)
+# Verify
+npm run typecheck
+npm test
+npm run build
+```
 
-Requirements: PHP >= 7.4 (tested up to 8.x), Composer, MySQL 5.7+/8 (SQLite is
-used by the test suite).
+For the live API, copy `frontend-react/.env.example` to `.env.local`, keep `VITE_DEMO_MODE=false` and configure `BMS_PROXY_TARGET` for a separately running Laravel server. The Vite proxy is server-side; browser requests use relative `/api` URLs. In production, route `/api` to Laravel with a reverse proxy, or configure a public `VITE_API_BASE_URL` and the corresponding CORS policy. Set `VITE_BMS_SERVER_TIME_ZONE` to Laravel's timezone (`Africa/Cairo` in this checkout) and rebuild when it changes.
+
+The official circular logo is `frontend-react/src/assets/alphaiota-logo.png` and is shared by the sidebar, sign-in screen and favicon. UI colours use Deep Indigo `#45436E`, Skin `#DBCEBF` and White `#FFFFFF`, with Pink `#F498C1`, Lavender `#E7BAED`, Violet `#B5AFF9`, Turquoise `#A9F9ED` and Cyan `#81E2FD` for charts and small highlights. Neutral tints are derived from the primary colours. Graphik is preferred when licensed and installed; self-hosted Inter and IBM Plex Sans Arabic provide fallbacks.
+
+See [`frontend-react/README.md`](frontend-react/README.md) for demo persistence, API configuration, date handling and the current live API limitations. In particular, some write operations, bonuses and generic activity endpoints are not present in this Laravel checkout; the UI reports errors rather than simulating live success.
+
+## Backend
+
+Use PHP and Composer versions compatible with the locked dependencies, and a configured application database. CI uses PHP 8.1 and installs with `--ignore-platform-req=php` because some locked packages declare older PHP constraints; this is not proof of full PHP 8 compatibility.
 
 ```bash
 cd backend
 composer install
-cp .env.example .env            # fill DB / JWT / mail values
+cp .env.example .env              # configure DB, JWT, mail and allowed origins
 php artisan key:generate
-php artisan jwt:secret          # sets JWT_SECRET
+php artisan jwt:secret
 php artisan migrate
-php artisan db:seed             # modules + default company + entitlements
+# Seed only after reviewing the warning below:
+php artisan db:seed
 php artisan serve
+
+# Tests (configured test database required)
+vendor/bin/phpunit
 ```
 
-> **Fresh-database note:** the historical codebase only ships migrations for
-> part of its schema — many feature tables (CRM, HR, recruitment, …)
-> were created directly in deployed databases. A clean `migrate` + `seed` is
-> enough to run authentication and the modules dashboard. For the full feature
-> set, import a `mysqldump` from an existing environment into an empty database
-> instead, then run `php artisan db:seed` if that dump predates the modular
-> system (modules/companies/company_modules tables).
+**Database and seeding:** historical migrations cover only part of the existing application schema; a fresh database may require a provisioned schema from the target environment. Review migrations and back up data before applying them. Some seeders update existing role abilities and entitlements, so review them and test in staging before running against an established database. Never commit `.env`, credentials, uploads or generated builds.
 
-Management endpoints (JWT required; Management/Administration only):
-
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| GET | `/api/modules` | Module catalogue with current company status |
-| GET | `/api/company/modules` | Modules enabled for the caller's company |
-| POST | `/api/company/modules/enable` | Enable `{module_slug}` / `{module_id}` |
-| POST | `/api/company/modules/disable` | Disable `{module_slug}` / `{module_id}` |
-
-Run backend tests:
-
-```bash
-vendor/bin/phpunit            # 28 feature tests, in-memory SQLite (83 assertions)
-```
-
-The suite covers the core/403/200 middleware paths, explicit and config-mapped
-module resolution, fail-open legacy tenants, the management enable/disable API,
-end-to-end entitlement cache invalidation and the module seeders.
-
-## Frontend setup (Angular 13, `frontend`)
-
-```bash
-cd frontend
-cp src/environments/environment.example.ts src/environments/environment.ts
-# edit environment.ts with your Firebase/API values (never commit real secrets)
-npm install
-npm start                     # ng serve
-npm test                      # Karma/Jasmine unit tests
-npm run build
-```
-
-FTP deployment credentials are no longer stored in `package.json`. Export them
-before running the deploy scripts:
-
-```bash
-export FTP_HOST=... FTP_PORT=21 FTP_USERNAME=... FTP_PASSWORD=...
-npm run deploy-test
-```
-
-### Firebase / push configuration (backend)
-
-The Firebase keys that used to be hardcoded in the messaging/database controllers
-are now read from `backend/config/firebase.php` via environment variables — copy
-them into `backend/.env` (never commit real values):
-
-| Variable | Purpose |
-| --- | --- |
-| `FIREBASE_SERVER_KEY` | FCM legacy server key for push notifications |
-| `FIREBASE_API_KEY` | Firebase Web API key |
-| `FIREBASE_DATABASE_URL` | Realtime Database base URL (current project) |
-
-Service-account JSON files (`*firebase-adminsdk*.json`) are git-ignored and must
-be provisioned on the server out of band. The frontend keeps `YOUR_*` placeholders
-in `src/environments/environment.example.ts`.
-
-## Security
-
-- No secrets are committed: `.env` files, TLS keys, FTP credentials, Firebase
-  service-account JSON and Firebase keys are ignored/sanitised (see root
-  `.gitignore` and the `*.example` templates).
-- Production Angular bundles and source maps are build output only and are never
-  committed; `frontend/` is the single source of truth for the UI.
-- New deployments must rotate every previously exposed credential (the pre-cleanup
-  Git history still contains them).
+The frontend test suite uses demo data and mocked HTTP contracts; it does not replace integration tests against a running Laravel service. See [`docs/TESTING.md`](docs/TESTING.md), [`docs/MODULES.md`](docs/MODULES.md) and [`docs/README.md`](docs/README.md) for testing, backend provisioning and historical records.

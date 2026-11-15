@@ -3,40 +3,48 @@
 @tailwind utilities;
 
 :root {
-  --brand: #4f46e5;
-  --brand-hover: #4338ca;
-  --accent: #14b8a6;
-  --sidebar-bg: #0a0e1a;
-  --content-bg: #f7f8fa;
-  --card-border: #e6e9f0;
+  --brand: #45436E;
+  --skin: #DBCEBF;
+  --white: #FFFFFF;
+  --pink: #F498C1;
+  --lavender: #E7BAED;
+  --violet: #B5AFF9;
+  --turquoise: #A9F9ED;
+  --cyan: #81E2FD;
+  color-scheme: light;
 }
 
+html, body, #root { min-height: 100%; }
 html, body, #root { height: 100%; }
 
 body {
   @apply bg-surface text-slate-800 antialiased;
-  font-family: Inter, 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  font-family: Graphik, Inter, 'IBM Plex Sans Arabic', system-ui, sans-serif;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-[dir='rtl'] body { font-family: 'IBM Plex Sans Arabic', Inter, system-ui, sans-serif; }
+[dir='rtl'] body { font-family: Graphik, 'IBM Plex Sans Arabic', Inter, system-ui, sans-serif; }
 
-/* Thin, calm scrollbars */
-* { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+/* Keep keyboard focus visible on every interactive element, including native selects. */
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.brand-sidebar :focus-visible { outline-color: var(--skin); }
+[dir='rtl'] .brand-sidebar nav a { font-size: 13px; }
+[dir='rtl'] .brand-sidebar .nav-group-label { font-size: 10px; letter-spacing: 0; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--skin) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }
-*::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+*::-webkit-scrollbar-thumb { background: var(--skin); border-radius: 999px; }
 *::-webkit-scrollbar-track { background: transparent; }
 
-/* Recharts polish */
-.recharts-wrapper :focus { outline: none; }
-.recharts-cartesian-axis-tick text { font-size: 11px; fill: #94a3b8; font-weight: 500; }
+.recharts-cartesian-axis-tick text { font-size: 10px; fill: var(--brand); opacity: .82; font-weight: 500; }
 .recharts-tooltip-wrapper { outline: none; }
-
-/* Number tabular for KPIs */
 .tnum { font-variant-numeric: tabular-nums; }
 
-/* Subtle dotted grid for chart cards */
-.dot-grid {
-  background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
-  background-size: 18px 18px;
+@media (max-height: 800px) {
+  .brand-sidebar .nav-group-label { padding-top: 2px; padding-bottom: 2px; }
+  .brand-sidebar .nav-group { margin-bottom: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

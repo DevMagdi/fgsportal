@@ -44,14 +44,14 @@ export function AccessPage() {
       <Card>
         <div className="border-b border-slate-100 px-5 py-4 text-sm font-semibold">{t('audit')}</div>
         {isLoading ? <LoadingState /> : isError ? <ErrorState message={(error as Error)?.message} onRetry={() => void refetch()} /> : (data ?? []).length === 0 ? <EmptyState /> : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
-                <th className="px-5 py-2.5 font-medium">{t('employees')}</th>
-                <th className="px-5 py-2.5 font-medium">{t('roles')}</th>
-                <th className="px-5 py-2.5 font-medium">{t('unit')}</th>
-                <th className="px-5 py-2.5 font-medium">{t('status')}</th>
-                <th className="px-5 py-2.5 font-medium">{t('updated')}</th>
+          <div role="region" tabIndex={0} aria-label={t('audit')} className="max-h-[min(55vh,32rem)] overflow-auto"><table className="w-full min-w-[650px] text-sm">
+            <thead className="sticky top-0 z-10 bg-slate-50">
+              <tr className="border-b border-slate-100 text-start text-[11px] uppercase tracking-wide text-slate-400">
+                <th className="px-5 py-2.5 text-start font-medium">{t('employees')}</th>
+                <th className="px-5 py-2.5 text-start font-medium">{t('roles')}</th>
+                <th className="px-5 py-2.5 text-start font-medium">{t('unit')}</th>
+                <th className="px-5 py-2.5 text-start font-medium">{t('status')}</th>
+                <th className="px-5 py-2.5 text-start font-medium">{t('updated')}</th>
               </tr>
             </thead>
             <tbody>
@@ -69,7 +69,7 @@ export function AccessPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </Card>
     </motion.div>

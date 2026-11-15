@@ -1,5 +1,7 @@
 # BMS Phase 3.5 — Contract resolutions and owner decisions
 
+> **Historical audit:** This report describes a previous source snapshot and test environment, not the current React UI or a current release decision. Its backend risks and decisions are retained for context; [the complete original](https://github.com/DevMagdi/fgsportal/blob/72953827d23608af32201d03065ef85f08fc5b85/docs/bms/PHASE_3_5_CONTRACT_DECISIONS.md) remains in Git history. Verify the present code and deployment before acting.
+
 **Branch:** `arena/e1389d1e-fgsportal`; PR #26 remains open against `BMS`.  
 **Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2`; latest CI [43318197656](https://github.com/DevMagdi/fgsportal/actions/runs/43318197656) failed.
 **Scope:** evidence-backed resolution only; no Phase 4 work.
@@ -77,6 +79,6 @@ No new visibility policy is implemented. Keep the existing behavior pending the 
 
 ## Local integration and environment decision
 
-Repository CI specifies PHP 8.1, MySQL 8.0, SQLite, Node 20 and locked Composer/npm dependencies. The local checkout has no PHP, Composer vendor tree, MySQL service, Docker executable or Chrome binary. The frontend production build and Node suite can run after `npm ci`; Karma browser execution is blocked locally by absent Chrome. No fresh install or real local API/database rehearsal was attempted. See `PHASE_3_5_DATABASE_READINESS.md` for the isolated test plan and exact blocker status.
+Repository CI specifies PHP 8.1, MySQL 8.0, SQLite, Node 20 and locked Composer/npm dependencies. The local checkout has no PHP, Composer vendor tree, MySQL service, Docker executable or Chrome binary. The client checks for that historical run are recorded in the original snapshot; use the current frontend instructions for present-day verification. No fresh install or real local API/database rehearsal was attempted. See `PHASE_3_5_DATABASE_READINESS.md` for the isolated test plan and exact blocker status.
 
 **Current disposition:** contract decisions above are evidence-resolved where stated; Company-to-BusinessUnit and Product-event visibility remain blocked for owner input. CI 43318197656 still shows two import failures on both engines; focused meeting/manager/module regressions pass, but these results do not approve a tenant policy. Phase 3.5 remains **NOT PASSED** until required tests and integration/security gates are accepted or resolved. PR #26 stays open; Phase 4 does not start.

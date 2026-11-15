@@ -3,15 +3,16 @@ import type { stageTone } from '../../lib/catalog';
 
 type Tone = ReturnType<typeof stageTone> | 'teal' | 'amber';
 
+// Secondary brand colours are reserved for small status highlights.
 const tones: Record<string, string> = {
-  neutral: 'bg-slate-100 text-slate-600',
+  neutral: 'bg-slate-100 text-brand-600',
   brand: 'bg-brand-50 text-brand-700',
-  accent: 'bg-teal-50 text-teal-700',
-  warn: 'bg-amber-50 text-amber-800',
-  danger: 'bg-rose-50 text-rose-700',
-  success: 'bg-emerald-50 text-emerald-700',
-  teal: 'bg-teal-50 text-teal-700',
-  amber: 'bg-amber-50 text-amber-800',
+  accent: 'bg-cyan/35 text-brand-600',
+  warn: 'bg-skin/50 text-brand-600',
+  danger: 'bg-pink/35 text-brand-600',
+  success: 'bg-turquoise/55 text-brand-600',
+  teal: 'bg-turquoise/55 text-brand-600',
+  amber: 'bg-skin/50 text-brand-600',
 };
 
 export function Badge({ children, tone = 'neutral', className }: { children: React.ReactNode; tone?: Tone | string; className?: string }) {
