@@ -1,46 +1,48 @@
-/* Signal / Atlas: the shared design language for every authenticated workspace. */
+/* FGS / BMS: restrained enterprise design tokens. */
 :root {
   color-scheme: light;
-  --bms-ink: #172136;
-  --bms-ink-soft: #34415a;
-  --bms-muted: #68758b;
-  --bms-primary: #7357f6;
-  --bms-primary-hover: #5d43dc;
-  --bms-primary-soft: #f0edff;
-  --bms-accent: #14a981;
-  --bms-accent-soft: #e6f8f1;
-  --bms-pink: #e95f83;
-  --bms-pink-soft: #fff0f4;
-  --bms-cyan: #20a8be;
-  --bms-cyan-soft: #e8f8fb;
-  --bms-sky: #377dff;
-  --bms-sky-soft: #edf4ff;
-  --bms-lavender: #9a6cf4;
-  --bms-lavender-soft: #f4efff;
-  --bms-periwinkle: #586de5;
-  --bms-periwinkle-soft: #edf0ff;
-  --bms-canvas: #f3f5f9;
+  --bms-ink: #172033;
+  --bms-ink-soft: #344155;
+  --bms-muted: #68758a;
+  --bms-primary: #5558d9;
+  --bms-primary-hover: #4548bf;
+  --bms-primary-strong: #3b3ea7;
+  --bms-primary-soft: #eef0ff;
+  --bms-accent: #12866b;
+  --bms-accent-soft: #e8f5f0;
+  --bms-canvas: #f5f7fa;
   --bms-surface: #ffffff;
   --bms-surface-raised: #ffffff;
-  --bms-border: #e3e8f1;
-  --bms-border-strong: #c8d0df;
-  --bms-focus: #326bff;
-  --bms-success: #087b59;
-  --bms-success-bg: #e8f8f1;
-  --bms-warning: #a75a00;
-  --bms-warning-bg: #fff5e5;
-  --bms-danger: #b33355;
-  --bms-danger-bg: #fff0f3;
-  --bms-info: #275fa8;
-  --bms-info-bg: #edf5ff;
-  --bms-radius-xs: 6px;
-  --bms-radius-sm: 10px;
-  --bms-radius-md: 16px;
-  --bms-radius-lg: 22px;
-  --bms-radius-xl: 28px;
-  --bms-shadow-sm: 0 2px 6px rgba(16, 24, 43, .04), 0 1px 2px rgba(16, 24, 43, .035);
-  --bms-shadow-md: 0 14px 38px rgba(16, 24, 43, .10), 0 3px 10px rgba(16, 24, 43, .04);
-  --bms-shadow-focus: 0 0 0 4px rgba(55, 125, 255, .18);
+  --bms-border: #e2e7ef;
+  --bms-border-strong: #cbd3df;
+  --bms-focus: #5458d9;
+  --bms-success: #13795b;
+  --bms-success-bg: #eaf5ef;
+  --bms-warning: #93631b;
+  --bms-warning-bg: #fbf3e6;
+  --bms-danger: #a33e50;
+  --bms-danger-bg: #faeef0;
+  --bms-info: #4e6280;
+  --bms-info-bg: #eef2f7;
+  /* Compatibility aliases intentionally map to the single primary hue. */
+  --bms-pink: var(--bms-danger);
+  --bms-pink-soft: var(--bms-danger-bg);
+  --bms-cyan: var(--bms-primary);
+  --bms-cyan-soft: var(--bms-primary-soft);
+  --bms-sky: var(--bms-primary);
+  --bms-sky-soft: var(--bms-primary-soft);
+  --bms-lavender: var(--bms-primary);
+  --bms-lavender-soft: var(--bms-primary-soft);
+  --bms-periwinkle: var(--bms-primary);
+  --bms-periwinkle-soft: var(--bms-primary-soft);
+  --bms-radius-xs: 5px;
+  --bms-radius-sm: 8px;
+  --bms-radius-md: 11px;
+  --bms-radius-lg: 14px;
+  --bms-radius-xl: 18px;
+  --bms-shadow-sm: 0 1px 3px rgba(20, 32, 54, .045);
+  --bms-shadow-md: 0 12px 30px rgba(20, 32, 54, .12);
+  --bms-shadow-focus: 0 0 0 3px rgba(85, 88, 217, .16);
   --bms-space-1: 4px;
   --bms-space-2: 8px;
   --bms-space-3: 12px;
@@ -48,19 +50,19 @@
   --bms-space-5: 20px;
   --bms-space-6: 24px;
   --bms-space-8: 32px;
-  --bms-motion-fast: 150ms;
-  --bms-motion-normal: 240ms;
+  --bms-motion-fast: 140ms;
+  --bms-motion-normal: 200ms;
   --shell-font: Inter, "Segoe UI", "Cairo", sans-serif;
-  --shell-sidebar-width: 272px;
-  --shell-sidebar-rail-width: 78px;
-  --shell-header-height: 74px;
-  --shell-sidebar-bg: #10182b;
-  --shell-sidebar-ink: #e8edf8;
-  --shell-sidebar-muted: #9ba8c0;
-  --shell-sidebar-border: rgba(226, 234, 249, .09);
-  --shell-sidebar-hover: rgba(226, 234, 249, .075);
-  --shell-sidebar-active: rgba(115, 87, 246, .22);
-  --shell-accent: #61e0b2;
+  --shell-sidebar-width: 256px;
+  --shell-sidebar-rail-width: 72px;
+  --shell-header-height: 64px;
+  --shell-sidebar-bg: #111827;
+  --shell-sidebar-ink: #f3f5f9;
+  --shell-sidebar-muted: #a6afbd;
+  --shell-sidebar-border: rgba(231, 237, 246, .10);
+  --shell-sidebar-hover: rgba(231, 237, 246, .07);
+  --shell-sidebar-active: rgba(113, 119, 226, .18);
+  --shell-accent: #55c4a3;
 }
 
 [lang='ar'] { --shell-font: Cairo, "Segoe UI", sans-serif; }
@@ -68,14 +70,17 @@
   color: var(--bms-ink);
   font-family: Inter, "Segoe UI", "Cairo", sans-serif;
   font-size: 14px;
-  line-height: 1.58;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
-.bms-workspace[lang='ar'] { font-family: Cairo, "Segoe UI", sans-serif; }
+.bms-workspace[lang='ar'], .bms-workspace[dir='rtl'] { font-family: Cairo, "Segoe UI", sans-serif; }
 .bms-workspace :where(button, input, select, textarea) { font: inherit; }
-.bms-workspace :where(button, a, input, select, textarea):focus-visible { outline: 3px solid var(--bms-focus); outline-offset: 2px; }
+.bms-workspace :where(button, a, input, select, textarea):focus-visible { outline: 2px solid var(--bms-focus); outline-offset: 2px; }
 .bms-workspace :where(.card, .mat-card) { border-color: var(--bms-border); border-radius: var(--bms-radius-md); box-shadow: var(--bms-shadow-sm); }
 @media (prefers-reduced-motion: reduce) {
   :root { --bms-motion-fast: 0ms; --bms-motion-normal: 0ms; }
-  .bms-workspace *, .bms-workspace *::before, .bms-workspace *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .bms-workspace *, .bms-workspace *::before, .bms-workspace *::after {
+    scroll-behavior: auto !important; animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important; transition-duration: .01ms !important;
+  }
 }

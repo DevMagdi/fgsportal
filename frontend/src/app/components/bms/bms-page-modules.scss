@@ -1,76 +1,25 @@
-/* Organization and unit-detail compositions use the existing live hierarchy, member and product records. */
-.bms-page--organization .bms-org-hero,
-.bms-page--units .bms-org-hero { display: grid; grid-template-columns: 50px minmax(0,1fr) auto; align-items: center; gap: 14px; padding: 18px 20px; border: 1px solid rgba(20,169,129,.18); border-radius: 18px; background: radial-gradient(ellipse at 95% 0%,rgba(20,169,129,.12),transparent 38%),linear-gradient(110deg,#fff,#fafffd); box-shadow: 0 7px 22px rgba(20,32,56,.04); }
-.bms-page--organization .bms-org-hero .bms-page-hero-mark,
-.bms-page--units .bms-org-hero .bms-page-hero-mark,
-.bms-page--unit-detail .bms-unit-hero .bms-page-hero-mark { width: 50px; height: 50px; border-radius: 15px; }
-.bms-page--organization .bms-org-hero-copy,
-.bms-page--units .bms-org-hero-copy,
-.bms-page--unit-detail .bms-unit-hero-copy { display: grid; gap: 3px; }
-.bms-page--organization .bms-org-hero h1,
-.bms-page--units .bms-org-hero h1,
-.bms-page--unit-detail .bms-unit-hero h1 { margin: 0; color: #1b2640; font-size: clamp(22px,2.3vw,29px); font-weight: 780; letter-spacing: -.04em; }
-.bms-page--organization .bms-org-hero p,
-.bms-page--units .bms-org-hero p,
-.bms-page--unit-detail .bms-unit-hero p { margin: 2px 0 0; color: #718098; font-size: 12px; }
-.bms-page--units .org-filters { grid-template-columns: minmax(220px,1fr) minmax(170px,.5fr); padding: 14px; border: 1px solid #e6eaf2; border-radius: 14px; background: #fff; }
-.bms-page--units .unit-card { border-radius: 17px; transition: transform 170ms ease,border-color 170ms ease,box-shadow 170ms ease; }
-.bms-page--units .unit-card:hover { transform: translateY(-2px); border-color: rgba(20,169,129,.27); }
-.bms-page--unit-detail .bms-unit-hero { display: grid; grid-template-columns: 54px minmax(0,1fr); align-items: center; gap: 14px; padding: 20px 22px; border: 1px solid rgba(20,169,129,.18); border-radius: 18px; background: radial-gradient(ellipse at 100% 0%,rgba(20,169,129,.12),transparent 40%),#fff; box-shadow: 0 7px 22px rgba(20,32,56,.04); }
-.bms-page--unit-detail .unit-crumbs { padding: 2px 2px 7px; }
-.bms-page--unit-detail .org-panel { overflow: hidden; }
-.bms-page--unit-detail .unit-member { background: linear-gradient(145deg,#fff,#fbfdfc); transition: border-color 150ms ease,box-shadow 150ms ease; }
-.bms-page--unit-detail .unit-member:hover { border-color: #cde9dd; box-shadow: 0 5px 15px rgba(17,95,72,.06); }
-.bms-page--organization .org-panel { overflow: hidden; }
-.bms-page--organization .org-panel-head { padding-top: 18px; }
-.bms-page--organization .org-stats { grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); }
-.bms-page--organization .org-row:not(.org-row-head):hover { background: #f8fcfa; }
-.bms-page--organization .org-progress-fill { background: linear-gradient(90deg,#14a981,#20a8be); }
-
-/* Access screen: make assignment and audit functions distinct from the permission reference. */
-.bms-page--access .assignment-panel { background: radial-gradient(ellipse at 100% 0%,rgba(88,109,229,.08),transparent 45%),#fff; }
-.bms-page--access .role-matrix-panel { border-top: 3px solid #7357f6; }
-.bms-page--access .access-audit-panel { border-top: 3px solid #20a8be; }
-.bms-page--access .ability-list { max-width: 850px; }
-.bms-page--access .phase-item { padding: 12px 14px; border-radius: 12px; }
-.bms-page--access .role-audit-event { display: inline-flex; min-width: 110px; justify-content: center; }
-
-/* Long-form forms and dynamic workflow details remain readable at all viewport widths. */
-.bms-page .bms-form-panel { border-top: 3px solid var(--page-accent); background: radial-gradient(ellipse at 100% 0%,rgba(var(--page-accent-rgb),.07),transparent 40%),#fff; }
-.bms-page--collection .collection-form-panel { border-top: 3px solid var(--page-accent); }
-.bms-page--collection .collection-table-panel { padding-top: 17px; }
-.bms-page--collection .collection-table-panel tbody tr td:first-child { font-weight: 700; }
-.bms-page--collection .collection-table-panel tbody tr:hover { background: rgba(var(--page-accent-rgb),.045); }
-.bms-page--collection .collection-filter-panel { position: relative; }
-.bms-page--collection .collection-filter-panel::after { display: block; width: 100%; height: 2px; margin-top: 13px; border-radius: 2px; background: linear-gradient(90deg,var(--page-accent),transparent 68%); opacity: .35; content: ''; }
-.bms-page--employees .employee-placeholder { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 50%; background: #fff0f5; color: #d75379; font-size: 35px; }
-.bms-page--employees .employee-card-roles { grid-column: 1/-1; }
-.bms-page--employees .employee-card-facts dd .badge-status { margin: 2px 4px 2px 0; }
-.bms-page--employees .employee-card-actions .btn-soft { min-height: 32px; }
-.bms-page--meetings .meeting-agenda-item { width: 100%; border-color: #e6edf3; color: inherit; font: inherit; text-align: start; cursor: pointer; transition: border-color 150ms ease,box-shadow 150ms ease,transform 150ms ease; }
-.bms-page--meetings .meeting-agenda-item:hover { transform: translateY(-1px); border-color: #bce7ee; box-shadow: 0 7px 16px rgba(32,168,190,.08); }
-.bms-page--meetings .meeting-agenda-item.selected-row { border-color: #79d0dd; background: #f2fbfc; }
+/* BMS-specific compositions; visual language stays consistent across modules. */
+.bms-page .bms-form-panel, .bms-page--collection .collection-form-panel { border-top: 1px solid var(--bms-border); }
+.bms-page .filter-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.bms-page .collection-table-panel { padding-top: 16px; }
+.bms-page .collection-filter-panel { position: relative; }
+.bms-page .collection-flow-item > div:first-child strong { color: var(--bms-ink); }
+.bms-page--organization .org-panel-head { padding-top: 16px; }
+.bms-page--organization .org-row-head { background: #f6f8fb; color: var(--bms-muted); font-weight: 600; }
+.bms-page--organization .org-progress-track { height: 7px; overflow: hidden; border-radius: 999px; background: #e9edf3; }
+.bms-page--organization .org-progress-fill { height: 100%; border-radius: inherit; background: var(--bms-accent); }
+.bms-page--organization .org-stat, .bms-page--organization .org-stat-card { padding: 14px; border: 1px solid var(--bms-border); border-radius: var(--bms-radius-sm); background: #fff; }
+.bms-page--unit-detail .unit-member { padding: 12px; border: 1px solid var(--bms-border); border-radius: var(--bms-radius-sm); }
+.bms-page--access .phase-item { padding: 12px 14px; border-radius: var(--bms-radius-sm); }
+.bms-page--collection .timeline { border-color: #d7daf5; }
+.bms-page--collection .timeline > div::before { background: var(--bms-primary); }
+.bms-page--collection .directory-profile { border-top: 1px solid var(--bms-border); }
 .bms-page--meetings .meeting-agenda-status { display: grid; justify-items: end; gap: 4px; }
-.bms-page--meetings .meeting-agenda-status small { color: #8590a3; font-size: 9px; }
-.bms-page--opportunities .pipeline-overview > .page-heading { grid-column: 1/-1; margin-bottom: 0; }
-.bms-page--opportunities .pipeline-overview .page-heading h2 { margin: 0; font-size: 15px; }
-.bms-page--opportunities .pipeline-overview .page-heading p { margin: 3px 0 0; color: #8792a5; font-size: 10px; }
-.bms-page--opportunities .bms-opportunity-editor { background: radial-gradient(ellipse at 100% 0%,rgba(229,155,63,.08),transparent 42%),#fff; }
-@media (max-width: 600px) {
-  .bms-page--organization .bms-org-hero, .bms-page--units .bms-org-hero { grid-template-columns: 42px minmax(0,1fr); padding: 15px; }
-  .bms-page--organization .bms-org-hero .org-actions, .bms-page--units .bms-org-hero .org-actions { grid-column: 1/-1; }
-  .bms-page--units .org-filters { grid-template-columns: minmax(0,1fr); }
-  .bms-page--unit-detail .bms-unit-hero { grid-template-columns: 42px minmax(0,1fr); padding: 15px; }
+.bms-page--meetings .meeting-agenda-status small { color: var(--bms-muted); font-size: 12px; }
+.bms-page--opportunities .bms-opportunity-editor { border-top: 1px solid var(--bms-border); }
+.bms-page--reports .report-progress { display: grid; grid-template-columns: minmax(80px,1fr) 48px; align-items: center; gap: 8px; min-width: 120px; }
+.bms-page--reports .report-progress-track span { background: var(--bms-primary); }
+@media (max-width: 700px) {
   .bms-page--meetings .meeting-agenda-status { justify-items: start; }
+  .bms-page--collection .collection-flow { padding: 13px; }
 }
-.bms-page--collection .collection-flow { display: grid; gap: 12px; padding: 16px 18px; border: 1px solid rgba(var(--page-accent-rgb),.17); border-radius: 16px; background: radial-gradient(ellipse at 100% 0%,rgba(var(--page-accent-rgb),.08),transparent 44%),#fff; }
-.bms-page--collection .collection-flow-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.bms-page--collection .collection-flow-heading h2 { margin: 0; color: #26324b; font-size: 13px; font-weight: 760; }
-.bms-page--collection .collection-flow-heading p { margin: 2px 0 0; color: #8290a5; font-size: 10px; }
-.bms-page--collection .collection-flow-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 9px; }
-.bms-page--collection .collection-flow-item { min-width: 0; padding: 10px 12px; border: 1px solid #e8ebf2; border-radius: 11px; background: rgba(255,255,255,.86); }
-.bms-page--collection .collection-flow-item > div:first-child { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; color: #56627a; font-size: 10px; font-weight: 680; }
-.bms-page--collection .collection-flow-item strong { color: #24314a; font-size: 16px; font-variant-numeric: tabular-nums; }
-.bms-page--collection .collection-flow-track { height: 5px; margin-top: 8px; overflow: hidden; border-radius: 99px; background: #eff1f5; }
-.bms-page--collection .collection-flow-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--page-accent),rgba(var(--page-accent-rgb),.52)); }
-@media(max-width:600px){.bms-page--collection .collection-flow{padding:13px}.bms-page--collection .collection-flow-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.bms-page--collection .collection-flow-item{padding:9px}}

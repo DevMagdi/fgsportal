@@ -3,9 +3,9 @@
 @import '@angular/material/theming';
 @include mat.core();
 
-$atlas-primary-palette:(50:#f4f1ff,100:#e8e2ff,200:#d4caff,300:#b8a8ff,400:#967dff,500:#7357f6,600:#6247df,700:#5239c7,800:#432e9f,900:#352475,A100:#eeeaff,A200:#d4caff,A400:#967dff,A700:#5239c7,contrast:(50:#26314a,100:#26314a,200:#26314a,300:#26314a,400:#172136,500:#ffffff,600:#ffffff,700:#ffffff,800:#ffffff,900:#ffffff,A100:#26314a,A200:#26314a,A400:#172136,A700:#ffffff));
-$atlas-accent-palette:(50:#e8fbf4,100:#d4f6e9,200:#a9edd3,300:#78e2bb,400:#45d2a0,500:#14b889,600:#0b9a70,700:#087b59,800:#076447,900:#064c37,A100:#e8fbf4,A200:#a9edd3,A400:#45d2a0,A700:#087b59,contrast:(50:#172136,100:#172136,200:#172136,300:#172136,400:#172136,500:#ffffff,600:#ffffff,700:#ffffff,800:#ffffff,900:#ffffff,A100:#172136,A200:#172136,A400:#172136,A700:#ffffff));
-$atlas-warn-palette:(50:#fff0f3,100:#fde0e7,200:#f9bed0,300:#f397b2,400:#ed7898,500:#e85e7d,600:#d94e70,700:#b33355,800:#922944,900:#712036,A100:#fff0f3,A200:#f9bed0,A400:#ed7898,A700:#b33355,contrast:(50:#172136,100:#172136,200:#172136,300:#172136,400:#172136,500:#ffffff,600:#ffffff,700:#ffffff,800:#ffffff,900:#ffffff,A100:#172136,A200:#172136,A400:#172136,A700:#ffffff));
+$atlas-primary-palette:(50:#f0f1ff,100:#e0e2ff,200:#c2c5ff,300:#a1a5f4,400:#7a7fe8,500:#5558d9,600:#4548bf,700:#3b3ea7,800:#2f3288,900:#26296d,A100:#e0e2ff,A200:#c2c5ff,A400:#7a7fe8,A700:#3b3ea7,contrast:(50:#172033,100:#172033,200:#172033,300:#172033,400:#172033,500:#ffffff,600:#ffffff,700:#ffffff,800:#ffffff,900:#ffffff,A100:#172033,A200:#172033,A400:#172033,A700:#ffffff));
+$atlas-accent-palette:(50:#e8f5f0,100:#cfe9df,200:#a1d6c3,300:#6fbea4,400:#3ba483,500:#12866b,600:#0e7059,700:#0b5b48,800:#084838,900:#063729,A100:#e8f5f0,A200:#a1d6c3,A400:#3ba483,A700:#0b5b48,contrast:(50:#172033,100:#172033,200:#172033,300:#172033,400:#172033,500:#ffffff,600:#ffffff,700:#ffffff,800:#ffffff,900:#ffffff,A100:#172033,A200:#172033,A400:#172033,A700:#ffffff));
+$atlas-warn-palette:(50:#faeef0,100:#f1dce0,200:#e3b8c0,300:#d28b99,400:#bd6173,500:#a33e50,600:#8d3546,700:#762d3c,800:#612631,900:#4d1e27,A100:#faeef0,A200:#e3b8c0,A400:#bd6173,A700:#762d3c,contrast:(50:#172033,100:#172033,200:#172033,300:#172033,400:#172033,500:#ffffff,600:#ffffff,700:#ffffff,800:#ffffff,900:#ffffff,A100:#172033,A200:#172033,A400:#172033,A700:#ffffff));
 $atlas-primary:mat.define-palette($atlas-primary-palette,500,100,800);
 $atlas-accent:mat.define-palette($atlas-accent-palette,500,100,800);
 $atlas-warn:mat.define-palette($atlas-warn-palette,500,100,800);
