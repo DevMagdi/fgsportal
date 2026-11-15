@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #4f46e5;
+  --brand-hover: #4338ca;
+  --accent: #14b8a6;
+  --sidebar-bg: #0a0e1a;
+  --content-bg: #f7f8fa;
+  --card-border: #e6e9f0;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  @apply bg-surface text-slate-800 antialiased;
+  font-family: Inter, 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+[dir='rtl'] body { font-family: 'IBM Plex Sans Arabic', Inter, system-ui, sans-serif; }
+
+/* Thin, calm scrollbars */
+* { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Recharts polish */
+.recharts-wrapper :focus { outline: none; }
+.recharts-cartesian-axis-tick text { font-size: 11px; fill: #94a3b8; font-weight: 500; }
+.recharts-tooltip-wrapper { outline: none; }
+
+/* Number tabular for KPIs */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Subtle dotted grid for chart cards */
+.dot-grid {
+  background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
+  background-size: 18px 18px;
+}
