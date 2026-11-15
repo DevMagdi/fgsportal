@@ -1,174 +1,92 @@
-import { Link, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { CalendarCheck, CheckCircle2, ClipboardList, Pencil, Plus, Send, Trash2 } from 'lucide-react';
 import { api } from '../lib/api';
-import { useI18n, type MsgKey } from '../i18n';
-import { formatDate } from '../lib/utils';
-import { Badge } from '../components/ui/Badge';
+import { useAuth } from '../auth/AuthContext';
+import { useI18n } from '../i18n';
+import type { UnitTask, WeeklyPlan } from '../lib/types';
+import { formatCalendarDate } from '../lib/utils';
+import { useEntityManager } from '../components/crud/useEntityManager';
+import { displayName } from '../components/ui/Avatar';
+import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { DataTable, type Column } from '../components/ui/DataTable';
+import { Breadcrumb, MetricCards, SectionTitle, StatusBadge } from '../components/ui/PageParts';
 import { PageHeader } from '../components/ui/PageHeader';
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/States';
-import { displayName } from '../components/ui/Avatar';
-
-const taskTone: Record<string, string> = {
-  achieved: 'success',
-  in_progress: 'brand',
-  not_done: 'neutral',
-};
+import { useToast } from '../components/ui/Toast';
 
 export function PlansPage() {
   const { t, lang } = useI18n();
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['bms', 'plans'],
-    queryFn: () => api.weeklyPlans(),
-  });
-  if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState message={(error as Error)?.message} onRetry={() => void refetch()} />;
-  const items = data ?? [];
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-      <PageHeader title={t('plans')} />
-      <Card>
-        {items.length === 0 ? <EmptyState /> : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
-                <th className="px-5 py-2.5 font-medium">{t('weekStart')}</th>
-                <th className="px-5 py-2.5 font-medium">{t('unit')}</th>
-                <th className="px-5 py-2.5 font-medium">{t('status')}</th>
-                <th className="px-5 py-2.5 font-medium">{t('tasks')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((p) => (
-                <tr key={p.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/70">
-                  <td className="px-5 py-3">
-                    <Link to={`/plans/${p.id}`} className="font-medium text-slate-800 hover:text-brand-700">
-                      {formatDate(p.week_start, lang)}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3">{p.unit?.name ?? '—'}</td>
-                  <td className="px-5 py-3"><Badge tone={p.status === 'submitted' ? 'accent' : 'neutral'}>{t(p.status as MsgKey)}</Badge></td>
-                  <td className="px-5 py-3 tnum">{p.tasks?.length ?? 0}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
-    </motion.div>
-  );
+  const query = useQuery({ queryKey: ['bms', 'plans'], queryFn: () => api.weeklyPlans() });
+  const manager = useEntityManager('plans');
+  if (query.isLoading) return <LoadingState />;
+  if (query.isError) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
+  const items = query.data ?? [];
+  const columns: Column<WeeklyPlan>[] = [
+    { key: 'week', label: t('weekStart'), render: (p) => <div><Link to={`/plans/${p.id}`} className="font-semibold text-slate-800 hover:text-brand-600">{t('weekOf')} {formatCalendarDate(p.week_start, lang)}</Link><p className="mt-1 max-w-[250px] truncate text-xs text-slate-400">{p.objectives || '—'}</p></div> },
+    { key: 'unit', label: t('unit'), render: (p) => p.unit?.name ?? '—' },
+    { key: 'tasks', label: t('tasks'), render: (p) => p.tasks?.length ?? 0 },
+    { key: 'status', label: t('status'), render: (p) => <StatusBadge status={p.status} /> },
+  ];
+  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6"><PageHeader eyebrow={t('grpExecution')} title={t('plans')} subtitle={lang === 'ar' ? 'حوّل الأولويات الأسبوعية إلى تقدم ملموس.' : 'Turn weekly priorities into meaningful progress.'} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t('newPlan')}</Button>} />
+    <MetricCards items={[
+      { label: t('plans'), value: items.length, hint: t('allTime'), icon: CalendarCheck },
+      { label: t('draft'), value: items.filter((p) => p.status === 'draft').length, hint: t('plans'), icon: ClipboardList, tone: 'amber' },
+      { label: t('submitted'), value: items.filter((p) => p.status === 'submitted').length, hint: t('plans'), icon: CheckCircle2, tone: 'teal' },
+      { label: t('tasks'), value: items.reduce((sum, p) => sum + (p.tasks?.length ?? 0), 0), hint: t('allTime'), icon: ClipboardList },
+    ]} />
+    <DataTable items={items} columns={columns} title={t('allRecords')} getSearchText={(p) => `${p.week_start} ${p.unit?.name ?? ''} ${p.objectives ?? ''}`} getStatus={(p) => p.status} getUnit={(p) => p.unit?.name} onCreate={manager.canManage ? () => manager.openCreate() : undefined} createLabel={t('newPlan')}
+      onEdit={manager.canManage ? manager.openEdit : undefined} canEdit={(p) => p.status === 'draft'} onDelete={manager.canManage ? (p) => manager.openDelete(p, `${t('weekOf')} ${formatCalendarDate(p.week_start, lang)}`) : undefined} onBulkDelete={manager.canManage ? manager.openBulkDelete : undefined} />
+    {manager.dialogs}</motion.div>;
 }
 
 export function PlanShowPage() {
-  const { id } = useParams();
-  const { t, lang } = useI18n();
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['bms', 'plan', id],
-    queryFn: () => api.weeklyPlan(id!),
-    enabled: Boolean(id),
-  });
-  if (isLoading) return <LoadingState />;
-  if (isError || !data) return <ErrorState message={(error as Error)?.message} onRetry={() => void refetch()} />;
-  const p = data;
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-      <PageHeader
-        eyebrow={p.unit?.name}
-        title={`${t('weekOf')} ${formatDate(p.week_start, lang)}`}
-        actions={<Badge tone={p.status === 'submitted' ? 'accent' : 'neutral'}>{t(p.status as MsgKey)}</Badge>}
-      />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="p-5">
-          <h3 className="text-sm font-semibold">{t('objectives')}</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{p.objectives || '—'}</p>
-        </Card>
-        <Card className="p-5">
-          <h3 className="text-sm font-semibold">{t('nextWeek')}</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{p.next_week_plan || '—'}</p>
-        </Card>
-      </div>
-      <Card>
-        <div className="border-b border-slate-100 px-5 py-4 text-sm font-semibold">{t('tasks')}</div>
-        <ul className="divide-y divide-slate-100">
-          {(p.tasks ?? []).map((task) => (
-            <li key={task.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
-              <div>
-                <div className="text-sm font-medium text-slate-800">{task.title}</div>
-                <div className="text-xs text-slate-400">{displayName(task.owner)} · {t('due')} {formatDate(task.due_date, lang)}</div>
-                {task.blockers && <div className="mt-1 text-xs text-amber-700">{task.blockers}</div>}
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full bg-brand-600" style={{ width: `${task.progress ?? 0}%` }} />
-                </div>
-                <Badge tone={taskTone[task.status] ?? 'neutral'}>{t(task.status as MsgKey)}</Badge>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
-      {(p.supportRequests ?? []).length > 0 && (
-        <Card className="p-5">
-          <h3 className="text-sm font-semibold">{t('support')}</h3>
-          <ul className="mt-3 space-y-2 text-sm">
-            {p.supportRequests!.map((s) => (
-              <li key={s.id} className="flex justify-between">
-                <span>{s.title}</span>
-                <Badge>{s.status}</Badge>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-    </motion.div>
-  );
+  const { id } = useParams(); const navigate = useNavigate(); const { t, lang } = useI18n(); const toast = useToast(); const client = useQueryClient();
+  const query = useQuery({ queryKey: ['bms', 'plan', id], queryFn: () => api.weeklyPlan(id!), enabled: Boolean(id) });
+  const planManager = useEntityManager('plans', { onDeleted: () => navigate('/plans') }); const taskManager = useEntityManager('tasks');
+  const submit = useMutation({ mutationFn: (planId: number) => api.submitPlan(planId), onSuccess: () => { toast.success(t('planSubmitted')); void client.invalidateQueries({ queryKey: ['bms'] }); }, onError: (error) => toast.error(error instanceof Error ? error.message : t('saveError')) });
+  if (query.isLoading) return <LoadingState />;
+  if (query.isError || !query.data) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
+  const p = query.data; const draft = p.status === 'draft';
+  const columns: Column<UnitTask>[] = [
+    { key: 'title', label: t('tasks'), render: (task) => <div><div className="font-semibold text-slate-800">{task.title}</div><p className="mt-1 max-w-[260px] truncate text-xs text-slate-400">{task.blockers || task.description || '—'}</p></div> },
+    { key: 'owner', label: t('owner'), render: (task) => displayName(task.owner) },
+    { key: 'due', label: t('dueDate'), render: (task) => formatCalendarDate(task.due_date, lang) },
+    { key: 'progress', label: t('progress'), render: (task) => <span className="tnum">{task.progress ?? 0}%</span> },
+    { key: 'status', label: t('status'), render: (task) => <StatusBadge status={task.status} /> },
+  ];
+  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5"><Breadcrumb items={[{ label: t('plans'), to: '/plans' }, { label: `${t('weekOf')} ${formatCalendarDate(p.week_start, lang)}` }]} />
+    <div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex items-center gap-3"><h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t('weekOf')} {formatCalendarDate(p.week_start, lang)}</h1><StatusBadge status={p.status} /></div><p className="mt-2 text-sm text-slate-500">{p.unit?.name ?? '—'}</p></div><div className="flex flex-wrap gap-2">{planManager.canManage && draft && <><Button variant="secondary" onClick={() => planManager.openEdit(p)}><Pencil size={15} />{t('edit')}</Button><Button onClick={() => submit.mutate(p.id)} disabled={submit.isPending}><Send size={15} />{t('submitPlan')}</Button></>}{planManager.canManage && <Button variant="secondary" className="text-rose-600" onClick={() => planManager.openDelete(p, `${t('weekOf')} ${formatCalendarDate(p.week_start, lang)}`)}><Trash2 size={15} />{t('remove')}</Button>}</div></div>
+    {!draft && <p className="rounded-lg border border-indigo-100 bg-indigo-50/70 px-4 py-3 text-xs text-indigo-700">{t('submittedReadOnly')}</p>}
+    <div className="grid gap-4 lg:grid-cols-2"><Card><SectionTitle title={t('objectives')} /><p className="p-5 text-sm leading-6 text-slate-600">{p.objectives || '—'}</p></Card><Card><SectionTitle title={t('nextWeek')} /><p className="p-5 text-sm leading-6 text-slate-600">{p.next_week_plan || '—'}</p></Card></div>
+    <DataTable items={p.tasks ?? []} columns={columns} title={t('tasks')} getSearchText={(task) => `${task.title} ${task.description ?? ''} ${displayName(task.owner)}`} getStatus={(task) => task.status} extra={taskManager.canManage && draft && <Button size="sm" onClick={() => taskManager.openCreate({ weekly_plan_id: p.id })}><Plus size={14} />{t('addTask')}</Button>}
+      onCreate={taskManager.canManage && draft ? () => taskManager.openCreate({ weekly_plan_id: p.id }) : undefined} createLabel={t('addTask')} onEdit={taskManager.canManage ? taskManager.openEdit : undefined} onDelete={taskManager.canManage ? (task) => taskManager.openDelete(task, task.title) : undefined} onBulkDelete={taskManager.canManage ? taskManager.openBulkDelete : undefined} />
+    {(p.supportRequests ?? []).length > 0 && <Card><SectionTitle title={t('support')} /><ul className="divide-y divide-slate-100">{p.supportRequests!.map((s) => <li key={s.id} className="flex justify-between px-5 py-4 text-sm"><span className="font-medium text-slate-700">{s.title}</span><StatusBadge status={s.status} /></li>)}</ul></Card>}
+    {planManager.dialogs}{taskManager.dialogs}
+  </motion.div>;
 }
 
 export function MyTasksPage() {
-  const { t, lang } = useI18n();
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['bms', 'my-tasks'],
-    queryFn: () => api.myTasks(),
-  });
-  if (isLoading) return <LoadingState />;
-  if (isError || !data) return <ErrorState message={(error as Error)?.message} onRetry={() => void refetch()} />;
-  const tasks = Array.isArray(data) ? data : data.data ?? [];
-  const summary = Array.isArray(data) ? null : data.summary;
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-      <PageHeader title={t('myTasks')} />
-      {summary && (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
-          {(['total', 'achieved', 'inProgress', 'notDone', 'overdue', 'blocked'] as const).map((k) => {
-            const keyMap = { total: summary.total, achieved: summary.achieved, inProgress: summary.in_progress, notDone: summary.not_done, overdue: summary.overdue, blocked: summary.blocked };
-            return (
-              <Card key={k} className="px-4 py-3">
-                <div className="text-[11px] uppercase tracking-wide text-slate-400">{t(k)}</div>
-                <div className="tnum mt-1 text-xl font-semibold">{keyMap[k]}</div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-      <Card>
-        {tasks.length === 0 ? <EmptyState /> : (
-          <ul className="divide-y divide-slate-100">
-            {tasks.map((task) => (
-              <li key={task.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
-                <div>
-                  <div className="text-sm font-medium text-slate-800">{task.title}</div>
-                  <div className="text-xs text-slate-400">{task.unit?.name} · {t('due')} {formatDate(task.due_date, lang)}</div>
-                </div>
-                <Badge tone={taskTone[task.status] ?? 'neutral'}>{t(task.status as MsgKey)}</Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-    </motion.div>
-  );
+  const { t, lang } = useI18n(); const { lookups } = useAuth();
+  const query = useQuery({ queryKey: ['bms', 'my-tasks'], queryFn: () => api.myTasks() }); const manager = useEntityManager('tasks');
+  if (query.isLoading) return <LoadingState />;
+  if (query.isError || !query.data) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
+  const tasks = Array.isArray(query.data) ? query.data : query.data.data ?? []; const summary = Array.isArray(query.data) ? null : query.data.summary;
+  const columns: Column<UnitTask>[] = [
+    { key: 'title', label: t('tasks'), render: (task) => <div><div className="font-semibold text-slate-800">{task.title}</div><p className="mt-1 text-xs text-slate-400">{task.blockers || task.description || '—'}</p></div> },
+    { key: 'unit', label: t('unit'), render: (task) => task.unit?.name ?? '—' },
+    { key: 'due', label: t('dueDate'), render: (task) => formatCalendarDate(task.due_date, lang) },
+    { key: 'progress', label: t('progress'), render: (task) => `${task.progress ?? 0}%` },
+    { key: 'status', label: t('status'), render: (task) => <StatusBadge status={task.status} /> },
+  ];
+  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6"><PageHeader eyebrow={t('grpExecution')} title={t('myTasks')} subtitle={lang === 'ar' ? 'ركز على أولوياتك وما يحتاج إلى انتباهك.' : 'Your priorities, progress, and next steps in one place.'} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t('addTask')}</Button>} />
+    {summary && <MetricCards items={[
+      { label: t('total'), value: summary.total, hint: t('tasks'), icon: ClipboardList }, { label: t('inProgress'), value: summary.in_progress, hint: t('tasks'), icon: CalendarCheck }, { label: t('achieved'), value: summary.achieved, hint: t('tasks'), icon: CheckCircle2, tone: 'teal' }, { label: t('overdue'), value: summary.overdue, hint: t('tasks'), icon: ClipboardList, tone: 'rose' },
+    ]} />}
+    <DataTable items={tasks} columns={columns} title={t('allRecords')} getSearchText={(task) => `${task.title} ${task.unit?.name ?? ''}`} getStatus={(task) => task.status} getUnit={(task) => task.unit?.name}
+      onEdit={manager.openEdit} canEdit={(task) => manager.canManage || task.owner_id === lookups?.current_user.id} onDelete={manager.canManage ? (task) => manager.openDelete(task, task.title) : undefined} onBulkDelete={manager.canManage ? manager.openBulkDelete : undefined} />{manager.dialogs}
+  </motion.div>;
 }

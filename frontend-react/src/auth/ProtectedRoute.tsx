@@ -2,6 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { hasAbility } from '../lib/abilities';
 import { Spinner } from '../components/ui/Spinner';
+import { useI18n } from '../i18n';
 
 export function ProtectedRoute() {
   const { token } = useAuth();
@@ -12,11 +13,12 @@ export function ProtectedRoute() {
 
 export function AbilityRoute({ ability }: { ability: string }) {
   const { abilities, loading, token, lookupsError, reloadLookups } = useAuth();
+  const { t } = useI18n();
   if (!token) return <Navigate to="/login" replace />;
   if (loading) {
     return (
       <div className="grid min-h-[50vh] place-items-center">
-        <Spinner label="Loading workspace" />
+        <Spinner label={t('loading')} />
       </div>
     );
   }
@@ -24,10 +26,10 @@ export function AbilityRoute({ ability }: { ability: string }) {
     return (
       <div className="grid min-h-[50vh] place-items-center px-6 text-center">
         <div>
-          <p className="text-sm font-medium text-slate-800">Couldn’t load permissions</p>
+          <p className="text-sm font-medium text-slate-800">{t('permissionsLoadError')}</p>
           <p className="mt-1 text-sm text-slate-500">{lookupsError.message}</p>
           <button type="button" onClick={reloadLookups} className="mt-4 text-sm font-medium text-brand-600">
-            Try again
+            {t('retry')}
           </button>
         </div>
       </div>

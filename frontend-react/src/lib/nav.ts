@@ -1,7 +1,7 @@
 import {
   BarChart3, Briefcase, Building2, Calendar, CalendarCheck, FileText,
   FolderOpen, Network, Package, Shield, ShoppingCart, Sparkles, SquareKanban,
-  Users, UserPlus, Workflow,
+  Users, UserPlus, Workflow, Gift,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { MsgKey } from '../i18n';
@@ -52,6 +52,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { path: '/units', label: 'units', ability: 'units.view', icon: Building2 },
       { path: '/organization', label: 'organization', ability: 'units.view', icon: Workflow },
       { path: '/employees', label: 'employees', ability: 'directory.view', icon: Users },
+      { path: '/bonuses', label: 'bonuses', ability: 'bonuses.view', icon: Gift },
       { path: '/recruitment', label: 'recruitment', ability: 'recruitment.view', icon: UserPlus },
       { path: '/development', label: 'development', ability: 'development.view', icon: Sparkles },
     ],

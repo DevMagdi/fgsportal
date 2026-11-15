@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { calendarDateValue } from './dates';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -32,17 +33,26 @@ export function formatMoney(value: number | string | null | undefined, currency:
 
 export function formatDate(value: string | null | undefined, lang: string): string {
   if (!value) return '—';
-  const d = new Date(value);
+  // A bare date is a calendar day, not midnight UTC in the viewer's timezone.
+  const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const d = parts ? new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]), 12) : new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
+  if (parts && (d.getFullYear() !== Number(parts[1]) || d.getMonth() !== Number(parts[2]) - 1 || d.getDate() !== Number(parts[3]))) return '—';
   return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
+}
+
+/** Format a server-side date-only field without shifting it to the viewer's timezone. */
+export function formatCalendarDate(value: string | null | undefined, lang: string): string {
+  return value ? formatDate(calendarDateValue(value), lang) : '—';
 }
 
 export function formatDateTime(value: string | null | undefined, lang: string): string {
   if (!value) return '—';
-  const d = new Date(value);
+  // Support legacy demo events saved as bare dates without a UTC day shift.
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value);
   if (Number.isNaN(d.getTime())) return '—';
   return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-EG' : 'en-GB', {
-    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   }).format(d);
 }
 

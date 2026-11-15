@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
-  AlertTriangle, ArrowUpRight, Calendar, Clock3, ShoppingCart, TriangleAlert,
+  AlertTriangle, ArrowUpRight, Calendar, Clock3, ShoppingCart, TriangleAlert, Building2, BriefcaseBusiness, ClipboardCheck, Package, Sparkles, ArrowRight,
 } from 'lucide-react';
 import {
   Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -71,11 +71,11 @@ export function DashboardPage() {
   ];
 
   const kpis = [
-    { label: t('kpiUnits'), value: formatNumber(s.units, lang), hint: t('units') },
-    { label: t('kpiTasks'), value: `${formatNumber(s.achieved, lang)}/${formatNumber(s.tasks, lang)}`, hint: t('achieved') },
-    { label: t('kpiOpps'), value: formatNumber(s.opportunities, lang), hint: `${s.delayed_opportunities} ${t('delayed')}` },
-    { label: t('kpiProducts'), value: formatNumber(s.products, lang), hint: t('products') },
-    { label: t('kpiMeetings'), value: formatNumber(s.upcoming_meetings, lang), hint: t('upcomingMeetings') },
+    { label: t('kpiUnits'), value: formatNumber(s.units, lang), hint: t('units'), icon: Building2, tone: 'indigo' },
+    { label: t('kpiTasks'), value: `${formatNumber(s.achieved, lang)}/${formatNumber(s.tasks, lang)}`, hint: t('achieved'), icon: ClipboardCheck, tone: 'teal' },
+    { label: t('kpiOpps'), value: formatNumber(s.opportunities, lang), hint: `${s.delayed_opportunities} ${t('delayed')}`, icon: BriefcaseBusiness, tone: 'indigo' },
+    { label: t('kpiProducts'), value: formatNumber(s.products, lang), hint: t('products'), icon: Package, tone: 'amber' },
+    { label: t('kpiMeetings'), value: formatNumber(s.upcoming_meetings, lang), hint: t('upcomingMeetings'), icon: Calendar, tone: 'teal' },
   ];
 
   const flagged = data.opportunities.filter((o) => o.is_delayed || o.has_no_update).slice(0, 6);
@@ -83,7 +83,7 @@ export function DashboardPage() {
   return (
     <motion.div {...fade} transition={{ duration: 0.28 }} className="space-y-6">
       <PageHeader
-        eyebrow="BMS"
+        eyebrow={t('workspaceOverview')}
         title={t('dashboard')}
         subtitle={t('dashboardSub')}
         actions={
@@ -94,49 +94,34 @@ export function DashboardPage() {
       />
 
       <div className="flex flex-wrap items-center gap-2">
-        <select value={unit} onChange={(e) => setUnit(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+        <select aria-label={t('unit')} value={unit} onChange={(e) => setUnit(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
           <option value="">{t('allUnits')}</option>
           {lookups?.units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
         </select>
-        <select value={product} onChange={(e) => setProduct(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
+        <select aria-label={t('product')} value={product} onChange={(e) => setProduct(e.target.value)} className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
           <option value="">{t('allProducts')}</option>
           {lookups?.products.map((p) => <option key={p.id} value={p.id}>{p.product_name}</option>)}
         </select>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {attention.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link key={item.label} to={item.to} className="group">
-              <Card className="flex items-center gap-3 px-4 py-3 transition hover:shadow-lift">
-                <span className={cn(
-                  'grid h-9 w-9 place-items-center rounded-lg',
-                  item.tone === 'rose' && 'bg-rose-50 text-rose-600',
-                  item.tone === 'amber' && 'bg-amber-50 text-amber-600',
-                  item.tone === 'teal' && 'bg-teal-50 text-teal-600',
-                )}>
-                  <Icon size={16} />
-                </span>
-                <div className="min-w-0">
-                  <div className="tnum text-lg font-semibold text-slate-900">{formatNumber(item.value, lang)}</div>
-                  <div className="truncate text-xs text-slate-500">{item.label}</div>
-                </div>
-                <ArrowUpRight size={14} className="ms-auto text-slate-300 group-hover:text-slate-500" />
-              </Card>
-            </Link>
-          );
-        })}
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
+        {kpis.map((k) => <Card key={k.label} className="group px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-lift">
+          <div className="flex items-start justify-between gap-2"><span className="text-[11px] font-medium text-slate-500">{k.label}</span><span className={cn('grid h-9 w-9 place-items-center rounded-lg', k.tone === 'indigo' ? 'bg-indigo-50 text-indigo-600' : k.tone === 'teal' ? 'bg-teal-50 text-teal-600' : 'bg-amber-50 text-amber-600')}><k.icon size={17} strokeWidth={1.8} /></span></div>
+          <div className="tnum -mt-1 text-[25px] font-semibold tracking-tight text-slate-900">{k.value}</div><div className="mt-1.5 text-xs text-slate-400">{k.hint}</div>
+        </Card>)}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {kpis.map((k) => (
-          <Card key={k.label} className="px-5 py-4">
-            <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">{k.label}</div>
-            <div className="tnum mt-2 text-2xl font-semibold tracking-tight text-slate-900">{k.value}</div>
-            <div className="mt-1 text-xs text-slate-400">{k.hint}</div>
-          </Card>
-        ))}
+      <div className="grid gap-4 xl:grid-cols-5">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#3f3ab6] via-[#4f46e5] to-[#6661df] p-6 text-white shadow-[0_8px_24px_-10px_rgba(79,70,229,.4)] sm:p-7 xl:col-span-3">
+          <div className="pointer-events-none absolute -end-12 -top-28 h-72 w-72 rounded-full border border-white/10" /><div className="pointer-events-none absolute -end-2 -top-20 h-56 w-56 rounded-full border border-white/10" /><div className="pointer-events-none absolute end-10 top-1 h-36 w-36 rounded-full bg-white/[0.04]" />
+          <div className="relative"><div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-indigo-200"><Sparkles size={14} />{t('liveOverview')}</div><h2 className="mt-4 max-w-md text-[23px] font-semibold tracking-tight sm:text-[26px]">{t('workspaceHealth')}</h2><p className="mt-2 max-w-md text-sm leading-6 text-indigo-100/80">{t('overviewSubtitle')}</p>
+            <div className="mt-7 flex flex-wrap gap-x-9 gap-y-4 border-t border-white/15 pt-5"><div><div className="text-[10px] font-medium uppercase tracking-wider text-indigo-200">{t('opportunities')}</div><div className="tnum mt-1 text-xl font-semibold">{formatNumber(s.opportunities, lang)}</div></div><div><div className="text-[10px] font-medium uppercase tracking-wider text-indigo-200">{t('achieved')}</div><div className="tnum mt-1 text-xl font-semibold">{formatNumber(s.achieved, lang)} <span className="text-xs font-normal text-indigo-200">/ {formatNumber(s.tasks, lang)}</span></div></div><div><div className="text-[10px] font-medium uppercase tracking-wider text-indigo-200">{t('units')}</div><div className="tnum mt-1 text-xl font-semibold">{formatNumber(s.units, lang)}</div></div></div>
+            <Link to="/opportunities" className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-white hover:text-indigo-100">{t('viewPipeline')} <ArrowRight size={14} className="rtl:rotate-180" /></Link>
+          </div>
+        </div>
+        <Card className="xl:col-span-2"><CardHeader title={t('attention')} subtitle={lang === 'ar' ? 'الأولويات التي تحتاج إلى متابعة.' : 'The things that could use a closer look.'} />
+          <div className="divide-y divide-slate-100">{attention.map((item) => { const Icon = item.icon; return <Link key={item.label} to={item.to} className="group flex items-center gap-3 px-5 py-2.5 transition hover:bg-slate-50"><span className={cn('grid h-8 w-8 place-items-center rounded-lg', item.tone === 'rose' ? 'bg-rose-50 text-rose-500' : item.tone === 'amber' ? 'bg-amber-50 text-amber-600' : 'bg-teal-50 text-teal-600')}><Icon size={15} /></span><span className="flex-1 text-xs font-medium text-slate-600">{item.label}</span><span className="tnum text-sm font-semibold text-slate-800">{formatNumber(item.value, lang)}</span><ArrowUpRight size={14} className="text-slate-300 group-hover:text-brand-600" /></Link>; })}</div>
+        </Card>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-5">
@@ -150,7 +135,7 @@ export function DashboardPage() {
                   <XAxis type="number" domain={[0, 100]} tickLine={false} axisLine={false} />
                   <YAxis type="category" dataKey="name" width={110} tickLine={false} axisLine={false} />
                   <Tooltip content={<ChartTip />} />
-                  <Bar dataKey="progress" name={t('progress')} radius={[0, 6, 6, 0]} barSize={14} fill="#4f46e5" />
+                  <Bar dataKey="progress" name={t('progress')} radius={[0, 6, 6, 0]} barSize={14} fill="#4f46e5" isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -167,7 +152,7 @@ export function DashboardPage() {
                   <XAxis dataKey="stage" tickLine={false} axisLine={false} interval={0} angle={-28} textAnchor="end" height={50} />
                   <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
                   <Tooltip content={<ChartTip />} />
-                  <Bar dataKey="count" name={t('opportunities')} radius={[6, 6, 0, 0]} barSize={18}>
+                  <Bar dataKey="count" name={t('opportunities')} radius={[6, 6, 0, 0]} barSize={18} isAnimationActive={false}>
                     {pipeline.map((p) => (
                       <Cell key={p.raw} fill={p.raw === 'won' ? '#14b8a6' : p.raw === 'lost' || p.raw === 'declined' ? '#fb7185' : '#6366f1'} />
                     ))}
@@ -236,7 +221,7 @@ export function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-[11px] uppercase tracking-wide text-slate-400">
+                <tr className="border-b border-slate-100 text-start text-[11px] uppercase tracking-wide text-slate-400">
                   <th className="px-5 py-2.5 font-medium">{t('reference')}</th>
                   <th className="px-5 py-2.5 font-medium">{t('opportunities')}</th>
                   <th className="px-5 py-2.5 font-medium">{t('stage')}</th>
