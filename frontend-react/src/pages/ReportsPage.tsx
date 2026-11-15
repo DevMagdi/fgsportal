@@ -9,6 +9,8 @@ import { chartEntrance } from '../lib/motion';
 import { usePrefersReducedMotion } from '../lib/usePrefersReducedMotion';
 import { formatNumber, cn } from '../lib/utils';
 import { Badge } from '../components/ui/Badge';
+import { AnimatedTableRow } from '../components/ui/AnimatedTableRow';
+import { CountUpValue } from '../components/ui/CountUpValue';
 import { Card, CardHeader } from '../components/ui/Card';
 import { PageHeader } from '../components/ui/PageHeader';
 import { EmptyState, ErrorState, LoadingState } from '../components/ui/States';
@@ -34,7 +36,7 @@ export function ReportsPage() {
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex rounded-lg border border-slate-200 bg-white p-0.5">
           {(['monthly', 'kpis', 'social'] as const).map((id) => (
-            <button key={id} onClick={() => setTab(id)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', tab === id ? 'bg-slate-900 text-white' : 'text-slate-500')}>
+            <button key={id} type="button" aria-pressed={tab === id} onClick={() => setTab(id)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors motion-reduce:transition-none', tab === id ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50')}>
               {t(id)}
             </button>
           ))}
@@ -59,7 +61,7 @@ export function ReportsPage() {
               ].map((k) => (
                 <Card key={k.label} className="px-5 py-4">
                   <div className="text-[11px] uppercase tracking-wide text-slate-400">{k.label}</div>
-                  <div className="tnum mt-1 text-2xl font-semibold">{formatNumber(k.value, lang)}</div>
+                  <div className="tnum mt-1 text-[28px] font-semibold tracking-tight">{typeof k.value === 'number' && Number.isFinite(k.value) ? <CountUpValue value={k.value} lang={lang} /> : formatNumber(k.value, lang)}</div>
                 </Card>
               ))}
             </div>
@@ -115,15 +117,15 @@ export function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {kpis.data.kpis.map((k) => (
-                      <tr key={k.id} className="border-b border-slate-50 last:border-0">
+                    {kpis.data.kpis.map((k, index) => (
+                      <AnimatedTableRow key={k.id} index={index} reduced={reduceMotion} className="border-b border-slate-50 last:border-0">
                         <td className="px-5 py-3 font-medium">{k.name}</td>
                         <td className="px-5 py-3">{k.unit?.name ?? '—'}</td>
                         <td className="px-5 py-3 tnum">{k.actual}{k.unit_label ? ` ${k.unit_label}` : ''}</td>
                         <td className="px-5 py-3 tnum">{k.target ?? '—'}</td>
                         <td className="px-5 py-3 tnum">{k.attainment != null ? `${k.attainment}%` : '—'}</td>
                         <td className="px-5 py-3"><Badge tone={kpiTone[k.status ?? ''] ?? 'neutral'}>{k.status ? t(k.status as MsgKey) : '—'}</Badge></td>
-                      </tr>
+                      </AnimatedTableRow>
                     ))}
                   </tbody>
                 </table></div>
@@ -144,7 +146,7 @@ export function ReportsPage() {
               ].map((k) => (
                 <Card key={k.label} className="px-5 py-4">
                   <div className="text-[11px] uppercase tracking-wide text-slate-400">{k.label}</div>
-                  <div className="tnum mt-1 text-2xl font-semibold">{formatNumber(k.value, lang)}</div>
+                  <div className="tnum mt-1 text-[28px] font-semibold tracking-tight">{typeof k.value === 'number' && Number.isFinite(k.value) ? <CountUpValue value={k.value} lang={lang} /> : formatNumber(k.value, lang)}</div>
                 </Card>
               ))}
             </div>
@@ -160,12 +162,12 @@ export function ReportsPage() {
                 </thead>
                 <tbody>
                   {social.data.metrics.map((m, i) => (
-                    <tr key={m.id ?? i} className="border-b border-slate-50 last:border-0">
+                    <AnimatedTableRow key={m.id ?? i} index={i} reduced={reduceMotion} className="border-b border-slate-50 last:border-0">
                       <td className="px-5 py-3 font-medium">{m.platform}</td>
                       <td className="px-5 py-3 tnum">{formatNumber(m.followers, lang)}</td>
                       <td className="px-5 py-3 tnum">{formatNumber(m.posts, lang)}</td>
                       <td className="px-5 py-3 tnum">{formatNumber(m.engagement, lang)}</td>
-                    </tr>
+                    </AnimatedTableRow>
                   ))}
                 </tbody>
               </table></div>

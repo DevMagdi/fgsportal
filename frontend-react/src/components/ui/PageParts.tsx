@@ -6,17 +6,19 @@ import { interactionSpring } from '../../lib/motion';
 import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 import { cn } from '../../lib/utils';
 import { AnimatedValue } from './AnimatedValue';
+import { CountUpValue } from './CountUpValue';
 import { Badge } from './Badge';
 import { Card } from './Card';
 import { statusLabel } from './DataTable';
 
 export function MetricCards({ items }: { items: { label: string; value: string | number; hint?: string; icon: LucideIcon; tone?: 'indigo' | 'teal' | 'amber' | 'rose' }[] }) {
   const reduceMotion = usePrefersReducedMotion();
+  const { lang } = useI18n();
   const tones = { indigo: 'bg-brand-50 text-brand-600', teal: 'bg-turquoise/40 text-brand-600', amber: 'bg-skin/40 text-brand-600', rose: 'bg-pink/20 text-brand-600' };
   return <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{items.map((item) => <motion.div key={item.label} className="min-w-0" whileHover={reduceMotion ? undefined : 'hover'}>
     <Card className="h-full p-4">
       <div className="flex items-start justify-between gap-3"><p className="text-[12px] font-medium text-slate-500">{item.label}</p><motion.span variants={{ hover: { scale: 1.12, rotate: -5 } }} animate={reduceMotion ? { scale: 1, rotate: 0 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring} className={cn('grid h-10 w-10 place-items-center rounded-xl', tones[item.tone ?? 'indigo'])}><item.icon size={17} strokeWidth={1.8} /></motion.span></div>
-      <div className="tnum -mt-1 text-[25px] font-semibold tracking-tight text-slate-900"><AnimatedValue value={item.value} /></div>
+      <div className="tnum -mt-1 max-w-full break-words text-[28px] font-semibold tracking-tight text-slate-900">{typeof item.value === 'number' && Number.isFinite(item.value) ? <CountUpValue value={item.value} lang={lang} /> : <AnimatedValue value={item.value} />}</div>
       {item.hint && <p className="mt-1.5 text-xs text-slate-400">{item.hint}</p>}
     </Card>
   </motion.div>)}</div>;

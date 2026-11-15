@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pencil, Plus, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useI18n, type MsgKey } from '../../i18n';
-import { rowEntrance } from '../../lib/motion';
-import { useEntranceValues } from '../../lib/useAccessibleMotion';
 import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 import { cn } from '../../lib/utils';
 import { AnimatedValue } from './AnimatedValue';
+import { AnimatedTableRow } from './AnimatedTableRow';
 import { Button } from './Button';
 import { EmptyState } from './States';
 
@@ -33,12 +31,6 @@ interface Props<T extends { id: number }> {
 export function statusLabel(status: string, t: (key: MsgKey) => string) {
   const value = t(status as MsgKey);
   return value === status ? status.replace(/_/g, ' ').replace(/^\w/, (letter) => letter.toUpperCase()) : value;
-}
-
-function TableRow({ index, reduced, entering, children }: { index: number; reduced: boolean; entering: boolean; children: ReactNode }) {
-  const entrance = rowEntrance(index, reduced || !entering);
-  const values = useEntranceValues(reduced, entrance.initial);
-  return <motion.tr {...entrance} style={values} className="group border-b border-slate-100/80 transition-colors duration-200 last:border-0 hover:bg-slate-50/70 focus-within:bg-slate-50/70 motion-reduce:transition-none">{children}</motion.tr>;
 }
 
 export function DataTable<T extends { id: number }>({ items, columns, title, getSearchText, getStatus, getUnit, onEdit, canEdit, onDelete, canDelete, deleteLabel, onBulkDelete, onCreate, createLabel, extra, pageSize = 8 }: Props<T>) {
@@ -93,14 +85,14 @@ export function DataTable<T extends { id: number }>({ items, columns, title, get
           {columns.map((column) => <th key={column.key} className={cn('px-4 py-2.5 text-start font-semibold', column.className)}>{column.label}</th>)}
           {hasActions && <th className="px-4 py-2.5 text-end font-semibold">{t('actions')}</th>}
         </tr></thead>
-        <tbody>{visible.map((item, index) => <TableRow key={item.id} index={index} reduced={reduceMotion} entering={firstRender.current}>
+        <tbody>{visible.map((item, index) => <AnimatedTableRow key={item.id} index={index} reduced={reduceMotion} entering={firstRender.current} className="group border-b border-slate-100/80 transition-colors duration-200 last:border-0 hover:bg-slate-50/70 focus-within:bg-slate-50/70 motion-reduce:transition-none">
           {selectEnabled && <td className="px-4 py-2.5"><input type="checkbox" aria-label={`${t('selectedCount')} ${getSearchText(item)}`} checked={selected.includes(item.id)} disabled={Boolean(canDelete && !canDelete(item))} onChange={() => setSelected((prev) => prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id])} className="h-3.5 w-3.5 rounded border-slate-300 accent-brand-600 disabled:opacity-35" /></td>}
           {columns.map((column) => <td key={column.key} className={cn('px-4 py-2.5 align-middle text-[13px] text-slate-600', column.className)}>{column.render(item)}</td>)}
           {hasActions && <td className="px-4 py-2"><div className="flex items-center justify-end gap-1">
             {onEdit && (!canEdit || canEdit(item)) && <button type="button" onClick={() => onEdit(item)} aria-label={`${t('edit')}: ${getSearchText(item)}`} title={t('edit')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-brand-600"><Pencil size={15} /></button>}
             {onDelete && (!canDelete || canDelete(item)) && <button type="button" onClick={() => onDelete(item)} aria-label={`${deleteLabel ?? t('remove')}: ${getSearchText(item)}`} title={deleteLabel ?? t('remove')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-brand-600"><Trash2 size={15} /></button>}
           </div></td>}
-        </TableRow>)}</tbody>
+        </AnimatedTableRow>)}</tbody>
       </table>
     </div>}
     {filtered.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-2.5 text-xs text-slate-400"><span>{t('showing')} {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filtered.length)} {t('of')} {filtered.length}</span><div className="flex items-center gap-2"><span className="me-1">{t('page')} {currentPage} / {pages}</span><button type="button" aria-label={t('previous')} disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)} className="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 disabled:opacity-35">{dir === 'rtl' ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}</button><button type="button" aria-label={t('next')} disabled={currentPage >= pages} onClick={() => setPage(currentPage + 1)} className="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 disabled:opacity-35">{dir === 'rtl' ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}</button></div></div>}
