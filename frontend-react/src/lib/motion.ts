@@ -8,7 +8,7 @@ export const entranceTransition: Transition = { duration: 0.28, ease: 'easeOut' 
 export function heroFloat(reduced: boolean, direction: 1 | -1 = 1) {
   return reduced
     ? { animate: { y: 0 }, transition: { duration: 0 } }
-    : { animate: { y: [0, -6 * direction, 0] }, transition: { duration: 4.5, ease: 'easeInOut' as const } };
+    : { animate: { y: [0, -4 * direction, 0] }, transition: { duration: 0.6, ease: 'easeInOut' as const, repeat: 1, repeatDelay: 0.4 } };
 }
 
 /** A bounded acknowledgement, used only for attention counts greater than zero. */

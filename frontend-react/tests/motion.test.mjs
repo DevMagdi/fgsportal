@@ -15,10 +15,11 @@ test('route entrance and interaction spring stay short and transform-friendly', 
 
 test('decorative hero drift is gentle, bounded and disabled for reduced motion', () => {
   const normal = heroFloat(false);
-  assert.deepEqual(normal.animate.y, [0, -6, 0]);
-  assert.ok(normal.transition.duration <= 5);
-  assert.equal(normal.transition.repeat, undefined);
-  assert.deepEqual(heroFloat(false, -1).animate.y, [0, 6, 0]);
+  assert.deepEqual(normal.animate.y, [0, -4, 0]);
+  assert.ok(normal.transition.duration >= 0.2 && normal.transition.duration <= 0.6);
+  assert.equal(normal.transition.repeat, 1);
+  assert.ok(normal.transition.duration * (normal.transition.repeat + 1) + normal.transition.repeatDelay < 5);
+  assert.deepEqual(heroFloat(false, -1).animate.y, [0, 4, 0]);
   assert.deepEqual(heroFloat(true), { animate: { y: 0 }, transition: { duration: 0 } });
 });
 

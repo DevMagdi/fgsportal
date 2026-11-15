@@ -46,8 +46,8 @@ export default {
       boxShadow: {
         sm: '0 1px 2px rgb(69 67 110 / 0.06)',
         '2xl': '0 24px 50px -12px rgb(69 67 110 / 0.30)',
-        card: '0 1px 2px rgb(69 67 110 / 0.04), 0 3px 12px rgb(69 67 110 / 0.035)',
-        lift: '0 10px 28px -10px rgb(69 67 110 / 0.22)',
+        card: '0 1px 2px rgb(69 67 110 / 0.04), 0 8px 24px -12px rgb(69 67 110 / 0.14)',
+        lift: '0 14px 32px -14px rgb(69 67 110 / 0.24)',
       },
     },
   },

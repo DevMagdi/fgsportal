@@ -5,7 +5,7 @@ import { build } from 'esbuild';
 const result = await build({ entryPoints: ['src/lib/dashboard.ts'], bundle: true, platform: 'node', format: 'esm', write: false });
 const { percentage, formatPercentage, dashboardRatios, pipelineSegments, canQuickCreate } = await import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
 const visuals = await build({ entryPoints: ['src/lib/dashboardVisuals.ts'], bundle: true, platform: 'node', format: 'esm', write: false });
-const { pipelineDisplayColor } = await import(`data:text/javascript;base64,${Buffer.from(visuals.outputFiles[0].text).toString('base64')}`);
+const { pipelineDisplayColor, progressInk } = await import(`data:text/javascript;base64,${Buffer.from(visuals.outputFiles[0].text).toString('base64')}`);
 
 test('dashboard percentages describe actual totals and do not invent a zero-denominator result', () => {
   assert.equal(percentage(1, 3), 33);
@@ -73,6 +73,20 @@ test('pipeline presentation distinguishes stages without changing groups or atte
   assert.equal(colors['lost:normal'], '#F498C1');
   assert.equal(colors['unknown_stage:normal'], '#B5AFF9');
   assert.deepEqual(segments, before, 'presentation must not change the data used for counts or tooltips');
+});
+
+test('progress arcs use readable mixes of official highlights and primary ink', () => {
+  const luminance = (hex) => {
+    const channels = hex.match(/[a-f\d]{2}/gi).map((part) => parseInt(part, 16) / 255)
+      .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  };
+  for (const highlight of ['#45436E', '#F498C1', '#A9F9ED', '#B5AFF9', '#81E2FD']) {
+    const ink = progressInk(highlight);
+    assert.match(ink, /^#[a-f\d]{6}$/);
+    assert.ok(1.05 / (luminance(ink) + 0.05) >= 3, `${ink} remains visible against white`);
+  }
+  assert.equal(progressInk('#45436E'), '#45436e');
 });
 
 test('quick create is shown only when both collection view and manage abilities are present', () => {
