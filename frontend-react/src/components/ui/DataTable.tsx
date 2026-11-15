@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Pencil, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Plus, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useI18n, type MsgKey } from '../../i18n';
 import { cn } from '../../lib/utils';
 import { Button } from './Button';
@@ -71,7 +71,7 @@ export function DataTable<T extends { id: number }>({ items, columns, title, get
       {getUnit && <select aria-label={t('unit')} value={unit} onChange={(event) => setUnit(event.target.value)} className="h-9 max-w-[170px] rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-600 outline-none focus:border-brand-400"><option value="">{t('allUnits')}</option>{units.map((value) => <option key={value} value={value}>{value}</option>)}</select>}
       {selected.length > 0 && <div className="ms-auto flex items-center gap-2 text-xs text-slate-500"><span>{selected.length} {t('selectedCount')}</span><button type="button" onClick={() => setSelected([])} className="text-slate-400 hover:text-slate-700">{t('clearSelection')}</button><Button size="sm" variant="secondary" onClick={() => onBulkDelete?.(selected)} className="text-brand-600"><Trash2 size={13} />{t('deleteSelected')}</Button></div>}
     </div>
-    {filtered.length === 0 ? <EmptyState title={items.length ? t('noMatching') : undefined} body={items.length ? t('adjustFilters') : t('getStarted')} action={!items.length && onCreate ? <Button onClick={onCreate} size="sm">{createLabel ?? t('create')}</Button> : undefined} /> : <div role="region" aria-label={title ?? t('allRecords')} tabIndex={0} className="max-h-[min(55vh,32rem)] overflow-auto">
+    {filtered.length === 0 ? <EmptyState title={items.length ? t('noMatching') : undefined} body={items.length ? t('adjustFilters') : t('getStarted')} action={!items.length && onCreate ? <Button onClick={onCreate} size="sm"><Plus size={14} />{createLabel ?? t('create')}</Button> : undefined} /> : <div role="region" aria-label={title ?? t('allRecords')} tabIndex={0} className="max-h-[min(55vh,32rem)] overflow-auto">
       <table className="w-full min-w-[650px] text-sm">
         <thead className="sticky top-0 z-10 bg-slate-50"><tr className="border-b border-slate-100 text-start text-[10px] font-semibold uppercase tracking-[0.09em] text-slate-400">
           {selectEnabled && <th className="w-12 px-4 py-2.5 text-start"><input type="checkbox" aria-label={t('selectAll')} checked={allVisibleSelected} disabled={!selectable.length} onChange={() => setSelected((prev) => allVisibleSelected ? prev.filter((id) => !selectable.some((item) => item.id === id)) : Array.from(new Set([...prev, ...selectable.map((item) => item.id)])))} className="h-3.5 w-3.5 rounded border-slate-300 accent-brand-600 disabled:opacity-35" /></th>}
@@ -79,8 +79,8 @@ export function DataTable<T extends { id: number }>({ items, columns, title, get
           {hasActions && <th className="px-4 py-2.5 text-end font-semibold">{t('actions')}</th>}
         </tr></thead>
         <tbody>{visible.map((item) => <tr key={item.id} className="group border-b border-slate-100/80 last:border-0 hover:bg-slate-50/70">
-          {selectEnabled && <td className="px-4 py-3"><input type="checkbox" aria-label={`${t('selectedCount')} ${getSearchText(item)}`} checked={selected.includes(item.id)} disabled={Boolean(canDelete && !canDelete(item))} onChange={() => setSelected((prev) => prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id])} className="h-3.5 w-3.5 rounded border-slate-300 accent-brand-600 disabled:opacity-35" /></td>}
-          {columns.map((column) => <td key={column.key} className={cn('px-4 py-3 align-middle text-[13px] text-slate-600', column.className)}>{column.render(item)}</td>)}
+          {selectEnabled && <td className="px-4 py-2.5"><input type="checkbox" aria-label={`${t('selectedCount')} ${getSearchText(item)}`} checked={selected.includes(item.id)} disabled={Boolean(canDelete && !canDelete(item))} onChange={() => setSelected((prev) => prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id])} className="h-3.5 w-3.5 rounded border-slate-300 accent-brand-600 disabled:opacity-35" /></td>}
+          {columns.map((column) => <td key={column.key} className={cn('px-4 py-2.5 align-middle text-[13px] text-slate-600', column.className)}>{column.render(item)}</td>)}
           {hasActions && <td className="px-4 py-2"><div className="flex items-center justify-end gap-1">
             {onEdit && (!canEdit || canEdit(item)) && <button type="button" onClick={() => onEdit(item)} aria-label={`${t('edit')}: ${getSearchText(item)}`} title={t('edit')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-brand-600"><Pencil size={15} /></button>}
             {onDelete && (!canDelete || canDelete(item)) && <button type="button" onClick={() => onDelete(item)} aria-label={`${deleteLabel ?? t('remove')}: ${getSearchText(item)}`} title={deleteLabel ?? t('remove')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-brand-600"><Trash2 size={15} /></button>}
