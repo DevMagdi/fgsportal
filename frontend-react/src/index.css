@@ -40,6 +40,20 @@ body {
 .recharts-tooltip-wrapper { outline: none; }
 .tnum { font-variant-numeric: tabular-nums; }
 
+/* Loading stays labelled if a request is slow; decorative motion stops within five seconds. */
+.loading-spinner { animation: loading-spin 1s linear 4; }
+@keyframes loading-spin { to { transform: rotate(360deg); } }
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+  transform: translateX(-100%);
+  animation: skeleton-sheen 1.8s ease-in-out 2;
+}
+[dir='rtl'] .skeleton-shimmer::after { animation-direction: reverse; }
+@keyframes skeleton-sheen { to { transform: translateX(100%); } }
+
 @media (max-height: 800px) {
   .brand-sidebar .nav-group-label { padding-top: 2px; padding-bottom: 2px; }
   .brand-sidebar .nav-group { margin-bottom: 2px; }

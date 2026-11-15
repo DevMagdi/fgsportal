@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { ENTITY_CONFIG } from '../../lib/entity-config';
@@ -28,7 +29,9 @@ export function useEntityManager<K extends EntityKind>(kind: K, options?: { onDe
   const { t } = useI18n();
   const toast = useToast();
   const client = useQueryClient();
-  const [dialog, setDialog] = useState<{ record: EntityMap[K] | null; defaults?: EntityPayload } | null>(null);
+  const [dialog, setDialog] = useState<{ record: EntityMap[K] | null; defaults?: EntityPayload; instance: number } | null>(null);
+  // A rapidly reopened form must be fresh even while the previous one is exiting.
+  const dialogInstance = useRef(0);
   const [deletion, setDeletion] = useState<{ ids: number[]; name: string } | null>(null);
   const prefix = ['bms', queryNames[kind]];
 
@@ -85,18 +88,20 @@ export function useEntityManager<K extends EntityKind>(kind: K, options?: { onDe
     : null;
   return {
     canManage,
-    openCreate: (defaults?: EntityPayload) => setDialog({ record: null, defaults }),
+    openCreate: (defaults?: EntityPayload) => setDialog({ record: null, defaults, instance: ++dialogInstance.current }),
     openEdit: (record: EntityMap[K]) => {
       // Directory list records omit manager and work-degree IDs; load the full
       // employee before editing so unchanged fields are never cleared.
       if (kind === 'employees') {
-        void api.employee(record.id).then((full) => setDialog({ record: full as EntityMap[K] })).catch((error) => toast.error(error instanceof Error ? error.message : t('errorTitle')));
-      } else setDialog({ record });
+        void api.employee(record.id).then((full) => setDialog({ record: full as EntityMap[K], instance: ++dialogInstance.current })).catch((error) => toast.error(error instanceof Error ? error.message : t('errorTitle')));
+      } else setDialog({ record, instance: ++dialogInstance.current });
     },
     openDelete: (record: EntityMap[K], name: string) => setDeletion({ ids: [record.id], name }),
     openBulkDelete: (ids: number[]) => setDeletion({ ids, name: `${ids.length} ${t('selectedCount')}` }),
     dialogs: <>
-      {dialog && <EntityDialog key={`${kind}-${dialog.record?.id ?? 'new'}`} kind={kind} record={dialog.record} defaults={dialog.defaults} onClose={() => setDialog(null)} busy={save.isPending} onSave={async (data, id) => { await save.mutateAsync({ data, id }); }} />}
+      <AnimatePresence mode="wait">
+        {dialog && <EntityDialog key={`${kind}-${dialog.instance}`} kind={kind} record={dialog.record} defaults={dialog.defaults} onClose={() => setDialog(null)} busy={save.isPending} onSave={async (data, id) => { await save.mutateAsync({ data, id }); }} />}
+      </AnimatePresence>
       <ConfirmDialog open={Boolean(deletion)} onClose={() => setDeletion(null)} onConfirm={() => { if (deletion) remove.mutate(deletion.ids); }} name={deletion?.name} title={action ? `${action.label}?` : undefined} message={action?.warning} confirmLabel={action?.label} busy={remove.isPending} />
     </>,
   };

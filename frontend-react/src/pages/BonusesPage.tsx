@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Award, Banknote, CheckCircle2, Gift, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { useI18n } from '../i18n';
 import type { Bonus } from '../lib/types';
@@ -21,7 +20,7 @@ export function BonusesPage() {
   if (query.isError) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
   const items = query.data ?? [];
   const totalSar = items.filter((b) => b.currency === 'SAR').reduce((sum, b) => sum + Number(b.amount || 0), 0);
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+  return <div className="space-y-4">
     <PageHeader eyebrow={t('grpOrganization')} title={t('bonuses')} subtitle={lang === 'ar' ? 'احتفِ بالإنجازات وتابع المكافآت عبر مؤسستك.' : 'Recognize great work and keep every award in view.'} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t('addBonus')}</Button>} />
     <MetricCards items={[
       { label: t('totalBonuses'), value: items.length, hint: t('allTime'), icon: Gift },
@@ -31,7 +30,7 @@ export function BonusesPage() {
     ]} />
     <BonusTable items={items} manager={manager} />
     {manager.dialogs}
-  </motion.div>;
+  </div>;
 }
 
 type BonusManager = ReturnType<typeof useEntityManager<'bonuses'>>;

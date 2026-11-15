@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import palette from '../brand.json';
 import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n, type MsgKey } from '../i18n';
+import { chartEntrance } from '../lib/motion';
+import { usePrefersReducedMotion } from '../lib/usePrefersReducedMotion';
 import { formatNumber, cn } from '../lib/utils';
 import { Badge } from '../components/ui/Badge';
 import { Card, CardHeader } from '../components/ui/Card';
@@ -17,6 +18,7 @@ const kpiTone: Record<string, string> = { achieved: 'success', on_track: 'accent
 
 export function ReportsPage() {
   const { t, lang } = useI18n();
+  const reduceMotion = usePrefersReducedMotion();
   const { lookups } = useAuth();
   const [tab, setTab] = useState<Tab>('monthly');
   const [unit, setUnit] = useState('');
@@ -27,7 +29,7 @@ export function ReportsPage() {
   const social = useQuery({ queryKey: ['bms', 'reports', 'social'], queryFn: () => api.socialReport(), enabled: tab === 'social' });
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+    <div className="space-y-5">
       <PageHeader title={t('reports')} />
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex rounded-lg border border-slate-200 bg-white p-0.5">
@@ -70,7 +72,7 @@ export function ReportsPage() {
                     <XAxis dataKey="name" tickLine={false} axisLine={false} />
                     <YAxis domain={[0, 100]} tickLine={false} axisLine={false} />
                     <Tooltip />
-                    <Bar dataKey="progress" name={t('progress')} fill={palette.indigo} radius={[6, 6, 0, 0]} barSize={22} />
+                    <Bar dataKey="progress" name={t('progress')} fill={palette.indigo} radius={[6, 6, 0, 0]} barSize={22} {...chartEntrance(reduceMotion)} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -92,8 +94,8 @@ export function ReportsPage() {
                       <XAxis dataKey="period" tickLine={false} axisLine={false} />
                       <YAxis tickLine={false} axisLine={false} />
                       <Tooltip />
-                      <Line type="monotone" dataKey="actual" name={t('actual')} stroke={palette.indigo} strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="target" name={t('target')} stroke={palette.violet} strokeDasharray="4 4" strokeWidth={1.5} dot={false} />
+                      <Line type="monotone" dataKey="actual" name={t('actual')} stroke={palette.indigo} strokeWidth={2} dot={false} {...chartEntrance(reduceMotion)} />
+                      <Line type="monotone" dataKey="target" name={t('target')} stroke={palette.violet} strokeDasharray="4 4" strokeWidth={1.5} dot={false} {...chartEntrance(reduceMotion)} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -171,6 +173,6 @@ export function ReportsPage() {
           </div>
         ) : <EmptyState />
       )}
-    </motion.div>
+    </div>
   );
 }

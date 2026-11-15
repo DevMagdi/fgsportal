@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
@@ -18,7 +17,7 @@ export function AccessPage() {
   });
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+    <div className="space-y-5">
       <PageHeader title={t('accessRoles')} subtitle={t('audit')} />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {(lookups?.roles ?? []).map((r) => (
@@ -72,6 +71,6 @@ export function AccessPage() {
           </table></div>
         )}
       </Card>
-    </motion.div>
+    </div>
   );
 }

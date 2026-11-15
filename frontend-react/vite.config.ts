@@ -9,6 +9,17 @@ export default defineConfig(({ mode }) => {
   const proxy = env.BMS_PROXY_TARGET ? { '/api': { target: env.BMS_PROXY_TARGET, changeOrigin: true } } : undefined;
   return {
     plugins: [react()],
+    build: {
+      rollupOptions: {
+        output: {
+          // Keep shared runtimes cacheable while leaving route chunks lazy-loaded.
+          manualChunks(id) {
+            if (/\/node_modules\/(react|react-dom|scheduler)\//.test(id)) return 'react-vendor';
+            if (/\/node_modules\/(framer-motion|motion-dom|motion-utils)\//.test(id)) return 'motion-vendor';
+          },
+        },
+      },
+    },
     resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     server: { host: '0.0.0.0', port: 5173, allowedHosts: ['.e2b.app'], proxy },
     preview: { host: '0.0.0.0', port: 5173, allowedHosts: ['.e2b.app'], proxy },

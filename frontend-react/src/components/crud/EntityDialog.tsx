@@ -223,7 +223,7 @@ export function EntityDialog<K extends EntityKind>({ kind, record, defaults, onC
 
   const visibleFields = config.steps ? fields.filter((field) => (field.step ?? 1) === step) : fields;
   const title = isEdit ? `${t('edit')} ${t(config.singular).toLocaleLowerCase()}` : t(config.createLabel);
-  return <Modal open onClose={onClose} title={title} description={config.steps ? (step === 1 ? t('titleDetails') : t('moreDetails')) : t('titleDetails')} size="lg" busy={busy}>
+  return <Modal open parentPresence onClose={onClose} title={title} description={config.steps ? (step === 1 ? t('titleDetails') : t('moreDetails')) : t('titleDetails')} size="lg" busy={busy}>
     <form onSubmit={(event) => void submit(event)} className="flex min-h-0 flex-1 flex-col" noValidate>
       <div className="overflow-y-auto px-5 py-4 sm:px-6">
         {config.steps && <div className="mb-4 flex items-center gap-3">
