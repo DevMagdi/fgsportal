@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { LogOut, X } from 'lucide-react';
 import logo from '../../assets/alphaiota-logo.png';
 import { useAuth } from '../../auth/AuthContext';
 import { useI18n } from '../../i18n';
 import { api } from '../../lib/api';
 import { hasAbility } from '../../lib/abilities';
+import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 import { NAV_GROUPS } from '../../lib/nav';
 import { cn } from '../../lib/utils';
 import { Avatar, displayName } from '../ui/Avatar';
@@ -13,6 +15,7 @@ import { Avatar, displayName } from '../ui/Avatar';
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useI18n();
   const { abilities, user, logout } = useAuth();
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     if (!open) return;
@@ -37,16 +40,21 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         {NAV_GROUPS.map((group) => {
           const links = group.links.filter((link) => hasAbility(abilities, link.ability));
           if (!links.length) return null;
-          return <div key={group.id} className="nav-group mb-1">
-            <div className="nav-group-label px-3 pb-1 pt-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-skin">{t(group.label)}</div>
+          return <div key={group.id} className="nav-group mb-0.5">
+            <div className="nav-group-label px-3 pb-0.5 pt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-skin">{t(group.label)}</div>
             <ul>{links.map((link) => {
               const Icon = link.icon;
               return <li key={link.path}>
                 <NavLink to={link.path} onClick={onClose} className={({ isActive }) => cn(
                   'relative flex min-h-[26px] items-center gap-2.5 rounded-md px-3 py-1 text-[12px] font-medium leading-[18px] transition-colors',
-                  isActive ? 'bg-white/15 text-white before:absolute before:inset-y-1 before:start-0 before:w-0.5 before:rounded-full before:bg-skin' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                  isActive ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
                 )}>
-                  <Icon size={15} strokeWidth={1.7} className="shrink-0" /><span className="truncate">{t(link.label)}</span>
+                  {({ isActive }) => <>
+                    {isActive && (reduceMotion
+                      ? <span aria-hidden="true" className="absolute inset-y-1 start-0 w-0.5 rounded-full bg-skin" />
+                      : <motion.span aria-hidden="true" layoutId="active-sidebar-indicator" transition={{ type: 'spring', stiffness: 420, damping: 38 }} className="absolute inset-y-1 start-0 w-0.5 rounded-full bg-skin" />)}
+                    <Icon size={15} strokeWidth={1.7} className="shrink-0" /><span className="truncate">{t(link.label)}</span>
+                  </>}
                 </NavLink>
               </li>;
             })}</ul>

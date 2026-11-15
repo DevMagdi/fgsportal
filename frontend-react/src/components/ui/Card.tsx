@@ -1,10 +1,17 @@
+import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
+import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
+  const reduceMotion = usePrefersReducedMotion();
   return (
-    <div className={cn('rounded-xl border border-slate-200/80 bg-white shadow-card', className)}>
+    <motion.div
+      whileHover={reduceMotion ? undefined : { y: -2 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+      className={cn('rounded-xl border border-slate-200/80 bg-white shadow-card transition-shadow hover:shadow-lift', className)}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 

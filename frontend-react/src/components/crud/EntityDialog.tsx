@@ -229,7 +229,7 @@ export function EntityDialog<K extends EntityKind>({ kind, record, defaults, onC
         {config.steps && <div className="mb-4 flex items-center gap-3">
           {[1, 2].map((number) => <div key={number} className="flex flex-1 items-center gap-2"><span className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-semibold', step >= number ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-400')}>{step > number ? <Check size={14} /> : number}</span><span className={cn('text-xs font-medium', step >= number ? 'text-slate-700' : 'text-slate-400')}>{number === 1 ? t('basicDetails') : t('additionalDetails')}</span>{number === 1 && <div className="ms-1 h-px flex-1 bg-slate-200" />}</div>)}
         </div>}
-        <div className="grid gap-4 sm:grid-cols-2">{visibleFields.map((field) => {
+        <div className="grid gap-3 sm:grid-cols-2">{visibleFields.map((field) => {
           const fieldId = `${id}-${field.name}`;
           const value = values[field.name] ?? '';
           const disabled = busy || Boolean(isEdit && field.disabledOnEdit);
