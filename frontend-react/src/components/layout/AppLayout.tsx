@@ -30,7 +30,7 @@ function RouteContent({ children }: { children: ReactNode }) {
     style={values}
     initial={motionReduced ? false : { opacity: 0, y: 8 }}
     animate={{ opacity: 1, y: 0 }}
-    exit={motionReduced ? { opacity: 1, y: 0, transition: { duration: 0 } } : { opacity: 0, y: -4, transition: { duration: 0.18, ease: 'easeOut' } }}
+    exit={motionReduced ? { opacity: 1, y: 0, transition: { duration: 0 } } : { opacity: 0, y: -6, transition: { duration: 0.2, ease: 'easeOut' } }}
     transition={motionReduced ? { duration: 0 } : entranceTransition}
   >
     <Suspense fallback={<LoadingState />}>{children}</Suspense>

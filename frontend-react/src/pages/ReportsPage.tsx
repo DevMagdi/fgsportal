@@ -63,7 +63,7 @@ export function ReportsPage() {
                 </Card>
               ))}
             </div>
-            <Card>
+            <Card scaleOnHover={false}>
               <CardHeader title={t('unitProgress')} subtitle={`${monthly.data.period.start} → ${monthly.data.period.end}`} />
               <div dir="ltr" className="h-[220px] px-2 py-3">
                 <ResponsiveContainer width="100%" height="100%">
@@ -85,7 +85,7 @@ export function ReportsPage() {
         kpis.isLoading ? <LoadingState /> : kpis.isError ? <ErrorState message={(kpis.error as Error)?.message} onRetry={() => void kpis.refetch()} /> : kpis.data ? (
           <div className="space-y-4">
             {kpis.data.history[0] && (
-              <Card>
+              <Card scaleOnHover={false}>
                 <CardHeader title={kpis.data.history[0].name} subtitle={kpis.data.history[0].unit ?? undefined} />
                 <div dir="ltr" className="h-[220px] px-2 py-4">
                   <ResponsiveContainer width="100%" height="100%">

@@ -4,6 +4,8 @@ import { build } from 'esbuild';
 
 const result = await build({ entryPoints: ['src/lib/dashboard.ts'], bundle: true, platform: 'node', format: 'esm', write: false });
 const { percentage, formatPercentage, dashboardRatios, pipelineSegments, canQuickCreate } = await import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
+const visuals = await build({ entryPoints: ['src/lib/dashboardVisuals.ts'], bundle: true, platform: 'node', format: 'esm', write: false });
+const { pipelineDisplayColor } = await import(`data:text/javascript;base64,${Buffer.from(visuals.outputFiles[0].text).toString('base64')}`);
 
 test('dashboard percentages describe actual totals and do not invent a zero-denominator result', () => {
   assert.equal(percentage(1, 3), 33);
@@ -49,6 +51,28 @@ test('pipeline segments retain stage and delayed detail, totals and official pal
   ]);
   assert.equal(segments.reduce((sum, segment) => sum + segment.count, 0), 6);
   assert.deepEqual(pipelineSegments([]), []);
+});
+
+test('pipeline presentation distinguishes stages without changing groups or attention semantics', () => {
+  const segments = pipelineSegments([
+    { stage: 'review', is_delayed: false },
+    { stage: 'qualification', is_delayed: false },
+    { stage: 'proposal', is_delayed: false },
+    { stage: 'review', is_delayed: true },
+    { stage: 'won', is_delayed: false },
+    { stage: 'lost', is_delayed: false },
+    { stage: 'unknown_stage', is_delayed: false },
+  ]);
+  const before = structuredClone(segments);
+  const colors = Object.fromEntries(segments.map((segment) => [segment.key, pipelineDisplayColor(segment)]));
+  assert.equal(colors['review:normal'], '#B5AFF9');
+  assert.equal(colors['qualification:normal'], '#81E2FD');
+  assert.equal(colors['proposal:normal'], '#A9F9ED');
+  assert.equal(colors['review:delayed'], '#F498C1');
+  assert.equal(colors['won:normal'], '#A9F9ED');
+  assert.equal(colors['lost:normal'], '#F498C1');
+  assert.equal(colors['unknown_stage:normal'], '#B5AFF9');
+  assert.deepEqual(segments, before, 'presentation must not change the data used for counts or tooltips');
 });
 
 test('quick create is shown only when both collection view and manage abilities are present', () => {

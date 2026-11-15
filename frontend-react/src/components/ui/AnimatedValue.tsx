@@ -6,7 +6,8 @@ export function AnimatedValue({ value }: { value: string | number }) {
   const reduceMotion = usePrefersReducedMotion();
   if (reduceMotion) return <span>{value}</span>;
 
-  return <span className="inline-grid align-baseline">
+  // Anchor the screen-reader copy inside the value, including in horizontal scrollers.
+  return <span className="relative inline-grid align-baseline">
     <span className="sr-only">{value}</span>
     <AnimatePresence initial={false}>
       <motion.span
@@ -16,7 +17,7 @@ export function AnimatedValue({ value }: { value: string | number }) {
         initial={{ opacity: 0, y: 3 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -3 }}
-        transition={{ duration: 0.18, ease: 'easeOut' }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
       >{value}</motion.span>
     </AnimatePresence>
   </span>;

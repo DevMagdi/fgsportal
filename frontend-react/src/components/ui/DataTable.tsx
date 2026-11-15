@@ -74,7 +74,7 @@ export function DataTable<T extends { id: number }>({ items, columns, title, get
   }, [items, canDelete]);
   const hasActions = Boolean(onEdit || onDelete);
   const selectEnabled = Boolean(onBulkDelete);
-  return <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-card">
+  return <div className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-card">
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
       <div className="flex items-center gap-2.5"><h2 className="text-sm font-semibold text-slate-900">{title ?? t('allRecords')}</h2><span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500"><AnimatedValue value={filtered.length} /></span></div>
       {extra}

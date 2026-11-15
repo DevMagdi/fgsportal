@@ -23,7 +23,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled={disabled}
       animate={reduceMotion ? { y: 0, scale: 1 } : undefined}
       whileHover={reduceMotion || disabled ? undefined : { y: -1 }}
-      whileTap={reduceMotion || disabled ? undefined : { scale: 0.98 }}
+      whileTap={reduceMotion || disabled ? undefined : { scale: 0.97 }}
       transition={reduceMotion ? { duration: 0 } : interactionSpring}
       className={cn(
         'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold transition-colors duration-200 focus-visible:ring-4 focus-visible:ring-brand-500/20 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none',
