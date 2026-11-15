@@ -55,7 +55,7 @@ import {
 
 export const TOKEN_KEY = 'bms.token';
 export const USER_KEY = 'bms.user';
-export const ANGULAR_USER_KEY = 'userData';
+export const LEGACY_USER_KEY = 'userData';
 
 const DEMO = import.meta.env.VITE_DEMO_MODE === 'true';
 const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
@@ -74,7 +74,7 @@ export function readStoredToken(): string | null {
   const direct = localStorage.getItem(TOKEN_KEY);
   if (direct) return direct;
   try {
-    const raw = localStorage.getItem(ANGULAR_USER_KEY);
+    const raw = localStorage.getItem(LEGACY_USER_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { _token?: string; token?: string };
     return parsed._token || parsed.token || null;
@@ -94,8 +94,8 @@ export function readStoredUser(): AuthUser | null {
 export function persistSession(user: AuthUser, token: string) {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify({ ...user, token }));
-  // Stay compatible with the Angular app's storage shape.
-  localStorage.setItem(ANGULAR_USER_KEY, JSON.stringify({
+  // Keep the existing session storage shape for compatibility.
+  localStorage.setItem(LEGACY_USER_KEY, JSON.stringify({
     key: user.key,
     email: user.email,
     username: user.username,
@@ -112,7 +112,7 @@ export function persistSession(user: AuthUser, token: string) {
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
-  localStorage.removeItem(ANGULAR_USER_KEY);
+  localStorage.removeItem(LEGACY_USER_KEY);
 }
 
 const http = axios.create({

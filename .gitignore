@@ -1,7 +1,4 @@
-# ==========================================================
-# FGS Connect — root .gitignore
-# Monorepo: backend/ (Laravel 8) + frontend/ (Angular 13)
-# ==========================================================
+# Alphaiota BMS: Laravel API and React UI
 
 # ---- Environment / secrets ----
 .env
@@ -16,10 +13,9 @@
 /cert/
 **/public/cert/
 
-# ---- PHP / Laravel (backend) ----
+# ---- PHP / Laravel ----
 backend/vendor/
 vendor/
-node_modules/
 backend/public/hot
 backend/public/storage
 backend/storage/*.key
@@ -36,28 +32,17 @@ Homestead.json
 Homestead.yaml
 docker-compose.override.yml
 
-# ---- Node / Angular (frontend) ----
-dist/
-tmp/
-out-tsc/
-.bazel-out/
+# ---- Node / React ----
+node_modules/
 **/node_modules/
-.angular/
-.sass-cache/
+dist/
 coverage/
-connect.lock
-libpeerconnection.log
+.cache/
+*.tsbuildinfo
 npm-debug.log*
 yarn-error.log*
-testem.log
-/typings
-.firebase/
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
 
-# ---- Built/deployed bundles (source of truth is frontend/) ----
-# Never commit production builds at the repo root or in hosting folders.
+# ---- Built/deployed bundles ----
 /main.js
 /main.*.js
 /runtime.js

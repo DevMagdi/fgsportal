@@ -1,130 +1,20 @@
-# Modules — catalogue & client provisioning
+# Backend modules and client provisioning
 
-Alphaiota is sold as a **core platform plus optional modules**. Each module is
-enabled or disabled per **company** (the client/tenant). The Core module is
-always present.
+The Laravel API maintains a module catalogue in `modules` and per-company entitlements in `company_modules`. The seed catalogue contains the core `bms` and `core` entries and the optional `crm`, `ticketing`, `projects`, `hr` and `admin` entries. BMS role abilities and business-unit scope remain separate from module entitlements.
 
-## 1. Module catalogue
+`App\Http\Middleware\CheckModule` checks explicit module slugs or resolves controller namespaces through `backend/config/modules.php`; mapped requests for disabled modules receive HTTP 403. Unmapped controllers pass this middleware. The React BMS navigation is filtered by BMS abilities and does not provide an optional-module catalogue or provisioning screen. The backend remains authoritative for all access decisions.
 
-| Slug | Module | Core | Contents |
-| --- | --- | --- | --- |
-| `core` | Core (Users, Auth & Permissions) | ✅ | Authentication, users, roles, permission groups, profile, notifications, notes |
-| `crm` | CRM | — | Leads, contacts, accounts, activities, campaigns, POC & RFP requests, partner organisation types |
-| `ticketing` | Ticketing & Support | — | Client tickets, contract support, client accounts, partner management, satisfaction ratings |
-| `projects` | Projects | — | Projects, processes, tasks, timesheets, reports, PM team requests, open-to-work |
-| `hr` | Human Resources | — | Recruitment & onboarding, salaries, vacations/annual requests, incentives, transport requests, work hours, company policies |
-| `admin` | Administration | — | Departments, products, permissions, work degrees, public requests, announcements, logs, admin dashboard |
+## Management API
 
-Module metadata lives in the `modules` table; per-client entitlements live in
-`company_modules`.
+The following routes require a JWT; the backend restricts entitlement changes to its authorized management/administration users:
 
-## 2. How enforcement works
-
-- **Backend** — every request to `/api/users/*` or `/api/clients/*` passes
-  through the `module` middleware (`App\Http\Middleware\CheckModule`). It maps
-  the target controller to a module slug via `config/modules.php` and returns
-  **HTTP 403** when the caller's company has not enabled that module. Core
-  controllers are not mapped and always pass.
-- **Frontend** — after login the app calls `GET /api/company/modules`, stores the
-  enabled slugs (memory + `localStorage`) and (a) hides disabled menu sections in
-  the navbar and (b) blocks disabled lazy routes with `ModuleGuard`, redirecting to
-  the `/module-disabled` page.
-- **Modules dashboard (`/modules`)** — the `ModulesCardsComponent` loads the full
-  catalogue from `GET /api/modules` and renders **all six modules as cards** (name,
-  description, icon, state). Enabled cards are normal and navigate into the module;
-  disabled modules are never hidden — they stay visible but are **dimmed/grayed
-  with a lock badge**, and clicking one routes to
-  `/module-disabled?module=<slug>` instead of entering the module. Deep links to
-  disabled lazy routes are still blocked by `ModuleGuard`.
-- **Module feature pages (`/modules/:slug`)** — clicking an enabled module opens
-  `ModuleDetailsComponent`, which renders **one card per sidebar section** of that
-  module (e.g. CRM: Insights, Reports, Organizations, Contacts, Activities,
-  Requests, Leads, Opportunity, Closed Deal). The titles, router targets and
-  visibility rules mirror the navbar exactly and live in one declarative registry,
-  `frontend/src/app/services/module-pages.registry.ts` (permission, department,
-  role, position, manager/admin and `or`/`and`/`not` conditions). Each feature
-  card navigates to the real route, whose existing guards still apply; users
-  without any visible feature get an explicit empty state instead of a blank page.
-
-## 3. Enable a module for a client
-
-### Via API (recommended)
-
-Only users whose `sub_departments_id` is Management (`1`) or Administration (`4`)
-can change entitlements.
-
-```bash
-# 1. inspect the catalogue and current status
-curl -H "Authorization: Bearer $JWT" \
-  https://api.example.com/api/modules
-
-# 2. enable CRM for the caller's company
-curl -X POST -H "Authorization: Bearer $JWT" -H "Content-Type: application/json" \
-  -d '{"module_slug":"crm"}' \
-  https://api.example.com/api/company/modules/enable
-
-# 3. disable CRM
-curl -X POST -H "Authorization: Bearer $JWT" -H "Content-Type: application/json" \
-  -d '{"module_slug":"crm"}' \
-  https://api.example.com/api/company/modules/disable
-```
-
-`module_id` is accepted instead of `module_slug`. The Core module cannot be
-disabled (returns 422).
-
-### Via database / seeder
-
-```php
-$company = \App\Models\Company::where('slug', 'client-a')->first();
-$module  = \App\Models\Module::where('slug', 'crm')->first();
-
-\App\Models\CompanyModule::updateOrCreate(
-    ['company_id' => $company->id, 'module_id' => $module->id],
-    ['is_enabled' => true, 'enabled_at' => now()]
-);
-```
-
-### Onboard a brand-new client
-
-```php
-$company = \App\Models\Company::create([
-    'name' => 'Client A',
-    'slug' => 'client-a',
-    'is_active' => true,
-]);
-
-// attach the client's users
-\App\Models\User::whereIn('id', [...])->update(['company_id' => $company->id]);
-
-// give them Core + CRM only
-foreach (['core', 'crm'] as $slug) {
-    $module = \App\Models\Module::where('slug', $slug)->first();
-    \App\Models\CompanyModule::create([
-        'company_id' => $company->id,
-        'module_id' => $module->id,
-        'is_enabled' => true,
-        'enabled_at' => now(),
-    ]);
-}
-```
-
-## 4. Environment variables
-
-| Variable | Default | Effect |
+| Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `MODULES_FAIL_OPEN` | `true` | Companies without any `company_modules` row are allowed through (legacy compatibility). Set `false` for strict commercial enforcement. |
+| GET | `/api/modules` | Catalogue with company status |
+| GET | `/api/company/modules` | Enabled modules for the caller's company |
+| POST | `/api/company/modules/enable` | Enable by `module_slug` or `module_id` |
+| POST | `/api/company/modules/disable` | Disable by `module_slug` or `module_id` |
 
-Entitlement decisions are cached for 5 minutes per company/module; the enable /
-disable endpoints flush the relevant cache entry automatically.
+Core modules cannot be disabled. Entitlements are cached for five minutes; management endpoints clear the relevant cache. `MODULES_FAIL_OPEN=true` allows requests when a company or the relevant module entitlement row is missing; set it to `false` only after verifying provisioning and the desired policy.
 
-## 5. Adding a new module later
-
-1. Add a row to the `modules` table (via a seeder) with a unique slug.
-2. Add the controller namespace → slug mapping in `config/modules.php`.
-3. Add a lazy Angular route guarded with `data: { module: '<slug>' }` and a navbar
-   section gated by `isModuleEnabled('<slug>')`.
-4. Add the slug to `MODULE_SLUGS` / `MODULE_META` and its feature list to
-   `MODULE_PAGES` in `services/module-pages.registry.ts` (titles, icons, routes
-   and the same visibility conditions as the navbar) so it appears on the modules
-   dashboard and gets a feature-cards landing page.
-5. Provision the module to companies through the enable endpoint.
+Before running seeders, back up and review the target database: seeders can update existing role abilities and module metadata. For setup and test commands see [`../README.md`](../README.md) and [`TESTING.md`](TESTING.md). The [previous module guide](https://github.com/DevMagdi/fgsportal/blob/72953827d23608af32201d03065ef85f08fc5b85/docs/MODULES.md) remains available as historical context.

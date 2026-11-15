@@ -18,7 +18,7 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
   return (
     <div className="grid min-h-[40vh] place-items-center px-6">
       <div className="max-w-md text-center">
-        <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-rose-50 text-rose-600">
+        <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-pink/20 text-brand-600">
           <AlertCircle size={18} />
         </div>
         <h2 className="text-base font-semibold text-slate-900">{t('errorTitle')}</h2>
@@ -34,7 +34,7 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
 export function EmptyState({ title, body, action }: { title?: string; body?: string; action?: React.ReactNode }) {
   const { t } = useI18n();
   return (
-    <div className="grid place-items-center px-6 py-16 text-center">
+    <div className="grid place-items-center px-6 py-10 text-center">
       <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-500">
         <Inbox size={18} />
       </div>

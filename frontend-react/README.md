@@ -1,10 +1,14 @@
-# BMS React workspace
+# Alphaiota BMS — React workspace
 
 A React 18 / TypeScript console for the Laravel BMS. Existing routes, JWT authentication, ability checks, and English / Arabic RTL support are retained. The interface includes searchable, filterable, paginated collections; creation and editing dialogs; confirmations and bulk removal; detail tabs; and a keyboard-accessible navigation palette (`Ctrl/⌘ K`).
 
+## Official identity
+
+The original circular logo is `src/assets/alphaiota-logo.png`; it is used unchanged in the sidebar, sign-in screen and favicon. The primary palette is Deep Indigo `#45436E`, Skin `#DBCEBF` and White `#FFFFFF`. Pink `#F498C1`, Lavender `#E7BAED`, Violet `#B5AFF9`, Turquoise `#A9F9ED` and Cyan `#81E2FD` are reserved for charts and small highlights. Primary-colour tints provide the neutral UI surfaces. Graphik is used when licensed and installed; Inter and IBM Plex Sans Arabic are self-hosted fallbacks.
+
 ## Run
 
-Use Node.js 18.13 or newer (Node 20/22 recommended).
+Use Node.js 20 or 22; CI uses Node 20.
 
 ```bash
 cd frontend-react

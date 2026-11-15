@@ -17,10 +17,10 @@ import type {
 } from './types';
 
 const users = [
-  { id: 1, username: 'nora.alharbi', firstname: 'Nora', lastname: 'Alharbi', email: 'nora@fgs.local' },
-  { id: 2, username: 'omar.fahmy', firstname: 'Omar', lastname: 'Fahmy', email: 'omar@fgs.local' },
-  { id: 3, username: 'lina.khaled', firstname: 'Lina', lastname: 'Khaled', email: 'lina@fgs.local' },
-  { id: 4, username: 'hassan.nabil', firstname: 'Hassan', lastname: 'Nabil', email: 'hassan@fgs.local' },
+  { id: 1, username: 'nora.alharbi', firstname: 'Nora', lastname: 'Alharbi', email: 'nora@alphaiota.local' },
+  { id: 2, username: 'omar.fahmy', firstname: 'Omar', lastname: 'Fahmy', email: 'omar@alphaiota.local' },
+  { id: 3, username: 'lina.khaled', firstname: 'Lina', lastname: 'Khaled', email: 'lina@alphaiota.local' },
+  { id: 4, username: 'hassan.nabil', firstname: 'Hassan', lastname: 'Nabil', email: 'hassan@alphaiota.local' },
 ];
 
 const units = [
@@ -40,7 +40,7 @@ export const demoUser: AuthUser = {
   username: 'nora.alharbi',
   firstname: 'Nora',
   lastname: 'Alharbi',
-  email: 'nora@fgs.local',
+  email: 'nora@alphaiota.local',
   photoURL: null,
   accType: 'Employee',
   token: 'demo-jwt-token',

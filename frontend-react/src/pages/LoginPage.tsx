@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import logo from '../assets/alphaiota-logo.png';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
 import { api, ApiError } from '../lib/api';
@@ -20,7 +21,6 @@ export function LoginPage() {
   if (token) {
     if (loading) return <div className="mx-auto max-w-4xl p-8"><LoadingState /></div>;
     const from = (location.state as { from?: string } | null)?.from;
-    // The guarded dashboard displays the permissions retry state if lookups fail.
     return <Navigate to={lookupsError ? '/dashboard' : from || firstAllowedPath(abilities)} replace />;
   }
 
@@ -38,63 +38,68 @@ export function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-full lg:grid-cols-[1.05fr_1fr]">
-      <div className="relative hidden overflow-hidden bg-ink-950 text-slate-200 lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <div className="pointer-events-none absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, #4f46e5 0, transparent 32%), radial-gradient(circle at 80% 80%, #0d9488 0, transparent 28%)' }} />
-        <div className="relative">
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 text-xs font-bold text-white">BMS</span>
-            <span className="text-sm font-semibold tracking-wide text-white">{t('appFull')}</span>
-          </div>
-          <h2 className="mt-16 max-w-md text-3xl font-semibold leading-snug tracking-tight text-white">
-            {lang === 'ar' ? 'مساحة عمل هادئة للوحدات والفرص والتنفيذ.' : 'A calm operating system for units, pipeline and delivery.'}
+    <div className="grid min-h-full lg:grid-cols-[46%_54%]">
+      <div className="relative hidden overflow-hidden bg-brand-600 text-white lg:flex lg:flex-col lg:items-center lg:justify-center lg:px-12 lg:py-16">
+        <div aria-hidden="true" className="pointer-events-none absolute -start-40 -top-40 h-[420px] w-[420px] rounded-full border border-skin/20" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-52 -end-32 h-[480px] w-[480px] rounded-full border border-skin/20" />
+        <div className="relative flex max-w-md flex-col items-center text-center">
+          <img src={logo} alt="" className="h-32 w-32 rounded-full object-contain" />
+          <p dir="ltr" className="mt-5 text-2xl font-semibold tracking-tight">Alphaiota BMS</p>
+          <span aria-hidden="true" className="mt-7 h-px w-12 bg-skin" />
+          <h2 className="mt-7 text-[28px] font-semibold leading-snug tracking-tight">
+            {lang === 'ar' ? 'وضوح أكبر لكل ما يهمّ العمل.' : 'A clearer view of the work that matters.'}
           </h2>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-slate-400">
-            {lang === 'ar' ? 'رؤية تنفيذية واضحة ومساحة واحدة للفرص والخطط الأسبوعية والعمل اليومي.' : 'Executive visibility without the noise. One workspace for opportunities, weekly plans and the work that actually moves.'}
+          <p className="mt-4 max-w-sm text-sm leading-6 text-white/80">
+            {lang === 'ar' ? 'مساحة واحدة تجمع الوحدات والفرص والخطط والتنفيذ.' : 'One connected workspace for your units, opportunities, plans and delivery.'}
           </p>
         </div>
-        <p className="relative text-xs text-slate-500">FGS · Business Management Solutions</p>
+        <p className="absolute bottom-8 text-[11px] font-medium tracking-wide text-white/70">Alphaiota BMS · {t('workspace')}</p>
       </div>
 
-      <div className="flex flex-col bg-white">
-        <div className="flex justify-end p-5">
-          <button className="text-xs font-medium text-slate-500 hover:text-slate-800" onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}>
+      <div className="flex min-h-full flex-col bg-white">
+        <div className="flex justify-end px-6 py-5 sm:px-10">
+          <button type="button" aria-label={`${t('changeLanguage')}: ${lang === 'en' ? 'العربية' : 'English'}`} className="rounded-md px-2 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-brand-600" onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}>
             {lang === 'en' ? 'العربية' : 'English'}
           </button>
         </div>
-        <div className="flex flex-1 items-center justify-center px-6 pb-16">
+        <div className="flex flex-1 items-center justify-center px-6 pb-14 pt-4">
           <motion.form
             onSubmit={onSubmit}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
-            className="w-full max-w-[380px]"
+            className="w-full max-w-[390px]"
           >
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t('signIn')}</h1>
-            <p className="mt-1.5 text-sm text-slate-500">{t('signInSub')}</p>
+            <div className="mb-8 flex flex-col items-center gap-2 lg:hidden">
+              <img src={logo} alt="" className="h-[76px] w-[76px] rounded-full object-contain" />
+              <p dir="ltr" className="text-base font-semibold text-brand-600">Alphaiota BMS</p>
+            </div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{t('workspace')}</p>
+            <h1 className="text-[28px] font-semibold tracking-tight text-brand-600">{t('signIn')}</h1>
+            <p className="mt-2 text-sm text-slate-500">{t('signInSub')}</p>
 
-            <label htmlFor="login-identifier" className="mt-8 block text-xs font-medium text-slate-600">{t('identifier')}</label>
+            <label htmlFor="login-identifier" className="mt-8 block text-xs font-semibold text-slate-700">{t('identifier')}</label>
             <input
               id="login-identifier"
               autoFocus
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none ring-brand-600/20 transition focus:border-brand-500 focus:ring-4"
+              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none ring-brand-600/20 transition focus:border-brand-500 focus:ring-4"
               autoComplete="username"
             />
 
-            <label htmlFor="login-password" className="mt-4 block text-xs font-medium text-slate-600">{t('password')}</label>
+            <label htmlFor="login-password" className="mt-5 block text-xs font-semibold text-slate-700">{t('password')}</label>
             <input
               id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none ring-brand-600/20 transition focus:border-brand-500 focus:ring-4"
+              className="mt-2 h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none ring-brand-600/20 transition focus:border-brand-500 focus:ring-4"
               autoComplete="current-password"
             />
 
-            {error && <p role="alert" className="mt-3 text-sm text-rose-600">{error}</p>}
-            {api.demo && <p className="mt-3 text-xs leading-5 text-slate-400">{t('demoHint')}</p>}
+            {error && <p role="alert" className="mt-3 rounded-lg bg-pink/20 px-3 py-2 text-sm text-brand-600">{error}</p>}
+            {api.demo && <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">{t('demoHint')}</p>}
 
             <Button type="submit" className="mt-6 w-full" disabled={busy || !identifier || !password}>
               {busy ? t('signingIn') : t('signIn')}

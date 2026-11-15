@@ -21,7 +21,7 @@ export function BonusesPage() {
   if (query.isError) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
   const items = query.data ?? [];
   const totalSar = items.filter((b) => b.currency === 'SAR').reduce((sum, b) => sum + Number(b.amount || 0), 0);
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
     <PageHeader eyebrow={t('grpOrganization')} title={t('bonuses')} subtitle={lang === 'ar' ? 'احتفِ بالإنجازات وتابع المكافآت عبر مؤسستك.' : 'Recognize great work and keep every award in view.'} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t('addBonus')}</Button>} />
     <MetricCards items={[
       { label: t('totalBonuses'), value: items.length, hint: t('allTime'), icon: Gift },
@@ -38,8 +38,8 @@ type BonusManager = ReturnType<typeof useEntityManager<'bonuses'>>;
 export function BonusTable({ items, manager, defaults }: { items: Bonus[]; manager: BonusManager; defaults?: { business_unit_id?: number; employee_id?: number } }) {
   const { t, lang } = useI18n();
   const columns: Column<Bonus>[] = [
-    { key: 'award', label: t('awardTitle'), render: (b) => <div className="flex items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-amber-50 text-amber-600"><Award size={16} /></span><div><div className="font-semibold text-slate-800">{b.title}</div><div className="mt-1 text-xs text-slate-400">{b.notes || t('bonus')}</div></div></div> },
-    { key: 'employee', label: t('employee'), render: (b) => b.employee ? <Link to={`/employees/${b.employee.id}`} className="font-medium text-slate-700 hover:text-brand-600">{b.employee.name}</Link> : '—' },
+    { key: 'award', label: t('awardTitle'), render: (b) => <div className="flex items-center gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-skin/40 text-brand-600"><Award size={16} /></span><div><div className="font-semibold text-slate-800">{b.title}</div><div className="mt-1 text-xs text-slate-400">{b.notes || t('bonus')}</div></div></div> },
+    { key: 'employee', label: t('employee'), render: (b) => b.employee ? <Link to={`/employees/${b.employee.id}`} className="font-medium text-slate-700 hover:underline">{b.employee.name}</Link> : '—' },
     { key: 'unit', label: t('unit'), render: (b) => b.unit?.name ?? '—' },
     { key: 'amount', label: t('amount'), render: (b) => <span className="tnum font-semibold text-slate-800">{formatMoney(b.amount, b.currency, lang)}</span> },
     { key: 'date', label: t('awardedOn'), render: (b) => formatCalendarDate(b.awarded_on, lang) },

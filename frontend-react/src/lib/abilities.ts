@@ -1,4 +1,4 @@
-/** Mirrors backend BmsAccess + Angular `hasAbility()`. Wildcard `*` is a system admin. */
+/** Mirrors backend BmsAccess. Wildcard `*` is a system admin. */
 export const WILDCARD = '*';
 
 export function hasAbility(abilities: readonly string[] | null | undefined, ability: string): boolean {

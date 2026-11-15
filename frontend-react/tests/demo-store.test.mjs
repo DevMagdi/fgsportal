@@ -103,7 +103,7 @@ test('document uploads store metadata only, and audit entries track changes', ()
 test('duplicate unit names and employee credentials are rejected', () => {
   assert.throws(() => store.demoSave('units', { name: 'kraken' }), /already exists/);
   assert.throws(() => store.demoSave('employees', { username: 'nora.alharbi', email: 'new@example.com' }), /username/);
-  assert.throws(() => store.demoSave('employees', { username: 'new', email: 'nora@fgs.local' }), /email/);
+  assert.throws(() => store.demoSave('employees', { username: 'new', email: 'nora@alphaiota.local' }), /email/);
 });
 
 test('team members must belong to the unit and are released when they leave it', () => {

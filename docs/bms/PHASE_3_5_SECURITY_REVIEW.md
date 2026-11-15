@@ -1,5 +1,7 @@
 # BMS Phase 3.5 — Security and authorization review
 
+> **Historical audit:** This report describes a previous source snapshot and test environment, not the current React UI or a current release decision. Its backend risks and decisions are retained for context; [the complete original](https://github.com/DevMagdi/fgsportal/blob/72953827d23608af32201d03065ef85f08fc5b85/docs/bms/PHASE_3_5_SECURITY_REVIEW.md) remains in Git history. Verify the present code and deployment before acting.
+
 **Starting SHA:** `ae790a960bf52cda08f0047a43de896ea0972145`
 **Initial fix SHA:** `7de9f0479c75269c658bf80772e2ddd343fe29c9`
 **Latest tested source SHA:** `15c8bf295ff3c44a171800b61bb5441ddca979c2`
@@ -30,7 +32,7 @@
 
 1. **High — shared Product audit event scope is ambiguous.** An audit event does not store the unit in which the action occurred. Resolving scope from all current product-unit pivots may expose an event to another unit that shares the Product. The existing P22 and P19 assertions do not fully define the expected cross-unit behavior. This needs explicit security/product approval before any change.
 2. **High — company/unit schema contract unresolved.** Employee import conditionally queries `business_units.company_id`, but no such column was found in checked-in migrations. MySQL import tests return 500; reviewer output reports unknown `company_id`. Removing the predicate can weaken tenant boundaries; adding a column/migration invents ownership semantics. No change made; obtain schema and contract decision.
-3. **Medium — test suites are not green.** Latest CI 43318197656 still has two employee-import failures in both SQLite and MySQL; broad Angular/Karma failures also remain. The focused P16 attendee synchronization regression now passes; this does not resolve the separate shared-Product audit-visibility policy.
+3. **Medium — test suites are not green.** Latest CI 43318197656 still has two employee-import failures in both SQLite and MySQL; the retired UI also had test failures in that run. The focused P16 attendee synchronization regression now passes; this does not resolve the separate shared-Product audit-visibility policy.
 
 The changes made in this stabilization candidate do **not** modify role abilities, global roles, unit-scope resolution, endpoints, or business workflows. They persist validated product metadata and manager IDs after existing validation; the date-only fix is presentation-only. No credentials or production data were accessed.
 
