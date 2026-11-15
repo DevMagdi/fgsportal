@@ -3,14 +3,16 @@ import { cn } from '../../lib/utils';
 import { interactionSpring } from '../../lib/motion';
 import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 
-export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
+// Responsive chart containers opt out of scaling so their measurements stay stable.
+export function Card({ className, children, scaleOnHover = true }: { className?: string; children: React.ReactNode; scaleOnHover?: boolean }) {
   const reduceMotion = usePrefersReducedMotion();
   return (
     <motion.div
-      animate={reduceMotion ? { y: 0 } : undefined}
-      whileHover={reduceMotion ? undefined : { y: -2 }}
+      variants={{ hover: { y: -3, scale: scaleOnHover ? 1.005 : 1 } }}
+      animate={reduceMotion ? { y: 0, scale: 1 } : undefined}
+      whileHover={reduceMotion ? undefined : 'hover'}
       transition={reduceMotion ? { duration: 0 } : interactionSpring}
-      className={cn('rounded-xl border border-slate-200/80 bg-white shadow-card transition-shadow duration-200 hover:shadow-lift motion-reduce:transition-none', className)}
+      className={cn('rounded-2xl border border-slate-200/70 bg-white shadow-card transition-shadow duration-200 hover:shadow-lift motion-reduce:transition-none', className)}
     >
       {children}
     </motion.div>

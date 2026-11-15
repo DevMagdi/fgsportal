@@ -31,6 +31,17 @@ body {
 [dir='rtl'] .brand-sidebar nav a { font-size: 13px; }
 [dir='rtl'] .brand-sidebar .nav-group-label { font-size: 10px; letter-spacing: 0; }
 
+/* Atmospheric depth, using only the brand's existing colours. */
+.dashboard-hero {
+  background: radial-gradient(circle at 95% 0%, rgb(181 175 249 / .20), transparent 42%),
+    radial-gradient(circle at 0% 100%, rgb(219 206 191 / .12), transparent 48%), var(--brand);
+}
+.login-brand-panel {
+  background: radial-gradient(circle at 50% 42%, rgb(181 175 249 / .18), transparent 38%),
+    radial-gradient(circle at 5% 95%, rgb(219 206 191 / .12), transparent 40%), var(--brand);
+}
+.dashboard-hero :focus-visible { outline-color: var(--skin); }
+
 * { scrollbar-width: thin; scrollbar-color: var(--skin) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }
 *::-webkit-scrollbar-thumb { background: var(--skin); border-radius: 999px; }

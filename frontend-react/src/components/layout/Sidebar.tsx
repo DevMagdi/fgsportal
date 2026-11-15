@@ -93,7 +93,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                     {isActive && (reduceMotion
                       ? <span aria-hidden="true" className="absolute inset-y-1 start-0 w-0.5 rounded-full bg-skin" />
                       : <motion.span aria-hidden="true" layoutId="active-sidebar-indicator" transition={{ type: 'spring', stiffness: 420, damping: 38 }} className="absolute inset-y-1 start-0 w-0.5 rounded-full bg-skin" />)}
-                    <motion.span className="inline-flex shrink-0" variants={{ hover: { x: dir === 'rtl' ? -2 : 2, scale: 1.08 } }} animate={reduceMotion ? { x: 0, scale: 1 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring}><Icon size={15} strokeWidth={1.7} /></motion.span><span className="truncate">{t(link.label)}</span>
+                    <motion.span className="inline-flex shrink-0" variants={{ hover: { x: dir === 'rtl' ? -2 : 2, scale: 1.1, rotate: dir === 'rtl' ? 4 : -4 } }} animate={reduceMotion ? { x: 0, scale: 1, rotate: 0 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring}><Icon size={15} strokeWidth={1.7} /></motion.span><span className="truncate">{t(link.label)}</span>
                   </>}
                 </NavLink>
               </motion.li>;

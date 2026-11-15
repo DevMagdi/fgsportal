@@ -15,7 +15,7 @@ export function MetricCards({ items }: { items: { label: string; value: string |
   const tones = { indigo: 'bg-brand-50 text-brand-600', teal: 'bg-turquoise/40 text-brand-600', amber: 'bg-skin/40 text-brand-600', rose: 'bg-pink/20 text-brand-600' };
   return <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{items.map((item) => <motion.div key={item.label} className="min-w-0" whileHover={reduceMotion ? undefined : 'hover'}>
     <Card className="h-full p-4">
-      <div className="flex items-start justify-between gap-3"><p className="text-[12px] font-medium text-slate-500">{item.label}</p><motion.span variants={{ hover: { scale: 1.08, rotate: -3 } }} animate={reduceMotion ? { scale: 1, rotate: 0 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring} className={cn('grid h-9 w-9 place-items-center rounded-lg', tones[item.tone ?? 'indigo'])}><item.icon size={17} strokeWidth={1.8} /></motion.span></div>
+      <div className="flex items-start justify-between gap-3"><p className="text-[12px] font-medium text-slate-500">{item.label}</p><motion.span variants={{ hover: { scale: 1.12, rotate: -5 } }} animate={reduceMotion ? { scale: 1, rotate: 0 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring} className={cn('grid h-10 w-10 place-items-center rounded-xl', tones[item.tone ?? 'indigo'])}><item.icon size={17} strokeWidth={1.8} /></motion.span></div>
       <div className="tnum -mt-1 text-[25px] font-semibold tracking-tight text-slate-900"><AnimatedValue value={item.value} /></div>
       {item.hint && <p className="mt-1.5 text-xs text-slate-400">{item.hint}</p>}
     </Card>
