@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Plus, type LucideIcon } from 'lucide-react';
 import { useI18n, type MsgKey } from '../../i18n';
 import { ENTITY_CONFIG } from '../../lib/entity-config';
@@ -40,7 +40,7 @@ export function CollectionPage<K extends EntityKind>({ kind, queryName, queryFn,
   if (query.isLoading) return <LoadingState />;
   if (query.isError) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
   const items = query.data ?? [];
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+  return <div className="space-y-3">
     {!hideHeader && <PageHeader eyebrow={t(eyebrow)} title={t(title)} subtitle={subtitle[lang]} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t(ENTITY_CONFIG[kind].createLabel)}</Button>} />}
     {!hideHeader && <div className="flex items-center gap-3 rounded-xl border border-brand-100 bg-gradient-to-r from-brand-50/80 via-white to-white px-4 py-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm"><Icon size={20} /></span><div><div className="text-sm font-semibold text-slate-800">{items.length} {t('records')}</div><div className="mt-1 text-xs text-slate-400">{subtitle[lang]}</div></div></div>}
     {hideHeader && manager.canManage && <div className="flex justify-end"><Button size="sm" onClick={() => manager.openCreate()}><Plus size={14} />{t(ENTITY_CONFIG[kind].createLabel)}</Button></div>}
@@ -48,9 +48,11 @@ export function CollectionPage<K extends EntityKind>({ kind, queryName, queryFn,
       onCreate={manager.canManage ? () => manager.openCreate() : undefined} createLabel={t(ENTITY_CONFIG[kind].createLabel)}
       onEdit={manager.canManage ? manager.openEdit : undefined} canEdit={canEdit} onDelete={manager.canManage ? (item) => manager.openDelete(item, recordName(item)) : undefined} canDelete={canDelete} deleteLabel={deleteLabel} onBulkDelete={manager.canManage ? manager.openBulkDelete : undefined} />
     {children}
-    {detail && <RecordDrawer record={detail as unknown as Record<string, unknown>} title={recordName(detail)} onClose={() => setDetail(null)} onEdit={manager.canManage && (!canEdit || canEdit(detail)) ? () => { manager.openEdit(detail); setDetail(null); } : undefined} />}
+    <AnimatePresence mode="wait">
+      {detail && <RecordDrawer key={detail.id} record={detail as unknown as Record<string, unknown>} title={recordName(detail)} onClose={() => setDetail(null)} onEdit={manager.canManage && (!canEdit || canEdit(detail)) ? () => { manager.openEdit(detail); setDetail(null); } : undefined} />}
+    </AnimatePresence>
     {manager.dialogs}
-  </motion.div>;
+  </div>;
 }
 
 const labels: Record<string, MsgKey> = { name: 'name', title: 'title', item: 'item', product_name: 'product', job_title: 'jobTitle', description: 'description', specification: 'specification', purpose: 'purpose', status: 'status', stage: 'stage', entity_type: 'entityType', sector: 'sector', contact_name: 'contactName', contact_email: 'contactEmail', contact_phone: 'phone', location: 'location', starts_at: 'startTime', ends_at: 'endTime', event_date: 'eventDate', event_type: 'type', venue: 'venue', notes: 'notes', quantity: 'quantity', category: 'category', content: 'content', created_at: 'updated', due_date: 'dueDate', first_working_day: 'hiringDate', finance_comment: 'finance', announcement_plan: 'description', reference: 'reference', candidates: 'candidates', onboarding: 'onboarding', quotations: 'quotations', checklist: 'checklist', phases: 'phase', unit: 'unit', businessUnits: 'units', owner: 'owner', requester: 'owner', currentPhase: 'phase', attendees: 'members', minutes: 'notes', interview_at: 'starts', email: 'email', issuer: 'issuer', amount: 'amount', vendor: 'vendor', department: 'unit', progress: 'progress' };
@@ -80,7 +82,7 @@ function RecordDrawer({ record, title, onClose, onEdit }: { record: Record<strin
   const { t, lang } = useI18n();
   const entries = Object.entries(record).filter(([key, value]) => !hiddenKeys.has(key) && !key.endsWith('_id') && value != null && value !== '' && !Array.isArray(value));
   const groups = Object.entries(record).filter(([key, value]) => !hiddenKeys.has(key) && Array.isArray(value) && value.length > 0) as [string, unknown[]][];
-  return <Drawer open onClose={onClose} title={title} description={t('details')}>
+  return <Drawer open parentPresence onClose={onClose} title={title} description={t('details')}>
     <div className="flex-1 overflow-y-auto px-6 py-5"><dl className="grid gap-x-5 gap-y-4 sm:grid-cols-2">{entries.map(([key, value]) => <div key={key} className={typeof value === 'string' && value.length > 100 ? 'sm:col-span-2' : ''}><dt className="text-[11px] font-medium text-slate-400">{labels[key] ? t(labels[key]) : humanize(key)}</dt><dd className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-5 text-slate-700">{valueText(value, key, lang, t)}</dd></div>)}</dl>
       {groups.map(([key, rows]) => <section key={key} className="mt-7"><h3 className="mb-3 text-sm font-semibold text-slate-800">{labels[key] ? t(labels[key]) : humanize(key)}</h3><div className="space-y-2">{rows.map((row, index) => <div key={index} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-sm text-slate-600">{row && typeof row === 'object' ? Object.entries(row as Record<string, unknown>).filter(([k, v]) => !hiddenKeys.has(k) && !k.endsWith('_id') && v != null && v !== '' && !Array.isArray(v)).map(([k, v]) => <div key={k} className="flex justify-between gap-4 py-0.5 text-xs"><span className="text-slate-400">{labels[k] ? t(labels[k]) : humanize(k)}</span><span className="text-end font-medium text-slate-700">{valueText(v, k, lang, t)}</span></div>) : String(row)}</div>)}</div></section>)}
     </div><div className="flex justify-end gap-2 border-t border-slate-100 bg-slate-50/70 px-6 py-4"><Button variant="secondary" onClick={onClose}>{t('close')}</Button>{onEdit && <Button onClick={onEdit}>{t('edit')}</Button>}</div>

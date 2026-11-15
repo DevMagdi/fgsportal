@@ -1,8 +1,10 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useIsPresent } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useI18n } from '../../i18n';
+import { useEntranceValues, useExitMotionPreference, useReducedMotionValue } from '../../lib/useAccessibleMotion';
+import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 import { cn } from '../../lib/utils';
 
 interface ModalProps {
@@ -14,19 +16,79 @@ interface ModalProps {
   size?: 'md' | 'lg';
   drawer?: boolean;
   busy?: boolean;
+  /** Use the caller's presence boundary when the entire dialog is conditionally mounted. */
+  parentPresence?: boolean;
+}
+
+interface ModalLayerProps extends Omit<ModalProps, 'open' | 'parentPresence'> {
+  panel: RefObject<HTMLDivElement>;
+  titleId: string;
+  descriptionId: string;
+  dir: 'ltr' | 'rtl';
+  closeLabel: string;
+}
+
+function ModalLayer({ onClose, title, description, children, size, drawer, busy, panel, titleId, descriptionId, dir, closeLabel }: ModalLayerProps) {
+  const reduced = usePrefersReducedMotion();
+  const isPresent = useIsPresent();
+  const layer = useRef<HTMLDivElement>(null);
+  // Do not interrupt an exit that the surrounding presence boundary is awaiting.
+  const motionReduced = useExitMotionPreference(reduced, isPresent);
+  const snapEntrance = reduced && isPresent;
+  const entrance = useEntranceValues(snapEntrance, reduced ? false : { opacity: 0, y: drawer ? 0 : 10 });
+  const x = useReducedMotionValue(snapEntrance, reduced || !drawer ? 0 : dir === 'rtl' ? -24 : 24, 0);
+  const scale = useReducedMotionValue(snapEntrance, reduced || drawer ? 1 : 0.985, 1);
+  const backdropOpacity = useReducedMotionValue(snapEntrance, reduced ? 1 : 0, 1);
+
+  // A visually exiting dialog must no longer capture focus or appear to AT.
+  useLayoutEffect(() => {
+    const node = layer.current;
+    if (!node) return;
+    if (!isPresent && node.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+    node.inert = !isPresent;
+    if (isPresent) node.removeAttribute('aria-hidden');
+    else node.setAttribute('aria-hidden', 'true');
+  }, [isPresent]);
+
+  return <div ref={layer} style={{ pointerEvents: isPresent ? undefined : 'none' }} className={cn('fixed inset-0 z-[80] flex', drawer ? 'justify-end' : 'items-center justify-center p-4')}>
+    <motion.div
+      className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]"
+      style={{ opacity: backdropOpacity }}
+      initial={motionReduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={motionReduced ? { opacity: 1 } : { opacity: 0 }}
+      transition={motionReduced ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+      onClick={() => { if (!busy) onClose(); }}
+    />
+    <motion.div
+      ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined} tabIndex={-1}
+      style={{ ...entrance, x, scale }}
+      initial={motionReduced ? false : drawer ? { opacity: 0, x: dir === 'rtl' ? -24 : 24 } : { opacity: 0, y: 10, scale: 0.985 }}
+      animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+      exit={motionReduced ? { opacity: 1, x: 0, y: 0, scale: 1 } : drawer ? { opacity: 0, x: dir === 'rtl' ? -20 : 20 } : { opacity: 0, y: 6, scale: 0.99 }}
+      transition={motionReduced ? { duration: 0 } : { duration: 0.24, ease: 'easeOut' }}
+      className={cn('relative flex max-h-[min(90vh,900px)] w-full flex-col overflow-hidden bg-white shadow-2xl outline-none', drawer ? 'h-full max-h-full max-w-[560px] rounded-none' : 'rounded-2xl', !drawer && (size === 'lg' ? 'max-w-2xl' : 'max-w-lg'))}
+    >
+      <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div><h2 id={titleId} className="text-base font-semibold tracking-tight text-slate-900">{title}</h2>{description && <p id={descriptionId} className="mt-1 text-sm text-slate-500">{description}</p>}</div>
+        <button type="button" onClick={onClose} disabled={busy} aria-label={closeLabel} className="-me-1 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"><X size={18} /></button>
+      </div>
+      {children}
+    </motion.div>
+  </div>;
 }
 
 /** Accessible dialog with focus containment, Escape handling and focus restoration. */
-export function Modal({ open, onClose, title, description, children, size = 'md', drawer = false, busy = false }: ModalProps) {
+export function Modal({ open, onClose, title, description, children, size = 'md', drawer = false, busy = false, parentPresence = false }: ModalProps) {
   const titleId = useId();
   const descriptionId = useId();
   const panel = useRef<HTMLDivElement>(null);
   const { t, dir } = useI18n();
+  const isPresent = useIsPresent();
+  const active = open && isPresent;
   const onCloseRef = useRef(onClose);
   const busyRef = useRef(busy);
   onCloseRef.current = onClose; busyRef.current = busy;
   useEffect(() => {
-    if (!open) return;
+    if (!active) return;
     const previous = document.activeElement as HTMLElement | null;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -45,28 +107,14 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
     };
     document.addEventListener('keydown', onKeyDown);
     return () => { window.clearTimeout(timer); document.removeEventListener('keydown', onKeyDown); document.body.style.overflow = oldOverflow; previous?.focus(); };
-  }, [open]);
+  }, [active]);
 
+  const layer = <ModalLayer key="dialog" onClose={onClose} title={title} description={description} size={size} drawer={drawer} busy={busy} panel={panel} titleId={titleId} descriptionId={descriptionId} dir={dir} closeLabel={t('closeDialog')}>{children}</ModalLayer>;
   return createPortal(
-    <AnimatePresence>
-      {open && <div className={cn('fixed inset-0 z-[80] flex', drawer ? 'justify-end' : 'items-center justify-center p-4')}>
-        <motion.div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { if (!busy) onClose(); }} />
-        <motion.div
-          ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined} tabIndex={-1}
-          initial={drawer ? { opacity: 0, x: dir === 'rtl' ? -36 : 36 } : { opacity: 0, y: 14, scale: 0.98 }}
-          animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-          exit={drawer ? { opacity: 0, x: dir === 'rtl' ? -30 : 30 } : { opacity: 0, y: 8, scale: 0.98 }}
-          transition={{ duration: 0.18 }}
-          className={cn('relative flex max-h-[min(90vh,900px)] w-full flex-col overflow-hidden bg-white shadow-2xl outline-none', drawer ? 'h-full max-h-full max-w-[560px] rounded-none' : 'rounded-2xl', !drawer && (size === 'lg' ? 'max-w-2xl' : 'max-w-lg'))}
-        >
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
-            <div><h2 id={titleId} className="text-base font-semibold tracking-tight text-slate-900">{title}</h2>{description && <p id={descriptionId} className="mt-1 text-sm text-slate-500">{description}</p>}</div>
-            <button type="button" onClick={onClose} disabled={busy} aria-label={t('closeDialog')} className="-me-1 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"><X size={18} /></button>
-          </div>
-          {children}
-        </motion.div>
-      </div>}
-    </AnimatePresence>, document.body,
+    // Conditional callers keep their layer in the existing boundary as it exits.
+    // Persistent callers need a separate boundary for changes to `open`.
+    parentPresence ? (open ? layer : null) : <AnimatePresence>{active && layer}</AnimatePresence>,
+    document.body,
   );
 }
 

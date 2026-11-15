@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pencil, Plus, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useI18n, type MsgKey } from '../../i18n';
+import { rowEntrance } from '../../lib/motion';
+import { useEntranceValues } from '../../lib/useAccessibleMotion';
+import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 import { cn } from '../../lib/utils';
+import { AnimatedValue } from './AnimatedValue';
 import { Button } from './Button';
 import { EmptyState } from './States';
 
@@ -30,8 +35,18 @@ export function statusLabel(status: string, t: (key: MsgKey) => string) {
   return value === status ? status.replace(/_/g, ' ').replace(/^\w/, (letter) => letter.toUpperCase()) : value;
 }
 
+function TableRow({ index, reduced, entering, children }: { index: number; reduced: boolean; entering: boolean; children: ReactNode }) {
+  const entrance = rowEntrance(index, reduced || !entering);
+  const values = useEntranceValues(reduced, entrance.initial);
+  return <motion.tr {...entrance} style={values} className="group border-b border-slate-100/80 transition-colors duration-200 last:border-0 hover:bg-slate-50/70 focus-within:bg-slate-50/70 motion-reduce:transition-none">{children}</motion.tr>;
+}
+
 export function DataTable<T extends { id: number }>({ items, columns, title, getSearchText, getStatus, getUnit, onEdit, canEdit, onDelete, canDelete, deleteLabel, onBulkDelete, onCreate, createLabel, extra, pageSize = 8 }: Props<T>) {
   const { t, dir } = useI18n();
+  const reduceMotion = usePrefersReducedMotion();
+  const firstRender = useRef(true);
+  // Rows introduced by filtering, pagination or edits should not replay the entrance.
+  useEffect(() => { firstRender.current = false; }, []);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [unit, setUnit] = useState('');
@@ -61,7 +76,7 @@ export function DataTable<T extends { id: number }>({ items, columns, title, get
   const selectEnabled = Boolean(onBulkDelete);
   return <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-card">
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-      <div className="flex items-center gap-2.5"><h2 className="text-sm font-semibold text-slate-900">{title ?? t('allRecords')}</h2><span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">{filtered.length}</span></div>
+      <div className="flex items-center gap-2.5"><h2 className="text-sm font-semibold text-slate-900">{title ?? t('allRecords')}</h2><span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500"><AnimatedValue value={filtered.length} /></span></div>
       {extra}
     </div>
     <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-4 py-3">
@@ -69,7 +84,7 @@ export function DataTable<T extends { id: number }>({ items, columns, title, get
       {(getStatus || getUnit) && <span className="hidden text-slate-400 sm:block"><SlidersHorizontal size={15} /></span>}
       {getStatus && <select aria-label={t('filterStatus')} value={status} onChange={(event) => setStatus(event.target.value)} className="h-9 max-w-[170px] rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-600 outline-none focus:border-brand-400"><option value="">{t('allStatuses')}</option>{statuses.map((value) => <option key={value} value={value}>{statusLabel(value, t)}</option>)}</select>}
       {getUnit && <select aria-label={t('unit')} value={unit} onChange={(event) => setUnit(event.target.value)} className="h-9 max-w-[170px] rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-600 outline-none focus:border-brand-400"><option value="">{t('allUnits')}</option>{units.map((value) => <option key={value} value={value}>{value}</option>)}</select>}
-      {selected.length > 0 && <div className="ms-auto flex items-center gap-2 text-xs text-slate-500"><span>{selected.length} {t('selectedCount')}</span><button type="button" onClick={() => setSelected([])} className="text-slate-400 hover:text-slate-700">{t('clearSelection')}</button><Button size="sm" variant="secondary" onClick={() => onBulkDelete?.(selected)} className="text-brand-600"><Trash2 size={13} />{t('deleteSelected')}</Button></div>}
+      {selected.length > 0 && <div className="ms-auto flex items-center gap-2 text-xs text-slate-500"><span><AnimatedValue value={selected.length} /> {t('selectedCount')}</span><button type="button" onClick={() => setSelected([])} className="text-slate-400 hover:text-slate-700">{t('clearSelection')}</button><Button size="sm" variant="secondary" onClick={() => onBulkDelete?.(selected)} className="text-brand-600"><Trash2 size={13} />{t('deleteSelected')}</Button></div>}
     </div>
     {filtered.length === 0 ? <EmptyState title={items.length ? t('noMatching') : undefined} body={items.length ? t('adjustFilters') : t('getStarted')} action={!items.length && onCreate ? <Button onClick={onCreate} size="sm"><Plus size={14} />{createLabel ?? t('create')}</Button> : undefined} /> : <div role="region" aria-label={title ?? t('allRecords')} tabIndex={0} className="max-h-[min(55vh,32rem)] overflow-auto">
       <table className="w-full min-w-[650px] text-sm">
@@ -78,14 +93,14 @@ export function DataTable<T extends { id: number }>({ items, columns, title, get
           {columns.map((column) => <th key={column.key} className={cn('px-4 py-2.5 text-start font-semibold', column.className)}>{column.label}</th>)}
           {hasActions && <th className="px-4 py-2.5 text-end font-semibold">{t('actions')}</th>}
         </tr></thead>
-        <tbody>{visible.map((item) => <tr key={item.id} className="group border-b border-slate-100/80 last:border-0 hover:bg-slate-50/70">
+        <tbody>{visible.map((item, index) => <TableRow key={item.id} index={index} reduced={reduceMotion} entering={firstRender.current}>
           {selectEnabled && <td className="px-4 py-2.5"><input type="checkbox" aria-label={`${t('selectedCount')} ${getSearchText(item)}`} checked={selected.includes(item.id)} disabled={Boolean(canDelete && !canDelete(item))} onChange={() => setSelected((prev) => prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id])} className="h-3.5 w-3.5 rounded border-slate-300 accent-brand-600 disabled:opacity-35" /></td>}
           {columns.map((column) => <td key={column.key} className={cn('px-4 py-2.5 align-middle text-[13px] text-slate-600', column.className)}>{column.render(item)}</td>)}
           {hasActions && <td className="px-4 py-2"><div className="flex items-center justify-end gap-1">
             {onEdit && (!canEdit || canEdit(item)) && <button type="button" onClick={() => onEdit(item)} aria-label={`${t('edit')}: ${getSearchText(item)}`} title={t('edit')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-brand-600"><Pencil size={15} /></button>}
             {onDelete && (!canDelete || canDelete(item)) && <button type="button" onClick={() => onDelete(item)} aria-label={`${deleteLabel ?? t('remove')}: ${getSearchText(item)}`} title={deleteLabel ?? t('remove')} className="rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-brand-600"><Trash2 size={15} /></button>}
           </div></td>}
-        </tr>)}</tbody>
+        </TableRow>)}</tbody>
       </table>
     </div>}
     {filtered.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-2.5 text-xs text-slate-400"><span>{t('showing')} {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filtered.length)} {t('of')} {filtered.length}</span><div className="flex items-center gap-2"><span className="me-1">{t('page')} {currentPage} / {pages}</span><button type="button" aria-label={t('previous')} disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)} className="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 disabled:opacity-35">{dir === 'rtl' ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}</button><button type="button" aria-label={t('next')} disabled={currentPage >= pages} onClick={() => setPage(currentPage + 1)} className="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 disabled:opacity-35">{dir === 'rtl' ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}</button></div></div>}

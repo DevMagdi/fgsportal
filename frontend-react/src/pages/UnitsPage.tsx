@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { Building2, CheckCircle2, Network, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import { api } from '../lib/api';
 import { useI18n } from '../i18n';
@@ -32,7 +31,7 @@ export function UnitsPage() {
     { key: 'parent', label: t('parentUnit'), render: (u) => u.parent?.name ?? '—' },
     { key: 'status', label: t('status'), render: (u) => <StatusBadge status={u.is_active ?? true} /> },
   ];
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+  return <div className="space-y-4">
     <PageHeader eyebrow={t('grpOrganization')} title={t('units')} subtitle={lang === 'ar' ? 'نظّم وحداتك والأشخاص والعمل الذي يربطهم.' : 'A clearer view of the teams and work powering your business.'} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t('newUnit')}</Button>} />
     <MetricCards items={[
       { label: t('totalUnits'), value: items.length, hint: t('allTime'), icon: Building2 },
@@ -44,7 +43,7 @@ export function UnitsPage() {
       onCreate={manager.canManage ? () => manager.openCreate() : undefined} createLabel={t('newUnit')} onEdit={manager.canManage ? manager.openEdit : undefined}
       onDelete={manager.canManage ? (u) => manager.openDelete(u, u.name) : undefined} onBulkDelete={manager.canManage ? manager.openBulkDelete : undefined} />
     {manager.dialogs}
-  </motion.div>;
+  </div>;
 }
 
 export function UnitShowPage() {
@@ -55,7 +54,7 @@ export function UnitShowPage() {
   if (query.isLoading) return <LoadingState />;
   if (query.isError || !query.data) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
   const u = query.data; const members = u.users ?? []; const plans = u.weeklyPlans ?? [];
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+  return <div className="space-y-5">
     <Breadcrumb items={[{ label: t('units'), to: '/units' }, { label: u.name }]} />
     <div className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-start gap-4"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-100 text-brand-600"><Building2 size={25} /></span><div><div className="flex flex-wrap items-center gap-3"><h1 className="text-2xl font-semibold tracking-tight text-slate-900">{u.name}</h1><StatusBadge status={u.is_active ?? true} /></div><p className="mt-1.5 text-sm text-slate-500">{u.description || t('noDescription')}</p></div></div>
       {manager.canManage && <div className="flex gap-2"><Button variant="secondary" onClick={() => manager.openEdit(u)}><Pencil size={15} />{t('edit')}</Button><Button variant="secondary" onClick={() => manager.openDelete(u, u.name)} className="text-brand-600"><Trash2 size={15} />{t('remove')}</Button></div>}
@@ -69,5 +68,5 @@ export function UnitShowPage() {
       { id: 'activity', label: t('activity'), content: tab === 'activity' ? <ActivityPanel kind="units" id={u.id} /> : null },
     ]} />
     {manager.dialogs}
-  </motion.div>;
+  </div>;
 }

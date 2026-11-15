@@ -1,14 +1,16 @@
 import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
+import { interactionSpring } from '../../lib/motion';
 import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
   const reduceMotion = usePrefersReducedMotion();
   return (
     <motion.div
+      animate={reduceMotion ? { y: 0 } : undefined}
       whileHover={reduceMotion ? undefined : { y: -2 }}
-      transition={{ duration: 0.18, ease: 'easeOut' }}
-      className={cn('rounded-xl border border-slate-200/80 bg-white shadow-card transition-shadow hover:shadow-lift', className)}
+      transition={reduceMotion ? { duration: 0 } : interactionSpring}
+      className={cn('rounded-xl border border-slate-200/80 bg-white shadow-card transition-shadow duration-200 hover:shadow-lift motion-reduce:transition-none', className)}
     >
       {children}
     </motion.div>

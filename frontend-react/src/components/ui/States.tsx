@@ -1,7 +1,10 @@
+import { motion } from 'framer-motion';
 import { AlertCircle, Inbox } from 'lucide-react';
 import { Button } from './Button';
 import { Skeleton } from './Spinner';
 import { useI18n } from '../../i18n';
+import { useEntranceValues } from '../../lib/useAccessibleMotion';
+import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 
 export function LoadingState() {
   const { t } = useI18n();
@@ -33,14 +36,16 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
 
 export function EmptyState({ title, body, action }: { title?: string; body?: string; action?: React.ReactNode }) {
   const { t } = useI18n();
+  const reduceMotion = usePrefersReducedMotion();
+  const values = useEntranceValues(reduceMotion, reduceMotion ? false : { opacity: 0, y: 6 });
   return (
-    <div className="grid place-items-center px-6 py-10 text-center">
+    <motion.div style={values} initial={reduceMotion ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={reduceMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }} className="grid place-items-center px-6 py-10 text-center">
       <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-500">
         <Inbox size={18} />
       </div>
       <h3 className="text-sm font-semibold text-slate-800">{title ?? t('emptyTitle')}</h3>
       <p className="mt-1 max-w-sm text-sm text-slate-500">{body ?? t('emptyBody')}</p>
       {action && <div className="mt-4">{action}</div>}
-    </div>
+    </motion.div>
   );
 }

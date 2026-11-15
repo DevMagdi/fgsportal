@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useEntityManager } from '../components/crud/useEntityManager';
@@ -38,7 +37,7 @@ export function OrganizationPage() {
   if (teamsQ.isError) return <ErrorState message={(teamsQ.error as Error)?.message} onRetry={() => void teamsQ.refetch()} />;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+    <div className="space-y-5">
       <PageHeader eyebrow={t('grpOrganization')} title={t('organization')} subtitle={t('structure')} actions={canCreateTeam && <Button onClick={() => manager.openCreate({ business_unit_id: current!.id })}><Plus size={16} />{t('newTeam')}</Button>} />
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         <Card className="p-3">
@@ -87,7 +86,7 @@ export function OrganizationPage() {
         </div>
       </div>
       {manager.dialogs}
-    </motion.div>
+    </div>
   );
 }
 

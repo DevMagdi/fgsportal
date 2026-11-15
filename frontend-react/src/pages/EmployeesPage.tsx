@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { BriefcaseBusiness, CheckCircle2, Pencil, Plus, ShieldCheck, Trash2, Users } from 'lucide-react';
 import { api } from '../lib/api';
 import { useI18n } from '../i18n';
@@ -35,7 +34,7 @@ export function EmployeesPage() {
     { key: 'date', label: t('hiringDate'), render: (p) => formatCalendarDate(p.hiring_date, lang) },
     { key: 'status', label: t('status'), render: (p) => <StatusBadge status={p.active ?? true} /> },
   ];
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+  return <div className="space-y-4">
     <PageHeader eyebrow={t('grpOrganization')} title={t('employees')} subtitle={lang === 'ar' ? 'كل الأشخاص الذين يقفون خلف العمل الرائع.' : 'Get to know the people behind the work, all in one place.'} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t('addEmployee')}</Button>} />
     <MetricCards items={[
       { label: t('totalPeople'), value: items.length, hint: t('employees'), icon: Users },
@@ -46,7 +45,7 @@ export function EmployeesPage() {
     <DataTable items={items} columns={columns} title={t('allRecords')} getSearchText={(p) => `${p.name} ${p.username} ${p.email ?? ''} ${p.job_title ?? ''}`} getStatus={(p) => p.active === false ? 'inactive' : 'active'} getUnit={(p) => (p.units ?? p.business_units ?? []).map((u) => u.name)}
       onCreate={manager.canManage ? () => manager.openCreate() : undefined} createLabel={t('addEmployee')} onEdit={manager.canManage ? manager.openEdit : undefined} onDelete={manager.canManage ? (p) => manager.openDelete(p, p.name) : undefined} canDelete={(p) => api.demo || (p.active !== false && p.id !== lookups?.current_user.id)} deleteLabel={api.demo ? t('remove') : t('deactivateEmployee')} onBulkDelete={manager.canManage ? manager.openBulkDelete : undefined} />
     {manager.dialogs}
-  </motion.div>;
+  </div>;
 }
 
 export function EmployeeShowPage() {
@@ -56,7 +55,7 @@ export function EmployeeShowPage() {
   if (query.isLoading) return <LoadingState />;
   if (query.isError || !query.data) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
   const p = query.data; const units = p.units ?? p.business_units ?? []; const roles = p.roles ?? []; const certs = p.certificates ?? [];
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+  return <div className="space-y-5">
     <Breadcrumb items={[{ label: t('employees'), to: '/employees' }, { label: p.name }]} />
     <div className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-center gap-4"><span className="[&>span]:h-14 [&>span]:w-14 [&>span]:text-base [&>img]:h-14 [&>img]:w-14"><Avatar name={p.name} src={p.photo_url} /></span><div><div className="flex flex-wrap items-center gap-3"><h1 className="text-2xl font-semibold tracking-tight text-slate-900">{p.name}</h1><StatusBadge status={p.active ?? true} /></div><p className="mt-1.5 text-sm text-slate-500">{p.job_title || p.username}{units.length ? ` · ${units.map((u) => u.name).join(', ')}` : ''}</p></div></div>
       {manager.canManage && <div className="flex gap-2"><Button variant="secondary" onClick={() => manager.openEdit(p)}><Pencil size={15} />{t('edit')}</Button>{(api.demo || (p.active !== false && p.id !== lookups?.current_user.id)) && <Button variant="secondary" className="text-brand-600" onClick={() => manager.openDelete(p, p.name)}><Trash2 size={15} />{api.demo ? t('remove') : t('deactivateEmployee')}</Button>}</div>}
@@ -69,5 +68,5 @@ export function EmployeeShowPage() {
       { id: 'activity', label: t('activity'), content: tab === 'activity' ? <ActivityPanel kind="employees" id={p.id} /> : null },
     ]} />
     {manager.dialogs}
-  </motion.div>;
+  </div>;
 }

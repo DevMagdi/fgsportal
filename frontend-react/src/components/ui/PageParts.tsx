@@ -1,17 +1,25 @@
+import { motion } from 'framer-motion';
 import { ArrowUpRight, type LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useI18n, type MsgKey } from '../../i18n';
+import { interactionSpring } from '../../lib/motion';
+import { usePrefersReducedMotion } from '../../lib/usePrefersReducedMotion';
 import { cn } from '../../lib/utils';
+import { AnimatedValue } from './AnimatedValue';
 import { Badge } from './Badge';
+import { Card } from './Card';
 import { statusLabel } from './DataTable';
 
 export function MetricCards({ items }: { items: { label: string; value: string | number; hint?: string; icon: LucideIcon; tone?: 'indigo' | 'teal' | 'amber' | 'rose' }[] }) {
+  const reduceMotion = usePrefersReducedMotion();
   const tones = { indigo: 'bg-brand-50 text-brand-600', teal: 'bg-turquoise/40 text-brand-600', amber: 'bg-skin/40 text-brand-600', rose: 'bg-pink/20 text-brand-600' };
-  return <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{items.map((item) => <div key={item.label} className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-card">
-    <div className="flex items-start justify-between gap-3"><p className="text-[12px] font-medium text-slate-500">{item.label}</p><span className={cn('grid h-9 w-9 place-items-center rounded-lg', tones[item.tone ?? 'indigo'])}><item.icon size={17} strokeWidth={1.8} /></span></div>
-    <div className="tnum -mt-1 text-[25px] font-semibold tracking-tight text-slate-900">{item.value}</div>
-    {item.hint && <p className="mt-1.5 text-xs text-slate-400">{item.hint}</p>}
-  </div>)}</div>;
+  return <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{items.map((item) => <motion.div key={item.label} className="min-w-0" whileHover={reduceMotion ? undefined : 'hover'}>
+    <Card className="h-full p-4">
+      <div className="flex items-start justify-between gap-3"><p className="text-[12px] font-medium text-slate-500">{item.label}</p><motion.span variants={{ hover: { scale: 1.08, rotate: -3 } }} animate={reduceMotion ? { scale: 1, rotate: 0 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring} className={cn('grid h-9 w-9 place-items-center rounded-lg', tones[item.tone ?? 'indigo'])}><item.icon size={17} strokeWidth={1.8} /></motion.span></div>
+      <div className="tnum -mt-1 text-[25px] font-semibold tracking-tight text-slate-900"><AnimatedValue value={item.value} /></div>
+      {item.hint && <p className="mt-1.5 text-xs text-slate-400">{item.hint}</p>}
+    </Card>
+  </motion.div>)}</div>;
 }
 
 export function StatusBadge({ status }: { status?: string | boolean | number | null }) {

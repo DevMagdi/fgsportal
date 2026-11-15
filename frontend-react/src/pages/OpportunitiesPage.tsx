@@ -1,7 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { BriefcaseBusiness, CircleDollarSign, FileText, LayoutGrid, List, Pencil, Plus, Target, Trash2, TrendingUp, Upload } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
@@ -41,7 +40,7 @@ export function OpportunitiesPage() {
     { key: 'owner', label: t('owner'), render: (o) => <span className="flex items-center gap-2"><Avatar name={displayName(o.owner)} size="sm" /><span className="whitespace-nowrap">{displayName(o.owner)}</span></span> },
     { key: 'close', label: t('expectedClose'), render: (o) => formatCalendarDate(o.expected_close_date, lang) },
   ];
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+  return <div className="space-y-4">
     <PageHeader eyebrow={t('grpBusinessDev')} title={t('opportunities')} subtitle={lang === 'ar' ? 'تابع كل فرصة من الفكرة إلى الفوز.' : 'Move the right opportunities forward, from first look to close.'} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t('newOpportunity')}</Button>} />
     <MetricCards items={[
       { label: t('openOpportunities'), value: open.length, hint: t('pipeline'), icon: BriefcaseBusiness },
@@ -59,7 +58,7 @@ export function OpportunitiesPage() {
     {view === 'list' ? <DataTable items={items} columns={columns} title={t('allRecords')} getSearchText={(o) => `${o.title} ${o.client_name} ${o.reference}`} getStatus={(o) => o.stage} getUnit={(o) => o.unit?.name}
       onCreate={manager.canManage ? () => manager.openCreate() : undefined} createLabel={t('newOpportunity')} onEdit={manager.canManage ? manager.openEdit : undefined} onDelete={manager.canManage ? (o) => manager.openDelete(o, o.title) : undefined} onBulkDelete={manager.canManage ? manager.openBulkDelete : undefined} /> : <PipelineBoard items={items} onEdit={manager.canManage ? manager.openEdit : undefined} onDelete={manager.canManage ? (o) => manager.openDelete(o, o.title) : undefined} onCreate={manager.canManage ? () => manager.openCreate() : undefined} />}
     {manager.dialogs}
-  </motion.div>;
+  </div>;
 }
 
 function PipelineBoard({ items, onEdit, onDelete, onCreate }: { items: Opportunity[]; onEdit?: (o: Opportunity) => void; onDelete?: (o: Opportunity) => void; onCreate?: () => void }) {
@@ -76,7 +75,7 @@ export function OpportunityShowPage() {
   if (query.isLoading) return <LoadingState />;
   if (query.isError || !query.data) return <ErrorState message={(query.error as Error)?.message} onRetry={() => void query.refetch()} />;
   const o = query.data;
-  return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+  return <div className="space-y-5">
     <Breadcrumb items={[{ label: t('opportunities'), to: '/opportunities' }, { label: o.reference }]} />
     <div className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-start gap-4"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-100 text-brand-600"><BriefcaseBusiness size={24} /></span><div><div className="flex flex-wrap items-center gap-3"><h1 className="text-2xl font-semibold tracking-tight text-slate-900">{o.title}</h1><StatusBadge status={o.stage} /></div><p className="mt-1.5 text-sm text-slate-500">{o.client_name} · {o.reference}</p></div></div>{manager.canManage && <div className="flex gap-2"><Button variant="secondary" onClick={() => manager.openEdit(o)}><Pencil size={15} />{t('edit')}</Button><Button variant="secondary" className="text-brand-600" onClick={() => manager.openDelete(o, o.title)}><Trash2 size={15} />{t('remove')}</Button></div>}</div>
     <Tabs value={tab} onChange={setTab} items={[
@@ -86,7 +85,7 @@ export function OpportunityShowPage() {
       { id: 'related', label: t('related'), content: <Card><SectionTitle title={t('linkedRecords')} /><dl className="grid gap-4 p-4 sm:grid-cols-2"><DetailField label={t('unit')} value={o.unit ? <Link to={`/units/${o.unit.id}`} className="text-brand-600 hover:underline">{o.unit.name}</Link> : undefined} /><DetailField label={t('product')} value={o.product?.product_name} /><DetailField label={t('lead')} value={o.bms_lead_id ? `#${o.bms_lead_id}` : undefined} /><DetailField label={t('goNoGo')} value={o.go_no_go ? statusLabel(o.go_no_go, t) : undefined} /></dl></Card> },
       { id: 'documents', label: t('documents'), content: tab === 'documents' ? <OpportunityDocuments id={o.id} canManage={manager.canManage} /> : null },
     ]} />{manager.dialogs}
-  </motion.div>;
+  </div>;
 }
 
 function OpportunityDocuments({ id, canManage }: { id: number; canManage: boolean }) {
