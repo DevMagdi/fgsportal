@@ -1,5 +1,6 @@
-<div class="access-denied">
+<div class="bms-page bms-page--no-access access-denied" [attr.dir]="lang.direction">
   <div class="card">
+    <span class="bms-access-icon" aria-hidden="true"><i class="bx bx-lock-alt"></i></span>
     <h1 *ngIf="!loading">{{lang.t('noAccessTitle')}}</h1>
     <h1 *ngIf="loading">{{lang.t('loading')}}</h1>
     <p *ngIf="!loading">{{lang.t('noAccessBody')}}</p>

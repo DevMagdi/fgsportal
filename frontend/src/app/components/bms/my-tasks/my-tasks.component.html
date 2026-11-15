@@ -1,4 +1,9 @@
-<div class="page-heading"><div><h1>{{lang.t('myTasks')}}</h1><p>{{lang.t('myTasksSubtitle')}}</p></div><div class="button-row"><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div></div>
+<div class="bms-page bms-page--my-tasks" [attr.dir]="lang.direction">
+<header class="bms-page-hero bms-page-hero--my-tasks">
+  <span class="bms-page-hero-mark" aria-hidden="true"><i class="bx bx-task"></i></span>
+  <div class="bms-page-hero-copy"><span class="bms-page-kicker">{{lang.t('bmsPageEyebrow')}}</span><h1>{{lang.t('myTasks')}}</h1><p>{{lang.t('myTasksSubtitle')}}</p></div>
+  <div class="bms-page-hero-actions"><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div>
+</header>
 <div class="alert-box alert-error" *ngIf="error">{{error}}</div><div class="alert-box alert-success" *ngIf="success">{{success}}</div>
 <div class="kpi-grid">
   <div class="kpi"><div class="value">{{summary.total || 0}}</div><div class="label">{{lang.t('total')}}</div></div>
@@ -22,3 +27,5 @@
 <tr *ngIf="!loading && !tasks.length"><td colspan="8" class="empty-state">{{lang.t('noData')}}</td></tr>
 <tr *ngIf="loading"><td colspan="8" class="empty-state">{{lang.t('loading')}}</td></tr>
 </tbody></table></div></section>
+
+</div>

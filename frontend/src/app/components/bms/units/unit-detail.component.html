@@ -1,4 +1,4 @@
-<div class="org-page">
+<div class="bms-page bms-page--unit-detail org-page" [attr.dir]="lang.direction">
   <nav class="unit-crumbs" [attr.aria-label]="lang.t('orgBackToUnits')">
     <a class="org-link" routerLink="/bms/organization">{{ lang.t('organization') }}</a>
     <span aria-hidden="true">/</span>
@@ -17,8 +17,10 @@
   <app-bms-state *ngIf="unitState === 'error'" kind="error" [message]="lang.t('orgUnitNotFound')" [actionLabel]="lang.t('retry')" (action)="loadAll()"></app-bms-state>
 
   <ng-container *ngIf="unitState === 'ready' && unit">
-    <header class="org-header">
-      <div>
+    <header class="org-header bms-unit-hero">
+      <span class="bms-page-hero-mark" aria-hidden="true"><i class="bx bx-building-house"></i></span>
+      <div class="bms-unit-hero-copy">
+        <span class="bms-page-kicker">{{lang.t('bmsPageEyebrow')}}</span>
         <h1>{{ unit.name }}
           <span class="org-chip unit-status" [ngClass]="unit.is_active ? 'org-chip-success' : 'org-chip-muted'">{{ unit.is_active ? lang.t('active') : lang.t('inactive') }}</span>
         </h1>

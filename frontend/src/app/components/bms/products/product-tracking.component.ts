@@ -6,7 +6,7 @@ import { BmsExportService } from '../bms-export.service';
 import { BmsLanguageService } from '../bms-language.service';
 import { BmsConfirmService } from '../bms-confirm.service';
 
-@Component({selector:'app-product-tracking',templateUrl:'./product-tracking.component.html',styleUrls:['../bms-shared.scss']})
+@Component({selector:'app-product-tracking',templateUrl:'./product-tracking.component.html',styleUrls:['../bms-shared.scss','../bms-pages.scss', '../bms-page-modules.scss']})
 export class ProductTrackingComponent extends BmsBaseComponent implements OnInit {
   products:any[]=[];productForm:FormGroup;phaseForm:FormGroup;phaseProduct:any=null;
   constructor(api:BmsApiService,lang:BmsLanguageService,private fb:FormBuilder,private exporter:BmsExportService,private confirmDialog:BmsConfirmService){super(api,lang);this.productForm=fb.group({product_name:['',Validators.required],description:[''],owner_id:[''],business_unit_ids:[[],Validators.required]});this.phaseForm=fb.group({name:['',Validators.required],sequence:[1,[Validators.required,Validators.min(1)]],status:['not_started'],blockers:[''],data_needs:[''],support_needs:[''],start_date:[''],end_date:['']});}

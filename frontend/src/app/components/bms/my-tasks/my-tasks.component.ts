@@ -9,7 +9,7 @@ import { BmsLanguageService } from '../bms-language.service';
  * with progress / blocker update in place. The backend refuses updates on
  * tasks the user neither owns nor manages.
  */
-@Component({ selector: 'app-my-tasks', templateUrl: './my-tasks.component.html', styleUrls: ['../bms-shared.scss'] })
+@Component({ selector: 'app-my-tasks', templateUrl: './my-tasks.component.html', styleUrls: ['../bms-shared.scss', '../bms-pages.scss', '../bms-page-modules.scss'] })
 export class MyTasksComponent extends BmsBaseComponent implements OnInit {
   tasks: any[] = [];
   summary: any = {};

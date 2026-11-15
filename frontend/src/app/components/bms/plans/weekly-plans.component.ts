@@ -5,7 +5,7 @@ import { BmsBaseComponent } from '../bms-base.component';
 import { BmsExportService } from '../bms-export.service';
 import { BmsLanguageService } from '../bms-language.service';
 
-@Component({selector:'app-weekly-plans',templateUrl:'./weekly-plans.component.html',styleUrls:['../bms-shared.scss']})
+@Component({selector:'app-weekly-plans',templateUrl:'./weekly-plans.component.html',styleUrls:['../bms-shared.scss','../bms-pages.scss', '../bms-page-modules.scss']})
 export class WeeklyPlansComponent extends BmsBaseComponent implements OnInit {
   plans:any[]=[];selected:any=null;report:any=null;planForm:FormGroup;taskForm:FormGroup;supportForm:FormGroup;
   constructor(api:BmsApiService,lang:BmsLanguageService,private fb:FormBuilder,private exporter:BmsExportService){super(api,lang);

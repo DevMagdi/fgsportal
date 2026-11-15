@@ -6,7 +6,7 @@ import { BmsCollectionConfig, BmsField } from '../bms-catalog';
 import { BmsExportService } from '../bms-export.service';
 import { BmsLanguageService } from '../bms-language.service';
 
-@Component({selector:'app-bms-collection',templateUrl:'./bms-collection.component.html',styleUrls:['../bms-shared.scss']})
+@Component({selector:'app-bms-collection',templateUrl:'./bms-collection.component.html',styleUrls:['../bms-shared.scss','../bms-pages.scss', '../bms-page-modules.scss']})
 export class BmsCollectionComponent extends BmsBaseComponent implements OnInit {
   config:BmsCollectionConfig;items:any[]=[];filtered:any[]=[];selected:any=null;draft:any={};files:{[key:string]:File}={};search='';unitFilter='';stageFilter='';editing=false;
   interaction:any={interaction_type:'meeting',happened_at:'',outcome:'',notes:''};study:any={title:'',owner_id:'',status:'planned',due_date:'',notes:''};
@@ -17,6 +17,19 @@ export class BmsCollectionComponent extends BmsBaseComponent implements OnInit {
   certificate:any={user_id:'',business_unit_id:'',name:'',issuer:'',issued_at:'',expires_at:''};history:any[]=[];allStages:any[]=[];newStage:any={code:'',name:'',name_ar:'',sequence:8,is_active:true};
   constructor(api:BmsApiService,lang:BmsLanguageService,private route:ActivatedRoute,private exporter:BmsExportService){super(api,lang);}
   ngOnInit():void{super.ngOnInit();this.route.data.subscribe(data=>{this.config=data.config;this.reset();this.load();if(this.config.kind==='events')this.loadProcedures();if(this.config.kind==='leads')this.loadStages();});}
+  /** Counts reflect only records returned by the active, permission-gated collection endpoint. */
+  get statusSummary():{key:string;label:string;count:number;share:number}[]{
+    if(!this.config||this.config.kind==='directory')return [];
+    const field=this.config.kind==='leads'?'stage':'status';
+    const counts=new Map<string,number>();
+    this.filtered.forEach(item=>{const value=String(item?.[field]||'').trim();if(value)counts.set(value,(counts.get(value)||0)+1);});
+    const total=Array.from(counts.values()).reduce((sum,value)=>sum+value,0);
+    return Array.from(counts.entries()).map(([key,count])=>{
+      const stage=(this.lookups.lead_stages||[]).find((entry:any)=>entry.code===key);
+      const label=stage?(this.lang.current==='ar'?(stage.name_ar||stage.name):stage.name):this.lang.t(key);
+      return {key,label,count,share:total?Math.round(count*100/total):0};
+    }).sort((a,b)=>b.count-a.count||a.key.localeCompare(b.key));
+  }
   load():void{if(!this.config)return;this.loading=true;const filters:any={};if(this.search)filters.search=this.search;if(this.unitFilter)filters.business_unit_id=this.unitFilter;if(this.stageFilter)filters.stage=this.stageFilter;this.api.get<any[]>(this.config.endpoint,filters).subscribe({next:data=>{this.items=data||[];this.filtered=this.items;this.selected=this.selected?this.items.find(i=>i.id===this.selected.id)||null:null;this.loading=false;},error:e=>this.showError(e)});}
   applyFilters():void{this.load();}
   reset():void{this.draft={...(this.config?.defaults||{})};this.files={};this.editing=false;}

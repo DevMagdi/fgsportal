@@ -11,7 +11,7 @@ import { BmsConfirmService } from '../bms-confirm.service';
  * employee, assign/revoke with an explicit confirmation, and the audit trail
  * of every role change. Scope enforcement lives on the server.
  */
-@Component({ selector: 'app-bms-access', templateUrl: './access.component.html', styleUrls: ['../bms-shared.scss'] })
+@Component({ selector: 'app-bms-access', templateUrl: './access.component.html', styleUrls: ['../bms-shared.scss', '../bms-pages.scss', '../bms-page-modules.scss'] })
 export class AccessComponent extends BmsBaseComponent implements OnInit {
   assignment: any = { user_id: '', role_id: '', business_unit_id: '' };
   search = '';

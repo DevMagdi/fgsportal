@@ -1,13 +1,18 @@
-<div class="page-heading"><div><h1>{{lang.t('accessRoles')}}</h1><p>{{lang.t('accessSubtitle')}}</p></div><div class="button-row"><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div></div>
+<div class="bms-page bms-page--access" [attr.dir]="lang.direction">
+<header class="bms-page-hero bms-page-hero--access">
+  <span class="bms-page-hero-mark" aria-hidden="true"><i class="bx bx-shield-quarter"></i></span>
+  <div class="bms-page-hero-copy"><span class="bms-page-kicker">{{lang.t('bmsPageEyebrow')}}</span><h1>{{lang.t('accessRoles')}}</h1><p>{{lang.t('accessSubtitle')}}</p></div>
+  <div class="bms-page-hero-actions"><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div>
+</header>
 <div class="alert-box alert-error" *ngIf="error">{{error}}</div><div class="alert-box alert-success" *ngIf="success">{{success}}</div>
 
-<section class="bms-card filter-card"><div class="filter-grid">
+<section class="bms-card filter-card access-filter-panel"><div class="filter-grid">
   <label>{{lang.t('searchEmployee')}}<input class="form-control" [(ngModel)]="search"></label>
   <label>{{lang.t('unit')}}<select class="form-select" [(ngModel)]="unitFilter"><option value="">{{lang.t('allUnits')}}</option><option *ngFor="let u of lookups.units" [value]="u.id">{{u.name}}</option></select></label>
   <label>{{lang.t('role')}}<select class="form-select" [(ngModel)]="roleFilter"><option value="">{{lang.t('allRoles')}}</option><option *ngFor="let r of lookups.roles" [value]="r.slug">{{r.name}}</option></select></label>
 </div></section>
 
-<section class="bms-card" *ngIf="can('roles.manage')">
+<section class="bms-card assignment-panel" *ngIf="can('roles.manage')">
   <h2>{{lang.t('assignRole')}}</h2>
   <p class="small muted">{{lang.t('assignRoleHint')}}</p>
   <form class="form-grid" (ngSubmit)="assign()">
@@ -26,13 +31,13 @@
   <p class="small muted" *ngIf="assignment.user_id && !assignmentsByUser[assignment.user_id]?.length">{{lang.t('noRoles')}}</p>
 </section>
 
-<section class="bms-card">
+<section class="bms-card role-matrix-panel">
   <h2>{{lang.t('roleMatrix')}}</h2>
   <div class="table-responsive"><table><thead><tr><th>{{lang.t('role')}}</th><th>{{lang.t('permissions')}}</th></tr></thead>
-  <tbody><tr *ngFor="let role of lookups.roles"><td><strong>{{role.name}}</strong><div class="small muted">{{role.slug}}</div></td><td><span class="department-chip" *ngFor="let ability of role.abilities">{{ability}}</span></td></tr></tbody></table></div>
+  <tbody><tr *ngFor="let role of lookups.roles"><td><div class="role-name"><div><strong>{{role.name}}</strong><div class="small muted">{{role.slug}}</div></div></div></td><td><span class="ability-chip" *ngFor="let ability of role.abilities">{{ability}}</span></td></tr></tbody></table></div>
 </section>
 
-<section class="bms-card">
+<section class="bms-card access-audit-panel">
   <div class="page-heading"><h2>{{lang.t('roleAudit')}}</h2><button class="btn-soft" (click)="loadAudit()">{{lang.t('refresh')}}</button></div>
   <div class="table-responsive"><table><thead><tr><th>{{lang.t('date')}}</th><th>{{lang.t('employee')}}</th><th>{{lang.t('event')}}</th><th>{{lang.t('role')}}</th><th>{{lang.t('unitScope')}}</th><th>{{lang.t('changedBy')}}</th></tr></thead>
   <tbody><tr *ngFor="let entry of audit">
@@ -43,3 +48,5 @@
   </tr>
   <tr *ngIf="!audit.length"><td colspan="6" class="empty-state">{{lang.t('noData')}}</td></tr></tbody></table></div>
 </section>
+
+</div>

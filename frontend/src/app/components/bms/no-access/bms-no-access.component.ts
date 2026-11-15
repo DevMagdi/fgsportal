@@ -10,7 +10,7 @@ import { BmsLanguageService } from '../bms-language.service';
 @Component({
   selector: 'app-bms-no-access',
   templateUrl: './bms-no-access.component.html',
-  styleUrls: ['../bms-shared.scss'],
+  styleUrls: ['../bms-shared.scss', '../bms-pages.scss', '../bms-page-modules.scss'],
 })
 export class BmsNoAccessComponent implements OnInit {
   loading = true;
