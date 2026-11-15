@@ -1,18 +1,43 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AbilityRoute, ProtectedRoute } from './auth/ProtectedRoute';
 import { AppLayout } from './components/layout/AppLayout';
+import { useAuth } from './auth/AuthContext';
+import { firstAllowedPath } from './lib/abilities';
+import { ErrorState, LoadingState } from './components/ui/States';
+import { lazy } from 'react';
 import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { OpportunitiesPage, OpportunityShowPage } from './pages/OpportunitiesPage';
-import { UnitsPage, UnitShowPage } from './pages/UnitsPage';
-import { MyTasksPage, PlanShowPage, PlansPage } from './pages/PlansPage';
-import { LeadsPage, MeetingsPage, NoAccessPage, ProductsPage } from './pages/ListsPages';
-import { EmployeeShowPage, EmployeesPage } from './pages/EmployeesPage';
-import { OrganizationPage } from './pages/OrganizationPage';
-import { RecruitmentPage } from './pages/RecruitmentPage';
-import { DevelopmentPage, DocumentsPage, EventsPage, ProcurementPage } from './pages/OperationsPages';
-import { ReportsPage } from './pages/ReportsPage';
-import { AccessPage } from './pages/AccessPage';
+
+// Keep charts and less frequently used modules out of the initial sign-in bundle.
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const OpportunitiesPage = lazy(() => import('./pages/OpportunitiesPage').then((m) => ({ default: m.OpportunitiesPage })));
+const OpportunityShowPage = lazy(() => import('./pages/OpportunitiesPage').then((m) => ({ default: m.OpportunityShowPage })));
+const UnitsPage = lazy(() => import('./pages/UnitsPage').then((m) => ({ default: m.UnitsPage })));
+const UnitShowPage = lazy(() => import('./pages/UnitsPage').then((m) => ({ default: m.UnitShowPage })));
+const MyTasksPage = lazy(() => import('./pages/PlansPage').then((m) => ({ default: m.MyTasksPage })));
+const PlanShowPage = lazy(() => import('./pages/PlansPage').then((m) => ({ default: m.PlanShowPage })));
+const PlansPage = lazy(() => import('./pages/PlansPage').then((m) => ({ default: m.PlansPage })));
+const LeadsPage = lazy(() => import('./pages/ListsPages').then((m) => ({ default: m.LeadsPage })));
+const MeetingsPage = lazy(() => import('./pages/ListsPages').then((m) => ({ default: m.MeetingsPage })));
+const NoAccessPage = lazy(() => import('./pages/ListsPages').then((m) => ({ default: m.NoAccessPage })));
+const ProductsPage = lazy(() => import('./pages/ListsPages').then((m) => ({ default: m.ProductsPage })));
+const EmployeeShowPage = lazy(() => import('./pages/EmployeesPage').then((m) => ({ default: m.EmployeeShowPage })));
+const EmployeesPage = lazy(() => import('./pages/EmployeesPage').then((m) => ({ default: m.EmployeesPage })));
+const OrganizationPage = lazy(() => import('./pages/OrganizationPage').then((m) => ({ default: m.OrganizationPage })));
+const RecruitmentPage = lazy(() => import('./pages/RecruitmentPage').then((m) => ({ default: m.RecruitmentPage })));
+const DevelopmentPage = lazy(() => import('./pages/OperationsPages').then((m) => ({ default: m.DevelopmentPage })));
+const DocumentsPage = lazy(() => import('./pages/OperationsPages').then((m) => ({ default: m.DocumentsPage })));
+const EventsPage = lazy(() => import('./pages/OperationsPages').then((m) => ({ default: m.EventsPage })));
+const ProcurementPage = lazy(() => import('./pages/OperationsPages').then((m) => ({ default: m.ProcurementPage })));
+const ReportsPage = lazy(() => import('./pages/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const AccessPage = lazy(() => import('./pages/AccessPage').then((m) => ({ default: m.AccessPage })));
+const BonusesPage = lazy(() => import('./pages/BonusesPage').then((m) => ({ default: m.BonusesPage })));
+
+function HomeRedirect() {
+  const { abilities, loading, lookupsError, reloadLookups } = useAuth();
+  if (loading) return <LoadingState />;
+  if (lookupsError) return <ErrorState message={lookupsError.message} onRetry={reloadLookups} />;
+  return <Navigate to={firstAllowedPath(abilities)} replace />;
+}
 
 export default function App() {
   return (
@@ -20,7 +45,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route index element={<HomeRedirect />} />
           <Route element={<AbilityRoute ability="dashboard.view" />}>
             <Route path="dashboard" element={<DashboardPage />} />
           </Route>
@@ -51,6 +76,9 @@ export default function App() {
             <Route path="employees" element={<EmployeesPage />} />
             <Route path="employees/:id" element={<EmployeeShowPage />} />
           </Route>
+          <Route element={<AbilityRoute ability="bonuses.view" />}>
+            <Route path="bonuses" element={<BonusesPage />} />
+          </Route>
           <Route element={<AbilityRoute ability="recruitment.view" />}>
             <Route path="recruitment" element={<RecruitmentPage />} />
           </Route>
@@ -75,7 +103,7 @@ export default function App() {
           <Route path="no-access" element={<NoAccessPage />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

@@ -215,9 +215,9 @@ export const demoPlans: WeeklyPlan[] = [
 ];
 
 export const demoMeetings: Meeting[] = [
-  { id: 1, title: 'MOD proposal freeze', starts_at: '2026-11-16T09:00:00Z', ends_at: '2026-11-16T10:00:00Z', location: 'Riyadh HQ', status: 'scheduled', business_unit_id: 1, unit: units[0] },
-  { id: 2, title: 'Argus weekly steering', starts_at: '2026-11-17T12:00:00Z', ends_at: '2026-11-17T12:45:00Z', location: 'Teams', status: 'scheduled', business_unit_id: 2, unit: units[1] },
-  { id: 3, title: 'NEOM commercial review', starts_at: '2026-11-18T07:30:00Z', ends_at: '2026-11-18T08:30:00Z', location: 'NEOM office', status: 'scheduled', business_unit_id: 3, unit: units[2] },
+  { id: 1, title: 'MOD proposal freeze', starts_at: '2026-11-16T09:00:00Z', ends_at: '2026-11-16T10:00:00Z', location: 'Riyadh HQ', status: 'scheduled', business_unit_id: 1, unit: units[0], attendees: [{ id: 1, user_id: 1, user: users[0], response: 'accepted' }] },
+  { id: 2, title: 'Argus weekly steering', starts_at: '2026-11-17T12:00:00Z', ends_at: '2026-11-17T12:45:00Z', location: 'Teams', status: 'scheduled', business_unit_id: 2, unit: units[1], attendees: [{ id: 2, user_id: 3, user: users[2], response: 'pending' }] },
+  { id: 3, title: 'NEOM commercial review', starts_at: '2026-11-18T07:30:00Z', ends_at: '2026-11-18T08:30:00Z', location: 'NEOM office', status: 'scheduled', business_unit_id: 3, unit: units[2], attendees: [{ id: 3, user_id: 2, user: users[1], response: 'pending' }] },
 ];
 
 export const demoLeads: Lead[] = [
@@ -388,7 +388,7 @@ export const demoProcurement = [
 
 export const demoEvents = [
   {
-    id: 1, title: 'MOD annex signing', event_type: 'agreement_signing', event_date: '2026-11-24', venue: 'Riyadh HQ',
+    id: 1, title: 'MOD annex signing', event_type: 'agreement_signing', event_date: '2026-11-24T07:00:00Z', venue: 'Riyadh HQ',
     status: 'planning', business_unit_id: 1, unit: units[0], requester: users[0],
     checklist: [
       { id: 1, title: 'Photography', status: 'in_progress' },
@@ -397,7 +397,7 @@ export const demoEvents = [
     ],
   },
   {
-    id: 2, title: 'Argus demo day', event_type: 'conference', event_date: '2026-12-03', venue: 'KAFD',
+    id: 2, title: 'Argus demo day', event_type: 'conference', event_date: '2026-12-03T08:30:00Z', venue: 'KAFD',
     status: 'submitted', business_unit_id: 2, unit: units[1], requester: users[2],
     checklist: [{ id: 4, title: 'Photography', status: 'pending' }],
   },

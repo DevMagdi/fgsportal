@@ -319,6 +319,19 @@ export interface Lead {
   [key: string]: unknown;
 }
 
+export interface MeetingAttendeeInput {
+  user_id?: number;
+  external_name?: string | null;
+  external_email?: string | null;
+}
+
+export interface MeetingAttendee extends MeetingAttendeeInput {
+  id?: number;
+  user?: LookupUser | null;
+  response?: string | null;
+  delivery_status?: string | null;
+}
+
 export interface Meeting {
   id: number;
   title: string;
@@ -328,7 +341,7 @@ export interface Meeting {
   status?: string | null;
   business_unit_id?: number | null;
   unit?: LookupUnit | null;
-  attendees?: unknown[];
+  attendees?: MeetingAttendee[];
   [key: string]: unknown;
 }
 
@@ -597,3 +610,61 @@ export interface RoleAssignment {
   business_unit?: string | null;
   scope: 'unit' | 'global';
 }
+
+/** Incentives are scoped to a unit and an employee. The BMS API contract is
+ * intentionally isolated so a future Laravel implementation can back it. */
+export interface Bonus {
+  id: number;
+  title: string;
+  employee_id: number;
+  business_unit_id: number;
+  amount: number;
+  currency: string;
+  awarded_on: string;
+  status: 'draft' | 'approved' | 'paid';
+  notes?: string | null;
+  employee?: { id: number; name: string } | null;
+  unit?: LookupUnit | null;
+}
+
+export interface OpportunityDocument {
+  id: number;
+  opportunity_id?: number;
+  document_type: string;
+  original_name: string;
+  version?: number;
+  created_at?: string;
+  uploader?: LookupUser | null;
+}
+
+export interface DemoActivity {
+  id: number;
+  entity: EntityKind;
+  entity_id: number;
+  action: 'created' | 'updated' | 'deleted';
+  title: string;
+  created_at: string;
+}
+
+export interface EntityMap {
+  units: BusinessUnit;
+  employees: DirectoryPerson;
+  opportunities: Opportunity;
+  bonuses: Bonus;
+  teams: Team;
+  plans: WeeklyPlan;
+  tasks: UnitTask;
+  leads: Lead;
+  meetings: Meeting;
+  products: Product;
+  recruitment: HiringRequest;
+  development: DevelopmentItem;
+  procurement: ProcurementRequest;
+  events: PrEvent;
+  documents: BrandDocument;
+  procedures: Procedure;
+}
+
+export type EntityKind = keyof EntityMap;
+export type EntityPayloadValue = string | number | boolean | null | number[] | string[] | MeetingAttendeeInput[] | File;
+export type EntityPayload = Record<string, EntityPayloadValue>;

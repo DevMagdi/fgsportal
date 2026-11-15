@@ -1,16 +1,16 @@
 import { FormEvent, useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
 import { api, ApiError } from '../lib/api';
 import { firstAllowedPath } from '../lib/abilities';
 import { Button } from '../components/ui/Button';
+import { LoadingState } from '../components/ui/States';
 
 export function LoginPage() {
   const { t, lang, setLang } = useI18n();
-  const { token, login, abilities } = useAuth();
-  const navigate = useNavigate();
+  const { token, login, abilities, loading, lookupsError } = useAuth();
   const location = useLocation();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -18,8 +18,10 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
 
   if (token) {
+    if (loading) return <div className="mx-auto max-w-4xl p-8"><LoadingState /></div>;
     const from = (location.state as { from?: string } | null)?.from;
-    return <Navigate to={from || firstAllowedPath(abilities)} replace />;
+    // The guarded dashboard displays the permissions retry state if lookups fail.
+    return <Navigate to={lookupsError ? '/dashboard' : from || firstAllowedPath(abilities)} replace />;
   }
 
   async function onSubmit(e: FormEvent) {
@@ -28,7 +30,6 @@ export function LoginPage() {
     setBusy(true);
     try {
       await login(identifier, password);
-      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('errorTitle'));
     } finally {
@@ -46,10 +47,10 @@ export function LoginPage() {
             <span className="text-sm font-semibold tracking-wide text-white">{t('appFull')}</span>
           </div>
           <h2 className="mt-16 max-w-md text-3xl font-semibold leading-snug tracking-tight text-white">
-            A calm operating system for units, pipeline and delivery.
+            {lang === 'ar' ? 'مساحة عمل هادئة للوحدات والفرص والتنفيذ.' : 'A calm operating system for units, pipeline and delivery.'}
           </h2>
           <p className="mt-4 max-w-sm text-sm leading-6 text-slate-400">
-            Executive visibility without the noise. One workspace for opportunities, weekly plans and the work that actually moves.
+            {lang === 'ar' ? 'رؤية تنفيذية واضحة ومساحة واحدة للفرص والخطط الأسبوعية والعمل اليومي.' : 'Executive visibility without the noise. One workspace for opportunities, weekly plans and the work that actually moves.'}
           </p>
         </div>
         <p className="relative text-xs text-slate-500">FGS · Business Management Solutions</p>
@@ -72,8 +73,9 @@ export function LoginPage() {
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{t('signIn')}</h1>
             <p className="mt-1.5 text-sm text-slate-500">{t('signInSub')}</p>
 
-            <label className="mt-8 block text-xs font-medium text-slate-600">{t('identifier')}</label>
+            <label htmlFor="login-identifier" className="mt-8 block text-xs font-medium text-slate-600">{t('identifier')}</label>
             <input
+              id="login-identifier"
               autoFocus
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
@@ -81,8 +83,9 @@ export function LoginPage() {
               autoComplete="username"
             />
 
-            <label className="mt-4 block text-xs font-medium text-slate-600">{t('password')}</label>
+            <label htmlFor="login-password" className="mt-4 block text-xs font-medium text-slate-600">{t('password')}</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -90,7 +93,7 @@ export function LoginPage() {
               autoComplete="current-password"
             />
 
-            {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
+            {error && <p role="alert" className="mt-3 text-sm text-rose-600">{error}</p>}
             {api.demo && <p className="mt-3 text-xs leading-5 text-slate-400">{t('demoHint')}</p>}
 
             <Button type="submit" className="mt-6 w-full" disabled={busy || !identifier || !password}>
