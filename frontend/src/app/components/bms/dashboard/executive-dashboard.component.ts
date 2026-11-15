@@ -203,7 +203,7 @@ export class ExecutiveDashboardComponent implements OnInit, OnDestroy {
       animation: this.chartAnimation, font: { family: font }, layout: { padding: 5 },
       plugins: {
         legend: { display: false, rtl, textDirection: rtl ? 'rtl' : 'ltr' },
-        tooltip: { rtl, textDirection: rtl ? 'rtl' : 'ltr', callbacks: {
+        tooltip: { rtl, textDirection: rtl ? 'rtl' : 'ltr', backgroundColor: 'rgba(17,24,39,.96)', titleColor: '#fff', bodyColor: '#e8edf4', borderColor: this.colorToken('--bms-border', '#e2e7ef'), borderWidth: 1, padding: 10, cornerRadius: 8, callbacks: {
           label: (context: any) => `${context.label}: ${this.number(context.raw)}`,
         } },
       },
@@ -223,7 +223,7 @@ export class ExecutiveDashboardComponent implements OnInit, OnDestroy {
       animation: this.chartAnimation, font: { family: font },
       plugins: {
         legend: { display: false, rtl, textDirection: rtl ? 'rtl' : 'ltr' },
-        tooltip: { rtl, textDirection: rtl ? 'rtl' : 'ltr', callbacks: {
+        tooltip: { rtl, textDirection: rtl ? 'rtl' : 'ltr', backgroundColor: 'rgba(17,24,39,.96)', titleColor: '#fff', bodyColor: '#e8edf4', borderColor: this.colorToken('--bms-border', '#e2e7ef'), borderWidth: 1, padding: 10, cornerRadius: 8, callbacks: {
           label: (context: any) => {
             const stage = stages[context.dataIndex];
             return stage ? `${this.number(stage.count)} · ${this.number(stage.percent)}%` : this.number(context.raw);
@@ -231,8 +231,8 @@ export class ExecutiveDashboardComponent implements OnInit, OnDestroy {
         } },
       },
       scales: {
-        x: { beginAtZero: true, reverse: rtl, ticks: { precision: 0, color: this.colorToken('--bms-muted', '#596579'), font: { family: font }, callback: (value: any) => this.number(value) }, grid: { color: this.colorToken('--bms-border', '#edf0f5'), drawBorder: false } },
-        y: { ticks: { color: this.colorToken('--bms-ink-soft', '#34394c'), font: { family: font } }, grid: { display: false, drawBorder: false } },
+        x: { beginAtZero: true, reverse: rtl, ticks: { precision: 0, color: this.colorToken('--bms-muted', '#68758a'), font: { family: font }, callback: (value: any) => this.number(value) }, grid: { color: this.colorToken('--bms-border', '#e2e7ef'), drawBorder: false } },
+        y: { ticks: { color: this.colorToken('--bms-ink-soft', '#344155'), font: { family: font } }, grid: { display: false, drawBorder: false } },
       },
     };
     this.refreshTrendChart();
@@ -247,14 +247,14 @@ export class ExecutiveDashboardComponent implements OnInit, OnDestroy {
       datasets: [
         {
           label: this.lang.t('actual'), data: points.map(point => Number(point.actual)),
-          borderColor: this.colorToken('--bms-primary', '#7357f6'), backgroundColor: 'rgba(115,87,246,.12)',
-          pointBackgroundColor: this.colorToken('--bms-surface', '#ffffff'), pointBorderColor: this.colorToken('--bms-primary', '#7357f6'), pointBorderWidth: 2,
+          borderColor: this.colorToken('--bms-primary', '#5558d9'), backgroundColor: 'rgba(85,88,217,.08)',
+          pointBackgroundColor: this.colorToken('--bms-surface', '#ffffff'), pointBorderColor: this.colorToken('--bms-primary', '#5558d9'), pointBorderWidth: 2,
           pointRadius: 3.5, pointHoverRadius: 5, borderWidth: 2.5, tension: .34, fill: true,
         },
         {
           label: this.lang.t('target'), data: points.map(point => point.targetY === null ? null : Number(point.target)),
-          borderColor: this.colorToken('--bms-accent', '#247a70'), backgroundColor: 'transparent',
-          pointBackgroundColor: this.colorToken('--bms-surface', '#ffffff'), pointBorderColor: this.colorToken('--bms-accent', '#247a70'), pointBorderWidth: 2,
+          borderColor: this.colorToken('--bms-accent', '#12866b'), backgroundColor: 'transparent',
+          pointBackgroundColor: this.colorToken('--bms-surface', '#ffffff'), pointBorderColor: this.colorToken('--bms-accent', '#12866b'), pointBorderWidth: 2,
           pointRadius: 3, pointHoverRadius: 4.5, borderWidth: 2, borderDash: [5, 4], tension: .2, fill: false,
         },
       ],
@@ -265,25 +265,25 @@ export class ExecutiveDashboardComponent implements OnInit, OnDestroy {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false, rtl, textDirection: rtl ? 'rtl' : 'ltr' },
-        tooltip: { rtl, textDirection: rtl ? 'rtl' : 'ltr', callbacks: {
+        tooltip: { rtl, textDirection: rtl ? 'rtl' : 'ltr', backgroundColor: 'rgba(17,24,39,.96)', titleColor: '#fff', bodyColor: '#e8edf4', borderColor: this.colorToken('--bms-border', '#e2e7ef'), borderWidth: 1, padding: 10, cornerRadius: 8, callbacks: {
           label: (context: any) => `${context.dataset.label}: ${context.parsed.y === null ? '—' : this.number(context.parsed.y)}`,
         } },
       },
       scales: {
-        x: { reverse: rtl, ticks: { color: this.colorToken('--bms-muted', '#596579'), maxRotation: 0, autoSkip: true, maxTicksLimit: 5, font: { family: font } }, grid: { display: false, drawBorder: false } },
-        y: { ticks: { color: this.colorToken('--bms-muted', '#596579'), font: { family: font } }, grid: { color: this.colorToken('--bms-border', '#edf0f5'), drawBorder: false } },
+        x: { reverse: rtl, ticks: { color: this.colorToken('--bms-muted', '#68758a'), maxRotation: 0, autoSkip: true, maxTicksLimit: 5, font: { family: font } }, grid: { display: false, drawBorder: false } },
+        y: { ticks: { color: this.colorToken('--bms-muted', '#68758a'), font: { family: font } }, grid: { color: this.colorToken('--bms-border', '#e2e7ef'), drawBorder: false } },
       },
     };
   }
 
   taskStatusColor(key: string): string {
-    const tokens: Record<string, string> = { achieved: '--bms-accent', inProgress: '--bms-sky', notDone: '--bms-pink', other: '--bms-muted' };
-    return this.colorToken(tokens[key] || '--bms-muted', '#727d8e');
+    const tokens: Record<string, string> = { achieved: '--bms-accent', inProgress: '--bms-primary', notDone: '--bms-muted', other: '--bms-border-strong' };
+    return this.colorToken(tokens[key] || '--bms-border-strong', '#9aa4b3');
   }
 
   private stageColor(index: number): string {
-    const palette = ['--bms-primary', '--bms-accent', '--bms-sky', '--bms-lavender', '--bms-periwinkle', '--bms-cyan'];
-    return this.colorToken(palette[index % palette.length], '#45436e');
+    const palette = ['--bms-primary', '--bms-primary-hover', '--bms-primary-strong', '--bms-accent', '--bms-muted'];
+    return this.colorToken(palette[index % palette.length], '#5558d9');
   }
 
   private colorToken(name: string, fallback: string): string {

@@ -1,7 +1,7 @@
 <aside id="app-sidebar" class="app-sidebar" [class.is-rail]="rail" [class.is-mobile]="mobile" [class.is-open]="mobileOpen"
   [attr.aria-hidden]="mobile && !mobileOpen ? 'true' : null" [attr.inert]="mobile && !mobileOpen ? '' : null">
   <a routerLink="/bms/dashboard" class="sidebar-brand" (click)="navigated.emit()" [attr.aria-label]="lang.t('appName')">
-    <img src="assets/img/alphaiota-logo.png" alt="">
+    <span class="sidebar-logo-frame" aria-hidden="true"><img src="assets/img/alphaiota-logo.png" alt=""></span>
     <span class="sidebar-wordmark" *ngIf="!rail">Alphaiota<small>{{lang.t('bms')}}</small></span>
   </a>
 
