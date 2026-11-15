@@ -6,7 +6,7 @@ import { BmsBaseComponent } from '../bms-base.component';
 import { BmsExportService } from '../bms-export.service';
 import { BmsLanguageService } from '../bms-language.service';
 
-@Component({selector:'app-bms-opportunities',templateUrl:'./opportunities.component.html',styleUrls:['../bms-shared.scss']})
+@Component({selector:'app-bms-opportunities',templateUrl:'./opportunities.component.html',styleUrls:['../bms-shared.scss','../bms-pages.scss', '../bms-page-modules.scss']})
 export class OpportunitiesComponent extends BmsBaseComponent implements OnInit {
   items:any[]=[];editing:any=null;form:FormGroup;decisionForm:FormGroup;importResult:any=null;alert='';documents:any[]=[];documentType='rfp';documentFile:File|null=null;
   constructor(api:BmsApiService,lang:BmsLanguageService,private fb:FormBuilder,private exporter:BmsExportService){super(api,lang);
@@ -14,6 +14,13 @@ export class OpportunitiesComponent extends BmsBaseComponent implements OnInit {
     this.decisionForm=fb.group({decision:['go',Validators.required],reason:['',[Validators.required,Validators.minLength(3)]]});
   }
   ngOnInit():void{super.ngOnInit();this.load();}
+  /** Stage mix is grouped from the currently loaded, permission-scoped API records only. */
+  get stageRows():{stage:string;count:number;share:number}[]{
+    const counts=new Map<string,number>();
+    this.items.forEach(item=>{const stage=String(item.stage||'').trim();if(stage)counts.set(stage,(counts.get(stage)||0)+1);});
+    const total=Array.from(counts.values()).reduce((sum,count)=>sum+count,0);
+    return Array.from(counts.entries()).map(([stage,count])=>({stage,count,share:total?Math.round(count*100/total):0})).sort((a,b)=>b.count-a.count||a.stage.localeCompare(b.stage));
+  }
   load():void{this.loading=true;this.api.get<any[]>('opportunities',{alert:this.alert}).subscribe({next:data=>{this.items=data;this.loading=false;},error:e=>this.showError(e)});}
   edit(item:any):void{this.editing=item;this.form.patchValue({...item,business_unit_id:item.business_unit_id||'',product_id:item.product_id||'',owner_id:item.owner_id||'',submission_date:item.submission_date?String(item.submission_date).slice(0,10):'',expected_close_date:item.expected_close_date?String(item.expected_close_date).slice(0,10):''});this.decisionForm.reset({decision:item.go_no_go==='no_go'?'no_go':'go',reason:''});this.loadDocuments();window.scrollTo({top:0,behavior:'smooth'});}
   reset():void{this.editing=null;this.form.reset({reference:'',title:'',client_name:'',type:'opportunity',business_unit_id:'',product_id:'',owner_id:'',stage:'review',value:null,currency:'SAR',submission_date:'',expected_close_date:'',stage_note:''});}

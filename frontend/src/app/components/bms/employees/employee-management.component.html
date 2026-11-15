@@ -1,4 +1,9 @@
-<div class="page-heading"><div><h1>{{lang.t('employees')}}</h1><p>{{lang.t('employeesSubtitle')}}</p></div><div class="button-row"><button class="btn-brand" *ngIf="can('directory.manage')" (click)="startCreate()">{{lang.t('addEmployee')}}</button><button class="btn-soft" *ngIf="can('directory.manage')" (click)="importOpen=!importOpen">{{lang.t('bulkImport')}}</button><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div></div>
+<div class="bms-page bms-page--employees" [attr.dir]="lang.direction">
+<header class="bms-page-hero bms-page-hero--employees">
+  <span class="bms-page-hero-mark" aria-hidden="true"><i class="bx bx-group"></i></span>
+  <div class="bms-page-hero-copy"><span class="bms-page-kicker">{{lang.t('bmsPageEyebrow')}}</span><h1>{{lang.t('employees')}}</h1><p>{{lang.t('employeesSubtitle')}}</p></div>
+  <div class="bms-page-hero-actions"><button class="btn-brand" *ngIf="can('directory.manage')" (click)="startCreate()">{{lang.t('addEmployee')}}</button><button class="btn-soft" *ngIf="can('directory.manage')" (click)="importOpen=!importOpen">{{lang.t('bulkImport')}}</button><button class="btn-soft" (click)="excel()">{{lang.t('exportExcel')}}</button><button class="btn-soft" (click)="pdf()">{{lang.t('exportPdf')}}</button></div>
+</header>
 <section class="bms-card" *ngIf="importOpen && can('directory.manage')"><h2>{{lang.t('bulkImport')}}</h2><p class="small muted">{{lang.t('bulkImportHelp')}}</p><div class="button-row"><button class="btn-soft" (click)="downloadTemplate()">{{lang.t('downloadTemplate')}}</button><input type="file" accept=".csv" (change)="chooseImportFile($event)"><button class="btn-brand" (click)="previewImport()">{{lang.t('previewImport')}}</button></div><div class="alert-box alert-error" *ngIf="importSummary && importSummary.invalid">{{importSummary.invalid}} {{lang.t('rowsInvalid')}}</div><div class="alert-box alert-success" *ngIf="importSummary && !importSummary.invalid && importSummary.created">{{importSummary.created}} {{lang.t('rowsCreated')}}</div><div class="table-responsive" *ngIf="importRows.length"><table><thead><tr><th>#</th><th>{{lang.t('username')}}</th><th>{{lang.t('status')}}</th><th>{{lang.t('errors')}}</th></tr></thead><tbody><tr *ngFor="let row of importRows" [ngClass]="{danger: row.errors?.length}"><td>{{row.row}}</td><td>{{row.username}}</td><td>{{row.status}}</td><td class="small">{{row.errors?.join(', ')}}</td></tr></tbody></table></div><div class="button-row" *ngIf="importSummary?.valid"><button class="btn-brand" (click)="confirmImport()">{{lang.t('confirmImport')}} ({{importSummary.valid}})</button></div></section>
 <div class="alert-box alert-error" *ngIf="error">{{error}}</div><div class="alert-box alert-success" *ngIf="success">{{success}}</div>
 
@@ -31,32 +36,25 @@
   </form>
 </section>
 
-<section class="bms-card">
-  <div class="table-responsive"><table>
-    <thead><tr><th>{{lang.t('employee')}}</th><th>{{lang.t('jobTitle')}}</th><th>{{lang.t('manager')}}</th><th>{{lang.t('businessUnits')}}</th><th>{{lang.t('hiringDate')}}</th><th>{{lang.t('roles')}}</th><th>{{lang.t('status')}}</th><th>{{lang.t('actions')}}</th></tr></thead>
-    <tbody>
-      <tr *ngFor="let e of employees; trackBy: trackId" [class.selected-row]="selection?.id===e.id">
-        <td><div class="employee-cell"><img *ngIf="e.has_photo" [src]="e.photo_url" [alt]="e.name"><div><strong>{{e.name}}</strong><div class="small muted">{{e.username}} · {{e.email}}</div></div></div></td>
-        <td>{{e.job_title || '-'}}</td>
-        <td>{{e.manager || '-'}}</td>
-        <td><a class="badge-status unit-link" *ngFor="let u of e.business_units" [routerLink]="['/bms/units', u.id]">{{u.name}}</a><span class="muted" *ngIf="!e.business_units?.length">{{lang.t('orgNoUnitsAssigned')}}</span></td>
-        <td>{{e.hiring_date || '-'}}</td>
-        <td><span class="badge-status" *ngFor="let r of e.roles">{{r.name}}<small> · {{roleScope(r)}}</small></span></td>
-        <td><span class="badge-status" [ngClass]="e.active?'achieved':'not_done'">{{e.active?lang.t('active'):lang.t('inactive')}}</span></td>
-        <td><div class="button-row"><button class="btn-soft" (click)="select(e)">{{lang.t('details')}}</button><button class="btn-link" *ngIf="can('directory.manage')" (click)="startEdit(e)">{{lang.t('edit')}}</button><button class="btn-link" *ngIf="can('directory.manage')" (click)="toggleStatus(e)">{{e.active?lang.t('deactivate'):lang.t('activate')}}</button></div></td>
-      </tr>
-      <tr *ngIf="!loading && !employees.length"><td colspan="8" class="empty-state">{{lang.t('noData')}}</td></tr>
-      <tr *ngIf="loading"><td colspan="8" class="empty-state">{{lang.t('loading')}}</td></tr>
-    </tbody>
-  </table></div>
-  <div class="page-heading directory-footer" *ngIf="meta?.total">
-    <p class="small muted">{{lang.t('showing')}} {{employees.length}} / {{meta.total}}</p>
-    <div class="button-row" *ngIf="lastPage > 1">
-      <button type="button" class="btn-soft" [disabled]="page <= 1 || loading" (click)="goToPage(page - 1)" [attr.aria-label]="lang.t('orgPreviousPage')">‹</button>
-      <span class="small muted" aria-live="polite">{{page}} / {{lastPage}}</span>
-      <button type="button" class="btn-soft" [disabled]="page >= lastPage || loading" (click)="goToPage(page + 1)" [attr.aria-label]="lang.t('orgNextPage')">›</button>
-    </div>
+<section class="bms-card employee-directory-panel">
+  <div class="page-heading"><div><h2>{{lang.t('employeesList')}}</h2><p class="small muted">{{lang.t('showing')}} {{employees.length}} / {{meta.total}}</p></div></div>
+  <app-bms-state *ngIf="loading && !employees.length" kind="loading" [message]="lang.t('loading')"></app-bms-state>
+  <app-bms-state *ngIf="!loading && !employees.length" kind="empty" [message]="lang.t('noData')"></app-bms-state>
+  <div class="employee-card-grid" *ngIf="employees.length">
+    <article class="employee-directory-card" *ngFor="let e of employees; trackBy: trackId" [class.selected-row]="selection?.id===e.id">
+      <div class="employee-cell"><img *ngIf="e.has_photo" [src]="e.photo_url" [alt]="e.name"><i *ngIf="!e.has_photo" class="bx bx-user-circle employee-placeholder" aria-hidden="true"></i><div><strong>{{e.name}}</strong><div class="small muted">{{e.username}} · {{e.email}}</div></div></div>
+      <span class="badge-status" [ngClass]="e.active?'achieved':'not_done'">{{e.active?lang.t('active'):lang.t('inactive')}}</span>
+      <dl class="employee-card-facts">
+        <div><dt>{{lang.t('jobTitle')}}</dt><dd>{{e.job_title || '-'}}</dd></div>
+        <div><dt>{{lang.t('manager')}}</dt><dd>{{e.manager || '-'}}</dd></div>
+        <div><dt>{{lang.t('businessUnits')}}</dt><dd><a class="badge-status unit-link" *ngFor="let u of e.business_units" [routerLink]="['/bms/units', u.id]">{{u.name}}</a><span class="muted" *ngIf="!e.business_units?.length">{{lang.t('orgNoUnitsAssigned')}}</span></dd></div>
+        <div><dt>{{lang.t('hiringDate')}}</dt><dd>{{e.hiring_date || '-'}}</dd></div>
+        <div class="employee-card-roles"><dt>{{lang.t('roles')}}</dt><dd><span class="badge-status" *ngFor="let r of e.roles">{{r.name}} · {{roleScope(r)}}</span><span class="muted" *ngIf="!e.roles?.length">{{lang.t('noRoles')}}</span></dd></div>
+      </dl>
+      <div class="employee-card-actions"><button class="btn-soft" (click)="select(e)">{{lang.t('details')}}</button><button class="btn-link" *ngIf="can('directory.manage')" (click)="startEdit(e)">{{lang.t('edit')}}</button><button class="btn-link" *ngIf="can('directory.manage')" (click)="toggleStatus(e)">{{e.active?lang.t('deactivate'):lang.t('activate')}}</button></div>
+    </article>
   </div>
+  <div class="page-heading directory-footer" *ngIf="meta?.total"><p class="small muted">{{lang.t('showing')}} {{employees.length}} / {{meta.total}}</p><div class="button-row" *ngIf="lastPage > 1"><button type="button" class="btn-soft" [disabled]="page <= 1 || loading" (click)="goToPage(page - 1)" [attr.aria-label]="lang.t('orgPreviousPage')">‹</button><span class="small muted" aria-live="polite">{{page}} / {{lastPage}}</span><button type="button" class="btn-soft" [disabled]="page >= lastPage || loading" (click)="goToPage(page + 1)" [attr.aria-label]="lang.t('orgNextPage')">›</button></div></div>
 </section>
 
 <section class="bms-card detail-card" *ngIf="selection">
@@ -90,3 +88,5 @@
     <div><button class="btn-brand">{{lang.t('addCertificate')}}</button></div>
   </form>
 </section>
+
+</div>

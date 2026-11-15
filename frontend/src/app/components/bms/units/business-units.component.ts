@@ -14,7 +14,7 @@ import { OrgProduct, personName, productsForUnit, unitHeadcount } from '../organ
 @Component({
   selector: 'app-business-units',
   templateUrl: './business-units.component.html',
-  styleUrls: ['../bms-shared.scss', '../organization/organization-shared.scss'],
+  styleUrls: ['../bms-shared.scss', '../organization/organization-shared.scss', '../bms-pages.scss', '../bms-page-modules.scss'],
 })
 export class BusinessUnitsComponent extends BmsBaseComponent implements OnInit {
   units: any[] = [];

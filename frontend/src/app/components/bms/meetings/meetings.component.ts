@@ -3,7 +3,7 @@ import { BmsApiService } from '../bms-api.service';
 import { BmsBaseComponent } from '../bms-base.component';
 import { BmsExportService } from '../bms-export.service';
 import { BmsLanguageService } from '../bms-language.service';
-@Component({selector:'app-bms-meetings',templateUrl:'./meetings.component.html',styleUrls:['../bms-shared.scss']})
+@Component({selector:'app-bms-meetings',templateUrl:'./meetings.component.html',styleUrls:['../bms-shared.scss','../bms-pages.scss', '../bms-page-modules.scss']})
 export class MeetingsComponent extends BmsBaseComponent implements OnInit {
   meetings:any[]=[];selected:any=null;availability:any[]=[];external={name:'',email:''};search='';from='';to='';
   form:any={title:'',business_unit_id:'',starts_at:'',ends_at:'',meeting_type:'internal',location:'',user_ids:[],external:[]};

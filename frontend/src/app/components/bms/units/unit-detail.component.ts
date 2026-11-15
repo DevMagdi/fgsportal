@@ -27,7 +27,7 @@ interface UnitRoleRow { employee: OrgEmployee; roles: string[]; }
 @Component({
   selector: 'app-unit-detail',
   templateUrl: './unit-detail.component.html',
-  styleUrls: ['../organization/organization-shared.scss', './unit-detail.component.scss'],
+  styleUrls: ['../organization/organization-shared.scss', './unit-detail.component.scss', '../bms-pages.scss', '../bms-page-modules.scss'],
 })
 export class UnitDetailComponent implements OnInit, OnDestroy {
   unitId = 0;

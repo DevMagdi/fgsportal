@@ -24,7 +24,7 @@ import {
 @Component({
   selector: 'app-executive-dashboard',
   templateUrl: './executive-dashboard.component.html',
-  styleUrls: ['../bms-shared.scss', './executive-dashboard.component.scss'],
+  styleUrls: ['../bms-shared.scss', './executive-dashboard.component.scss', '../bms-pages.scss', '../bms-page-modules.scss'],
 })
 export class ExecutiveDashboardComponent implements OnInit, OnDestroy {
   data: any = null;
@@ -247,9 +247,9 @@ export class ExecutiveDashboardComponent implements OnInit, OnDestroy {
       datasets: [
         {
           label: this.lang.t('actual'), data: points.map(point => Number(point.actual)),
-          borderColor: this.colorToken('--bms-primary', '#45436e'), backgroundColor: 'transparent',
-          pointBackgroundColor: this.colorToken('--bms-surface', '#ffffff'), pointBorderColor: this.colorToken('--bms-primary', '#45436e'), pointBorderWidth: 2,
-          pointRadius: 3.5, pointHoverRadius: 5, borderWidth: 2.5, tension: .34, fill: false,
+          borderColor: this.colorToken('--bms-primary', '#7357f6'), backgroundColor: 'rgba(115,87,246,.12)',
+          pointBackgroundColor: this.colorToken('--bms-surface', '#ffffff'), pointBorderColor: this.colorToken('--bms-primary', '#7357f6'), pointBorderWidth: 2,
+          pointRadius: 3.5, pointHoverRadius: 5, borderWidth: 2.5, tension: .34, fill: true,
         },
         {
           label: this.lang.t('target'), data: points.map(point => point.targetY === null ? null : Number(point.target)),

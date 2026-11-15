@@ -1,6 +1,7 @@
-<div class="dashboard-page" [attr.dir]="lang.direction">
+<div class="bms-page bms-page--dashboard dashboard-page" [attr.dir]="lang.direction">
   <div class="page-heading dashboard-heading">
     <div>
+      <span class="dashboard-eyebrow"><i class="bx bx-sparkles" aria-hidden="true"></i>{{lang.t('executiveSummary')}}</span>
       <h1>{{lang.t('dashboard')}}</h1>
       <p *ngIf="data?.generated_at">{{lang.t('lastUpdated')}} · {{date(data.generated_at, 'datetime')}}</p>
     </div>

@@ -23,7 +23,7 @@ type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 @Component({
   selector: 'app-organization-overview',
   templateUrl: './organization-overview.component.html',
-  styleUrls: ['./organization-shared.scss', './organization-overview.component.scss'],
+  styleUrls: ['./organization-shared.scss', './organization-overview.component.scss', '../bms-pages.scss', '../bms-page-modules.scss'],
 })
 export class OrganizationOverviewComponent implements OnInit {
   abilities: string[] = [];

@@ -1,8 +1,10 @@
-<div class="org-page">
-  <header class="org-header">
-    <div>
+<div class="bms-page bms-page--units org-page" [attr.dir]="lang.direction">
+  <header class="org-header bms-org-hero">
+    <span class="bms-page-hero-mark" aria-hidden="true"><i class="bx bx-buildings"></i></span>
+    <div class="bms-org-hero-copy">
+      <span class="bms-page-kicker">{{lang.t('bmsPageEyebrow')}}</span>
       <h1>{{ lang.t('units') }}</h1>
-      <p>{{ lang.t('orgStructureHint') }}</p>
+      <p>{{ lang.t('businessUnitsPageSubtitle') }}</p>
     </div>
     <div class="org-actions">
       <button type="button" class="org-button" (click)="excel()" [disabled]="!units.length"><i class="bx bx-spreadsheet" aria-hidden="true"></i>{{ lang.t('exportExcel') }}</button>

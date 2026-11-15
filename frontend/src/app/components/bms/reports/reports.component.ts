@@ -3,7 +3,7 @@ import { BmsApiService } from '../bms-api.service';
 import { BmsBaseComponent } from '../bms-base.component';
 import { BmsExportService } from '../bms-export.service';
 import { BmsLanguageService } from '../bms-language.service';
-@Component({selector:'app-bms-reports',templateUrl:'./reports.component.html',styleUrls:['../bms-shared.scss']})
+@Component({selector:'app-bms-reports',templateUrl:'./reports.component.html',styleUrls:['../bms-shared.scss','../bms-pages.scss', '../bms-page-modules.scss']})
 export class ReportsComponent extends BmsBaseComponent implements OnInit {
   tab:'monthly'|'quarterly'|'kpis'|'social'='monthly';monthly:any=null;quarterly:any=null;social:any=null;month=new Date().toISOString().slice(0,7);unitId='';
   kpi:any={business_unit_id:'',name:'',target:null,actual:0,unit_label:'',frequency:'monthly',description:'',period_start:'',period_end:''};

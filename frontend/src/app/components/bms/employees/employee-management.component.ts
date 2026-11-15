@@ -14,7 +14,7 @@ import { unitNameById } from '../organization/organization.util';
  * status filters, create/edit, activation, photo, certificates and roles.
  * The backend re-checks every permission; this screen only mirrors it.
  */
-@Component({ selector: 'app-employee-management', templateUrl: './employee-management.component.html', styleUrls: ['../bms-shared.scss'], styles: ['.unit-link{text-decoration:none}.unit-link:hover{text-decoration:underline}.directory-footer{align-items:center;margin:14px 0 0}.directory-footer p{margin:0}'] })
+@Component({ selector: 'app-employee-management', templateUrl: './employee-management.component.html', styleUrls: ['../bms-shared.scss', '../bms-pages.scss', '../bms-page-modules.scss'], styles: ['.unit-link{text-decoration:none}.unit-link:hover{text-decoration:underline}.directory-footer{align-items:center;margin:14px 0 0}.directory-footer p{margin:0}'] })
 export class EmployeeManagementComponent extends BmsBaseComponent implements OnInit, OnDestroy {
   employees: any[] = [];
   meta: any = { total: 0 };

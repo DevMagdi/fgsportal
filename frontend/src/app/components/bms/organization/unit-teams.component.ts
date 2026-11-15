@@ -31,7 +31,7 @@ interface TeamForm { name: string; description: string; is_active: boolean; lead
 @Component({
   selector: 'app-unit-teams',
   templateUrl: './unit-teams.component.html',
-  styleUrls: ['./organization-shared.scss', './unit-teams.component.scss'],
+  styleUrls: ['./organization-shared.scss', './unit-teams.component.scss', '../bms-pages.scss', '../bms-page-modules.scss'],
 })
 export class UnitTeamsComponent implements OnChanges, OnDestroy {
   @Input() unitId = 0;
