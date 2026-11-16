@@ -42,7 +42,7 @@ export function OrganizationPage() {
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         <Card className="p-3">
           <div className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{t('units')}</div>
-          <ul className="space-y-0.5">
+          <ul className="stagger-list space-y-0.5">
             {roots.map((u) => (
               <UnitNode key={u.id} unit={u} childrenOf={childrenOf} selected={current?.id} onSelect={setSelected} />
             ))}
@@ -67,7 +67,7 @@ export function OrganizationPage() {
           <Card>
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 text-sm font-semibold"><span>{t('teams')}</span>{canCreateTeam && <Button size="sm" variant="secondary" onClick={() => manager.openCreate({ business_unit_id: current!.id })}><Plus size={14} />{t('newTeam')}</Button>}</div>
             {!canViewTeams ? <EmptyState body={t('noAccessBody')} /> : teams.length === 0 ? <EmptyState /> : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="stagger-list divide-y divide-slate-100">
                 {teams.map((tm) => (
                   <li key={tm.id} className="px-5 py-4">
                     <div className="flex items-center justify-between">

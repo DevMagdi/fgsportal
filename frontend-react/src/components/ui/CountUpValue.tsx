@@ -17,7 +17,7 @@ export function CountUpValue({ value, lang }: { value: number; lang: string }) {
       return;
     }
     const controls = animate(Number.isFinite(current.current) ? current.current : 0, value, {
-      duration: 0.55,
+      duration: 0.7,
       ease: 'easeOut',
       onUpdate: (next) => {
         const rounded = Math.round(next);

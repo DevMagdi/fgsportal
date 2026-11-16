@@ -31,19 +31,83 @@ body {
 [dir='rtl'] .brand-sidebar nav a { font-size: 13px; }
 [dir='rtl'] .brand-sidebar .nav-group-label { font-size: 10px; letter-spacing: 0; }
 
-/* Atmospheric depth, using only the brand's existing colours. */
+/* Quiet layers built from the official palette, with readable indigo text. */
+.brand-sidebar {
+  background-image: radial-gradient(circle at 100% 0%, rgb(181 175 249 / .16), transparent 33%);
+}
+[dir='rtl'] .brand-sidebar {
+  background-image: radial-gradient(circle at 0% 0%, rgb(181 175 249 / .16), transparent 33%);
+}
+.workspace-shell {
+  background: radial-gradient(circle at 80% 0%, rgb(181 175 249 / .09), transparent 36%),
+    linear-gradient(145deg, rgb(219 206 191 / .13), rgb(255 255 255 / .55)), #f9f7f5;
+}
 .dashboard-hero {
-  background: radial-gradient(circle at 100% 0%, rgb(181 175 249 / .24), transparent 42%),
-    radial-gradient(circle at 0% 100%, rgb(169 249 237 / .19), transparent 45%), var(--white);
+  background: radial-gradient(circle at 100% 0%, rgb(181 175 249 / .32), transparent 43%),
+    radial-gradient(circle at 0% 100%, rgb(169 249 237 / .27), transparent 44%),
+    linear-gradient(125deg, #fff, rgb(244 152 193 / .10) 55%, #fff);
 }
 [dir='rtl'] .dashboard-hero {
-  background: radial-gradient(circle at 0% 0%, rgb(181 175 249 / .24), transparent 42%),
-    radial-gradient(circle at 100% 100%, rgb(169 249 237 / .19), transparent 45%), var(--white);
+  background: radial-gradient(circle at 0% 0%, rgb(181 175 249 / .32), transparent 43%),
+    radial-gradient(circle at 100% 100%, rgb(169 249 237 / .27), transparent 44%),
+    linear-gradient(235deg, #fff, rgb(244 152 193 / .10) 55%, #fff);
+}
+/* Compositor-friendly ambient decoration. A visible control pauses it, and the
+   OS reduced-motion preference disables it altogether. */
+.dashboard-orbit { animation: dashboard-drift 3.6s ease-in-out infinite alternate; will-change: transform; }
+.dashboard-orbit--reverse { animation-direction: alternate-reverse; }
+.dashboard-orbit--paused { animation-play-state: paused; }
+@keyframes dashboard-drift { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+.collection-overview {
+  background: linear-gradient(110deg, rgb(181 175 249 / .18), #fff 55%, rgb(169 249 237 / .13));
+}
+[dir='rtl'] .collection-overview {
+  background: linear-gradient(250deg, rgb(181 175 249 / .18), #fff 55%, rgb(169 249 237 / .13));
+}
+.metric-card { --metric-accent: var(--violet); --metric-glow: rgb(181 175 249 / .19); }
+.metric-card--teal { --metric-accent: var(--turquoise); --metric-glow: rgb(169 249 237 / .25); }
+.metric-card--amber { --metric-accent: var(--skin); --metric-glow: rgb(219 206 191 / .22); }
+.metric-card--rose { --metric-accent: var(--pink); --metric-glow: rgb(244 152 193 / .20); }
+.metric-card::before {
+  content: ''; position: absolute; top: 0; inset-inline-start: 16px; width: 38px; height: 3px;
+  border-radius: 0 0 999px 999px; background: var(--metric-accent); pointer-events: none;
+}
+.metric-card::after {
+  content: ''; position: absolute; width: 120px; height: 120px; inset-inline-end: -45px; bottom: -65px;
+  border-radius: 50%; background: radial-gradient(circle, var(--metric-glow), transparent 70%); pointer-events: none;
 }
 .login-brand-panel {
-  background: radial-gradient(circle at 50% 42%, rgb(181 175 249 / .18), transparent 38%),
-    radial-gradient(circle at 5% 95%, rgb(219 206 191 / .12), transparent 40%), var(--brand);
+  background: radial-gradient(circle at 50% 42%, rgb(181 175 249 / .40), transparent 37%),
+    radial-gradient(circle at 8% 100%, rgb(169 249 237 / .35), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgb(244 152 193 / .24), transparent 40%), #f7f4f2;
 }
+.login-form-surface {
+  background: radial-gradient(circle at 90% 5%, rgb(181 175 249 / .12), transparent 35%),
+    radial-gradient(circle at 0% 100%, rgb(219 206 191 / .19), transparent 40%), #faf8f6;
+}
+
+/* Shared section entrances complement the route transition. Dashboard owns its
+   own stagger; backwards fill avoids overriding interactive transforms later. */
+.route-content > :not([data-dashboard]) > :nth-child(-n+5) {
+  animation: page-section-in .42s cubic-bezier(.22, 1, .36, 1) backwards;
+}
+.route-content > :not([data-dashboard]) > :nth-child(2) { animation-delay: .055s; }
+.route-content > :not([data-dashboard]) > :nth-child(3) { animation-delay: .11s; }
+.route-content > :not([data-dashboard]) > :nth-child(4) { animation-delay: .165s; }
+.route-content > :not([data-dashboard]) > :nth-child(5) { animation-delay: .22s; }
+@keyframes page-section-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Cap detail-list entrances so long lists never queue hundreds of animations. */
+.stagger-list > li:nth-child(-n+8) { animation: list-row-in .32s ease-out backwards; }
+.stagger-list > li:nth-child(2) { animation-delay: .045s; }
+.stagger-list > li:nth-child(3) { animation-delay: .09s; }
+.stagger-list > li:nth-child(4) { animation-delay: .135s; }
+.stagger-list > li:nth-child(5) { animation-delay: .18s; }
+.stagger-list > li:nth-child(6) { animation-delay: .225s; }
+.stagger-list > li:nth-child(7) { animation-delay: .27s; }
+.stagger-list > li:nth-child(8) { animation-delay: .315s; }
+@keyframes list-row-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
 * { scrollbar-width: thin; scrollbar-color: var(--skin) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }
 *::-webkit-scrollbar-thumb { background: var(--skin); border-radius: 999px; }
@@ -74,4 +138,5 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .route-content > :not([data-dashboard]) > :nth-child(-n+5), .dashboard-orbit, .stagger-list > li:nth-child(-n+8) { animation: none; }
 }

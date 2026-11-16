@@ -12,8 +12,8 @@ import { usePrefersReducedMotion } from '../lib/usePrefersReducedMotion';
 import { Button } from '../components/ui/Button';
 import { LoadingState } from '../components/ui/States';
 
-const formMotion: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.05 } } };
-const fieldMotion: Variants = { hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.32, ease: 'easeOut' } } };
+const formMotion: Variants = { hidden: {}, visible: { transition: { staggerChildren: 0.075 } } };
+const fieldMotion: Variants = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } } };
 
 function LoginDecoration({ reduced, className, delay = 0 }: { reduced: boolean; className: string; delay?: number }) {
   if (reduced) return <div aria-hidden="true" className={className} />;
@@ -26,7 +26,7 @@ function LoginLogo({ reduced, className, lift = false }: { reduced: boolean; cla
 }
 
 function LoginField({ reduced, as = 'div', className, children }: { reduced: boolean; as?: 'div' | 'p'; className?: string; children: ReactNode }) {
-  const values = useEntranceValues(reduced, reduced ? false : { opacity: 0, y: 8 });
+  const values = useEntranceValues(reduced, reduced ? false : { opacity: 0, y: 12 });
   const props = { variants: fieldMotion, animate: reduced ? { opacity: 1, y: 0, transition: { duration: 0 } } : undefined, style: values, className, children };
   return as === 'p' ? <motion.p {...props} /> : <motion.div {...props} />;
 }
@@ -62,28 +62,28 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-full lg:grid-cols-[46%_54%]">
-      <div className="login-brand-panel relative hidden overflow-hidden text-white lg:flex lg:flex-col lg:items-center lg:justify-center lg:px-12 lg:py-16">
-        <LoginDecoration reduced={reduceMotion} className="pointer-events-none absolute -start-40 -top-40 h-[440px] w-[440px] rounded-full border border-skin/20" />
-        <LoginDecoration reduced={reduceMotion} delay={0.05} className="pointer-events-none absolute -bottom-52 -end-32 h-[500px] w-[500px] rounded-full border border-skin/20" />
+      <div className="login-brand-panel relative hidden overflow-hidden text-brand-600 lg:flex lg:flex-col lg:items-center lg:justify-center lg:px-12 lg:py-16">
+        <LoginDecoration reduced={reduceMotion} className="pointer-events-none absolute -start-40 -top-40 h-[440px] w-[440px] rounded-full border border-brand-200" />
+        <LoginDecoration reduced={reduceMotion} delay={0.05} className="pointer-events-none absolute -bottom-52 -end-32 h-[500px] w-[500px] rounded-full border border-brand-200" />
         <div className="relative flex max-w-md flex-col items-center text-center">
-          <div className="relative grid h-56 w-56 place-items-center">
-            <LoginDecoration reduced={reduceMotion} delay={0.1} className="pointer-events-none absolute inset-0 rounded-full border border-white/15" />
-            <LoginDecoration reduced={reduceMotion} delay={0.05} className="pointer-events-none absolute inset-4 rounded-full border border-skin/20 bg-white/[0.04]" />
-            <LoginLogo reduced={reduceMotion} lift className="relative h-36 w-36 rounded-full object-contain shadow-[0_18px_50px_rgba(69,67,110,0.35)]" />
+          <div className="relative grid h-64 w-64 place-items-center">
+            <LoginDecoration reduced={reduceMotion} delay={0.1} className="pointer-events-none absolute inset-0 rounded-full border border-brand-200" />
+            <LoginDecoration reduced={reduceMotion} delay={0.05} className="pointer-events-none absolute inset-5 rounded-full border border-white/80 bg-white/35 shadow-card" />
+            <LoginLogo reduced={reduceMotion} lift className="relative h-36 w-36 rounded-full object-contain shadow-[0_18px_50px_rgba(69,67,110,0.20)]" />
           </div>
           <p dir="ltr" className="mt-3 text-2xl font-semibold tracking-tight">Alphaiota BMS</p>
-          <span aria-hidden="true" className="mt-7 h-px w-12 bg-skin" />
-          <h2 className="mt-7 text-[28px] font-semibold leading-snug tracking-tight">
+          <span aria-hidden="true" className="mt-7 h-1 w-12 rounded-full bg-violet" />
+          <h2 className="mt-7 text-[30px] font-semibold leading-snug tracking-[-0.035em]">
             {lang === 'ar' ? 'وضوح أكبر لكل ما يهمّ العمل.' : 'A clearer view of the work that matters.'}
           </h2>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-white/80">
+          <p className="mt-4 max-w-sm text-sm leading-6 text-slate-500">
             {lang === 'ar' ? 'مساحة واحدة تجمع الوحدات والفرص والخطط والتنفيذ.' : 'One connected workspace for your units, opportunities, plans and delivery.'}
           </p>
         </div>
-        <p className="absolute bottom-8 text-[11px] font-medium tracking-wide text-white/70">Alphaiota BMS · {t('workspace')}</p>
+        <p className="absolute bottom-8 text-[11px] font-medium tracking-wide text-slate-500">Alphaiota BMS · {t('workspace')}</p>
       </div>
 
-      <div className="flex min-h-full flex-col bg-surface">
+      <div className="login-form-surface flex min-h-full flex-col">
         <div className="flex justify-end px-6 py-5 sm:px-10">
           <button type="button" aria-label={`${t('changeLanguage')}: ${lang === 'en' ? 'العربية' : 'English'}`} className="rounded-md px-2 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-brand-600" onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}>
             {lang === 'en' ? 'العربية' : 'English'}
@@ -95,7 +95,7 @@ export function LoginPage() {
             variants={formMotion}
             initial={reduceMotion ? false : 'hidden'}
             animate="visible"
-            className="w-full max-w-[450px] rounded-[24px] border border-slate-200/70 bg-white p-6 shadow-lift sm:p-10"
+            className="w-full max-w-[450px] rounded-[28px] border border-white bg-white/95 p-6 shadow-lift sm:p-10"
           >
             <LoginField reduced={reduceMotion} className="mb-8 flex flex-col items-center gap-2 lg:hidden">
               <LoginLogo reduced={reduceMotion} className="h-[76px] w-[76px] rounded-full object-contain" />
