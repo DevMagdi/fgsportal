@@ -67,11 +67,11 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
   return <>
     <div aria-hidden="true" className={cn('fixed inset-0 z-30 bg-brand-900/50 backdrop-blur-[2px] lg:hidden', open ? 'block' : 'hidden')} onClick={onClose} />
     <aside ref={aside} id="workspace-navigation" className={cn(
-      'brand-sidebar fixed inset-y-0 start-0 z-40 flex w-[236px] shrink-0 flex-col bg-brand-600 text-white transition-transform duration-200 motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0',
+      'brand-sidebar fixed inset-y-0 start-0 z-40 flex w-[236px] shrink-0 flex-col bg-brand-600 text-white shadow-lift transition-transform duration-300 motion-reduce:transition-none lg:sticky lg:top-0 lg:h-screen lg:translate-x-0',
       open ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full lg:rtl:translate-x-0',
     )}>
-      <div className="relative flex shrink-0 flex-col items-center gap-1 border-b border-white/10 px-4 pb-2.5 pt-3">
-        <img src={logo} alt="" className="h-[42px] w-[42px] rounded-full object-contain" />
+      <div className="relative flex shrink-0 flex-col items-center gap-1 border-b border-white/10 px-4 pb-3 pt-3.5">
+        <img src={logo} alt="" className="h-[46px] w-[46px] rounded-full object-contain shadow-card" />
         <span dir="ltr" className="text-[13px] font-semibold tracking-[0.01em] text-white">Alphaiota BMS</span>
         <button type="button" className="absolute end-3 top-3 rounded-md p-1.5 text-white/80 hover:bg-white/10 lg:hidden" onClick={onClose} aria-label={t('closeDialog')}><X size={17} /></button>
       </div>
@@ -86,14 +86,14 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               const Icon = link.icon;
               return <motion.li key={link.path} whileHover={reduceMotion ? undefined : 'hover'}>
                 <NavLink to={link.path} onClick={onClose} className={({ isActive }) => cn(
-                  'relative flex min-h-[26px] items-center gap-2.5 rounded-md px-3 py-1 text-[12px] font-medium leading-[18px] transition-colors',
-                  isActive ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/10 hover:text-white',
+                  'relative flex min-h-[29px] items-center gap-2.5 rounded-lg px-3 py-1 text-[12px] font-medium leading-[18px] transition-colors',
+                  isActive ? 'bg-white/15 text-white shadow-sm' : 'text-white/80 hover:bg-white/10 hover:text-white',
                 )}>
                   {({ isActive }) => <>
                     {isActive && (reduceMotion
-                      ? <span aria-hidden="true" className="absolute inset-y-1 start-0 w-0.5 rounded-full bg-turquoise" />
-                      : <motion.span aria-hidden="true" layoutId="active-sidebar-indicator" transition={{ type: 'spring', stiffness: 420, damping: 38 }} className="absolute inset-y-1 start-0 w-0.5 rounded-full bg-turquoise" />)}
-                    <motion.span className="inline-flex shrink-0" variants={{ hover: { x: dir === 'rtl' ? -2 : 2, scale: 1.1, rotate: dir === 'rtl' ? 4 : -4 } }} animate={reduceMotion ? { x: 0, scale: 1, rotate: 0 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring}><Icon size={15} strokeWidth={1.7} /></motion.span><span className="truncate">{t(link.label)}</span>
+                      ? <span aria-hidden="true" className="absolute inset-y-1 start-0 w-1 rounded-full bg-turquoise" />
+                      : <motion.span aria-hidden="true" layoutId="active-sidebar-indicator" transition={{ type: 'spring', stiffness: 340, damping: 28 }} className="absolute inset-y-1 start-0 w-1 rounded-full bg-turquoise shadow-[0_0_12px_rgba(169,249,237,0.45)]" />)}
+                    <motion.span className="inline-flex shrink-0" variants={{ hover: { x: dir === 'rtl' ? -3 : 3, scale: 1.15, rotate: dir === 'rtl' ? 6 : -6 } }} animate={reduceMotion ? { x: 0, scale: 1, rotate: 0 } : undefined} transition={reduceMotion ? { duration: 0 } : interactionSpring}><Icon size={15} strokeWidth={1.7} /></motion.span><span className="truncate">{t(link.label)}</span>
                   </>}
                 </NavLink>
               </motion.li>;

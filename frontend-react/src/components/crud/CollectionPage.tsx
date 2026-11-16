@@ -8,6 +8,7 @@ import type { EntityKind, EntityMap } from '../../lib/types';
 import { formatCalendarDate, formatDate, formatDateTime } from '../../lib/utils';
 import { Button } from '../ui/Button';
 import { DataTable, statusLabel, type Column } from '../ui/DataTable';
+import { CountUpValue } from '../ui/CountUpValue';
 import { Drawer } from '../ui/Modal';
 import { PageHeader } from '../ui/PageHeader';
 import { ErrorState, LoadingState } from '../ui/States';
@@ -42,7 +43,7 @@ export function CollectionPage<K extends EntityKind>({ kind, queryName, queryFn,
   const items = query.data ?? [];
   return <div className="space-y-3">
     {!hideHeader && <PageHeader eyebrow={t(eyebrow)} title={t(title)} subtitle={subtitle[lang]} actions={manager.canManage && <Button onClick={() => manager.openCreate()}><Plus size={16} />{t(ENTITY_CONFIG[kind].createLabel)}</Button>} />}
-    {!hideHeader && <div className="flex items-center gap-3 rounded-xl border border-brand-100 bg-gradient-to-r from-brand-50/80 via-white to-white px-4 py-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm"><Icon size={20} /></span><div><div className="text-sm font-semibold text-slate-800">{items.length} {t('records')}</div><div className="mt-1 text-xs text-slate-400">{subtitle[lang]}</div></div></div>}
+    {!hideHeader && <div className="collection-overview flex items-center gap-3 rounded-[18px] border border-white px-4 py-3 shadow-card"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm"><Icon size={20} /></span><div><div className="text-sm font-semibold text-slate-800"><span className="tnum text-xl tracking-tight"><CountUpValue value={items.length} lang={lang} /></span> {t('records')}</div><div className="mt-0.5 text-xs text-slate-500">{subtitle[lang]}</div></div></div>}
     {hideHeader && manager.canManage && <div className="flex justify-end"><Button size="sm" onClick={() => manager.openCreate()}><Plus size={14} />{t(ENTITY_CONFIG[kind].createLabel)}</Button></div>}
     <DataTable items={items} columns={columns(setDetail)} title={t('allRecords')} getSearchText={searchText} getStatus={getStatus} getUnit={getUnit}
       onCreate={manager.canManage ? () => manager.openCreate() : undefined} createLabel={t(ENTITY_CONFIG[kind].createLabel)}

@@ -8,11 +8,11 @@ export function Card({ className, children, scaleOnHover = true }: { className?:
   const reduceMotion = usePrefersReducedMotion();
   return (
     <motion.div
-      variants={{ hover: { y: -3, scale: scaleOnHover ? 1.005 : 1 } }}
+      variants={{ hover: { y: -5, scale: scaleOnHover ? 1.012 : 1 } }}
       animate={reduceMotion ? { y: 0, scale: 1 } : undefined}
       whileHover={reduceMotion ? undefined : 'hover'}
       transition={reduceMotion ? { duration: 0 } : interactionSpring}
-      className={cn('rounded-2xl border border-slate-200/70 bg-white shadow-card transition-shadow duration-200 hover:shadow-lift motion-reduce:transition-none', className)}
+      className={cn('rounded-[20px] border border-slate-200/70 bg-white shadow-card transition-shadow duration-300 hover:shadow-lift motion-reduce:transition-none', className)}
     >
       {children}
     </motion.div>
@@ -22,9 +22,9 @@ export function Card({ className, children, scaleOnHover = true }: { className?:
 export function CardHeader({ title, subtitle, action, className }: { title: string; subtitle?: string; action?: React.ReactNode; className?: string }) {
   return (
     <div className={cn('flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3', className)}>
-      <div>
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
+      <div className="min-w-0">
+        <h3 className="text-sm font-semibold tracking-[-0.01em] text-slate-900">{title}</h3>
+        {subtitle && <p className="mt-0.5 text-xs leading-4 text-slate-500">{subtitle}</p>}
       </div>
       {action}
     </div>

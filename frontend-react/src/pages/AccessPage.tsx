@@ -3,6 +3,8 @@ import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import { useI18n } from '../i18n';
 import { formatDateTime } from '../lib/utils';
+import { usePrefersReducedMotion } from '../lib/usePrefersReducedMotion';
+import { AnimatedTableRow } from '../components/ui/AnimatedTableRow';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -10,6 +12,7 @@ import { EmptyState, ErrorState, LoadingState } from '../components/ui/States';
 
 export function AccessPage() {
   const { t, lang } = useI18n();
+  const reduceMotion = usePrefersReducedMotion();
   const { lookups } = useAuth();
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['bms', 'role-audit'],
@@ -54,8 +57,8 @@ export function AccessPage() {
               </tr>
             </thead>
             <tbody>
-              {(data ?? []).map((row) => (
-                <tr key={row.id} className="border-b border-slate-50 last:border-0">
+              {(data ?? []).map((row, index) => (
+                <AnimatedTableRow key={row.id} index={index} reduced={reduceMotion} className="border-b border-slate-50 transition-colors last:border-0 hover:bg-brand-50/60 motion-reduce:transition-none">
                   <td className="px-5 py-3">{row.employee}</td>
                   <td className="px-5 py-3">{row.role}</td>
                   <td className="px-5 py-3">{row.business_unit || t('global')}</td>
@@ -65,7 +68,7 @@ export function AccessPage() {
                     </Badge>
                   </td>
                   <td className="px-5 py-3 text-slate-500">{formatDateTime(row.created_at, lang)} · {row.user}</td>
-                </tr>
+                </AnimatedTableRow>
               ))}
             </tbody>
           </table></div>

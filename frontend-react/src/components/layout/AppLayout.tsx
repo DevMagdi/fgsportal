@@ -15,7 +15,7 @@ function RouteContent({ children }: { children: ReactNode }) {
   // An active entrance can snap to its final state; let an already-running exit
   // finish so the presence boundary can safely advance to the next route.
   const motionReduced = useExitMotionPreference(reduceMotion, isPresent);
-  const values = useEntranceValues(reduceMotion && isPresent, reduceMotion ? false : { opacity: 0, y: 8 });
+  const values = useEntranceValues(reduceMotion && isPresent, reduceMotion ? false : { opacity: 0, y: 14 });
   useLayoutEffect(() => {
     const node = content.current;
     if (!node) return;
@@ -26,11 +26,11 @@ function RouteContent({ children }: { children: ReactNode }) {
   }, [isPresent]);
   return <motion.div
     ref={content}
-    className="min-w-0"
+    className="route-content min-w-0"
     style={values}
-    initial={motionReduced ? false : { opacity: 0, y: 8 }}
+    initial={motionReduced ? false : { opacity: 0, y: 14 }}
     animate={{ opacity: 1, y: 0 }}
-    exit={motionReduced ? { opacity: 1, y: 0, transition: { duration: 0 } } : { opacity: 0, y: -6, transition: { duration: 0.2, ease: 'easeOut' } }}
+    exit={motionReduced ? { opacity: 1, y: 0, transition: { duration: 0 } } : { opacity: 0, y: -8, transition: { duration: 0.25, ease: 'easeOut' } }}
     transition={motionReduced ? { duration: 0 } : entranceTransition}
   >
     <Suspense fallback={<LoadingState />}>{children}</Suspense>
@@ -43,7 +43,7 @@ export function AppLayout() {
   // Capture the matched outlet so the exiting page does not render the new route.
   const outlet = useOutlet();
   return (
-    <div className="flex min-h-full bg-surface">
+    <div className="workspace-shell flex min-h-full bg-surface">
       <Sidebar open={open} onClose={() => setOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onMenu={() => setOpen(true)} menuOpen={open} />

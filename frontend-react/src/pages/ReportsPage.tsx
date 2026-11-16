@@ -58,10 +58,10 @@ export function ReportsPage() {
                 { label: t('inProgress'), value: monthly.data.summary.in_progress },
                 { label: t('supportRequests'), value: monthly.data.summary.support_requests },
                 { label: t('opportunities'), value: monthly.data.summary.opportunities_updated },
-              ].map((k) => (
-                <Card key={k.label} className="px-5 py-4">
-                  <div className="text-[11px] uppercase tracking-wide text-slate-400">{k.label}</div>
-                  <div className="tnum mt-1 text-[28px] font-semibold tracking-tight">{typeof k.value === 'number' && Number.isFinite(k.value) ? <CountUpValue value={k.value} lang={lang} /> : formatNumber(k.value, lang)}</div>
+              ].map((k, index) => (
+                <Card key={k.label} className={cn('metric-card relative overflow-hidden px-5 py-4', ['metric-card--indigo', 'metric-card--teal', 'metric-card--amber', 'metric-card--rose'][index])}>
+                  <div className="relative text-[11px] font-semibold uppercase tracking-wide text-slate-500">{k.label}</div>
+                  <div className="tnum relative mt-2 text-[32px] font-semibold tracking-tight text-brand-600">{typeof k.value === 'number' && Number.isFinite(k.value) ? <CountUpValue value={k.value} lang={lang} /> : formatNumber(k.value, lang)}</div>
                 </Card>
               ))}
             </div>
@@ -118,7 +118,7 @@ export function ReportsPage() {
                   </thead>
                   <tbody>
                     {kpis.data.kpis.map((k, index) => (
-                      <AnimatedTableRow key={k.id} index={index} reduced={reduceMotion} className="border-b border-slate-50 last:border-0">
+                      <AnimatedTableRow key={k.id} index={index} reduced={reduceMotion} className="border-b border-slate-50 transition-colors last:border-0 hover:bg-brand-50/60 motion-reduce:transition-none">
                         <td className="px-5 py-3 font-medium">{k.name}</td>
                         <td className="px-5 py-3">{k.unit?.name ?? '—'}</td>
                         <td className="px-5 py-3 tnum">{k.actual}{k.unit_label ? ` ${k.unit_label}` : ''}</td>
@@ -143,10 +143,10 @@ export function ReportsPage() {
                 { label: t('followers'), value: social.data.summary.followers },
                 { label: t('posts'), value: social.data.summary.posts },
                 { label: t('engagement'), value: social.data.summary.engagement },
-              ].map((k) => (
-                <Card key={k.label} className="px-5 py-4">
-                  <div className="text-[11px] uppercase tracking-wide text-slate-400">{k.label}</div>
-                  <div className="tnum mt-1 text-[28px] font-semibold tracking-tight">{typeof k.value === 'number' && Number.isFinite(k.value) ? <CountUpValue value={k.value} lang={lang} /> : formatNumber(k.value, lang)}</div>
+              ].map((k, index) => (
+                <Card key={k.label} className={cn('metric-card relative overflow-hidden px-5 py-4', ['metric-card--indigo', 'metric-card--teal', 'metric-card--amber', 'metric-card--rose'][index])}>
+                  <div className="relative text-[11px] font-semibold uppercase tracking-wide text-slate-500">{k.label}</div>
+                  <div className="tnum relative mt-2 text-[32px] font-semibold tracking-tight text-brand-600">{typeof k.value === 'number' && Number.isFinite(k.value) ? <CountUpValue value={k.value} lang={lang} /> : formatNumber(k.value, lang)}</div>
                 </Card>
               ))}
             </div>
@@ -162,7 +162,7 @@ export function ReportsPage() {
                 </thead>
                 <tbody>
                   {social.data.metrics.map((m, i) => (
-                    <AnimatedTableRow key={m.id ?? i} index={i} reduced={reduceMotion} className="border-b border-slate-50 last:border-0">
+                    <AnimatedTableRow key={m.id ?? i} index={i} reduced={reduceMotion} className="border-b border-slate-50 transition-colors last:border-0 hover:bg-brand-50/60 motion-reduce:transition-none">
                       <td className="px-5 py-3 font-medium">{m.platform}</td>
                       <td className="px-5 py-3 tnum">{formatNumber(m.followers, lang)}</td>
                       <td className="px-5 py-3 tnum">{formatNumber(m.posts, lang)}</td>

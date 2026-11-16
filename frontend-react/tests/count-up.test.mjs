@@ -52,7 +52,7 @@ test('count-up updates only the visual copy and retargets from the current value
     assert.equal(h.animations.length, 1);
     assert.equal(h.animations[0].from, 0);
     assert.equal(h.animations[0].to, 100);
-    assert.equal(h.animations[0].options.duration, 0.55);
+    assert.equal(h.animations[0].options.duration, 0.7);
     act(() => { h.animations[0].options.onUpdate(42.3); });
     assert.deepEqual(copies(tree), { visual: '42', accessible: '100' });
 
