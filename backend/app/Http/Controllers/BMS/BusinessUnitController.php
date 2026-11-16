@@ -130,6 +130,7 @@ class BusinessUnitController extends BmsController
             'child units' => \App\Models\BMS\BusinessUnit::where('parent_id', $unit->id)->exists(),
             'weekly plans' => $unit->weeklyPlans()->exists(),
             'employee task records' => \App\Models\BMS\UnitTask::where('business_unit_id', $unit->id)->exists(),
+            'bonuses' => \App\Models\BMS\Bonus::where('business_unit_id', $unit->id)->exists(),
             'opportunities' => \App\Models\BMS\Opportunity::where('business_unit_id', $unit->id)->exists(),
             'leads' => \App\Models\BMS\Lead::where('business_unit_id', $unit->id)->exists(),
             'product assignments' => \DB::table('product_business_unit')->where('business_unit_id', $unit->id)->exists(),

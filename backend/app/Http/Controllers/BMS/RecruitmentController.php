@@ -35,6 +35,22 @@ class RecruitmentController extends BmsController
         $old=$hiring->only(array_keys($data));$hiring->update($data);$this->audit->record($hiring,'hiring.updated',$old,$hiring->only(array_keys($data)));
         return $this->ok($this->load($hiring));
     }
+    public function destroy(HiringRequest $hiring)
+    {
+        $this->access->authorizeUnit((int) $hiring->business_unit_id);
+        $paths = $hiring->candidates()->whereNotNull('cv_path')->pluck('cv_path');
+        DB::transaction(function () use ($hiring) {
+            $old = $hiring->toArray();
+            $hiring->delete();
+            $this->audit->record($hiring, 'hiring.deleted', $old, []);
+        });
+        foreach ($paths as $path) {
+            if (!Candidate::where('cv_path', $path)->exists()) {
+                \Illuminate\Support\Facades\Storage::disk('local')->delete($path);
+            }
+        }
+        return $this->ok(null, 'Hiring request deleted');
+    }
     public function addCandidate(Request $request,HiringRequest $hiring)
     {
         $this->access->authorizeUnit($hiring->business_unit_id);
