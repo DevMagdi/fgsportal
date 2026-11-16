@@ -55,6 +55,8 @@ abstract class BmsTestCase extends TestCase
             '2026_11_14_000012_create_bms_organization_structure.php',
             '2026_11_14_000013_add_bms_organization_abilities.php',
             '2026_11_14_000014_backfill_single_unit_primary_assignments.php',
+            '2026_11_15_000015_create_bms_bonuses_table.php',
+            '2026_11_15_000016_add_bms_bonus_abilities.php',
         ] as $filename) {
             require_once base_path('database/migrations/'.$filename);
         }
@@ -71,6 +73,8 @@ abstract class BmsTestCase extends TestCase
         (new \CreateBmsOrganizationStructure())->up();
         (new \AddBmsOrganizationAbilities())->up();
         (new \BackfillSingleUnitPrimaryAssignments())->up();
+        (new \CreateBmsBonusesTable())->up();
+        (new \AddBmsBonusAbilities())->up();
 
         (new BmsPhaseOneSeeder())->run();
         (new \Database\Seeders\BmsOrganizationSeeder())->run();

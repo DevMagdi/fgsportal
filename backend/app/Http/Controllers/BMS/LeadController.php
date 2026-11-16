@@ -32,6 +32,16 @@ class LeadController extends BmsController
         $this->audit->record($lead,'lead.updated',$old,$lead->only(array_keys($data)));
         return $this->ok($this->load($lead));
     }
+    public function destroy(Lead $lead)
+    {
+        $this->authorizeLead($lead);
+        DB::transaction(function () use ($lead) {
+            $old = $lead->toArray();
+            $lead->delete();
+            $this->audit->record($lead, 'lead.deleted', $old, []);
+        });
+        return $this->ok(null, 'Lead deleted');
+    }
     public function interact(Request $request,Lead $lead)
     {
         $this->authorizeLead($lead);
@@ -49,7 +59,7 @@ class LeadController extends BmsController
     }
     public function updateStudyItem(Request $request,\App\Models\BMS\LabStudyItem $item)
     {
-        $this->authorizeLead($item->lead);$data=$request->validate(['title'=>'sometimes|string|max:200','owner_id'=>'nullable|exists:users,id','status'=>['sometimes',Rule::in(['planned','in_progress','completed','blocked'])],'due_date'=>'nullable|date','notes'=>'nullable|string']);$old=$item->only(array_keys($data));$item->update($data);$this->audit->record($item,'lab_study_item.updated',$old,$item->only(array_keys($data)));return $this->ok($this->load($item->lead));
+        $lead=$item->lead()->firstOrFail();$this->authorizeLead($lead);$data=$request->validate(['title'=>'sometimes|string|max:200','owner_id'=>'nullable|exists:users,id','status'=>['sometimes',Rule::in(['planned','in_progress','completed','blocked'])],'due_date'=>'nullable|date','notes'=>'nullable|string']);$old=$item->only(array_keys($data));$item->update($data);$this->audit->record($item,'lab_study_item.updated',$old,$item->only(array_keys($data)));return $this->ok($this->load($lead));
     }
     public function convert(Lead $lead)
     {

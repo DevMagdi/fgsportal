@@ -5,6 +5,7 @@ use App\Models\BMS\EventChecklistItem;
 use App\Models\BMS\PrEvent;
 use App\Models\BMS\Procedure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class EventController extends BmsController
@@ -34,6 +35,16 @@ class EventController extends BmsController
         if(($data['status']??null)==='completed')app(\App\Services\BMS\BmsNotifier::class)->notify([$event->requester],'event.completed','Event completed',$event->title);
         return $this->ok($this->load($event));
     }
+    public function destroy(PrEvent $event)
+    {
+        $this->authorizeEvent($event);
+        DB::transaction(function () use ($event) {
+            $old = $event->toArray();
+            $event->delete();
+            $this->audit->record($event, 'event.deleted', $old, []);
+        });
+        return $this->ok(null, 'Event deleted');
+    }
     public function checklist(Request $request,EventChecklistItem $item)
     {
         $this->authorizeEvent($item->event);
@@ -50,6 +61,31 @@ class EventController extends BmsController
         $data=$request->validate(['title'=>'required|string|max:200','category'=>'sometimes|string|max:100','content'=>'required|string','is_published'=>'sometimes|boolean']);
         $procedure=Procedure::create($data+['created_by'=>$this->access->user()->id]);$this->audit->record($procedure,'procedure.published',[],$procedure->toArray());
         return $this->ok($procedure,'Procedure published',201);
+    }
+    public function updateProcedure(Request $request, Procedure $procedure)
+    {
+        $data = $request->validate([
+            'title' => 'sometimes|required|string|max:200',
+            'category' => 'sometimes|nullable|string|max:100',
+            'content' => 'sometimes|required|string',
+            'is_published' => 'sometimes|boolean',
+        ]);
+        if (array_key_exists('category', $data) && $data['category'] === null) $data['category'] = 'pr_protocol';
+        DB::transaction(function () use ($procedure, $data) {
+            $old = $procedure->only(array_keys($data));
+            $procedure->update($data);
+            $this->audit->record($procedure, 'procedure.updated', $old, $procedure->only(array_keys($data)));
+        });
+        return $this->ok($procedure->load('creator:id,username'));
+    }
+    public function destroyProcedure(Procedure $procedure)
+    {
+        DB::transaction(function () use ($procedure) {
+            $old = $procedure->toArray();
+            $procedure->delete();
+            $this->audit->record($procedure, 'procedure.deleted', $old, []);
+        });
+        return $this->ok(null, 'Procedure deleted');
     }
     private function data(Request $request,bool $creating=true):array
     {

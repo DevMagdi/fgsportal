@@ -6,6 +6,7 @@ use App\Models\BMS\UnitTask;
 use App\Models\BMS\WeeklyPlan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class WeeklyPlanController extends BmsController
@@ -87,6 +88,19 @@ class WeeklyPlanController extends BmsController
         return $this->ok($plan);
     }
 
+    public function destroy(WeeklyPlan $plan)
+    {
+        DB::transaction(function () use ($plan) {
+            $plan = WeeklyPlan::whereKey($plan->id)->lockForUpdate()->firstOrFail();
+            $this->access->authorizeUnit((int) $plan->business_unit_id);
+            abort_if($plan->status === 'submitted', 422, 'A submitted weekly plan is read-only.');
+            $old = $plan->toArray();
+            $plan->delete();
+            $this->audit->record($plan, 'weekly_plan.deleted', $old, []);
+        });
+        return $this->ok(null, 'Weekly plan deleted');
+    }
+
     public function submit(WeeklyPlan $plan)
     {
         $this->access->authorizeUnit($plan->business_unit_id);
@@ -138,6 +152,25 @@ class WeeklyPlanController extends BmsController
         $task->update($data);
         $this->audit->record($task,'task.updated',$old,$task->only(array_keys($data)));
         return $this->ok($task->load('owner'));
+    }
+
+    public function destroyTask(UnitTask $task)
+    {
+        DB::transaction(function () use ($task) {
+            // Lock the parent first, so a concurrently submitted plan cannot
+            // lose a task after it has become read-only.
+            $plan = WeeklyPlan::whereKey($task->weekly_plan_id)->lockForUpdate()->first();
+            $task = UnitTask::whereKey($task->id)->lockForUpdate()->firstOrFail();
+            $this->access->authorizeUnit((int) $task->business_unit_id);
+            if ($plan) {
+                $this->access->authorizeUnit((int) $plan->business_unit_id);
+                abort_if($plan->status === 'submitted', 422, 'A submitted weekly plan is read-only.');
+            }
+            $old = $task->toArray();
+            $task->delete();
+            $this->audit->record($task, 'task.deleted', $old, []);
+        });
+        return $this->ok(null, 'Task deleted');
     }
 
     public function storeSupport(Request $request, WeeklyPlan $plan)

@@ -81,6 +81,17 @@ class OpportunityController extends BmsController
         return $this->ok($this->present($opportunity->fresh()->load(['unit','product','owner','history.user','minutes.meeting'])));
     }
 
+    public function destroy(Opportunity $opportunity)
+    {
+        $this->authorizeOpportunity($opportunity);
+        DB::transaction(function () use ($opportunity) {
+            $old = $opportunity->toArray();
+            $opportunity->delete();
+            $this->audit->record($opportunity, 'opportunity.deleted', $old, []);
+        });
+        return $this->ok(null, 'Opportunity deleted');
+    }
+
     public function decide(Request $request, Opportunity $opportunity)
     {
         $this->authorizeOpportunityView($opportunity);
@@ -119,7 +130,7 @@ class OpportunityController extends BmsController
 
     public function downloadDocument(\App\Models\BMS\OpportunityDocument $document)
     {
-        $this->authorizeOpportunity($document->opportunity);abort_unless(\Illuminate\Support\Facades\Storage::disk('local')->exists($document->file_path),404);
+        $this->authorizeOpportunity($document->opportunity()->firstOrFail());abort_unless(\Illuminate\Support\Facades\Storage::disk('local')->exists($document->file_path),404);
         return \Illuminate\Support\Facades\Storage::disk('local')->download($document->file_path,\App\Services\BMS\SafeFilename::forDownload($document->original_name));
     }
 
@@ -187,6 +198,7 @@ class OpportunityController extends BmsController
             'stage'=>['sometimes',Rule::in(self::STAGES)],'value'=>'nullable|numeric|min:0','currency'=>['sometimes','string',Rule::in(config('bms.currencies'))],
             'submission_date'=>'nullable|date','expected_close_date'=>'nullable|date','last_update_at'=>'nullable|date','stage_note'=>'nullable|string',
         ];
+        if ($id !== null) $rules['notes']='nullable|string';
         if ($withReference) $rules['reference']=['nullable','string','max:80',Rule::unique('bms_opportunities','reference')->ignore($id)];
         else $rules['reference']='nullable|string|max:80';
         return $rules;
